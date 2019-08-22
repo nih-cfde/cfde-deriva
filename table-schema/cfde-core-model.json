@@ -1,0 +1,578 @@
+{
+  "resources": [
+    
+    {
+      "name": "File",
+      "description": "A digital asset",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+    
+      ],
+      "primaryKey": "id"
+    },
+    
+    {
+      "name": "Dataset",
+      "description": "A named collection of files",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "title",
+          "description": "The proper human-readable title for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "contained_in",
+          "description": "The enclosing dataset of which this entity is a part.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "contained_in",
+          "reference": {
+            "resource": "", // karlcz thinks this should be absent rather than empty string
+            "fields": "id"
+          }
+        }
+      ]      
+    },
+    
+    {
+      "name": "Data_Event",
+      "description": "Generalized event which produces data",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "method",
+          "description": "The method used to produce data."
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+          }
+        },
+        {
+          "name": "platform",
+          "description": "The platform used to produce data."
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false,
+          }
+        }
+    
+      ],
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "method",
+          "reference": {
+            "resource": "Data_Method",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "platform",
+          "reference": {
+            "resource": "Data_Platform",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Biosample",
+      "description": "A tissue sample or specimen.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "format": "uri",
+          "description": "The canonical identifier for this entity.",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "subject",
+          "description": "Specimen taken from subject.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "sample_type",
+          "description": "The type of biosample.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "anatomy",
+          "description": "The anatomical source of the biosample.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        
+      ],
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "subject",
+          "reference": {
+            "resource": "Subject",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "sample_type",
+          "reference": {
+            "resource": "Biosample_Type",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "anatomy",
+          "reference": {
+            "resource": "Biosample_Anatomy",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Subject",
+      "description": "Source of samples or observations.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "taxonomy",
+          "description": "Subject belongs to taxonomic class.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "granularity",
+          "description": "Precision of subject taxonomic classification.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "taxonomy",
+          "reference": {
+            "resource": "Subject_Taxonomy",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "granularity",
+          "reference": {
+            "resource": "Subject_Granularity",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Subject_Group",
+      "description": "A named collection of subjects.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "title",
+          "description": "The proper human-readable title for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Subject_Part_of_Group",
+      "title": "Member Of",
+      "description": "Association of member subjects to subject groups.",
+      "fields": [
+        {
+          "name": "subject",
+          "description": "Subject which is member.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "group",
+          "description": "Group which has members.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+        
+      ],
+      "primaryKey": ["subject", "group"],
+      "foreignKeys": [
+        {
+          "fields": "subject",
+          "reference": {
+            "resource": "Subject",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "group",
+          "reference": {
+            "resource": "Subject_Group",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "File_Part_of_Dataset",
+      "title": "Part Of",
+      "description": "Association of collected files to datasets.",
+      "fields": [
+        {
+          "name": "file",
+          "description": "File which is contained.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "dataset",
+          "description": "Dataset which contains.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["file", "dataset"],
+      "foreignKeys": [
+        {
+          "fields": "file",
+          "reference": {
+            "resource": "File",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "dataset",
+          "reference": {
+            "resource": "Dataset",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "File_Produced_By_Event",
+      "title": "Produced By",
+      "description": "Assocation of produced files to data production events.",
+      "fields": [
+        {
+          "name": "file",
+          "description": "File which is produced.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "event",
+          "description": "Event which produces.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["file", "event"],
+      "foreignKeys": [
+        {
+          "fields": "file",
+          "reference": {
+            "resource": "File",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "event",
+          "reference": {
+            "resource": "Data_Event",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "File_Analyzed_By_Event",
+      "title": "Analyzed By",
+      "description": "Assocation of analyzed files to data production events.",
+      "fields": [
+        {
+          "name": "file",
+          "description": "File which is analyzed.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "event",
+          "description": "Event which analyzes.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["file", "event"],
+      "foreignKeys": [
+        {
+          "fields": "file",
+          "reference": {
+            "resource": "File",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "event",
+          "reference": {
+            "resource": "Data_Event",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "Biosample_Assayed_By_Event",
+      "title": "Assayed By",
+      "description": "Assocation of assayed biosamples to data production events.",
+      "fields": [
+        {
+          "name": "biosample",
+          "description": "Biosample which is analyzed.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "event",
+          "description": "Event which assays.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["biosample", "event"],
+      "foreignKeys": [
+        {
+          "fields": "biosample",
+          "reference": {
+            "resource": "Biosample",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "event",
+          "reference": {
+            "resource": "Data_Event",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    
+    
+    // TODO: protocol/step/rank tables and connectivity
+    
+    // TODO: controlled vocabulary tables
+
+    // Data_Method
+    // Data_Platform
+    // Biosample_Type
+    // Biosample_Anatomy
+    // Subject_Taxonomy
+    // Subject_Granularity
+  ]
+}
+  
