@@ -120,20 +120,20 @@
         },
         {
           "name": "method",
-          "description": "The method used to produce data."
+          "description": "The method used to produce data.",
           "type": "string",
           "format": "curi",
           "constraints": {
-            "required": true,
+            "required": true
           }
         },
         {
           "name": "platform",
-          "description": "The platform used to produce data."
+          "description": "The platform used to produce data.",
           "type": "string",
           "format": "curi",
           "constraints": {
-            "required": false,
+            "required": false
           }
         }
     
