@@ -35,6 +35,23 @@
           }
         },
         {
+          "name": "length",
+          "description": "The number of bytes in the file.",
+          "type": "integer",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "filename",
+          "description": "The suggested local name for the file.",
+          "type": "string",
+          "constraints": {
+            "required": false
+            // Add a pattern constraint to limit character set?
+          }
+        },
+        {
           "name": "md5",
           "description": "The file checksum using the MD5 algorithm.",
           "type": "string",
