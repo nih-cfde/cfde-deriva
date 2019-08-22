@@ -25,7 +25,33 @@
             "unique": true
           }
         },
-    
+        {
+          "name": "information_type",
+          "description": "The type of information in the file.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "md5",
+          "description": "The file checksum using the MD5 algorithm.",
+          "type": "string",
+          "format": "hex",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "sha256",
+          "description": "The file checksum using the SHA-256 algorithm.",
+          "type": "string",
+          "format": "hex",
+          "constraints": {
+            "required": false
+          }
+        }
       ],
       "primaryKey": "id"
     },
@@ -95,6 +121,78 @@
     },
     
     {
+      "name": "Protocol",
+      "description": "A named experimental method as controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "contained_in",
+          "description": "The enclosing protocol of which this is a sub-part.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "rank",
+          "description": "An ordinal rank, relative to siblings of the same contained_in parent.",
+          "type": "number",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "contained_in",
+          "reference": {
+            "resource": "",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
       "name": "Data_Event",
       "description": "Generalized event which produces data",
       "fields": [
@@ -135,8 +233,24 @@
           "constraints": {
             "required": false
           }
+        },
+        {
+          "name": "protocol",
+          "description": "The protocol followed while performing this event.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "rank",
+          "description": "An ordinal rank, relative to events for the same inputs and protocol.",
+          "type": "number",
+          "constraints": {
+            "required": false
+          }
         }
-    
       ],
       "primaryKey": "id",
       "foreignKeys": [
@@ -151,6 +265,13 @@
           "fields": "platform",
           "reference": {
             "resource": "Data_Platform",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "protocol",
+          "reference": {
+            "resource": "Protocol",
             "fields": "id"
           }
         }
@@ -208,7 +329,23 @@
             "required": true
           }
         },
-        
+        {
+          "name": "protocol",
+          "description": "The protocol followed while obtaining this biosample.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "rank",
+          "description": "An ordinal rank, relative to biosamples for the same subject and protocol.",
+          "type": "number",
+          "constraints": {
+            "required": false
+          }
+        }
       ],
       "primaryKey": "id",
       "foreignKeys": [
@@ -230,6 +367,13 @@
           "fields": "anatomy",
           "reference": {
             "resource": "Biosample_Anatomy",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "protocol",
+          "reference": {
+            "resource": "Protocol",
             "fields": "id"
           }
         }
@@ -367,8 +511,7 @@
           "constraints": {
             "required": true
           }
-        },        
-        
+        }
       ],
       "primaryKey": ["subject", "group"],
       "foreignKeys": [
@@ -383,6 +526,49 @@
           "fields": "group",
           "reference": {
             "resource": "Subject_Group",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "Subject_Protocol",
+      "title": "Managed With",
+      "description": "Association of subjects to protocols.",
+      "fields": [
+        {
+          "name": "subject",
+          "description": "Subject which is managed.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "protocol",
+          "description": "Protocol which is followed.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "primaryKey": ["subject", "protocol"],
+      "foreignKeys": [
+        {
+          "fields": "subject",
+          "reference": {
+            "resource": "Subject",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "protocol",
+          "reference": {
+            "resource": "Protocol",
             "fields": "id"
           }
         }
@@ -562,11 +748,9 @@
     },
 
     
-    
-    // TODO: protocol/step/rank tables and connectivity
-    
     // TODO: controlled vocabulary tables
 
+    // File_Information_Type
     // Data_Method
     // Data_Platform
     // Biosample_Type
