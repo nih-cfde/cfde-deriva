@@ -123,6 +123,15 @@
           "constraints": {
             "required": false
           }
+        },
+        {
+          "name": "producer",
+          "description": "The organization who produced this dataset.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
         }
       ],
       "primaryKey": "id",
@@ -130,7 +139,14 @@
         {
           "fields": "contained_in",
           "reference": {
-            "resource": "", // karlcz thinks this should be absent rather than empty string
+            "resource": "",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "producer",
+          "reference": {
+            "resource": "Organization",
             "fields": "id"
           }
         }
@@ -764,16 +780,398 @@
       ]
     },
 
-    
-    // TODO: controlled vocabulary tables
+    {
+      "name": "File_Information_Type",
+      "title": "File Information Type",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
 
-    // File_Information_Type
-    // Data_Method
-    // Data_Platform
-    // Biosample_Type
-    // Biosample_Anatomy
-    // Subject_Taxonomy
-    // Subject_Granularity
+    {
+      "name": "Data_Method",
+      "title": "Data Method",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Data_Platform",
+      "title": "Data Platform",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Biosample_Type",
+      "title": "Biosample Type",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Biosample_Anatomy",
+      "title": "Biosample Anatomy",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Subject_Taxonomy",
+      "title": "Subject Taxonomy",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+    
+    {
+      "name": "Subject_Granularity",
+      "title": "Subject Granularity",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    }
+
   ]
 }
   
