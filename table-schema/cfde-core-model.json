@@ -149,9 +149,17 @@
             "resource": "Organization",
             "fields": "id"
           }
+        },
+        {
+          "fields": "terms",
+          "reference": {
+            "resource": "License",
+            "fields": "id"
+          }
         }
       ]      
     },
+
     
     {
       "name": "Protocol",
@@ -413,6 +421,7 @@
       ]
     },
 
+
     {
       "name": "Subject",
       "description": "Source of samples or observations.",
@@ -521,6 +530,233 @@
       ],
       "primaryKey": "id"
     },
+
+{
+      "name": "License",
+      "title": "License",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+ 
+ 
+ {
+      "name": "Organization",
+      "title": "Organization",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Person",
+      "title": "Person",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Grant",
+      "title": "Grant",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
 
     {
       "name": "Subject_Part_of_Group",
@@ -1170,7 +1406,94 @@
         }
       ],
       "primaryKey": "id"
+    },
+   
+  {
+      "name": "awarded_to_person",
+      "title": "awarded to person",
+      "description": "Assocation of Persons to Grants.",
+      "fields": [
+        {
+          "name": "grant",
+          "description": "Grant which is awarded.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "person",
+          "description": "Person which receives the Grant.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["grant", "person"],
+      "foreignKeys": [
+        {
+          "fields": "person",
+          "reference": {
+            "resource": "Person",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "grant",
+          "reference": {
+            "resource": "Grant",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "awarded_to_organization",
+      "title": "awarded to organization",
+      "description": "Association of Organizations to Grants.",
+      "fields": [
+        {
+          "name": "grant",
+          "description": "Grant which is awarded.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "organization",
+          "description": "organization which receives the Grant.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },        
+      ],
+      "primaryKey": ["grant", "organization"],
+      "foreignKeys": [
+        {
+          "fields": "organization",
+          "reference": {
+            "resource": "Organization",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "grant",
+          "reference": {
+            "resource": "Grant",
+            "fields": "id"
+          }
+        }
+      ]
     }
+
 
   ]
 }
