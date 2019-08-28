@@ -48,7 +48,6 @@
           "type": "string",
           "constraints": {
             "required": false
-            // Add a pattern constraint to limit character set?
           }
         },
         {
@@ -125,8 +124,8 @@
           }
         },
         {
-          "name": "producer",
-          "description": "The organization who produced this dataset.",
+          "name": "protocol",
+          "description": "The overall protocol observed for activities reflected in this dataset.",
           "type": "string",
           "format": "curi",
           "constraints": {
@@ -144,9 +143,9 @@
           }
         },
         {
-          "fields": "producer",
+          "fields": "protocol",
           "reference": {
-            "resource": "Organization",
+            "resource": "Protocol",
             "fields": "id"
           }
         }
@@ -283,6 +282,15 @@
           "constraints": {
             "required": false
           }
+        },
+        {
+          "name": "event_ts",
+          "description": "The real-world time when the reported event occurred.",
+          "type": "datetime",
+          "format": "default",
+          "constraints": {
+            "required": false
+          }
         }
       ],
       "primaryKey": "id",
@@ -375,6 +383,15 @@
           "name": "rank",
           "description": "An ordinal rank, relative to biosamples for the same subject and protocol.",
           "type": "number",
+          "constraints": {
+            "required": false
+          }
+        },
+        {
+          "name": "event_ts",
+          "description": "The real-world time when the biosample was extracted.",
+          "type": "datetime",
+          "format": "default",
           "constraints": {
             "required": false
           }
@@ -516,8 +533,7 @@
           "constraints": {
             "required": true
           }
-        },
-
+        }
       ],
       "primaryKey": "id"
     },
@@ -630,7 +646,7 @@
           "constraints": {
             "required": true
           }
-        },        
+        }
       ],
       "primaryKey": ["file", "dataset"],
       "foreignKeys": [
@@ -673,7 +689,7 @@
           "constraints": {
             "required": true
           }
-        },        
+        }
       ],
       "primaryKey": ["file", "event"],
       "foreignKeys": [
@@ -716,7 +732,7 @@
           "constraints": {
             "required": true
           }
-        },        
+        }
       ],
       "primaryKey": ["file", "event"],
       "foreignKeys": [
@@ -724,6 +740,108 @@
           "fields": "file",
           "reference": {
             "resource": "File",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "event",
+          "reference": {
+            "resource": "Data_Event",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+    
+    {
+      "name": "Dataset_Organization",
+      "title": "Dataset Organization",
+      "description": "Assocation of organizations to datasets, qualified by the organization's role.",
+      "fields": [
+        {
+          "name": "dataset",
+          "description": "Associated dataset.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "organization",
+          "description": "Associated organization.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "role",
+          "description": "Role of organization with respect to dataset.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "primaryKey": ["dataset", "organization", "role"],
+      "foreignKeys": [
+        {
+          "fields": "dataset",
+          "reference": {
+            "resource": "Dataset",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "organization",
+          "reference": {
+            "resource": "Organization",
+            "fields": "id"
+          }
+        },
+        {
+          "fields": "role",
+          "reference": {
+            "resource": "Organization_Role",
+            "fields": "id"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Subject_Observed_By_Event",
+      "title": "Observed By",
+      "description": "Assocation of observed subjets to data production events.",
+      "fields": [
+        {
+          "name": "subject",
+          "description": "Subject who is observed.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "event",
+          "description": "Event which observes.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "primaryKey": ["subject", "event"],
+      "foreignKeys": [
+        {
+          "fields": "subject",
+          "reference": {
+            "resource": "Subject",
             "fields": "id"
           }
         },
@@ -759,7 +877,7 @@
           "constraints": {
             "required": true
           }
-        },        
+        }
       ],
       "primaryKey": ["biosample", "event"],
       "foreignKeys": [
@@ -1119,6 +1237,116 @@
     {
       "name": "Subject_Granularity",
       "title": "Subject Granularity",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+
+    {
+      "name": "Organization",
+      "description": "A controlled-vocabulary.",
+      "fields": [
+        {
+          "name": "id",
+          "description": "The compacted form of the resolvable identifier URL.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "url",
+          "description": "The canonical identifier for this entity.",
+          "type": "string",
+          "format": "uri",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "name",
+          "description": "The proper human-readable name for this entity.",
+          "type": "string",
+          "constraints": {
+            "required": true,
+            "unique": true
+          }
+        },
+        {
+          "name": "description",
+          "description": "A human-readable summary for this entity.",
+          "type": "string",
+          "format": "markdown",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "synonyms",
+          "description": "Potentially ambiguous aliases for the named term.",
+          "type": "string",
+          "format": "curi",
+          "constraints": {
+            "required": false
+          }
+        }
+      ],
+      "primaryKey": "id"
+    },
+    
+    {
+      "name": "Organization_Role",
       "description": "A controlled-vocabulary.",
       "fields": [
         {
