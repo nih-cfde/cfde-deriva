@@ -9,7 +9,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -29,7 +29,7 @@
           "name": "information_type",
           "description": "The type of information in the file.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -80,7 +80,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -118,7 +118,7 @@
           "name": "contained_in",
           "description": "The enclosing dataset of which this entity is a part.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -127,7 +127,7 @@
           "name": "protocol",
           "description": "The overall protocol observed for activities reflected in this dataset.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -160,7 +160,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -198,7 +198,7 @@
           "name": "contained_in",
           "description": "The enclosing protocol of which this is a sub-part.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -232,7 +232,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -252,7 +252,7 @@
           "name": "method",
           "description": "The method used to produce data.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -261,7 +261,7 @@
           "name": "platform",
           "description": "The platform used to produce data.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -270,7 +270,7 @@
           "name": "protocol",
           "description": "The protocol followed while performing this event.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -327,7 +327,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -347,7 +347,7 @@
           "name": "subject",
           "description": "Specimen taken from subject.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -356,7 +356,7 @@
           "name": "sample_type",
           "description": "The type of biosample.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -365,7 +365,7 @@
           "name": "anatomy",
           "description": "The anatomical source of the biosample.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -374,7 +374,7 @@
           "name": "protocol",
           "description": "The protocol followed while obtaining this biosample.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -438,7 +438,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -458,7 +458,7 @@
           "name": "taxonomy",
           "description": "Subject belongs to taxonomic class.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -467,7 +467,7 @@
           "name": "granularity",
           "description": "Precision of subject taxonomic classification.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -500,7 +500,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -547,7 +547,7 @@
           "name": "subject",
           "description": "Subject which is member.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -556,7 +556,7 @@
           "name": "group",
           "description": "Group which has members.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -590,7 +590,7 @@
           "name": "subject",
           "description": "Subject which is managed.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -599,7 +599,7 @@
           "name": "protocol",
           "description": "Protocol which is followed.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -633,7 +633,7 @@
           "name": "file",
           "description": "File which is contained.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -642,7 +642,7 @@
           "name": "dataset",
           "description": "Dataset which contains.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -676,7 +676,7 @@
           "name": "file",
           "description": "File which is produced.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -685,7 +685,7 @@
           "name": "event",
           "description": "Event which produces.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -719,7 +719,7 @@
           "name": "file",
           "description": "File which is analyzed.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -728,7 +728,7 @@
           "name": "event",
           "description": "Event which analyzes.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -762,7 +762,7 @@
           "name": "dataset",
           "description": "Associated dataset.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -771,7 +771,7 @@
           "name": "organization",
           "description": "Associated organization.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -780,7 +780,7 @@
           "name": "role",
           "description": "Role of organization with respect to dataset.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -821,7 +821,7 @@
           "name": "subject",
           "description": "Subject who is observed.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -830,7 +830,7 @@
           "name": "event",
           "description": "Event which observes.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -864,7 +864,7 @@
           "name": "biosample",
           "description": "Biosample which is analyzed.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -873,7 +873,7 @@
           "name": "event",
           "description": "Event which assays.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true
           }
@@ -907,7 +907,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -945,7 +945,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -963,7 +963,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1001,7 +1001,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1019,7 +1019,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1057,7 +1057,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1075,7 +1075,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1113,7 +1113,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1131,7 +1131,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1169,7 +1169,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1187,7 +1187,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1225,7 +1225,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1243,7 +1243,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1281,7 +1281,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1298,7 +1298,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1336,7 +1336,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
@@ -1353,7 +1353,7 @@
           "name": "id",
           "description": "The compacted form of the resolvable identifier URL.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": true,
             "unique": true
@@ -1391,7 +1391,7 @@
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
           "type": "string",
-          "format": "curi",
+          "format": "curie",
           "constraints": {
             "required": false
           }
