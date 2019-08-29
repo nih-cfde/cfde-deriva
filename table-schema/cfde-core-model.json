@@ -69,7 +69,16 @@
           }
         }
       ],
-      "primaryKey": "id"
+      "primaryKey": "id",
+      "foreignKeys": [
+        {
+          "fields": "information_type",
+          "reference": {
+            "resource": "File_Information_Type",
+            "fields": "id"
+          }
+        }
+      ]
     },
     
     {
