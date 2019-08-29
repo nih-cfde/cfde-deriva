@@ -953,8 +953,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1009,8 +1008,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1065,8 +1063,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1121,8 +1118,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1177,8 +1173,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1233,8 +1228,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1289,8 +1283,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1344,8 +1337,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
@@ -1399,8 +1391,7 @@
         {
           "name": "synonyms",
           "description": "Potentially ambiguous aliases for the named term.",
-          "type": "string",
-          "format": "curie",
+          "type": "list",
           "constraints": {
             "required": false
           }
