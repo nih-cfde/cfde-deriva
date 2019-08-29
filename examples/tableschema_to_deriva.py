@@ -14,8 +14,14 @@ Example:
    python3 examples/tableschema_to_deriva.py \
      < table-schema/cfde-core-model.json
 
+Optionally:
+
+   run with SKIP_SYSTEM_COLUMNS=true to suppress generation of ERMrest
+   system columns RID,RCT,RCB,RMT,RMB for each table.
+
 """
 
+import os
 import sys
 import json
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
@@ -103,7 +109,7 @@ def make_table(tdef):
             for fkdef in tdef.get("foreignKeys", [])
         ],
         comment=tdef.get("description"),
-        provide_system=False
+        provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
     )
 
 deriva_schema = {
