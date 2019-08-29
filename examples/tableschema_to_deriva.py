@@ -37,6 +37,9 @@ def make_type(type, format):
         return builtin_types.int8
     if type == "number":
         return builtin_types.float8
+    if type == "list":
+        # assume a list is a list of strings for now...
+        return builtin_types["text[]"]
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
 def make_column(cdef):
@@ -47,7 +50,7 @@ def make_column(cdef):
             cdef.get("type", "string"),
             cdef.get("format", "default"),
         ),
-        nullok=not constraints.get("unique", False),
+        nullok=not constraints.get("required", False),
         comment=cdef.get("description"),
     )
 
@@ -76,11 +79,13 @@ def make_fkey(tname, fkdef):
 def make_table(tdef):
     tname = tdef["name"]
     keys = []
+    keysets = set()
     pk = tdef.get("primaryKey")
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
         keys.append(make_key(tname, pk))
+        keysets.add(frozenset(pk))
     return Table.define(
         tname,
         column_defs=[
@@ -91,12 +96,14 @@ def make_table(tdef):
             make_key(tname, [cdef["name"]])
             for cdef in tdef["fields"]
             if cdef.get("constraints", {}).get("unique", False)
+            and frozenset([cdef["name"]]) not in keysets
         ],
         fkey_defs=[
             make_fkey(tname, fkdef)
             for fkdef in tdef.get("foreignKeys", [])
         ],
         comment=tdef.get("description"),
+        provide_system=False
     )
 
 deriva_schema = {
