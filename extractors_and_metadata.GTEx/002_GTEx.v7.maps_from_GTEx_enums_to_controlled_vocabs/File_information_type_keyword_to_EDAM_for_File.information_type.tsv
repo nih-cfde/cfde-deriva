@@ -1,0 +1,4 @@
+File_type_keyword	Description	EDAM_term_ID	EDAM_term_name
+RNA-Seq.reference_alignments	RNA-Seq (bulk RNA) sequences alignment report	data_1383	Sequence alignment (nucleic acid)
+WGS.reference_alignments	Whole-genome shotgun (DNA) sequences alignment report	data_1383	Sequence alignment (nucleic acid)
+Generic_sequence	Generic type for sequence file (e.g. FASTQ)	data_2977	Nucleic acid sequence
