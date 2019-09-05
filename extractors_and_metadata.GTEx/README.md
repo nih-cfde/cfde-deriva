@@ -46,5 +46,4 @@ This directory contains the prototype GTEx extractor script along with
 
 I believe that all other differences between my model (see diagram in this folder) and Karl's current draft model (https://github.com/nih-cfde/cfde-deriva/blob/master/diagrams/cfde-core-model.png) are trivially self-explanatory; if there's something I missed, hit me up and I'll expand this document with clarifications.
 
-Arthur Brady
-IGS
+Arthur Brady / IGS
