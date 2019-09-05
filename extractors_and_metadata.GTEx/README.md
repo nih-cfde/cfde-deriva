@@ -3,8 +3,8 @@
 ## Contents
 
 This directory contains the prototype GTEx extractor script along with
-- raw input data from GTEx
 - a Table-Schema JSON file describing the output
+- raw input data from GTEx
 - some auxiliary files mapping GTEx terminology to terms in selected controlled vocabularies
 - a gzipped tarball containing example output
 - an ER diagram (based on but different from Karl's working draft) precisely describing output structure
@@ -15,5 +15,6 @@ This directory contains the prototype GTEx extractor script along with
 - A working version of Perl5
 - 'bdbag' needs to be accessible via $PATH
 
-## Design notes
+## Design notes in no particular order
 
+- I've abandoned JSON as a serialization format: a collection of TSVs is built instead, representing table data defined in my version of the draft core metadata model
