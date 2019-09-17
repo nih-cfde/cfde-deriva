@@ -4,1400 +4,1448 @@
     {
       "name": "File",
       "description": "A digital asset",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "information_type",
+            "description": "The type of information in the file.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "length",
+            "description": "The number of bytes in the file.",
+            "type": "integer",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "filename",
+            "description": "The suggested local name for the file.",
+            "type": "string",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "md5",
+            "description": "The file checksum using the MD5 algorithm.",
+            "type": "string",
+            "format": "hex",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "sha256",
+            "description": "The file checksum using the SHA-256 algorithm.",
+            "type": "string",
+            "format": "hex",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "information_type",
+            "reference": {
+              "resource": "File_Information_Type",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "information_type",
-          "description": "The type of information in the file.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "length",
-          "description": "The number of bytes in the file.",
-          "type": "integer",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "filename",
-          "description": "The suggested local name for the file.",
-          "type": "string",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "md5",
-          "description": "The file checksum using the MD5 algorithm.",
-          "type": "string",
-          "format": "hex",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "sha256",
-          "description": "The file checksum using the SHA-256 algorithm.",
-          "type": "string",
-          "format": "hex",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "information_type",
-          "reference": {
-            "resource": "File_Information_Type",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "Dataset",
       "description": "A named collection of files",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "title",
+            "description": "The proper human-readable title for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "contained_in",
+            "description": "The enclosing dataset of which this entity is a part.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "protocol",
+            "description": "The overall protocol observed for activities reflected in this dataset.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "contained_in",
+            "reference": {
+              "resource": "",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "protocol",
+            "reference": {
+              "resource": "Protocol",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "title",
-          "description": "The proper human-readable title for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "contained_in",
-          "description": "The enclosing dataset of which this entity is a part.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "protocol",
-          "description": "The overall protocol observed for activities reflected in this dataset.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "contained_in",
-          "reference": {
-            "resource": "",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "protocol",
-          "reference": {
-            "resource": "Protocol",
-            "fields": "id"
-          }
-        }
-      ]      
+        ]
+      }
     },
     
     {
       "name": "Protocol",
       "description": "A named experimental method as controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "contained_in",
+            "description": "The enclosing protocol of which this is a sub-part.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "rank",
+            "description": "An ordinal rank, relative to siblings of the same contained_in parent.",
+            "type": "number",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "contained_in",
+            "reference": {
+              "resource": "",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "contained_in",
-          "description": "The enclosing protocol of which this is a sub-part.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "rank",
-          "description": "An ordinal rank, relative to siblings of the same contained_in parent.",
-          "type": "number",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "contained_in",
-          "reference": {
-            "resource": "",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "Data_Event",
       "description": "Generalized event which produces data",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "method",
+            "description": "The method used to produce data.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "platform",
+            "description": "The platform used to produce data.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "protocol",
+            "description": "The protocol followed while performing this event.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "rank",
+            "description": "An ordinal rank, relative to events for the same inputs and protocol.",
+            "type": "number",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "event_ts",
+            "description": "The real-world time when the reported event occurred.",
+            "type": "datetime",
+            "format": "default",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "method",
+            "reference": {
+              "resource": "Data_Method",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "platform",
+            "reference": {
+              "resource": "Data_Platform",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "protocol",
+            "reference": {
+              "resource": "Protocol",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "method",
-          "description": "The method used to produce data.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "platform",
-          "description": "The platform used to produce data.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "protocol",
-          "description": "The protocol followed while performing this event.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "rank",
-          "description": "An ordinal rank, relative to events for the same inputs and protocol.",
-          "type": "number",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "event_ts",
-          "description": "The real-world time when the reported event occurred.",
-          "type": "datetime",
-          "format": "default",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "method",
-          "reference": {
-            "resource": "Data_Method",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "platform",
-          "reference": {
-            "resource": "Data_Platform",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "protocol",
-          "reference": {
-            "resource": "Protocol",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Biosample",
       "description": "A tissue sample or specimen.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "format": "uri",
+            "description": "The canonical identifier for this entity.",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "subject",
+            "description": "Specimen taken from subject.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "sample_type",
+            "description": "The type of biosample.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "anatomy",
+            "description": "The anatomical source of the biosample.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "protocol",
+            "description": "The protocol followed while obtaining this biosample.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "rank",
+            "description": "An ordinal rank, relative to biosamples for the same subject and protocol.",
+            "type": "number",
+            "constraints": {
+              "required": false
+            }
+          },
+          {
+            "name": "event_ts",
+            "description": "The real-world time when the biosample was extracted.",
+            "type": "datetime",
+            "format": "default",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "type": "string",
-          "format": "uri",
-          "description": "The canonical identifier for this entity.",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "subject",
+            "reference": {
+              "resource": "Subject",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "sample_type",
+            "reference": {
+              "resource": "Biosample_Type",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "anatomy",
+            "reference": {
+              "resource": "Biosample_Anatomy",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "protocol",
+            "reference": {
+              "resource": "Protocol",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "subject",
-          "description": "Specimen taken from subject.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "sample_type",
-          "description": "The type of biosample.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "anatomy",
-          "description": "The anatomical source of the biosample.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "protocol",
-          "description": "The protocol followed while obtaining this biosample.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "rank",
-          "description": "An ordinal rank, relative to biosamples for the same subject and protocol.",
-          "type": "number",
-          "constraints": {
-            "required": false
-          }
-        },
-        {
-          "name": "event_ts",
-          "description": "The real-world time when the biosample was extracted.",
-          "type": "datetime",
-          "format": "default",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "subject",
-          "reference": {
-            "resource": "Subject",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "sample_type",
-          "reference": {
-            "resource": "Biosample_Type",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "anatomy",
-          "reference": {
-            "resource": "Biosample_Anatomy",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "protocol",
-          "reference": {
-            "resource": "Protocol",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Subject",
       "description": "Source of samples or observations.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "taxonomy",
+            "description": "Subject belongs to taxonomic class.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "granularity",
+            "description": "Precision of subject taxonomic classification.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
+        ],
+        "primaryKey": "id",
+        "foreignKeys": [
+          {
+            "fields": "taxonomy",
+            "reference": {
+              "resource": "Subject_Taxonomy",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "granularity",
+            "reference": {
+              "resource": "Subject_Granularity",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "taxonomy",
-          "description": "Subject belongs to taxonomic class.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "granularity",
-          "description": "Precision of subject taxonomic classification.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        }
-      ],
-      "primaryKey": "id",
-      "foreignKeys": [
-        {
-          "fields": "taxonomy",
-          "reference": {
-            "resource": "Subject_Taxonomy",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "granularity",
-          "reference": {
-            "resource": "Subject_Granularity",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Subject_Group",
       "description": "A named collection of subjects.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "title",
+            "description": "The proper human-readable title for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "title",
-          "description": "The proper human-readable title for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Subject_Part_of_Group",
       "title": "Member Of",
       "description": "Association of member subjects to subject groups.",
-      "fields": [
-        {
-          "name": "subject",
-          "description": "Subject which is member.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "subject",
+            "description": "Subject which is member.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "group",
+            "description": "Group which has members.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "group",
-          "description": "Group which has members.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["subject", "group"],
+        "foreignKeys": [
+          {
+            "fields": "subject",
+            "reference": {
+              "resource": "Subject",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "group",
+            "reference": {
+              "resource": "Subject_Group",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["subject", "group"],
-      "foreignKeys": [
-        {
-          "fields": "subject",
-          "reference": {
-            "resource": "Subject",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "group",
-          "reference": {
-            "resource": "Subject_Group",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "Subject_Protocol",
       "title": "Managed With",
       "description": "Association of subjects to protocols.",
-      "fields": [
-        {
-          "name": "subject",
-          "description": "Subject which is managed.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "subject",
+            "description": "Subject which is managed.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "protocol",
+            "description": "Protocol which is followed.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "protocol",
-          "description": "Protocol which is followed.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["subject", "protocol"],
+        "foreignKeys": [
+          {
+            "fields": "subject",
+            "reference": {
+              "resource": "Subject",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "protocol",
+            "reference": {
+              "resource": "Protocol",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["subject", "protocol"],
-      "foreignKeys": [
-        {
-          "fields": "subject",
-          "reference": {
-            "resource": "Subject",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "protocol",
-          "reference": {
-            "resource": "Protocol",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "File_Part_of_Dataset",
       "title": "Part Of",
       "description": "Association of collected files to datasets.",
-      "fields": [
-        {
-          "name": "file",
-          "description": "File which is contained.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "file",
+            "description": "File which is contained.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "dataset",
+            "description": "Dataset which contains.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "dataset",
-          "description": "Dataset which contains.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["file", "dataset"],
+        "foreignKeys": [
+          {
+            "fields": "file",
+            "reference": {
+              "resource": "File",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "dataset",
+            "reference": {
+              "resource": "Dataset",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["file", "dataset"],
-      "foreignKeys": [
-        {
-          "fields": "file",
-          "reference": {
-            "resource": "File",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "dataset",
-          "reference": {
-            "resource": "Dataset",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "File_Produced_By_Event",
       "title": "Produced By",
       "description": "Assocation of produced files to data production events.",
-      "fields": [
-        {
-          "name": "file",
-          "description": "File which is produced.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "file",
+            "description": "File which is produced.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "event",
+            "description": "Event which produces.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "event",
-          "description": "Event which produces.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["file", "event"],
+        "foreignKeys": [
+          {
+            "fields": "file",
+            "reference": {
+              "resource": "File",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "event",
+            "reference": {
+              "resource": "Data_Event",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["file", "event"],
-      "foreignKeys": [
-        {
-          "fields": "file",
-          "reference": {
-            "resource": "File",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "event",
-          "reference": {
-            "resource": "Data_Event",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "File_Analyzed_By_Event",
       "title": "Analyzed By",
       "description": "Assocation of analyzed files to data production events.",
-      "fields": [
-        {
-          "name": "file",
-          "description": "File which is analyzed.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "file",
+            "description": "File which is analyzed.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "event",
+            "description": "Event which analyzes.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "event",
-          "description": "Event which analyzes.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["file", "event"],
+        "foreignKeys": [
+          {
+            "fields": "file",
+            "reference": {
+              "resource": "File",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "event",
+            "reference": {
+              "resource": "Data_Event",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["file", "event"],
-      "foreignKeys": [
-        {
-          "fields": "file",
-          "reference": {
-            "resource": "File",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "event",
-          "reference": {
-            "resource": "Data_Event",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "Dataset_Organization",
       "title": "Dataset Organization",
       "description": "Assocation of organizations to datasets, qualified by the organization's role.",
-      "fields": [
-        {
-          "name": "dataset",
-          "description": "Associated dataset.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "dataset",
+            "description": "Associated dataset.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "organization",
+            "description": "Associated organization.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "role",
+            "description": "Role of organization with respect to dataset.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "organization",
-          "description": "Associated organization.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["dataset", "organization", "role"],
+        "foreignKeys": [
+          {
+            "fields": "dataset",
+            "reference": {
+              "resource": "Dataset",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "organization",
+            "reference": {
+              "resource": "Organization",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "role",
+            "reference": {
+              "resource": "Organization_Role",
+              "fields": "id"
+            }
           }
-        },
-        {
-          "name": "role",
-          "description": "Role of organization with respect to dataset.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
-          }
-        }
-      ],
-      "primaryKey": ["dataset", "organization", "role"],
-      "foreignKeys": [
-        {
-          "fields": "dataset",
-          "reference": {
-            "resource": "Dataset",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "organization",
-          "reference": {
-            "resource": "Organization",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "role",
-          "reference": {
-            "resource": "Organization_Role",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "Subject_Observed_By_Event",
       "title": "Observed By",
       "description": "Assocation of observed subjets to data production events.",
-      "fields": [
-        {
-          "name": "subject",
-          "description": "Subject who is observed.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "subject",
+            "description": "Subject who is observed.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "event",
+            "description": "Event which observes.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "event",
-          "description": "Event which observes.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["subject", "event"],
+        "foreignKeys": [
+          {
+            "fields": "subject",
+            "reference": {
+              "resource": "Subject",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "event",
+            "reference": {
+              "resource": "Data_Event",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["subject", "event"],
-      "foreignKeys": [
-        {
-          "fields": "subject",
-          "reference": {
-            "resource": "Subject",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "event",
-          "reference": {
-            "resource": "Data_Event",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
     
     {
       "name": "Biosample_Assayed_By_Event",
       "title": "Assayed By",
       "description": "Assocation of assayed biosamples to data production events.",
-      "fields": [
-        {
-          "name": "biosample",
-          "description": "Biosample which is analyzed.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+      "schema": {
+        "fields": [
+          {
+            "name": "biosample",
+            "description": "Biosample which is analyzed.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "event",
+            "description": "Event which assays.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true
+            }
           }
-        },
-        {
-          "name": "event",
-          "description": "Event which assays.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true
+        ],
+        "primaryKey": ["biosample", "event"],
+        "foreignKeys": [
+          {
+            "fields": "biosample",
+            "reference": {
+              "resource": "Biosample",
+              "fields": "id"
+            }
+          },
+          {
+            "fields": "event",
+            "reference": {
+              "resource": "Data_Event",
+              "fields": "id"
+            }
           }
-        }
-      ],
-      "primaryKey": ["biosample", "event"],
-      "foreignKeys": [
-        {
-          "fields": "biosample",
-          "reference": {
-            "resource": "Biosample",
-            "fields": "id"
-          }
-        },
-        {
-          "fields": "event",
-          "reference": {
-            "resource": "Data_Event",
-            "fields": "id"
-          }
-        }
-      ]
+        ]
+      }
     },
 
     {
       "name": "File_Information_Type",
       "title": "File Information Type",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Data_Method",
       "title": "Data Method",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Data_Platform",
       "title": "Data Platform",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Biosample_Type",
       "title": "Biosample Type",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Biosample_Anatomy",
       "title": "Biosample Anatomy",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Subject_Taxonomy",
       "title": "Subject Taxonomy",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
     
     {
       "name": "Subject_Granularity",
       "title": "Subject Granularity",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
 
     {
       "name": "Organization",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     },
     
     {
       "name": "Organization_Role",
       "description": "A controlled-vocabulary.",
-      "fields": [
-        {
-          "name": "id",
-          "description": "The compacted form of the resolvable identifier URL.",
-          "type": "string",
-          "format": "curie",
-          "constraints": {
-            "required": true,
-            "unique": true
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "description": "The compacted form of the resolvable identifier URL.",
+            "type": "string",
+            "format": "curie",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "url",
+            "description": "The canonical identifier for this entity.",
+            "type": "string",
+            "format": "uri",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "name",
+            "description": "The proper human-readable name for this entity.",
+            "type": "string",
+            "constraints": {
+              "required": true,
+              "unique": true
+            }
+          },
+          {
+            "name": "description",
+            "description": "A human-readable summary for this entity.",
+            "type": "string",
+            "format": "markdown",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "synonyms",
+            "description": "Potentially ambiguous aliases for the named term.",
+            "type": "list",
+            "constraints": {
+              "required": false
+            }
           }
-        },
-        {
-          "name": "url",
-          "description": "The canonical identifier for this entity.",
-          "type": "string",
-          "format": "uri",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "name",
-          "description": "The proper human-readable name for this entity.",
-          "type": "string",
-          "constraints": {
-            "required": true,
-            "unique": true
-          }
-        },
-        {
-          "name": "description",
-          "description": "A human-readable summary for this entity.",
-          "type": "string",
-          "format": "markdown",
-          "constraints": {
-            "required": true
-          }
-        },
-        {
-          "name": "synonyms",
-          "description": "Potentially ambiguous aliases for the named term.",
-          "type": "list",
-          "constraints": {
-            "required": false
-          }
-        }
-      ],
-      "primaryKey": "id"
+        ],
+        "primaryKey": "id"
+      }
     }
 
   ]

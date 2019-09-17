@@ -84,6 +84,8 @@ def make_fkey(tname, fkdef):
 
 def make_table(tdef):
     tname = tdef["name"]
+    tcomment = tdef.get("description")
+    tdef = tdef["schema"]
     keys = []
     keysets = set()
     pk = tdef.get("primaryKey")
@@ -108,7 +110,7 @@ def make_table(tdef):
             make_fkey(tname, fkdef)
             for fkdef in tdef.get("foreignKeys", [])
         ],
-        comment=tdef.get("description"),
+        comment=tcomment,
         provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
     )
 
