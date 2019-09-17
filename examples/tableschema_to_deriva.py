@@ -39,6 +39,8 @@ def make_type(type, format):
         return builtin_types.text
     if type == "datetime":
         return builtin_types.timestamptz
+    if type == "date":
+        return builtin_types.date
     if type == "integer":
         return builtin_types.int8
     if type == "number":
