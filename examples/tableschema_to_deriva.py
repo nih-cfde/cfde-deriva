@@ -26,6 +26,9 @@ import sys
 import json
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
+schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
+resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
+
 tableschema = json.load(sys.stdin)
 resources = tableschema['resources']
 
@@ -51,15 +54,22 @@ def make_type(type, format):
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
 def make_column(cdef):
+    cdef = dict(cdef)
     constraints = cdef.get("constraints", {})
+    cdef_name = cdef.pop("name")
+    nullok = not constraints.pop("required", False)
+    description = cdef.pop("description", None)
     return Column.define(
-        cdef["name"],
+        cdef_name,
         make_type(
             cdef.get("type", "string"),
             cdef.get("format", "default"),
         ),
-        nullok=not constraints.get("required", False),
-        comment=cdef.get("description"),
+        nullok=nullok,
+        comment=description,
+        annotations={
+            schema_tag: cdef,
+        }
     )
 
 def make_key(tname, cols):
@@ -69,12 +79,12 @@ def make_key(tname, cols):
     )
 
 def make_fkey(tname, fkdef):
-    fkcols = fkdef["fields"]
+    fkcols = fkdef.pop("fields")
     fkcols = [fkcols] if isinstance(fkcols, str) else fkcols
-    reference = fkdef["reference"]
-    pktable = reference["resource"]
+    reference = fkdef.pop("reference")
+    pktable = reference.pop("resource")
     pktable = tname if pktable == "" else pktable
-    pkcols = reference["fields"]
+    pkcols = reference.pop("fields")
     pkcols = [pkcols] if isinstance(pkcols, str) else pkcols
     return ForeignKey.define(
         fkcols,
@@ -82,38 +92,49 @@ def make_fkey(tname, fkdef):
         pktable,
         pkcols,
         constraint_names=[ [schema_name, "%s_%s_fkey" % (tname, "_".join(fkcols))] ],
+        annotations={
+            schema_tag: fkdef,
+        }
     )
 
 def make_table(tdef):
     tname = tdef["name"]
     tcomment = tdef.get("description")
-    tdef = tdef["schema"]
+    tdef_resource = tdef
+    tdef = tdef_resource.pop("schema")
     keys = []
     keysets = set()
-    pk = tdef.get("primaryKey")
+    pk = tdef.pop("primaryKey", None)
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
         keys.append(make_key(tname, pk))
         keysets.add(frozenset(pk))
+    tdef_fields = tdef.pop("fields", None)
+    for cdef in tdef_fields:
+        if cdef.get("constraints", {}).pop("unique", False):
+            kcols = [cdef["name"]]
+            if frozenset(kcols) not in keysets:
+                keys.append(make_key(tname, kcols))
+                keysets.add(frozenset(kcols))
+    tdef_fkeys = tdef.pop("foreignKeys", [])
     return Table.define(
         tname,
         column_defs=[
             make_column(cdef)
-            for cdef in tdef["fields"]
+            for cdef in tdef_fields
         ],
-        key_defs=([ make_key(tname, pk) ] if pk else []) + [
-            make_key(tname, [cdef["name"]])
-            for cdef in tdef["fields"]
-            if cdef.get("constraints", {}).get("unique", False)
-            and frozenset([cdef["name"]]) not in keysets
-        ],
+        key_defs=keys,
         fkey_defs=[
             make_fkey(tname, fkdef)
-            for fkdef in tdef.get("foreignKeys", [])
+            for fkdef in tdef_fkeys
         ],
         comment=tcomment,
-        provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
+        provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true'),
+        annotations={
+            resource_tag: tdef_resource,
+            schema_tag: tdef,
+        }
     )
 
 deriva_schema = {
