@@ -55,6 +55,40 @@ with open(datapackage_filename, 'r') as f:
         ).stdout
     )
 
+# the translation stores frictionless table resource metadata under this annotation
+resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
+# the translation leaves extranneous table-schema stuff under this annotation
+# (i.e. stuff that perhaps wasn't translated to deriva equivalents)
+schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
+
+# we'll use this utility function later...
+def topo_sorted(depmap):
+    """Return list of items topologically sorted.
+
+       depmap: { item: [required_item, ...], ... }
+
+    Raises ValueError if a required_item cannot be satisfied in any order.
+
+    The per-item required_item iterables must allow revisiting on
+    multiple iterations.
+
+    """
+    ordered = [ item for item, requires in depmap.items() if not requires ]
+    depmap = { item: set(requires) for item, requires in depmap.items() }
+    satisfied = set(ordered)
+    while depmap:
+        additions = []
+        for item, requires in list(depmap.items()):
+            if requires.issubset(satisfied):
+                additions.append(item)
+                satisfied.add(item)
+                del depmap[item]
+        if not additions:
+            raise ValueError(("unsatisfiable", depmap))
+        ordered.extend(additions)
+        additions = []
+    return ordered
+
 ## create catalog
 catalog = server.create_ermrest_catalog()
 print('New catalog has catalog_id=%s' % catalog.catalog_id)
@@ -113,12 +147,51 @@ model_root.table('public', 'ERMrest_Client').table_display.row_name = {
 ## apply the above ACL and annotation changes to server
 model_root.apply(catalog)
 
-
-## TODO: load some sample data?
-
 print("Policies and presentation configured.")
 
-print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (servername, catalog.catalog_id))
+## load some sample data?
+
+def make_row2dict(table, header):
+    """Pickle a row2dict(row) function for use with a csv reader"""
+    numcols = len(header)
+    missingValues = set(table.annotations[schema_tag].get("missingValues", []))
+
+    for cname in header:
+        if cname not in table.column_definitions.elements:
+            raise ValueError("header column %s not found in table %s" % (cname, table.name))
+
+    def row2dict(row):
+        """Convert row tuple to dictionary of {col: val} mappings."""
+        return dict(zip(
+            header,
+            [ None if x in missingValues else x for x in row ]
+        ))
+
+    return row2dict
+
+for table in topo_sorted({
+    table: [ model_root.table("CFDE", fkey.referenced_columns[0]["table_name"]) for fkey in table.foreign_keys ]
+    for table in cfde_schema.tables.values()
+}):
+    # we are doing a clean load of data in fkey dependency order
+    resource = table.annotations.get(resource_tag, {})
+    if "path" in resource:
+        with open("%s/%s" % (datapackage_dirname, resource["path"]), "r") as f:
+            # translate TSV to python dicts
+            reader = csv.reader(f, delimiter="\t")
+            raw_rows = list(reader)
+            row2dict = make_row2dict(table, raw_rows[0])
+            dict_rows = [ row2dict(row) for row in raw_rows[1:] ]
+            catalog.post("/entity/CFDE:%s" % urlquote(table.name), json=dict_rows)
+            print("Table %s data loaded." % table.name)
+
+print("All table data packages loaded.")
+
+print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:%s'" % (
+    servername,
+    catalog.catalog_id,
+    "Dataset" if "Dataset" in cfde_schema.tables else urlquote(list(cfde_schema.tables)[0]),
+))
 
 ## to re-bind to the same catalog in the future, extract catalog_id from URL
 
