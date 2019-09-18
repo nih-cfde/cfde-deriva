@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
+import os
+import sys
 import subprocess
 import json
+import csv
 
 from deriva.core import DerivaServer, get_credential, urlquote, AttrDict
 from deriva.core.ermrest_config import tag
@@ -17,20 +20,36 @@ Demonstrates use of deriva-py APIs:
 - small Chaise presentation tweaks via model annotations
 - simple insertion of tabular content
 
+Examples:
+
+   python3 ./examples/setup_c2m2_catalog.py ./table-schema/cfde-core-model.json
+
+   python3 /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
+
+when the JSON includes "path" attributes for the resources, as in the
+second example above, the data files (TSV assumed) are loaded for each
+resource after the schema is provisioned.
+
 """
 
 # this is the deriva server where we will create a catalog
-servername = 'demo.derivacloud.org'
+servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
 
 ## bind to server
 credentials = get_credential(servername)
 server = DerivaServer('https', servername, credentials)
 
 ## ugly: use subprocess to acquire ERMrest model definitions
-with open('../table-schema/cfde-core-model.json', 'r') as f:
+try:
+    datapackage_filename = sys.argv[1]
+    datapackage_dirname = os.path.dirname(datapackage_filename)
+except IndexError:
+    print("Error: data package filename required as sole argument")
+
+with open(datapackage_filename, 'r') as f:
     mdoc = json.loads(
         subprocess.run(
-            ['python3', './tableschema_to_deriva.py',],
+            ['python3', './examples/tableschema_to_deriva.py',],
             stdin=f,
             stdout=subprocess.PIPE
         ).stdout
