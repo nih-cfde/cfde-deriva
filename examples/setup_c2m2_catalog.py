@@ -74,7 +74,7 @@ def topo_sorted(depmap):
 
     """
     ordered = [ item for item, requires in depmap.items() if not requires ]
-    depmap = { item: set(requires) for item, requires in depmap.items() }
+    depmap = { item: set(requires) for item, requires in depmap.items() if requires }
     satisfied = set(ordered)
     while depmap:
         additions = []
@@ -170,7 +170,11 @@ def make_row2dict(table, header):
     return row2dict
 
 for table in topo_sorted({
-    table: [ model_root.table("CFDE", fkey.referenced_columns[0]["table_name"]) for fkey in table.foreign_keys ]
+    table: [
+        model_root.table("CFDE", fkey.referenced_columns[0]["table_name"])
+        for fkey in table.foreign_keys
+        if fkey.referenced_columns[0]["table_name"] != table.name
+    ]
     for table in cfde_schema.tables.values()
 }):
     # we are doing a clean load of data in fkey dependency order
