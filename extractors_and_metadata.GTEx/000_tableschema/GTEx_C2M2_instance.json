@@ -71,7 +71,23 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "information_type",
+                  "reference": {
+                     "resource": "cvReferenceTable_EDAM",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "reference": {
+                     "resource": "cvReferenceTable_EDAM",
+                     "fields": "id"
+                  }
+               }
+            ]
          }
       },
       {
@@ -144,6 +160,20 @@
                   "fields": "protocol",
                   "reference": {
                      "resource": "Protocol",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "sample_type",
+                  "reference": {
+                     "resource": "cvReferenceTable_OBI",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "reference": {
+                     "resource": "cvReferenceTable_Uberon",
                      "fields": "id"
                   }
                }
@@ -234,6 +264,13 @@
                   "fields": "protocol",
                   "reference": {
                      "resource": "Protocol",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "method",
+                  "reference": {
+                     "resource": "cvReferenceTable_OBI",
                      "fields": "id"
                   }
                }
@@ -753,6 +790,13 @@
                      "resource": "Subject",
                      "fields": "id"
                   }
+               },
+               {
+                  "fields": "NCBITaxonID",
+                  "reference": {
+                     "resource": "cvReferenceTable_NCBI_Taxonomy_DB",
+                     "fields": "id"
+                  }
                }
             ]
          }
@@ -847,6 +891,150 @@
                   }
                }
             ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_EDAM",
+         "path": "cvReferenceTable_EDAM.tsv",
+         "description": "Lookup table for field values drawn from the EDAM CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_NCBI_Taxonomy_DB",
+         "path": "cvReferenceTable_NCBI_Taxonomy_DB.tsv",
+         "description": "Lookup table for field values drawn from the NCBI_Taxonomy_DB CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_OBI",
+         "path": "cvReferenceTable_OBI.tsv",
+         "description": "Lookup table for field values drawn from the OBI CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_Uberon",
+         "path": "cvReferenceTable_Uberon.tsv",
+         "description": "Lookup table for field values drawn from the Uberon CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
          }
       },
       {
