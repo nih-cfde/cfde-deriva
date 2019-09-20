@@ -13,7 +13,7 @@ $| = 1;
 # specification prior to ingestion into a central CFDE database.
 
 # Creation date: 2019-08-28
-# Lastmod date unless I forgot to change it: 2019-08-29
+# Lastmod date unless I forgot to change it: 2019-09-05
 
 # contact email: abrady@som.umaryland.edu
 
@@ -54,6 +54,32 @@ my $baseURL = {
    'OBI' => 'http://purl.obolibrary.org/obo/',
    'Uberon' => 'http://purl.obolibrary.org/obo/UBERON_',
    'NCBI_Taxonomy_DB' => 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='
+};
+
+##########################################################################################
+# Track which external CV terms are used in the output; after main data tables are built,
+# use this data to build CV lookup tables for terms used (primary key (ID): URL;
+# minimal data fields: name, definition, synonyms; all but ID, name nullable).
+
+my $termsUsed = {};
+
+my $fullURL = {};
+
+##########################################################################################
+# Subdirectory containing full info for CVs, versioned to match the current data release.
+
+my $cvRefDir = '003_CV_reference_data';
+
+##########################################################################################
+# Map of CV names to reference files. NCBI taxonomy should be added here; right now
+# we're just making a stub reference for that CV due to the presence of just one
+# referenced species (human).
+
+my $cvFile = {
+   
+   'EDAM' => "$cvRefDir/EDAM.version_1.21.tsv",
+   'OBI' => "$cvRefDir/OBI.version_2019-08-15.obo",
+   'Uberon' => "$cvRefDir/uberon.version_2019-06-27.obo"
 };
 
 ##########################################################################################
@@ -103,7 +129,7 @@ my $mapFiles = {
 ##########################################################################################
 # Output directory
 
-my $outDir = '003_GTEx.v7.C2M2_preload.preBag_output_files';
+my $outDir = '004_GTEx.v7.C2M2_preload.preBag_output_files';
 
 ##########################################################################################
 # Global variables
@@ -236,6 +262,11 @@ system("mkdir -p $outDir") if ( not -d $outDir );
 
 &writeDataTables();
 
+# Construct reference tables describing all terms from external CVs/ontologies
+# used in this dataset.
+
+&writeOntologyReferenceTables();
+
 # Include the Table-Schema JSON document in the output for reference.
 
 system("cp $tableSchemaLoc $outDir");
@@ -319,6 +350,13 @@ sub consumeSubjectData {
       # Link up subjects with the NCBI taxonomy code for "human."
 
       $SubjectTaxonomy->{$subjectID}->{$baseURL->{'NCBI_Taxonomy_DB'} . '9606'} = 1;
+
+      # The next 2 lines aren't happening until support for autoloading used
+      # NCBI taxonomy terms is built. Right now, there's just one species,
+      # so this isn't enabled.
+      # 
+      # $termsUsed->{'NCBI_Taxonomy_DB'}->{'9606'} = 1;
+      # $fullURL->{'NCBI_Taxonomy_DB'}->{'9606'} = $baseURL->{'NCBI_Taxonomy_DB'} . '9606';
 
       # TEMPORARY: Assignment to top-level subject group is hard-coded here.
       # Refinements will require group decisions on how to parse the GTEx
@@ -469,6 +507,13 @@ sub consumeSampleData {
 
          $analysisType = $enumMap->{'BioSample.sample_type'}->{$analysisType};
 
+         my $savedAnalysisType = $analysisType;
+
+         $savedAnalysisType =~ s/OBI_/OBI:/;
+
+         $termsUsed->{'OBI'}->{$savedAnalysisType} = 1;
+         $fullURL->{'OBI'}->{$savedAnalysisType} = $baseURL->{'OBI'} . $analysisType;
+
          # Build and cache the sample data structure. Bottom-level hash keys,
          # here, should exactly match output-model property names for the
          # BioSample object.
@@ -478,6 +523,9 @@ sub consumeSampleData {
          $samples->{$sampleID}->{'sample_type'} = $baseURL->{'OBI'} . $analysisType;
 
          $samples->{$sampleID}->{'anatomy'} = $baseURL->{'Uberon'} . $uberonID;
+
+         $termsUsed->{'Uberon'}->{"UBERON:$uberonID"} = 1;
+         $fullURL->{'Uberon'}->{"UBERON:$uberonID"} = $baseURL->{'Uberon'} . $uberonID;
 
          # TEMPORARY: "BioSample.protocol" is currently hard-coded to a constant
          # ID value because we currently have no pre-built model set for
@@ -585,6 +633,9 @@ sub consumeLocationData {
       $files->{$seqFileID}->{'filename'} = "RAW_SEQUENCES.$seqFileID";
       $files->{$seqFileID}->{'md5'} = '.';
 
+      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = 1;
+      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'}} = 1;
+
       # Create a File record for the alignment results.
 
       my $alnFileID = &getNewID('FILE_ID.');
@@ -596,6 +647,9 @@ sub consumeLocationData {
       $files->{$alnFileID}->{'filename'} = $cramBaseName;
       $files->{$alnFileID}->{'md5'} = $cramFileMD5;
 
+      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{$dataType}} = 1;
+      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'CRAM'}} = 1;
+
       # Sequencing event.
 
       my $dataEventID = &getNewID('DATA_EVENT.');
@@ -603,6 +657,9 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'protocol'} = 'PROTOCOL_ID.0';
                                                 # Generic sequencing event.
       $dataEvents->{$dataEventID}->{'method'} = $baseURL->{'OBI'} . 'OBI_0600047';
+      $termsUsed->{'OBI'}->{'OBI:0600047'} = 1;
+      $fullURL->{'OBI'}->{'OBI:0600047'} = $baseURL->{'OBI'} . 'OBI_0600047';
+
       $dataEvents->{$dataEventID}->{'rank'} = 0;
                                                   # Copy for now from parent sample object.
       $dataEvents->{$dataEventID}->{'event_ts'} = $samples->{$sampleID}->{'event_ts'};
@@ -617,6 +674,9 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'protocol'} = 'PROTOCOL_ID.0';
                                                 # Generic alignment event.
       $dataEvents->{$dataEventID}->{'method'} = $baseURL->{'OBI'} . 'OBI_0002567';
+      $termsUsed->{'OBI'}->{'OBI:0002567'} = 1;
+      $fullURL->{'OBI'}->{'OBI:0002567'} = $baseURL->{'OBI'} . 'OBI_0002567';
+
       $dataEvents->{$dataEventID}->{'rank'} = 1;
                                                   # Copy for now from parent sample object.
       $dataEvents->{$dataEventID}->{'event_ts'} = $samples->{$sampleID}->{'event_ts'};
@@ -798,4 +858,174 @@ sub getNewID {
    return $newID;
 }
 
+sub writeOntologyReferenceTables {
+   
+   foreach my $cv ( keys %$termsUsed ) {
+      
+      my $refFile = $cvFile->{$cv};
 
+      open IN, "<$refFile" or die("Can't open $refFile for reading.\n");
+
+      my $ontoData = {};
+
+      if ( $cv eq 'OBI' or $cv eq 'Uberon' ) {
+         
+         # We have OBO files for these.
+
+         my $recording = 0;
+
+         my $currentTerm = '';
+
+         while ( chomp( my $line = <IN> ) ) {
+            
+            if ( $line =~ /^id:\s+(\S.*)$/ ) {
+               
+               $currentTerm = $1;
+
+               if ( exists( $termsUsed->{$cv}->{$currentTerm} ) ) {
+                  
+                  $recording = 1;
+
+                  if ( not exists( $fullURL->{$cv}->{$currentTerm} ) ) {
+                     
+                     die("FATAL: No URL cached for used CV ($cv) term "
+                       . "\"$currentTerm\"; cannot proceed, aborting.\n");
+                  }
+
+               } else {
+                  
+                  $currentTerm = '';
+
+                  # (Recording is already switched off by default.)
+               }
+
+            } elsif ( $line =~ /^\[Term\]/ ) {
+               
+               $recording = 0;
+
+            } elsif ( $recording ) {
+               
+               if ( $line =~ /^name:\s+(\S*.*)$/ ) {
+                  
+                  $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'name'} = $1;
+
+               } elsif ( $line =~ /^def:\s+\"(.*)\"[^\"]*$/ ) {
+                  
+                  $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'def'} = $1;
+
+               } elsif ( $line =~ /^def:\s+/ ) {
+                  
+                  die("FATAL: Unparsed def-line in $cv OBO file: "
+                  . "\"$line\"; aborting.\n");
+
+               } elsif ( $line =~ /^synonym:\s+\"(.*)\"[^\"]*$/ ) {
+                  
+                  my $synonym = $1;
+
+                  if ( exists( $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} ) ) {
+                     
+                     $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} .= "\|$synonym";
+
+                  } else {
+                     
+                     $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} = $synonym;
+                  }
+               }
+
+            } # end if ( line-type selector switch )
+
+         } # end while ( input file line iterator )
+
+      } elsif ( $cv eq 'EDAM' ) {
+         
+         # We have a CV-specific TSV for this one.
+
+         my $header = <IN>;
+
+         while ( chomp( my $line = <IN> ) ) {
+            
+            my ( $id, $name, $synonyms, $def, @theRest ) = split(/\t/, $line);
+
+            if ( exists( $termsUsed->{$cv}->{$id} ) ) {
+               
+               # There are some truly screwy things allowed inside
+               # tab-separated fields in this file. Clean them up.
+
+               $name = &trimSpace($name);
+               $name = &trimQuotes($name);
+               $name = &trimSpace($name);
+
+               $synonyms = &trimSpace($synonyms);
+               $synonyms = &trimQuotes($synonyms);
+               $synonyms = &trimSpace($synonyms);
+
+               $def = &trimSpace($def);
+               $def = &trimQuotes($def);
+               $def = &trimSpace($def);
+
+               $ontoData->{$id}->{'name'} = $name;
+               $ontoData->{$id}->{'synonyms'} = $synonyms;
+               $ontoData->{$id}->{'def'} = $def;
+            }
+         }
+      }
+
+      close IN;
+
+      my $outFile = "$outDir/cvReferenceTable_$cv.tsv";
+
+      open OUT, ">$outFile" or die("Can't open $outFile for writing.\n");
+
+      print OUT "id\tname\tdef\tsynonyms\n";
+
+      foreach my $id ( sort { $a cmp $b } keys %$ontoData ) {
+         
+         print OUT join("\t",
+                              $id,
+                              $ontoData->{$id}->{'name'},
+                              $ontoData->{$id}->{'def'},
+                              $ontoData->{$id}->{'synonyms'} ) . "\n";
+      }
+
+      close OUT;
+
+   } # end foreach ( $cv )
+
+   # TEMPORARY: Hack pending enabling of dynamic lookup for NCBI taxonomy IDs.
+
+   my $outFile = "$outDir/cvReferenceTable_NCBI_Taxonomy_DB.tsv";
+
+   open OUT, ">$outFile" or die("Can't open $outFile for writing.\n");
+
+   print OUT "id\tname\tdef\tsynonyms\n";
+
+   print OUT "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9606\tHomo sapiens\tHomo sapiens (modern human species)\t\n";
+
+   close OUT;
+}
+
+sub trimSpace {
+   
+   my $string = shift;
+
+   my $result = $string;
+
+   $result =~ s/^\s+//;
+
+   $result =~ s/\s+$//;
+
+   return $result;
+}
+
+sub trimQuotes {
+   
+   my $string = shift;
+
+   my $result = $string;
+
+   $result =~ s/^\"+//;
+
+   $result =~ s/\"+$//;
+
+   return $result;
+}
