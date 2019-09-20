@@ -1,0 +1,6 @@
+id	title	description
+DATASET.00000000	GTEx v7 data	All data from the v7 release of the GTEx project
+DATASET.00000001	GTEx v7 raw sequence files	GTEx v7 raw sequence files
+DATASET.00000002	GTEx v7 alignment files	GTEx v7 sequence alignment result files
+DATASET.00000003	GTEx v7 RNA-Seq alignment files	GTEx v7 RNA-Seq sequence alignment result files
+DATASET.00000004	GTEx v7 WGS alignment files	GTEx v7 WGS sequence alignment result files
