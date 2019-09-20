@@ -1,0 +1,5 @@
+id	name	def	synonyms
+http://edamontology.org/data_1383	Sequence alignment (nucleic acid)	Alignment of multiple nucleotide sequences.	Nucleic acid sequence alignment|RNA sequence alignment|DNA sequence alignment
+http://edamontology.org/data_2977	Nucleic acid sequence	One or more nucleic acid sequences, possibly with associated annotation.	Nucleic acid sequences|Nucleotide sequences|Nucleotide sequence|DNA sequence
+http://edamontology.org/format_1930	FASTQ	FASTQ short read format ignoring quality scores.	FASTAQ|fq
+http://edamontology.org/format_3462	CRAM	Reference-based compression of alignment format	

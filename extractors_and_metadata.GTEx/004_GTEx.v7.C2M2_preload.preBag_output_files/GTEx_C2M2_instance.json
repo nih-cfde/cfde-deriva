@@ -1,0 +1,1086 @@
+{
+   "profile": "tabular-data-package",
+   "name": "table_schema_specs_for_c2m2_encoding_of_GTEx_v7_data",
+   "title": "A complete list of schematic specifications for the resources (tables) that will be used to represent GTEx v7 (meta)data prior to ingest into a CFDE C2M2 database instance.",
+   "resources": [
+      {
+         "profile": "tabular-data-resource",
+         "name": "File",
+         "path": "File.tsv",
+         "description": "A digital asset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this File",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A resolvable identifier pointing to the location of this File",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "information_type",
+                  "title": "A CV keyword referencing the type of data contained in this File (target ontology: EDAM)",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "title": "A CV keyword referencing the data format in which this File is encoded (target ontology: EDAM)",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "length",
+                  "title": "The length of this File in bytes",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "minimum": 0
+                  }
+               },
+               {
+                  "name": "filename",
+                  "title": "A suggested local filename for this File",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "md5",
+                  "title": "MD5 checksum for this File",
+                  "type": "string",
+                  "format": "binary"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "information_type",
+                  "reference": {
+                     "resource": "cvReferenceTable_EDAM",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "reference": {
+                     "resource": "cvReferenceTable_EDAM",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "BioSample",
+         "path": "BioSample.tsv",
+         "description": "A tissue sample or other physical specimen",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this BioSample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "subject",
+                  "title": "A foreign key referencing the Subject (source organism(s)) that provided the material for this BioSample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "sample_type",
+                  "title": "A CV keyword referencing the type of material represented by this BioSample (target ontology: OBI)",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "title": "A CV keyword locating the origin of this BioSample within the physiology of its Subject (target ontology: UBERON)",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "protocol",
+                  "title": "A foreign key referencing the experimental protocol that generated this BioSample",
+                  "type": "string"
+               },
+               {
+                  "name": "rank",
+                  "title": "An integer specifying the relative sequence ordering associated with this BioSample within a set of associated BioSamples",
+                  "type": "number"
+               },
+               {
+                  "name": "event_ts",
+                  "title": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
+                  "type": "date",
+                  "format": "%Y-%m-%d"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "subject",
+                  "reference": {
+                     "resource": "Subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "protocol",
+                  "reference": {
+                     "resource": "Protocol",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "sample_type",
+                  "reference": {
+                     "resource": "cvReferenceTable_OBI",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "reference": {
+                     "resource": "cvReferenceTable_Uberon",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Subject",
+         "path": "Subject.tsv",
+         "description": "The source organism(s) from which a BioSample is generated",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "granularity",
+                  "title": "A foreign key referencing the scope of this Subject: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "granularity",
+                  "reference": {
+                     "resource": "SubjectGranularity",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "DataEvent",
+         "path": "DataEvent.tsv",
+         "description": "An event which generates a data object, e.g.: an assay producing a BioSample; a procedure that produces a File or Files from a BioSample (e.g., sequencing); an observation producing a phenotypic datum (e.g. a BMI measurement); a procedure generating new data from the processing of existing Files (e.g., sequence assembly)",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this DataEvent",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "method",
+                  "title": "A CV keyword referencing the method used to generate the data produced by this DataEvent (target ontology: OBI)",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "protocol",
+                  "title": "A foreign key referencing the experimental protocol (or protocol portion) associated with this DataEvent",
+                  "type": "string"
+               },
+               {
+                  "name": "rank",
+                  "title": "An integer specifying the relative sequence ordering associated with this BioSample within the set of associated BioSamples",
+                  "type": "number"
+               },
+               {
+                  "name": "event_ts",
+                  "title": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
+                  "type": "date",
+                  "format": "%Y-%m-%d"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "protocol",
+                  "reference": {
+                     "resource": "Protocol",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "method",
+                  "reference": {
+                     "resource": "cvReferenceTable_OBI",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Dataset",
+         "path": "Dataset.tsv",
+         "description": "A named collection of files",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "title",
+                  "title": "A short, human-readable, machine-read-friendly label for this Dataset",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Dataset",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Organization",
+         "path": "Organization.tsv",
+         "description": "A data coordination center contributing to this database",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Organization",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this Organization",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Organization",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SubjectGranularity",
+         "path": "SubjectGranularity.tsv",
+         "description": "A descriptor for the scope of a Subject (the source for a BioSample), e.g.: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this SubjectGranularity",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this SubjectGranularity",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this SubjectGranularity",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Protocol",
+         "path": "Protocol.tsv",
+         "description": "A sequence-based description of an experimental method",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Protocol",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this Protocol",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Protocol",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SubjectGroup",
+         "path": "SubjectGroup.tsv",
+         "description": "A named collection of Subjects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this SubjectGroup",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "title",
+                  "title": "A short, human-readable, machine-read-friendly label for this SubjectGroup",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this SubjectGroup",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "FilesInDatasets",
+         "path": "FilesInDatasets.tsv",
+         "description": "Association between a File and a containing Dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "FileID",
+                  "title": "The ID of a File",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DatasetID",
+                  "title": "The ID of a Dataset containing the File identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "FileID",
+               "DatasetID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "FileID",
+                  "reference": {
+                     "resource": "File",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "DatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "DatasetsInDatasets",
+         "path": "DatasetsInDatasets.tsv",
+         "description": "Association between a Dataset and a containing Dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "ContainedDatasetID",
+                  "title": "The ID of a contained Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ContainingDatasetID",
+                  "title": "The ID of a Dataset containing the Dataset identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "ContainedDatasetID",
+               "ContainingDatasetID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "ContainedDatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "ContainingDatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ProducedBy",
+         "path": "ProducedBy.tsv",
+         "description": "Association between a File and the (unique) DataEvent that produced it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "FileID",
+                  "title": "The ID of a File",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DataEventID",
+                  "title": "The ID of the (unique) DataEvent that produced the File identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "FileID",
+               "DataEventID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "FileID",
+                  "reference": {
+                     "resource": "File",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "DataEventID",
+                  "reference": {
+                     "resource": "DataEvent",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "AnalyzedBy",
+         "path": "AnalyzedBy.tsv",
+         "description": "Association between a File and a DataEvent that consumes it as an input",
+         "schema": {
+            "fields": [
+               {
+                  "name": "FileID",
+                  "title": "The ID of a File",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DataEventID",
+                  "title": "The ID of a DataEvent that consumes the File identified in the first column as input",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "FileID",
+               "DataEventID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "FileID",
+                  "reference": {
+                     "resource": "File",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "DataEventID",
+                  "reference": {
+                     "resource": "DataEvent",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "AssayedBy",
+         "path": "AssayedBy.tsv",
+         "description": "Association between a BioSample and the (unique) DataEvent that produced it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "BioSampleID",
+                  "title": "The ID of a BioSample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DataEventID",
+                  "title": "The ID of the (unique) DataEvent that produced the BioSample identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "BioSampleID",
+               "DataEventID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "BioSampleID",
+                  "reference": {
+                     "resource": "BioSample",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "DataEventID",
+                  "reference": {
+                     "resource": "DataEvent",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SubjectsInSubjectGroups",
+         "path": "SubjectsInSubjectGroups.tsv",
+         "description": "Association between a Subject and a containing SubjectGroup",
+         "schema": {
+            "fields": [
+               {
+                  "name": "SubjectID",
+                  "title": "The ID of a Subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "SubjectGroupID",
+                  "title": "The ID of a SubjectGroup that contains the Subject identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "SubjectID",
+               "SubjectGroupID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "SubjectID",
+                  "reference": {
+                     "resource": "Subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "SubjectGroupID",
+                  "reference": {
+                     "resource": "SubjectGroup",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ObservedBy",
+         "path": "ObservedBy.tsv",
+         "description": "Association between a Subject and a DataEvent in which data about the Subject was collected",
+         "schema": {
+            "fields": [
+               {
+                  "name": "SubjectID",
+                  "title": "The ID of a Subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DataEventID",
+                  "title": "The ID of a DataEvent in which data about the Subject identified in the first column was collected",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "SubjectID",
+               "DataEventID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "SubjectID",
+                  "reference": {
+                     "resource": "Subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "DataEventID",
+                  "reference": {
+                     "resource": "DataEvent",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SubjectTaxonomy",
+         "path": "SubjectTaxonomy.tsv",
+         "description": "Association between a Subject and a (numeric) NCBI Taxonomy Database ID describing the Subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "SubjectID",
+                  "title": "The ID of a Subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "NCBITaxonID",
+                  "title": "A CV keyword describing the taxonomy of the Subject identified in the first column (target ontology: NCBI Taxonomy Database)",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "SubjectID",
+               "NCBITaxonID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "SubjectID",
+                  "reference": {
+                     "resource": "Subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "NCBITaxonID",
+                  "reference": {
+                     "resource": "cvReferenceTable_NCBI_Taxonomy_DB",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "GeneratedBy",
+         "path": "GeneratedBy.tsv",
+         "description": "Association between a Dataset and an Organization which contributed to the generation of that Dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "DatasetID",
+                  "title": "The ID of a Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "OrganizationID",
+                  "title": "The ID of an Organization which contributed to the generation of the Dataset identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "DatasetID",
+               "OrganizationID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "DatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "OrganizationID",
+                  "reference": {
+                     "resource": "Organization",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SponsoredBy",
+         "path": "SponsoredBy.tsv",
+         "description": "Association between a Dataset and an Organization which sponsored the generation of that Dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "DatasetID",
+                  "title": "The ID of a Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "OrganizationID",
+                  "title": "The ID of an Organization which sponsored the generation of the Dataset identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "DatasetID",
+               "OrganizationID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "DatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "OrganizationID",
+                  "reference": {
+                     "resource": "Organization",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_EDAM",
+         "path": "cvReferenceTable_EDAM.tsv",
+         "description": "Lookup table for field values drawn from the EDAM CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_NCBI_Taxonomy_DB",
+         "path": "cvReferenceTable_NCBI_Taxonomy_DB.tsv",
+         "description": "Lookup table for field values drawn from the NCBI_Taxonomy_DB CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_OBI",
+         "path": "cvReferenceTable_OBI.tsv",
+         "description": "Lookup table for field values drawn from the OBI CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "cvReferenceTable_Uberon",
+         "path": "cvReferenceTable_Uberon.tsv",
+         "description": "Lookup table for field values drawn from the Uberon CV",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "The canonical ID of the current CV term",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "title": "Short name for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "def",
+                  "title": "Long descriptor for the current CV term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "AuxiliaryData",
+         "path": "AuxiliaryData.tsv",
+         "description": "DCC-specific metadata not covered by the core C2M2 model",
+         "schema": {
+            "fields": [
+               {
+                  "name": "ObjectType",
+                  "title": "A keyword representing the type of object which the current record describes",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ObjectID",
+                  "title": "An identifier unambiguously referencing the particular object being described",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "DataDescription",
+                  "title": "A short, human-readable description of the metadata in the current record",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "Value",
+                  "title": "The value of the metadata represented by the current record",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [
+               "ObjectID",
+               "DataDescription"
+            ]
+         }
+      }
+   ]
+}
+
