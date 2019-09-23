@@ -222,7 +222,7 @@
          "profile": "tabular-data-resource",
          "name": "DataEvent",
          "path": "DataEvent.tsv",
-         "description": "An event which generates a data object, e.g.: an assay producing a BioSample; a procedure that produces a File or Files from a BioSample (e.g., sequencing); an observation producing a phenotypic datum (e.g. a BMI measurement); a procedure generating new data from the processing of existing Files (e.g., sequence assembly)",
+         "description": "An event which generates a data object, e.g.: an assay producing a BioSample; a procedure that produces one or more Files from a BioSample (e.g., sequencing); an observation producing a phenotypic datum (e.g. a BMI measurement); a procedure generating new data by processing existing Files (e.g., sequence assembly)",
          "schema": {
             "fields": [
                {
@@ -331,7 +331,7 @@
          "profile": "tabular-data-resource",
          "name": "Organization",
          "path": "Organization.tsv",
-         "description": "A data coordination center contributing to this database",
+         "description": "INTERNAL CV: A data coordination center contributing to this database",
          "schema": {
             "fields": [
                {
@@ -368,7 +368,7 @@
          "profile": "tabular-data-resource",
          "name": "SubjectGranularity",
          "path": "SubjectGranularity.tsv",
-         "description": "A descriptor for the scope of a Subject (the source for a BioSample), e.g.: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
+         "description": "INTERNAL CV: A descriptor for the scope of a Subject (the source for a BioSample), e.g.: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
          "schema": {
             "fields": [
                {
@@ -405,7 +405,7 @@
          "profile": "tabular-data-resource",
          "name": "Platform",
          "path": "Platform.tsv",
-         "description": "A descriptor for the particular technologies with which an experimental procedure is performed",
+         "description": "CV: Dictionary of terms describing particular technologies with which experimental procedures are performed",
          "schema": {
             "fields": [
                {
@@ -442,7 +442,7 @@
          "profile": "tabular-data-resource",
          "name": "Method",
          "path": "Method.tsv",
-         "description": "A specific experimental method used to generate data",
+         "description": "CV: Dictionary of terms describing specific experimental methods used to generate data",
          "schema": {
             "fields": [
                {
@@ -484,7 +484,7 @@
          "profile": "tabular-data-resource",
          "name": "SampleType",
          "path": "SampleType.tsv",
-         "description": "The type of material comprising a BioSample",
+         "description": "CV: Dictionary of terms describing types of material that can be BioSamples",
          "schema": {
             "fields": [
                {
@@ -526,7 +526,7 @@
          "profile": "tabular-data-resource",
          "name": "InformationType",
          "path": "InformationType.tsv",
-         "description": "A descriptor for the type of data stored in a File",
+         "description": "CV: Dictionary of terms describing types of data contained in File objects",
          "schema": {
             "fields": [
                {
@@ -568,7 +568,7 @@
          "profile": "tabular-data-resource",
          "name": "FileFormat",
          "path": "FileFormat.tsv",
-         "description": "A descriptor for the format in which a File has been encoded",
+         "description": "CV: Dictionary of terms describing formats in which File objects can be encoded",
          "schema": {
             "fields": [
                {
@@ -610,12 +610,12 @@
          "profile": "tabular-data-resource",
          "name": "Anatomy",
          "path": "Anatomy.tsv",
-         "description": "A descriptor locating the origin of a BioSample within the physiology of its Subject",
+         "description": "CV: Dictionary of terms locating the origin of a BioSample within the physiology of its Subject",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Anatomy",
+                  "title": "A globally unique ID representing this Anatomy object",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -624,23 +624,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Anatomy",
+                  "title": "A URL referencing this Anatomy object",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Anatomy",
+                  "title": "A short, human-readable, machine-read-friendly label for this Anatomy object",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Anatomy",
+                  "title": "A human-readable description of this Anatomy object",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Anatomy",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this Anatomy object",
                   "type": "string"
                }
             ],
@@ -652,7 +652,7 @@
          "profile": "tabular-data-resource",
          "name": "Protocol",
          "path": "Protocol.tsv",
-         "description": "A sequence-based description of an experimental method",
+         "description": "INTERNAL CV: A sequence-based description of an experimental method",
          "schema": {
             "fields": [
                {
@@ -1181,12 +1181,12 @@
          "profile": "tabular-data-resource",
          "name": "NCBI_Taxonomy_DB",
          "path": "NCBI_Taxonomy_DB.tsv",
-         "description": "Lookup table for field values drawn from the NCBI_Taxonomy_DB CV",
+         "description": "CV: Dictionary of terms describing taxa indexed in the NCBI Taxonomy database",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "The canonical ID of the current taxon",
+                  "title": "The canonical ID of this taxon",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -1195,23 +1195,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing the current taxon",
+                  "title": "A URL referencing this taxon",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "Short name for the current taxon",
+                  "title": "Short name for this taxon",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "Long descriptor for the current taxon",
+                  "title": "Long descriptor for this taxon",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for the current taxon",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this taxon",
                   "type": "string"
                }
             ],
@@ -1223,12 +1223,12 @@
          "profile": "tabular-data-resource",
          "name": "AuxiliaryData",
          "path": "AuxiliaryData.tsv",
-         "description": "DCC-specific metadata not covered by the core C2M2 model",
+         "description": "DCC-specific (extension) metadata not covered by the core C2M2 model",
          "schema": {
             "fields": [
                {
                   "name": "ObjectType",
-                  "title": "A keyword representing the type of object which the current record describes",
+                  "title": "A keyword representing the type of metadata contained in the current record",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1236,7 +1236,7 @@
                },
                {
                   "name": "ObjectID",
-                  "title": "An identifier unambiguously referencing the particular object being described",
+                  "title": "An identifier unambiguously referencing the metadata in the current record",
                   "type": "string",
                   "constraints": {
                      "required": true
