@@ -514,7 +514,7 @@
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this SampleType",
                   "type": "string"
                }
             ],
@@ -556,7 +556,7 @@
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this InformationType",
                   "type": "string"
                }
             ],
@@ -598,7 +598,7 @@
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this FileFormat",
                   "type": "string"
                }
             ],
@@ -640,7 +640,7 @@
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this Anatomy",
                   "type": "string"
                }
             ],
