@@ -30,7 +30,7 @@
                },
                {
                   "name": "information_type",
-                  "title": "A CV keyword referencing the type of data contained in this File (target ontology: EDAM)",
+                  "title": "A CV term ID referencing the type of data contained in this File (target ontology: EDAM)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -39,7 +39,7 @@
                },
                {
                   "name": "file_format",
-                  "title": "A CV keyword referencing the data format in which this File is encoded (target ontology: EDAM)",
+                  "title": "A CV term ID referencing the data format in which this File is encoded (target ontology: EDAM)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -76,14 +76,14 @@
                {
                   "fields": "information_type",
                   "reference": {
-                     "resource": "cvReferenceTable_EDAM",
+                     "resource": "InformationType",
                      "fields": "id"
                   }
                },
                {
                   "fields": "file_format",
                   "reference": {
-                     "resource": "cvReferenceTable_EDAM",
+                     "resource": "FileFormat",
                      "fields": "id"
                   }
                }
@@ -116,7 +116,7 @@
                },
                {
                   "name": "sample_type",
-                  "title": "A CV keyword referencing the type of material represented by this BioSample (target ontology: OBI)",
+                  "title": "A CV term ID referencing the type of material represented by this BioSample (target ontology: OBI)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -125,7 +125,7 @@
                },
                {
                   "name": "anatomy",
-                  "title": "A CV keyword locating the origin of this BioSample within the physiology of its Subject (target ontology: UBERON)",
+                  "title": "A CV term ID locating the origin of this BioSample within the physiology of its Subject (target ontology: UBERON)",
                   "type": "string",
                   "format": "uri"
                },
@@ -166,14 +166,14 @@
                {
                   "fields": "sample_type",
                   "reference": {
-                     "resource": "cvReferenceTable_OBI",
+                     "resource": "SampleType",
                      "fields": "id"
                   }
                },
                {
                   "fields": "anatomy",
                   "reference": {
-                     "resource": "cvReferenceTable_Uberon",
+                     "resource": "Anatomy",
                      "fields": "id"
                   }
                }
@@ -236,7 +236,13 @@
                },
                {
                   "name": "method",
-                  "title": "A CV keyword referencing the method used to generate the data produced by this DataEvent (target ontology: OBI)",
+                  "title": "A CV term ID referencing the method used to generate the data produced by this DataEvent (target ontology: OBI)",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "platform",
+                  "title": "A CV term ID referencing the particular technologies with which the method in this DataEvent is executed (target ontology: OBI)",
                   "type": "string",
                   "format": "uri"
                },
@@ -270,7 +276,14 @@
                {
                   "fields": "method",
                   "reference": {
-                     "resource": "cvReferenceTable_OBI",
+                     "resource": "Method",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "platform",
+                  "reference": {
+                     "resource": "Platform",
                      "fields": "id"
                   }
                }
@@ -292,6 +305,12 @@
                      "required": true,
                      "unique": true
                   }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this Dataset",
+                  "type": "string",
+                  "format": "uri"
                },
                {
                   "name": "title",
@@ -325,6 +344,12 @@
                   }
                },
                {
+                  "name": "url",
+                  "title": "A URL referencing this Organization",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
                   "name": "name",
                   "title": "A short, human-readable, machine-read-friendly label for this Organization",
                   "type": "string"
@@ -356,6 +381,12 @@
                   }
                },
                {
+                  "name": "url",
+                  "title": "A URL referencing this SubjectGranularity",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
                   "name": "name",
                   "title": "A short, human-readable, machine-read-friendly label for this SubjectGranularity",
                   "type": "string"
@@ -363,6 +394,228 @@
                {
                   "name": "description",
                   "title": "A human-readable description of this SubjectGranularity",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Platform",
+         "path": "Platform.tsv",
+         "description": "A descriptor for the particular technologies with which an experimental procedure is performed",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Platform",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this Platform",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this Platform",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Platform",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Method",
+         "path": "Method.tsv",
+         "description": "A specific experimental method used to generate data",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Method",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this Method",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this Method",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Method",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "SampleType",
+         "path": "SampleType.tsv",
+         "description": "The type of material comprising a BioSample",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this SampleType",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this SampleType",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this SampleType",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this SampleType",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "InformationType",
+         "path": "InformationType.tsv",
+         "description": "A descriptor for the type of data stored in a File",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this InformationType",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this InformationType",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this InformationType",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this InformationType",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "FileFormat",
+         "path": "FileFormat.tsv",
+         "description": "A descriptor for the format in which a File has been encoded",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this FileFormat",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this FileFormat",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this FileFormat",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this FileFormat",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "Anatomy",
+         "path": "Anatomy.tsv",
+         "description": "A descriptor locating the origin of a BioSample within the physiology of its Subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this Anatomy",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this Anatomy",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this Anatomy",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this Anatomy",
                   "type": "string"
                }
             ],
@@ -385,6 +638,12 @@
                      "required": true,
                      "unique": true
                   }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this Protocol",
+                  "type": "string",
+                  "format": "uri"
                },
                {
                   "name": "name",
@@ -771,7 +1030,7 @@
                },
                {
                   "name": "NCBITaxonID",
-                  "title": "A CV keyword describing the taxonomy of the Subject identified in the first column (target ontology: NCBI Taxonomy Database)",
+                  "title": "A CV term ID describing the taxonomy of the Subject identified in the first column (target ontology: NCBI Taxonomy Database)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -794,7 +1053,7 @@
                {
                   "fields": "NCBITaxonID",
                   "reference": {
-                     "resource": "cvReferenceTable_NCBI_Taxonomy_DB",
+                     "resource": "NCBI_Taxonomy_DB",
                      "fields": "id"
                   }
                }
@@ -895,50 +1154,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "cvReferenceTable_EDAM",
-         "path": "cvReferenceTable_EDAM.tsv",
-         "description": "Lookup table for field values drawn from the EDAM CV",
-         "schema": {
-            "fields": [
-               {
-                  "name": "id",
-                  "title": "The canonical ID of the current CV term",
-                  "type": "string",
-                  "format": "uri",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "title": "Short name for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "def",
-                  "title": "Long descriptor for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "cvReferenceTable_NCBI_Taxonomy_DB",
-         "path": "cvReferenceTable_NCBI_Taxonomy_DB.tsv",
+         "name": "NCBI_Taxonomy_DB",
+         "path": "NCBI_Taxonomy_DB.tsv",
          "description": "Lookup table for field values drawn from the NCBI_Taxonomy_DB CV",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "The canonical ID of the current CV term",
+                  "title": "The canonical ID of the current taxon",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -946,90 +1169,24 @@
                   }
                },
                {
-                  "name": "name",
-                  "title": "Short name for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "def",
-                  "title": "Long descriptor for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "cvReferenceTable_OBI",
-         "path": "cvReferenceTable_OBI.tsv",
-         "description": "Lookup table for field values drawn from the OBI CV",
-         "schema": {
-            "fields": [
-               {
-                  "name": "id",
-                  "title": "The canonical ID of the current CV term",
+                  "name": "url",
+                  "title": "A URL referencing the current taxon",
                   "type": "string",
-                  "format": "uri",
-                  "constraints": {
-                     "required": true
-                  }
+                  "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "Short name for the current CV term",
+                  "title": "Short name for the current taxon",
                   "type": "string"
                },
                {
-                  "name": "def",
-                  "title": "Long descriptor for the current CV term",
+                  "name": "description",
+                  "title": "Long descriptor for the current taxon",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "cvReferenceTable_Uberon",
-         "path": "cvReferenceTable_Uberon.tsv",
-         "description": "Lookup table for field values drawn from the Uberon CV",
-         "schema": {
-            "fields": [
-               {
-                  "name": "id",
-                  "title": "The canonical ID of the current CV term",
-                  "type": "string",
-                  "format": "uri",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "title": "Short name for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "def",
-                  "title": "Long descriptor for the current CV term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for the current CV term",
+                  "title": "Pipe-separated list of synonyms (alternate names) for the current taxon",
                   "type": "string"
                }
             ],

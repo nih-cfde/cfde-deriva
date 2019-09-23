@@ -1,0 +1,3 @@
+id	url	name	description	synonyms
+http://purl.obolibrary.org/obo/OBI_0002567	http://purl.obolibrary.org/obo/OBI_0002567	sequence alignment	A data transformation in which one or more sequences (reads) are positioned on a reference sequence template (often a reference set of genes), according to the genetic base-pairing paradigm.	
+http://purl.obolibrary.org/obo/OBI_0600047	http://purl.obolibrary.org/obo/OBI_0600047	sequencing assay	An assay the uses chemical or biochemical means to infer the sequence of a biomaterial	
