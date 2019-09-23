@@ -128,7 +128,7 @@ class CfdeDataPackage (object):
     def provision(self):
         if 'CFDE' not in self.model_root.schemas:
             # blindly load the whole model on an apparently empty catalog
-            catalog.post('/schema', json=self.model_doc).raise_for_status()
+            self.catalog.post('/schema', json=self.model_doc).raise_for_status()
         else:
             # do some naively idempotent model definitions on existing catalog
             # adding missing tables and missing columns
@@ -152,10 +152,10 @@ class CfdeDataPackage (object):
 
             if need_tables:
                 print("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
-                catalog.post('/schema', json=need_tables).raise_for_status()
+                self.catalog.post('/schema', json=need_tables).raise_for_status()
 
             for cdoc in need_columns:
-                catalog.post(
+                self.catalog.post(
                     '/schema/CFDE/table/%s/column' % urlquote(cdoc['table_name']),
                     json=cdoc
                 ).raise_for_status()
@@ -304,7 +304,7 @@ class CfdeDataPackage (object):
                     raw_rows = list(reader)
                     row2dict = self.make_row2dict(table, raw_rows[0])
                     dict_rows = [ row2dict(row) for row in raw_rows[1:] ]
-                    catalog.post("/entity/CFDE:%s" % urlquote(table.name), json=dict_rows)
+                    self.catalog.post("/entity/CFDE:%s" % urlquote(table.name), json=dict_rows)
                     print("Table %s data loaded from %s." % (table.name, fname))
 
 
@@ -321,13 +321,13 @@ datapackages = [
 
 
 ## create catalog
-catalog = server.create_ermrest_catalog()
-print('New catalog has catalog_id=%s' % catalog.catalog_id)
+newcat = server.create_ermrest_catalog()
+print('New catalog has catalog_id=%s' % newcat.catalog_id)
 print("Don't forget to delete it if you are done with it!")
 
 ## deploy model(s)
 for dp in datapackages:
-    dp.set_catalog(catalog)
+    dp.set_catalog(newcat)
     dp.provision()
     print("Model deployed for %s." % (dp.filename,))
 
@@ -344,7 +344,7 @@ print("All data packages loaded.")
 
 print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
     servername,
-    catalog.catalog_id,
+    newcat.catalog_id,
 ))
 
 ## to re-bind to the same catalog in the future, extract catalog_id from URL
