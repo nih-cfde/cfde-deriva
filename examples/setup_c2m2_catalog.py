@@ -90,7 +90,7 @@ class CfdeDataPackage (object):
     })
     writers = [grp.demo_curator, grp.demo_writer]
     catalog_acls = {
-        "owner": [grp.demo_admin, grp.demo_creator],
+        "owner": [grp.demo_admin],
         "insert": writers,
         "update": writers,
         "delete": writers,
@@ -196,7 +196,11 @@ class CfdeDataPackage (object):
 
     def apply_custom_config(self):
         self.get_model()
-        self.model_root.acls.update(self.catalog_acls)
+        acls = dict(self.catalog_acls)
+        # keep original catalog ownership
+        # since ERMrest will prevent a client from discarding ownership rights
+        acls['owner'].append(self.model_root.acls['owner'][0])
+        self.model_root.acls.update(acls)
 
         # set custom chaise configuration values for this catalog
         self.model_root.annotations[tag.chaise_config] = {
