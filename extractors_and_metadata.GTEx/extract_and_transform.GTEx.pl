@@ -83,6 +83,18 @@ my $cvFile = {
 };
 
 ##########################################################################################
+# Map of internal table names to external ontology reference IDs.
+
+my $ontoMap = {
+   
+   'SampleType' => 'OBI',
+   'Anatomy' => 'Uberon',
+   'InformationType' => 'EDAM',
+   'FileFormat' => 'EDAM',
+   'Method' => 'OBI'
+};
+
+##########################################################################################
 # TEMPORARY: Loadable objects representing single-row CV table stubs that are
 #            specific to CFDE (Organization, Protocol, SubjectGranularity). Once
 #            these objects have been built into a target DB instance, code
@@ -93,16 +105,25 @@ my $tempTables = {
    
    'Organization' =>       {
                               'id' => 'ORGANIZATION_ID.0',
+                              'url' => '',
                               'name' => 'GTEx',
                               'description' => 'The Genotype-Tissue Expression (GTEx) project'
                            },
+   'Platform' =>           {
+                              'id' => 'PLATFORM_ID.0',
+                              'url' => '',
+                              'name' => 'Dummy_platform',
+                              'description' => 'Description of the dummy platform'
+                           },
    'Protocol' =>           {
                               'id' => 'PROTOCOL_ID.0',
+                              'url' => '',
                               'name' => 'Dummy_protocol',
-                              'description' => 'Description of the dummy protocol'
+                                 'description' => 'Description of the dummy protocol'
                            },
-   'SubjectGranularity' =>  {
+   'SubjectGranularity' => {
                               'id' => 'SUBJECT_GRANULARITY_ID.0',
+                              'url' => '',
                               'name' => 'single_organism',
                               'description' => 'A subject representing a single organism'
                            }
@@ -511,8 +532,8 @@ sub consumeSampleData {
 
          $savedAnalysisType =~ s/OBI_/OBI:/;
 
-         $termsUsed->{'OBI'}->{$savedAnalysisType} = 1;
-         $fullURL->{'OBI'}->{$savedAnalysisType} = $baseURL->{'OBI'} . $analysisType;
+         $termsUsed->{'SampleType'}->{$savedAnalysisType} = 1;
+         $fullURL->{'SampleType'}->{$savedAnalysisType} = $baseURL->{'OBI'} . $analysisType;
 
          # Build and cache the sample data structure. Bottom-level hash keys,
          # here, should exactly match output-model property names for the
@@ -524,8 +545,8 @@ sub consumeSampleData {
 
          $samples->{$sampleID}->{'anatomy'} = $baseURL->{'Uberon'} . $uberonID;
 
-         $termsUsed->{'Uberon'}->{"UBERON:$uberonID"} = 1;
-         $fullURL->{'Uberon'}->{"UBERON:$uberonID"} = $baseURL->{'Uberon'} . $uberonID;
+         $termsUsed->{'Anatomy'}->{"UBERON:$uberonID"} = 1;
+         $fullURL->{'Anatomy'}->{"UBERON:$uberonID"} = $baseURL->{'Uberon'} . $uberonID;
 
          # TEMPORARY: "BioSample.protocol" is currently hard-coded to a constant
          # ID value because we currently have no pre-built model set for
@@ -633,8 +654,10 @@ sub consumeLocationData {
       $files->{$seqFileID}->{'filename'} = "RAW_SEQUENCES.$seqFileID";
       $files->{$seqFileID}->{'md5'} = '.';
 
-      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = 1;
-      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'}} = 1;
+      $termsUsed->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = 1;
+      $fullURL->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = $baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'};
+      $termsUsed->{'FileFormat'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'}} = 1;
+      $fullURL->{'FileFormat'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'}} = $baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'};
 
       # Create a File record for the alignment results.
 
@@ -647,8 +670,10 @@ sub consumeLocationData {
       $files->{$alnFileID}->{'filename'} = $cramBaseName;
       $files->{$alnFileID}->{'md5'} = $cramFileMD5;
 
-      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{$dataType}} = 1;
-      $termsUsed->{'EDAM'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'CRAM'}} = 1;
+      $termsUsed->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{$dataType}} = 1;
+      $fullURL->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{$dataType}} = $baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{$dataType};
+      $termsUsed->{'FileFormat'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'CRAM'}} = 1;
+      $fullURL->{'FileFormat'}->{$baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'CRAM'}} = $baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'CRAM'};
 
       # Sequencing event.
 
@@ -657,8 +682,8 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'protocol'} = 'PROTOCOL_ID.0';
                                                 # Generic sequencing event.
       $dataEvents->{$dataEventID}->{'method'} = $baseURL->{'OBI'} . 'OBI_0600047';
-      $termsUsed->{'OBI'}->{'OBI:0600047'} = 1;
-      $fullURL->{'OBI'}->{'OBI:0600047'} = $baseURL->{'OBI'} . 'OBI_0600047';
+      $termsUsed->{'Method'}->{'OBI:0600047'} = 1;
+      $fullURL->{'Method'}->{'OBI:0600047'} = $baseURL->{'OBI'} . 'OBI_0600047';
 
       $dataEvents->{$dataEventID}->{'rank'} = 0;
                                                   # Copy for now from parent sample object.
@@ -674,8 +699,8 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'protocol'} = 'PROTOCOL_ID.0';
                                                 # Generic alignment event.
       $dataEvents->{$dataEventID}->{'method'} = $baseURL->{'OBI'} . 'OBI_0002567';
-      $termsUsed->{'OBI'}->{'OBI:0002567'} = 1;
-      $fullURL->{'OBI'}->{'OBI:0002567'} = $baseURL->{'OBI'} . 'OBI_0002567';
+      $termsUsed->{'Method'}->{'OBI:0002567'} = 1;
+      $fullURL->{'Method'}->{'OBI:0002567'} = $baseURL->{'OBI'} . 'OBI_0002567';
 
       $dataEvents->{$dataEventID}->{'rank'} = 1;
                                                   # Copy for now from parent sample object.
@@ -716,9 +741,9 @@ sub writeDummyTables {
 
       open OUT, ">$tableFile" or die("Can't open $tableFile for writing.\n");
 
-      print OUT join("\t", ( 'id', 'name', 'description' )) . "\n";
+      print OUT join("\t", ( 'id', 'url', 'name', 'description' )) . "\n";
 
-      print OUT join("\t", ( $stubHash->{$tableName}->{'id'}, $stubHash->{$tableName}->{'name'}, $stubHash->{$tableName}->{'description'} )) . "\n";
+      print OUT join("\t", ( $stubHash->{$tableName}->{'id'}, $stubHash->{$tableName}->{'url'}, $stubHash->{$tableName}->{'name'}, $stubHash->{$tableName}->{'description'} )) . "\n";
 
       close OUT;
    }
@@ -860,8 +885,19 @@ sub getNewID {
 
 sub writeOntologyReferenceTables {
    
-   foreach my $cv ( keys %$termsUsed ) {
+#   my $ontoMap = {
+#      
+#      'SampleType' => 'OBI',
+#      'Anatomy' => 'Uberon',
+#      'InformationType' => 'EDAM',
+#      'FileFormat' => 'EDAM',
+#      'Method' => 'OBI'
+#   };
+
+   foreach my $vocabTable ( keys %$termsUsed ) {
       
+      my $cv = $ontoMap->{$vocabTable};
+
       my $refFile = $cvFile->{$cv};
 
       open IN, "<$refFile" or die("Can't open $refFile for reading.\n");
@@ -882,11 +918,11 @@ sub writeOntologyReferenceTables {
                
                $currentTerm = $1;
 
-               if ( exists( $termsUsed->{$cv}->{$currentTerm} ) ) {
+               if ( exists( $termsUsed->{$vocabTable}->{$currentTerm} ) ) {
                   
                   $recording = 1;
 
-                  if ( not exists( $fullURL->{$cv}->{$currentTerm} ) ) {
+                  if ( not exists( $fullURL->{$vocabTable}->{$currentTerm} ) ) {
                      
                      die("FATAL: No URL cached for used CV ($cv) term "
                        . "\"$currentTerm\"; cannot proceed, aborting.\n");
@@ -907,11 +943,11 @@ sub writeOntologyReferenceTables {
                
                if ( $line =~ /^name:\s+(\S*.*)$/ ) {
                   
-                  $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'name'} = $1;
+                  $ontoData->{$fullURL->{$vocabTable}->{$currentTerm}}->{'name'} = $1;
 
                } elsif ( $line =~ /^def:\s+\"(.*)\"[^\"]*$/ ) {
                   
-                  $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'def'} = $1;
+                  $ontoData->{$fullURL->{$vocabTable}->{$currentTerm}}->{'description'} = $1;
 
                } elsif ( $line =~ /^def:\s+/ ) {
                   
@@ -922,13 +958,13 @@ sub writeOntologyReferenceTables {
                   
                   my $synonym = $1;
 
-                  if ( exists( $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} ) ) {
+                  if ( exists( $ontoData->{$fullURL->{$vocabTable}->{$currentTerm}}->{'synonyms'} ) ) {
                      
-                     $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} .= "\|$synonym";
+                     $ontoData->{$fullURL->{$vocabTable}->{$currentTerm}}->{'synonyms'} .= "\|$synonym";
 
                   } else {
                      
-                     $ontoData->{$fullURL->{$cv}->{$currentTerm}}->{'synonyms'} = $synonym;
+                     $ontoData->{$fullURL->{$vocabTable}->{$currentTerm}}->{'synonyms'} = $synonym;
                   }
                }
 
@@ -946,7 +982,7 @@ sub writeOntologyReferenceTables {
             
             my ( $id, $name, $synonyms, $def, @theRest ) = split(/\t/, $line);
 
-            if ( exists( $termsUsed->{$cv}->{$id} ) ) {
+            if ( exists( $termsUsed->{$vocabTable}->{$id} ) ) {
                
                # There are some truly screwy things allowed inside
                # tab-separated fields in this file. Clean them up.
@@ -965,41 +1001,42 @@ sub writeOntologyReferenceTables {
 
                $ontoData->{$id}->{'name'} = $name;
                $ontoData->{$id}->{'synonyms'} = $synonyms;
-               $ontoData->{$id}->{'def'} = $def;
+               $ontoData->{$id}->{'description'} = $def;
             }
          }
       }
 
       close IN;
 
-      my $outFile = "$outDir/cvReferenceTable_$cv.tsv";
+      my $outFile = "$outDir/$vocabTable.tsv";
 
       open OUT, ">$outFile" or die("Can't open $outFile for writing.\n");
 
-      print OUT "id\tname\tdef\tsynonyms\n";
+      print OUT "id\turl\tname\tdescription\tsynonyms\n";
 
       foreach my $id ( sort { $a cmp $b } keys %$ontoData ) {
          
          print OUT join("\t",
                               $id,
+                              $id,
                               $ontoData->{$id}->{'name'},
-                              $ontoData->{$id}->{'def'},
+                              $ontoData->{$id}->{'description'},
                               $ontoData->{$id}->{'synonyms'} ) . "\n";
       }
 
       close OUT;
 
-   } # end foreach ( $cv )
+   } # end foreach ( $vocabTable )
 
    # TEMPORARY: Hack pending enabling of dynamic lookup for NCBI taxonomy IDs.
 
-   my $outFile = "$outDir/cvReferenceTable_NCBI_Taxonomy_DB.tsv";
+   my $outFile = "$outDir/NCBI_Taxonomy_DB.tsv";
 
    open OUT, ">$outFile" or die("Can't open $outFile for writing.\n");
 
-   print OUT "id\tname\tdef\tsynonyms\n";
+   print OUT "id\turl\tname\tdescription\tsynonyms\n";
 
-   print OUT "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9606\tHomo sapiens\tHomo sapiens (modern human species)\t\n";
+   print OUT "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9606\thttps://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9606\tHomo sapiens\tHomo sapiens (modern human species)\t\n";
 
    close OUT;
 }
