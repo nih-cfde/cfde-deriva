@@ -8,6 +8,7 @@ import csv
 
 from deriva.core import DerivaServer, get_credential, urlquote, AttrDict
 from deriva.core.ermrest_config import tag
+from deriva.core.ermrest_model import Table, Column, Key, ForeignKey, builtin_types
 
 """
 Basic C2M2 catalog sketch
@@ -125,6 +126,35 @@ class CfdeDataPackage (object):
         self.model_root = self.catalog.getCatalogModel()
         self.cfde_schema = self.model_root.schemas.get('CFDE')
 
+    def provision_dataset_ancestor_tables(self):
+        def tdef(tname):
+            return Table.define(
+                tname,
+                [
+                    Column.define("descendant", builtin_types.text, nullok=False, comment="Contained dataset in transitive relationship."),
+                    Column.define("ancestor", builtin_types.text, nullok=False, comment="Containing dataset in transitive relationship."),
+                ],
+                [
+                    Key.define(["descendant", "ancestor"], constraint_names=[["CFDE", tname + "_assoc_key"]]),
+                ],
+                [
+                    ForeignKey.define(
+                        ["descendant"], "CFDE", "Dataset", ["id"],
+                        constraint_names=[["CFDE", tname + "_descendant_fkey"]],
+                    ),
+                    ForeignKey.define(
+                        ["ancestor"], "CFDE", "Dataset", ["id"],
+                        constraint_names=[["CFDE", tname + "_ancestor_fkey"]],
+                    ),
+                ],
+                comment="Flattened, transitive closure of nested DatasetsInDatasets relationship.",
+            )
+
+        if 'Dataset_Ancestor' not in self.model_root.schemas['CFDE'].tables:
+            self.model_root.schemas['CFDE'].create_table(self.catalog, tdef("Dataset_Ancestor"))
+            self.model_root.schemas['CFDE'].create_table(self.catalog, tdef("Dataset_Ancestor_Reflexive"))
+        self.get_model()
+
     def provision(self):
         if 'CFDE' not in self.model_root.schemas:
             # blindly load the whole model on an apparently empty catalog
@@ -162,6 +192,7 @@ class CfdeDataPackage (object):
                 print("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
 
         self.get_model()
+        self.provision_dataset_ancestor_tables()
 
     def apply_custom_config(self):
         self.get_model()
@@ -202,7 +233,17 @@ class CfdeDataPackage (object):
             d.update(kwargs)
             return d
 
-        ds_to_file = [
+        dsa_to_dsd = [
+            {"inbound": find_fkey("Dataset_Ancestor", "ancestor").names[0]},
+            {"outbound": find_fkey("Dataset_Ancestor", "descendant").names[0]},
+        ]
+
+        dsa_to_dsd_r = [
+            {"inbound": find_fkey("Dataset_Ancestor_Reflexive", "ancestor").names[0]},
+            {"outbound": find_fkey("Dataset_Ancestor_Reflexive", "descendant").names[0]},
+        ]
+
+        ds_to_file = dsa_to_dsd_r + [
             {"inbound": find_fkey("FilesInDatasets", "DatasetID").names[0]},
             {"outbound": find_fkey("FilesInDatasets", "FileID").names[0]},
         ]
@@ -218,10 +259,16 @@ class CfdeDataPackage (object):
         ]
         
         # improve Dataset with pseudo columns?
-        sponsors = assoc_source(
-            "Sponsors", "SponsoredBy", ["DatasetID"], ["OrganizationID"],
-            aggregate="array", array_display="ulist"
-        )
+        sponsors = {
+            "source": dsa_to_dsd_r + [
+                {"inbound": find_fkey("SponsoredBy", ["DatasetID"]).names[0]},
+                {"outbound": find_fkey("SponsoredBy", ["OrganizationID"]).names[0]},
+                "RID"
+            ],
+            "markdown_name": "Sponsors",
+            "aggregate": "array_d",
+            "array_display": "ulist",
+        }
         
         self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_columns] = {
             "compact": ["title", sponsors, "description", "url"],
@@ -247,10 +294,23 @@ class CfdeDataPackage (object):
                     "markdown_name": "Biosample Type",
                     "source": ds_to_bsamp + [ {"outbound": find_fkey("BioSample", "sample_type").names[0]}, "RID" ]
                 },
-                assoc_source("Parent Datasets", "DatasetsInDatasets", ["ContainedDatasetID"], ["ContainingDatasetID"]),
-                assoc_source("Child Datasets", "DatasetsInDatasets", ["ContainingDatasetID"], ["ContainedDatasetID"]),
+                assoc_source("Included By", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
+                assoc_source("Included Datasets", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
                 assoc_source("Files", "FilesInDatasets", ["DatasetID"], ["FileID"]),
             ]}
+        }
+
+        self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_foreign_keys] = {
+            "*": [
+                {
+                    "source": dsa_to_dsd + [ "RID" ],
+                    "markdown_name": "Included Datasets",
+                },
+                {
+                    "source": ds_to_file + [ "RID" ],
+                    "markdown_name": "Included Files",
+                }
+            ]
         }
 
         ## apply the above ACL and annotation changes to server
@@ -290,6 +350,60 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
+    def load_dataset_ancestor_tables(self):
+        assoc_rows = self.catalog.get('/entity/DatasetsInDatasets').json()
+        ds_ids = [ row['id'] for row in self.catalog.get('/attributegroup/Dataset/id').json() ]
+
+        contains = {} # ancestor -> {descendant, ...}
+        contained = {} # descendant -> {ancestor, ...}
+
+        def add(d, k, v):
+            if k not in d:
+                d[k] = set([v])
+            else:
+                d[k].add(v)
+
+        # reflexive links
+        for ds in ds_ids:
+            add(contains, ds, ds)
+            add(contained, ds, ds)
+
+        for row in assoc_rows:
+            child = row['ContainedDatasetID']
+            parent = row['ContainingDatasetID']
+            add(contains, parent, child)
+            add(contained, child, parent)
+            for descendant in contains.get(child, []):
+                add(contains, parent, descendant)
+                add(contained, descendant, parent)
+            for ancestor in contained.get(parent, []):
+                add(contains, ancestor, child)
+                add(contained, child, ancestor)
+
+        da_pairs = {
+            (descendant, ancestor)
+            for descendant, ancestors in contained.items()
+            for ancestor in ancestors
+        }
+
+        self.catalog.post(
+            '/entity/Dataset_Ancestor_Reflexive',
+            json=[
+                {"descendant": descendant, "ancestor": ancestor}
+                for descendant, ancestor in da_pairs
+            ],
+        )
+
+        self.catalog.post(
+            '/entity/Dataset_Ancestor',
+            json=[
+                {"descendant": descendant, "ancestor": ancestor}
+                for descendant, ancestor in da_pairs
+                # drop reflexive pairs
+                if descendant != ancestor
+            ],
+        )
+
     def load_data_files(self):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
@@ -306,7 +420,6 @@ class CfdeDataPackage (object):
                     dict_rows = [ row2dict(row) for row in raw_rows[1:] ]
                     self.catalog.post("/entity/CFDE:%s" % urlquote(table.name), json=dict_rows)
                     print("Table %s data loaded from %s." % (table.name, fname))
-
 
 # ugly quasi CLI...
 if len(sys.argv) < 2:
@@ -339,6 +452,9 @@ print("Policies and presentation configured.")
 ## load some sample data?
 for dp in datapackages:
     dp.load_data_files()
+
+## compute transitive-closure relationships
+datapackages[0].load_dataset_ancestor_tables()
 
 print("All data packages loaded.")
 
