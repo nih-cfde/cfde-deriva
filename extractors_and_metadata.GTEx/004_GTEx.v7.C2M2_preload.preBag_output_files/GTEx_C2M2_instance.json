@@ -469,6 +469,11 @@
                   "name": "description",
                   "title": "A human-readable description of this Method",
                   "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
@@ -505,6 +510,11 @@
                {
                   "name": "description",
                   "title": "A human-readable description of this SampleType",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this SampleType",
                   "type": "string"
                }
             ],
@@ -543,6 +553,11 @@
                   "name": "description",
                   "title": "A human-readable description of this InformationType",
                   "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this InformationType",
+                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
@@ -580,6 +595,11 @@
                   "name": "description",
                   "title": "A human-readable description of this FileFormat",
                   "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this FileFormat",
+                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
@@ -616,6 +636,11 @@
                {
                   "name": "description",
                   "title": "A human-readable description of this Anatomy",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "title": "Pipe-separated list of synonyms (alternate names) for this Anatomy",
                   "type": "string"
                }
             ],
