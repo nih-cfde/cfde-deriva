@@ -239,6 +239,7 @@ $DatasetsInDatasets->{$datasetIDs->{'wgs_alignment_files'}}->{$datasetIDs->{'ali
 foreach my $setKeyword ( 'sequence_files', 'alignment_files', 'rnaseq_alignment_files', 'wgs_alignment_files' ) {
    
    $generatedBy->{$datasetIDs->{$setKeyword}}->{'ORGANIZATION_ID.0'} = 1;
+   $sponsoredBy->{$datasetIDs->{$setKeyword}}->{'ORGANIZATION_ID.0'} = 1;
 }
 
 # Data structure to track SubjectGroups (includes init for top-level group).
