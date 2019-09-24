@@ -103,8 +103,8 @@ my $ontoMap = {
 
 my $tempTables = {
    
-   'DCC' =>                {
-                              'id' => 'DCC_ID.0',
+   'CommonFundProgram' =>  {
+                              'id' => 'COMMON_FUND_PROGRAM_ID.0',
                               'url' => 'https://commonfund.nih.gov/gtex',
                               'name' => 'GTEx',
                               'description' => 'The Genotype-Tissue Expression (GTEx) project'
@@ -205,7 +205,7 @@ my $datasets = {};
 
 my $topDatasetID = &getNewID('DATASET.');
 
-$datasets->{$topDatasetID}->{'data_source'} = 'DCC_ID.0';
+$datasets->{$topDatasetID}->{'data_source'} = 'COMMON_FUND_PROGRAM_ID.0';
 $datasets->{$topDatasetID}->{'title'} = 'GTEx v7 data';
 $datasets->{$topDatasetID}->{'description'} = 'All data from the v7 release of the GTEx project';
 
@@ -220,19 +220,19 @@ my $datasetIDs = {
    'wgs_alignment_files' => &getNewID('DATASET.')
 };
 
-$datasets->{$datasetIDs->{'sequence_files'}}->{'data_source'} = 'DCC_ID.0';
+$datasets->{$datasetIDs->{'sequence_files'}}->{'data_source'} = 'COMMON_FUND_PROGRAM_ID.0';
 $datasets->{$datasetIDs->{'sequence_files'}}->{'title'} = 'GTEx v7 raw sequence files';
 $datasets->{$datasetIDs->{'sequence_files'}}->{'description'} = 'GTEx v7 raw sequence files';
 
-$datasets->{$datasetIDs->{'alignment_files'}}->{'data_source'} = 'DCC_ID.0';
+$datasets->{$datasetIDs->{'alignment_files'}}->{'data_source'} = 'COMMON_FUND_PROGRAM_ID.0';
 $datasets->{$datasetIDs->{'alignment_files'}}->{'title'} = 'GTEx v7 alignment files';
 $datasets->{$datasetIDs->{'alignment_files'}}->{'description'} = 'GTEx v7 sequence alignment result files';
 
-$datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'data_source'} = 'DCC_ID.0';
+$datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'data_source'} = 'COMMON_FUND_PROGRAM_ID.0';
 $datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'title'} = 'GTEx v7 RNA-Seq alignment files';
 $datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'description'} = 'GTEx v7 RNA-Seq sequence alignment result files';
 
-$datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'data_source'} = 'DCC_ID.0';
+$datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'data_source'} = 'COMMON_FUND_PROGRAM_ID.0';
 $datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'title'} = 'GTEx v7 WGS alignment files';
 $datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'description'} = 'GTEx v7 WGS sequence alignment result files';
 
