@@ -307,6 +307,14 @@
                   }
                },
                {
+                  "name": "data_source",
+                  "title": "A foreign key referencing the data-generating program or entity that produced this Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "url",
                   "title": "A URL referencing this Dataset",
                   "type": "string",
@@ -324,7 +332,16 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "data_source",
+                  "reference": {
+                     "resource": "DCC",
+                     "fields": "id"
+                  }
+               }
+            ]
          }
       },
       {
@@ -362,6 +379,52 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ProducedBy",
+         "path": "ProducedBy.tsv",
+         "description": "Association between a Dataset and an Organization which contributed to the generation of that Dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "DatasetID",
+                  "title": "The ID of a Dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "OrganizationID",
+                  "title": "The ID of an Organization which contributed to the generation of the Dataset identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "DatasetID",
+               "OrganizationID"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "DatasetID",
+                  "reference": {
+                     "resource": "Dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "OrganizationID",
+                  "reference": {
+                     "resource": "Organization",
+                     "fields": "id"
+                  }
+               }
+            ]
          }
       },
       {
@@ -687,6 +750,43 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "DCC",
+         "path": "DCC.tsv",
+         "description": "INTERNAL CV: A list of data-generating programs or entities; every Dataset object must be bound to a member of this collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "title": "A globally unique ID representing this DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "url",
+                  "title": "A URL referencing this DCC",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "name",
+                  "title": "A short, human-readable, machine-read-friendly label for this DCC",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "title": "A human-readable description of this DCC",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "SubjectGroup",
          "path": "SubjectGroup.tsv",
          "description": "A named collection of Subjects",
@@ -810,9 +910,9 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "ProducedBy",
-         "path": "ProducedBy.tsv",
-         "description": "Association between a File and the (unique) DataEvent that produced it",
+         "name": "GeneratedBy",
+         "path": "GeneratedBy.tsv",
+         "description": "Association between a File and the (unique) DataEvent that generated it",
          "schema": {
             "fields": [
                {
@@ -825,7 +925,7 @@
                },
                {
                   "name": "DataEventID",
-                  "title": "The ID of the (unique) DataEvent that produced the File identified in the first column",
+                  "title": "The ID of the (unique) DataEvent that generated the File identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1079,98 +1179,6 @@
                   "fields": "NCBITaxonID",
                   "reference": {
                      "resource": "NCBI_Taxonomy_DB",
-                     "fields": "id"
-                  }
-               }
-            ]
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "GeneratedBy",
-         "path": "GeneratedBy.tsv",
-         "description": "Association between a Dataset and an Organization which contributed to the generation of that Dataset",
-         "schema": {
-            "fields": [
-               {
-                  "name": "DatasetID",
-                  "title": "The ID of a Dataset",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "OrganizationID",
-                  "title": "The ID of an Organization which contributed to the generation of the Dataset identified in the first column",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "DatasetID",
-               "OrganizationID"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": "DatasetID",
-                  "reference": {
-                     "resource": "Dataset",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "OrganizationID",
-                  "reference": {
-                     "resource": "Organization",
-                     "fields": "id"
-                  }
-               }
-            ]
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "SponsoredBy",
-         "path": "SponsoredBy.tsv",
-         "description": "Association between a Dataset and an Organization which sponsored the generation of that Dataset",
-         "schema": {
-            "fields": [
-               {
-                  "name": "DatasetID",
-                  "title": "The ID of a Dataset",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "OrganizationID",
-                  "title": "The ID of an Organization which sponsored the generation of the Dataset identified in the first column",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "DatasetID",
-               "OrganizationID"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": "DatasetID",
-                  "reference": {
-                     "resource": "Dataset",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "OrganizationID",
-                  "reference": {
-                     "resource": "Organization",
                      "fields": "id"
                   }
                }
