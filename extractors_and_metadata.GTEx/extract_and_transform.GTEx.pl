@@ -103,6 +103,12 @@ my $ontoMap = {
 
 my $tempTables = {
    
+   'DCC' =>                {
+                              'id' => 'DCC_ID.0',
+                              'url' => '',
+                              'name' => 'GTEx',
+                              'description' => 'The Genotype-Tissue Expression (GTEx) project'
+                           },
    'Organization' =>       {
                               'id' => 'ORGANIZATION_ID.0',
                               'url' => '',
@@ -183,12 +189,11 @@ my $auxData = {};
 
 # Association tables.
 
-my $producedBy = {};
+my $generatedBy = {};
 my $assayedBy = {};
 my $observedBy = {};
 my $analyzedBy = {};
-my $generatedBy = {};
-my $sponsoredBy = {};
+my $producedBy = {};
 my $SubjectTaxonomy = {};
 my $SubjectsInSubjectGroups = {};
 my $FilesInDatasets = {};
@@ -200,6 +205,7 @@ my $datasets = {};
 
 my $topDatasetID = &getNewID('DATASET.');
 
+$datasets->{$topDatasetID}->{'data_source'} = 'DCC_ID.0';
 $datasets->{$topDatasetID}->{'title'} = 'GTEx v7 data';
 $datasets->{$topDatasetID}->{'description'} = 'All data from the v7 release of the GTEx project';
 
@@ -214,15 +220,19 @@ my $datasetIDs = {
    'wgs_alignment_files' => &getNewID('DATASET.')
 };
 
+$datasets->{$datasetIDs->{'sequence_files'}}->{'data_source'} = 'DCC_ID.0';
 $datasets->{$datasetIDs->{'sequence_files'}}->{'title'} = 'GTEx v7 raw sequence files';
 $datasets->{$datasetIDs->{'sequence_files'}}->{'description'} = 'GTEx v7 raw sequence files';
 
+$datasets->{$datasetIDs->{'alignment_files'}}->{'data_source'} = 'DCC_ID.0';
 $datasets->{$datasetIDs->{'alignment_files'}}->{'title'} = 'GTEx v7 alignment files';
 $datasets->{$datasetIDs->{'alignment_files'}}->{'description'} = 'GTEx v7 sequence alignment result files';
 
+$datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'data_source'} = 'DCC_ID.0';
 $datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'title'} = 'GTEx v7 RNA-Seq alignment files';
 $datasets->{$datasetIDs->{'rnaseq_alignment_files'}}->{'description'} = 'GTEx v7 RNA-Seq sequence alignment result files';
 
+$datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'data_source'} = 'DCC_ID.0';
 $datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'title'} = 'GTEx v7 WGS alignment files';
 $datasets->{$datasetIDs->{'wgs_alignment_files'}}->{'description'} = 'GTEx v7 WGS sequence alignment result files';
 
@@ -238,8 +248,7 @@ $DatasetsInDatasets->{$datasetIDs->{'wgs_alignment_files'}}->{$datasetIDs->{'ali
 
 foreach my $setKeyword ( 'sequence_files', 'alignment_files', 'rnaseq_alignment_files', 'wgs_alignment_files' ) {
    
-   $generatedBy->{$datasetIDs->{$setKeyword}}->{'ORGANIZATION_ID.0'} = 1;
-   $sponsoredBy->{$datasetIDs->{$setKeyword}}->{'ORGANIZATION_ID.0'} = 1;
+   $producedBy->{$datasetIDs->{$setKeyword}}->{'ORGANIZATION_ID.0'} = 1;
 }
 
 # Data structure to track SubjectGroups (includes init for top-level group).
@@ -691,7 +700,7 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'event_ts'} = $samples->{$sampleID}->{'event_ts'};
 
       $assayedBy->{$sampleID}->{$dataEventID} = 1;
-      $producedBy->{$seqFileID}->{$dataEventID} = 1;
+      $generatedBy->{$seqFileID}->{$dataEventID} = 1;
 
       # Alignment event.
 
@@ -708,7 +717,7 @@ sub consumeLocationData {
       $dataEvents->{$dataEventID}->{'event_ts'} = $samples->{$sampleID}->{'event_ts'};
 
       $analyzedBy->{$seqFileID}->{$dataEventID} = 1;
-      $producedBy->{$alnFileID}->{$dataEventID} = 1;
+      $generatedBy->{$alnFileID}->{$dataEventID} = 1;
 
       # END TEMPORARY BLOCK
 
@@ -757,19 +766,18 @@ sub writeDataTables {
    &writeTable('BioSample', $samples, 'subject', 'sample_type', 'anatomy', 'protocol', 'rank', 'event_ts');
    &writeTable('Subject', $subjects, 'granularity');
    &writeTable('File', $files, 'url', 'information_type', 'file_format', 'length', 'filename', 'md5');
-   &writeTable('DataEvent', $dataEvents, 'method', 'protocol', 'rank', 'event_ts');
-   &writeTable('Dataset', $datasets, 'title', 'description');
+   &writeTable('DataEvent', $dataEvents, 'method', 'platform', 'protocol', 'rank', 'event_ts');
+   &writeTable('Dataset', $datasets, 'data_source', 'url', 'title', 'description');
    &writeTable('SubjectGroup', $subjectGroups, 'title', 'description');
 
    # Association tables.
 
    &writeAssociationTable('SubjectTaxonomy', $SubjectTaxonomy, 'SubjectID', 'NCBITaxonID');
-   &writeAssociationTable('ProducedBy', $producedBy, 'FileID', 'DataEventID');
+   &writeAssociationTable('GeneratedBy', $generatedBy, 'FileID', 'DataEventID');
    &writeAssociationTable('AssayedBy', $assayedBy, 'BioSampleID', 'DataEventID');
    &writeAssociationTable('ObservedBy', $observedBy, 'SubjectID', 'DataEventID');
    &writeAssociationTable('AnalyzedBy', $analyzedBy, 'FileID', 'DataEventID');
-   &writeAssociationTable('GeneratedBy', $generatedBy, 'DatasetID', 'OrganizationID');
-   &writeAssociationTable('SponsoredBy', $sponsoredBy, 'DatasetID', 'OrganizationID');
+   &writeAssociationTable('ProducedBy', $producedBy, 'DatasetID', 'OrganizationID');
    &writeAssociationTable('SubjectsInSubjectGroups', $SubjectsInSubjectGroups, 'SubjectID', 'SubjectGroupID');
    &writeAssociationTable('FilesInDatasets', $FilesInDatasets, 'FileID', 'DatasetID');
    &writeAssociationTable('DatasetsInDatasets', $DatasetsInDatasets, 'ContainedDatasetID', 'ContainingDatasetID');
