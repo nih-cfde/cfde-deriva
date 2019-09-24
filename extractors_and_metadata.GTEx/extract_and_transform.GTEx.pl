@@ -105,7 +105,7 @@ my $tempTables = {
    
    'DCC' =>                {
                               'id' => 'DCC_ID.0',
-                              'url' => '',
+                              'url' => 'https://commonfund.nih.gov/gtex',
                               'name' => 'GTEx',
                               'description' => 'The Genotype-Tissue Expression (GTEx) project'
                            },
