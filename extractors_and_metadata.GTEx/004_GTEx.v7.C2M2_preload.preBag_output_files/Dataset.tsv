@@ -1,6 +1,6 @@
 id	data_source	url	title	description
-DATASET.00000000	DCC_ID.0		GTEx v7 data	All data from the v7 release of the GTEx project
-DATASET.00000001	DCC_ID.0		GTEx v7 raw sequence files	GTEx v7 raw sequence files
-DATASET.00000002	DCC_ID.0		GTEx v7 alignment files	GTEx v7 sequence alignment result files
-DATASET.00000003	DCC_ID.0		GTEx v7 RNA-Seq alignment files	GTEx v7 RNA-Seq sequence alignment result files
-DATASET.00000004	DCC_ID.0		GTEx v7 WGS alignment files	GTEx v7 WGS sequence alignment result files
+DATASET.00000000	COMMON_FUND_PROGRAM_ID.0		GTEx v7 data	All data from the v7 release of the GTEx project
+DATASET.00000001	COMMON_FUND_PROGRAM_ID.0		GTEx v7 raw sequence files	GTEx v7 raw sequence files
+DATASET.00000002	COMMON_FUND_PROGRAM_ID.0		GTEx v7 alignment files	GTEx v7 sequence alignment result files
+DATASET.00000003	COMMON_FUND_PROGRAM_ID.0		GTEx v7 RNA-Seq alignment files	GTEx v7 RNA-Seq sequence alignment result files
+DATASET.00000004	COMMON_FUND_PROGRAM_ID.0		GTEx v7 WGS alignment files	GTEx v7 WGS sequence alignment result files
