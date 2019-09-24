@@ -253,8 +253,8 @@ class CfdeDataPackage (object):
         ]
 
         ds_to_devent = ds_to_file + [
-            {"inbound": find_fkey("ProducedBy", "FileID").names[0]},
-            {"outbound": find_fkey("ProducedBy", "DataEventID").names[0]},
+            {"inbound": find_fkey("GeneratedBy", "FileID").names[0]},
+            {"outbound": find_fkey("GeneratedBy", "DataEventID").names[0]},
         ]
 
         ds_to_bsamp = ds_to_devent + [
@@ -263,25 +263,27 @@ class CfdeDataPackage (object):
         ]
         
         # improve Dataset with pseudo columns?
-        sponsors = {
+        orgs = {
             "source": dsa_to_dsd_r + [
-                {"inbound": find_fkey("SponsoredBy", ["DatasetID"]).names[0]},
-                {"outbound": find_fkey("SponsoredBy", ["OrganizationID"]).names[0]},
+                {"inbound": find_fkey("ProducedBy", ["DatasetID"]).names[0]},
+                {"outbound": find_fkey("ProducedBy", ["OrganizationID"]).names[0]},
                 "RID"
             ],
-            "markdown_name": "Sponsors",
+            "markdown_name": "Organization",
             "aggregate": "array_d",
             "array_display": "ulist",
         }
-        
+
+        program = {
+            "source": [
+                {"outbound": find_fkey("Dataset", ["data_source"]).names[0]},
+                "RID"
+            ],
+            "markdown_name": "CF Program",
+        }
         self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_columns] = {
-            "compact": ["title", sponsors, "description", "url"],
-            "detailed": ["id", "title", sponsors, "url", "description"],
+            "compact": ["title", program, orgs, "description", "url"],
             "filter": {"and": [
-                "title",
-                #sponsors,
-                "description",
-                "url",
                 {
                     "markdown_name": "Data Method",
                     "source": ds_to_devent + [ {"outbound": find_fkey("DataEvent", "method").names[0]}, "RID" ]
@@ -298,14 +300,17 @@ class CfdeDataPackage (object):
                     "markdown_name": "Biosample Type",
                     "source": ds_to_bsamp + [ {"outbound": find_fkey("BioSample", "sample_type").names[0]}, "RID" ]
                 },
-                assoc_source("Included By", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
-                assoc_source("Included Datasets", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
+                assoc_source("Included In", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
+                assoc_source("Parts", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
                 assoc_source("Files", "FilesInDatasets", ["DatasetID"], ["FileID"]),
+                orgs,
+                program
             ]}
         }
 
         self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_foreign_keys] = {
             "*": [
+                orgs,
                 {
                     "source": dsa_to_dsd + [ "RID" ],
                     "markdown_name": "Included Datasets",
@@ -422,8 +427,13 @@ class CfdeDataPackage (object):
                     raw_rows = list(reader)
                     row2dict = self.make_row2dict(table, raw_rows[0])
                     dict_rows = [ row2dict(row) for row in raw_rows[1:] ]
-                    self.catalog.post("/entity/CFDE:%s" % urlquote(table.name), json=dict_rows)
-                    print("Table %s data loaded from %s." % (table.name, fname))
+                    entity_url = "/entity/CFDE:%s" % urlquote(table.name)
+                    try:
+                        self.catalog.post(entity_url, json=dict_rows)
+                        print("Table %s data loaded from %s." % (table.name, fname))
+                    except Exception as e:
+                        print("Table %s data load FAILED from %s: %s" % (table.name, fname, e))
+                        raise
 
 # ugly quasi CLI...
 if len(sys.argv) < 2:
@@ -442,26 +452,31 @@ newcat = server.create_ermrest_catalog()
 print('New catalog has catalog_id=%s' % newcat.catalog_id)
 print("Don't forget to delete it if you are done with it!")
 
-## deploy model(s)
-for dp in datapackages:
-    dp.set_catalog(newcat)
-    dp.provision()
-    print("Model deployed for %s." % (dp.filename,))
+try:
+    ## deploy model(s)
+    for dp in datapackages:
+        dp.set_catalog(newcat)
+        dp.provision()
+        print("Model deployed for %s." % (dp.filename,))
 
 
-## customize catalog policy/presentation (only need to do once)
-datapackages[0].apply_custom_config()
-print("Policies and presentation configured.")
+    ## customize catalog policy/presentation (only need to do once)
+    datapackages[0].apply_custom_config()
+    print("Policies and presentation configured.")
 
-## load some sample data?
-for dp in datapackages:
-    dp.load_data_files()
+    ## load some sample data?
+    for dp in datapackages:
+        dp.load_data_files()
 
-## compute transitive-closure relationships
-datapackages[0].load_dataset_ancestor_tables()
+    ## compute transitive-closure relationships
+    datapackages[0].load_dataset_ancestor_tables()
 
-print("All data packages loaded.")
-
+    print("All data packages loaded.")
+except Exception as e:
+    print('Provisioning failed: %s.\nDeleting catalog...' % e)
+    newcat.delete_ermrest_catalog(really=True)
+    raise
+    
 print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
     servername,
     newcat.catalog_id,
