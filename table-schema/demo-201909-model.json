@@ -415,14 +415,16 @@
             "foreignKeys": [
                {
                   "fields": "DatasetID",
-                  "reference": {
+                 "reference": {
+                   "title": "Produced Dataset",
                      "resource": "Dataset",
                      "fields": "id"
                   }
                },
                {
                   "fields": "OrganizationID",
-                  "reference": {
+                 "reference": {
+                   "title": "Producing Organization",
                      "resource": "Organization",
                      "fields": "id"
                   }

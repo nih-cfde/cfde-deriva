@@ -209,6 +209,22 @@ class CfdeDataPackage (object):
         self.model_root.annotations[tag.chaise_config] = {
             # hide system metadata by default in tabular listings, to focus on CFDE-specific content
             "SystemColumnsDisplayCompact": [],
+            "navbarMenu": {
+                "children": [
+                    {
+                        "name": "Browse",
+                        "children": [
+                            { "name": "Dataset", "url": "/chaise/recordset/#%s/CFDE:Dataset" % self.catalog._catalog_id },
+                            { "name": "Data Event", "url": "/chaise/recordset/#%s/CFDE:DataEvent" % self.catalog._catalog_id },
+                            { "name": "File", "url": "/chaise/recordset/#%s/CFDE:File" % self.catalog._catalog_id },
+                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:BioSample" % self.catalog._catalog_id },
+                            { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:Subject" % self.catalog._catalog_id },
+                            { "name": "Organization", "url": "/chaise/recordset/#%s/CFDE:Organization" % self.catalog._catalog_id },
+                            { "name": "Common Fund Program", "url": "/chaise/recordset/#%s/CFDE:CommonFundProgram" % self.catalog._catalog_id },
+                        ]
+                    }
+                ]
+            }
         }
 
         def _update(parent, key, d):
@@ -369,7 +385,7 @@ class CfdeDataPackage (object):
                 },
                 assoc_source("Containing Dataset", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
                 assoc_source("Contained Dataset", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
-                assoc_source("File", "FilesInDatasets", ["DatasetID"], ["FileID"]),
+                assoc_source("Contained File", "FilesInDatasets", ["DatasetID"], ["FileID"]),
                 orgs,
                 program
             ]}
