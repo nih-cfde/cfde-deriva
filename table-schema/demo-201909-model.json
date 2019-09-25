@@ -1054,7 +1054,7 @@
                {
                   "fields": "BioSampleID",
                  "reference": {
-                   "title": "Assayed BioSample",
+                   "title": "Assayed Biosample",
                      "resource": "BioSample",
                      "fields": "id"
                   }
