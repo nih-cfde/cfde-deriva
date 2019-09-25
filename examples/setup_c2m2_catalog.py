@@ -392,6 +392,10 @@ class CfdeDataPackage (object):
             ]
         }
 
+        self.model_root.column('CFDE', 'Dataset', 'url').column_display["*"] = {
+            "markdown_pattern": "[{{{url}}}]({{{url}}})"
+        }
+
         ## apply the above ACL and annotation changes to server
         self.model_root.apply(self.catalog)
         self.get_model()
