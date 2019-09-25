@@ -36,6 +36,9 @@ resource after the schema is provisioned.
 # this is the deriva server where we will create a catalog
 servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
 
+# this is an existing catalog we just want to re-configure!
+catid = os.getenv('DERIVA_CATALOGID')
+
 ## bind to server
 credentials = get_credential(servername)
 server = DerivaServer('https', servername, credentials)
@@ -94,7 +97,7 @@ class CfdeDataPackage (object):
         "insert": writers,
         "update": writers,
         "delete": writers,
-        "select": [grp.demo_reader, grp.isrd_testers, grp.isrd_staff],
+        "select": [grp.demo_reader, grp.isrd_testers, grp.isrd_staff, "*"],
         "enumerate": ["*"],
     }
 
@@ -208,13 +211,77 @@ class CfdeDataPackage (object):
             "SystemColumnsDisplayCompact": [],
         }
 
+        def _update(parent, key, d):
+            if key not in parent:
+                parent[key] = dict()
+            parent[key].update(d)
+        
         # have Chaise display underscores in model element names as whitespace
-        self.cfde_schema.display.name_style = {"underline_space": True}
+        _update(
+            self.cfde_schema.display,
+            "name_style",
+            {"underline_space": True, "title_case": True}
+        )
 
+        # definitions from table-schema file (may be newer than deployed model's annotations)
+        ts_tables = self.model_doc['schemas']['CFDE']['tables']
+
+        def _ts_column(ts_table, column):
+            for cdef in ts_table['column_definitions']:
+                if cdef['name'] == column.name:
+                    return cdef
+            raise KeyError(column.name)
+
+        def _ts_fkey(ts_table, fkey):
+            def _cmap(fkey):
+                def _get(obj, key):
+                    if hasattr(obj, key):
+                        return getattr(obj, key)
+                    else:
+                        return obj[key]
+                return tuple(sorted([
+                    (
+                        _get(fkey, "foreign_key_columns")[i]['column_name'],
+                        _get(fkey, "referenced_columns")[i]['schema_name'],
+                        _get(fkey, "referenced_columns")[i]['table_name'],
+                        _get(fkey, "referenced_columns")[i]['column_name'],
+                    )
+                    for i in range(len(_get(fkey, "foreign_key_columns")))
+                ]))
+            
+            cmap = _cmap(fkey)
+            for fkdef in ts_table['foreign_keys']:
+                if cmap == _cmap(fkdef):
+                    return fkdef
+            raise KeyError(cmap)
+
+        for table in self.model_root.schemas['CFDE'].tables.values():
+            if table.name not in ts_tables:
+                # ignore tables not in the input table-schema file
+                continue
+            ts_table = ts_tables[table.name]
+            table.comment = ts_table.get('annotations', {}).get(self.schema_tag, {}).get("description")
+            title = ts_table.get('annotations', {}).get(tag.display, {}).get("name")
+            if title:
+                table.display["name"] = title
+            for column in table.column_definitions:
+                ts_column = _ts_column(ts_table, column)
+                column.comment = ts_column.get('comment')
+                if column.name in {'id', 'url', 'md5'}:
+                    # set these acronyms to all-caps
+                    column.display["name"] = column.name.upper()
+            for fkey in table.foreign_keys:
+                ts_fkey = _ts_fkey(ts_table, fkey)
+                to_name = ts_fkey.get('annotations', {}).get(tag.foreign_key, {}).get("to_name")
+                if to_name:
+                    fkey.foreign_key["to_name"] = to_name
+        
         # prettier display of built-in ERMrest_Client table entries
-        self.model_root.table('public', 'ERMrest_Client').table_display.row_name = {
-            "row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"
-        }
+        _update(
+            self.model_root.table('public', 'ERMrest_Client').table_display,
+            'row_name',
+            {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
+        )
 
         def find_fkey(from_table, from_columns):
             from_table = self.model_root.table("CFDE", from_table)
@@ -279,9 +346,9 @@ class CfdeDataPackage (object):
                 {"outbound": find_fkey("Dataset", ["data_source"]).names[0]},
                 "RID"
             ],
-            "markdown_name": "CF Program",
+            "markdown_name": "Common Fund Program",
         }
-        self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_columns] = {
+        self.model_root.table('CFDE', 'Dataset').visible_columns = {
             "compact": ["title", program, orgs, "description", "url"],
             "filter": {"and": [
                 {
@@ -300,17 +367,20 @@ class CfdeDataPackage (object):
                     "markdown_name": "Biosample Type",
                     "source": ds_to_bsamp + [ {"outbound": find_fkey("BioSample", "sample_type").names[0]}, "RID" ]
                 },
-                assoc_source("Included In", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
-                assoc_source("Parts", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
-                assoc_source("Files", "FilesInDatasets", ["DatasetID"], ["FileID"]),
+                assoc_source("Containing Dataset", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
+                assoc_source("Contained Dataset", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
+                assoc_source("File", "FilesInDatasets", ["DatasetID"], ["FileID"]),
                 orgs,
                 program
             ]}
         }
 
-        self.model_root.table('CFDE', 'Dataset').annotations[tag.visible_foreign_keys] = {
+        orgs_e = dict(orgs)
+        del orgs_e['aggregate']
+        del orgs_e['array_display']
+        self.model_root.table('CFDE', 'Dataset').visible_foreign_keys = {
             "*": [
-                orgs,
+                orgs_e,
                 {
                     "source": dsa_to_dsd + [ "RID" ],
                     "markdown_name": "Included Datasets",
@@ -446,41 +516,47 @@ datapackages = [
     for fname in sys.argv[1:]
 ]
 
+if catid is None:
+    ## create catalog
+    newcat = server.create_ermrest_catalog()
+    print('New catalog has catalog_id=%s' % newcat.catalog_id)
+    print("Don't forget to delete it if you are done with it!")
 
-## create catalog
-newcat = server.create_ermrest_catalog()
-print('New catalog has catalog_id=%s' % newcat.catalog_id)
-print("Don't forget to delete it if you are done with it!")
-
-try:
-    ## deploy model(s)
-    for dp in datapackages:
-        dp.set_catalog(newcat)
-        dp.provision()
-        print("Model deployed for %s." % (dp.filename,))
+    try:
+        ## deploy model(s)
+        for dp in datapackages:
+            dp.set_catalog(newcat)
+            dp.provision()
+            print("Model deployed for %s." % (dp.filename,))
 
 
-    ## customize catalog policy/presentation (only need to do once)
+        ## customize catalog policy/presentation (only need to do once)
+        datapackages[0].apply_custom_config()
+        print("Policies and presentation configured.")
+
+        ## load some sample data?
+        for dp in datapackages:
+            dp.load_data_files()
+
+        ## compute transitive-closure relationships
+        datapackages[0].load_dataset_ancestor_tables()
+
+        print("All data packages loaded.")
+    except Exception as e:
+        print('Provisioning failed: %s.\nDeleting catalog...' % e)
+        newcat.delete_ermrest_catalog(really=True)
+        raise
+
+    print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
+        servername,
+        newcat.catalog_id,
+    ))
+else:
+    ## reconfigure existing catalog
+    oldcat = server.connect_ermrest(catid)
+    datapackages[0].set_catalog(oldcat)
     datapackages[0].apply_custom_config()
-    print("Policies and presentation configured.")
-
-    ## load some sample data?
-    for dp in datapackages:
-        dp.load_data_files()
-
-    ## compute transitive-closure relationships
-    datapackages[0].load_dataset_ancestor_tables()
-
-    print("All data packages loaded.")
-except Exception as e:
-    print('Provisioning failed: %s.\nDeleting catalog...' % e)
-    newcat.delete_ermrest_catalog(really=True)
-    raise
-    
-print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
-    servername,
-    newcat.catalog_id,
-))
+    print('Policies and presentation configured for %s.' % (oldcat._server_uri,))
 
 ## to re-bind to the same catalog in the future, extract catalog_id from URL
 

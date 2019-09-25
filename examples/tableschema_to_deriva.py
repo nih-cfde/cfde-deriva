@@ -25,6 +25,7 @@ import os
 import sys
 import json
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
+from deriva.core.ermrest_config import tag
 
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
@@ -84,17 +85,21 @@ def make_fkey(tname, fkdef):
     reference = fkdef.pop("reference")
     pktable = reference.pop("resource")
     pktable = tname if pktable == "" else pktable
+    to_name = reference.pop("title", None)
     pkcols = reference.pop("fields")
     pkcols = [pkcols] if isinstance(pkcols, str) else pkcols
+    annotations = {
+        schema_tag: fkdef,
+    }
+    if to_name is not None:
+        annotations[tag.foreign_key] = {"to_name": to_name}
     return ForeignKey.define(
         fkcols,
         schema_name,
         pktable,
         pkcols,
         constraint_names=[ [schema_name, "%s_%s_fkey" % (tname, "_".join(fkcols))] ],
-        annotations={
-            schema_tag: fkdef,
-        }
+        annotations=annotations
     )
 
 def make_table(tdef):
@@ -118,6 +123,13 @@ def make_table(tdef):
                 keys.append(make_key(tname, kcols))
                 keysets.add(frozenset(kcols))
     tdef_fkeys = tdef.pop("foreignKeys", [])
+    title = tdef_resource.get("title", None)
+    annotations = {
+        resource_tag: tdef_resource,
+        schema_tag: tdef,
+    }
+    if title is not None:
+        annotations[tag.display] = {"name": title}
     return Table.define(
         tname,
         column_defs=[
@@ -131,10 +143,7 @@ def make_table(tdef):
         ],
         comment=tcomment,
         provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true'),
-        annotations={
-            resource_tag: tdef_resource,
-            schema_tag: tdef,
-        }
+        annotations=annotations,
     )
 
 deriva_schema = {
