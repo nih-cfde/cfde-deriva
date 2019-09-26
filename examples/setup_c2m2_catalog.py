@@ -100,6 +100,9 @@ class CfdeDataPackage (object):
         "select": [grp.demo_reader, grp.isrd_testers, grp.isrd_staff, "*"],
         "enumerate": ["*"],
     }
+    ermrestclient_acls = {
+        "select": ["*"],
+    }
 
     def __init__(self, filename):
         self.filename = filename
@@ -204,11 +207,12 @@ class CfdeDataPackage (object):
         # since ERMrest will prevent a client from discarding ownership rights
         acls['owner'].append(self.model_root.acls['owner'][0])
         self.model_root.acls.update(acls)
+        self.model_root.table('public', 'ERMrest_Client').acls.update(self.ermrestclient_acls)
+        self.model_root.table('public', 'ERMrest_Group').acls.update(self.ermrestclient_acls)
 
         # set custom chaise configuration values for this catalog
         self.model_root.annotations[tag.chaise_config] = {
-            # hide system metadata by default in tabular listings, to focus on CFDE-specific content
-            "SystemColumnsDisplayCompact": [],
+            #"navbarBrandText": "CFDE Data Browser",
             "navbarMenu": {
                 "children": [
                     {
@@ -271,6 +275,21 @@ class CfdeDataPackage (object):
                     return fkdef
             raise KeyError(cmap)
 
+        def compact_visible_columns(table):
+            """Emulate Chaise heuristics while hiding system metadata"""
+            # hacks for CFDE:
+            # - assume we have an app-level primary key (besides RID)
+            # - ignore possibility of compound or overlapping fkeys
+            fkeys_by_col = {
+                fkey.foreign_key_columns[0]['column_name']: fkey.names[0]
+                for fkey in table.foreign_keys
+            }
+            return [
+                fkeys_by_col.get(col.name, col.name)
+                for col in table.column_definitions
+                if col.name not in {"RID", "RCT", "RMT", "RCB", "RMB"}
+            ]
+
         for table in self.model_root.schemas['CFDE'].tables.values():
             if table.name not in ts_tables:
                 # ignore tables not in the input table-schema file
@@ -291,7 +310,8 @@ class CfdeDataPackage (object):
                 to_name = ts_fkey.get('annotations', {}).get(tag.foreign_key, {}).get("to_name")
                 if to_name:
                     fkey.foreign_key["to_name"] = to_name
-        
+            table.visible_columns = {'compact': compact_visible_columns(table)}
+
         # prettier display of built-in ERMrest_Client table entries
         _update(
             self.model_root.table('public', 'ERMrest_Client').table_display,

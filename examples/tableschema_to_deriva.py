@@ -103,7 +103,40 @@ def make_fkey(tname, fkdef):
     )
 
 def make_table(tdef):
+    provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
     tname = tdef["name"]
+    if provide_system:
+        system_columns = Table.system_column_defs()
+        system_keys = Table.system_key_defs()
+        # customize the system column templates...
+        for col in system_columns:
+            cname = col['name']
+            col['comment'] = {
+                'RID': 'Immutable record identifier (system-generated).',
+                'RCT': 'Record creation time (system-generated).',
+                'RMT': 'Record last-modification time (system-generated).',
+                'RCB': 'Record created by (system-generated).',
+                'RMB': 'Record last-modified by (system-generated).',
+            }[cname]
+            display_names = {
+                'RCT': 'Creation Time',
+                'RMT': 'Modification Time',
+                'RCB': 'Created By',
+                'RMB': 'Modified By',
+            }
+            if cname != 'RID':
+                col['annotations'] = {tag.display: {"name": display_names[cname]}}
+        system_fkeys = [
+            ForeignKey.define(
+                [cname], 'public', 'ERMrest_Client', ['ID'],
+                constraint_names=[['CFDE', '%s_%s_fkey' % (tname, cname)]]
+            )
+            for cname in ['RCB', 'RMB']
+        ]
+    else:
+        system_columns = []
+        system_keys = []
+        system_fkeys = []
     tcomment = tdef.get("description")
     tdef_resource = tdef
     tdef = tdef_resource.pop("schema")
@@ -132,17 +165,17 @@ def make_table(tdef):
         annotations[tag.display] = {"name": title}
     return Table.define(
         tname,
-        column_defs=[
+        column_defs=system_columns + [
             make_column(cdef)
             for cdef in tdef_fields
         ],
-        key_defs=keys,
-        fkey_defs=[
+        key_defs=system_keys + keys,
+        fkey_defs=system_fkeys + [
             make_fkey(tname, fkdef)
             for fkdef in tdef_fkeys
         ],
         comment=tcomment,
-        provide_system=not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true'),
+        provide_system=False,
         annotations=annotations,
     )
 
