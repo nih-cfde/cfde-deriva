@@ -247,10 +247,48 @@ class CfdeDataPackage (object):
 
     def apply_custom_config(self):
         self.get_model()
-        acls = dict(self.catalog_acls)
+
+        # prune foreign keys that cause trouble for Chaise heuristics
+        def is_fkey(table, cname):
+            for fkey in table.foreign_keys:
+                if {cname} == { col['column_name'] for col in fkey.foreign_key_columns }:
+                    return fkey
+            return None
+
+        def is_key(table, cnames):
+            for key in table.keys:
+                if set(cnames) == set(key.unique_columns):
+                    return True
+            return False
+
+        def is_assoc(table):
+            if len(table.column_definitions) == 7:
+                app_cnames = set(table.column_definitions.elements).difference({'RID', 'RCT', 'RMT', 'RCB', 'RMB'})
+                if not is_key(table, app_cnames):
+                    return False
+                for cname in app_cnames:
+                    if not is_fkey(table, cname):
+                        return False
+                return True
+            return False
+
+        dirty = False
+        for schema in self.model_root.schemas.values():
+            for table in schema.tables.values():
+                if is_assoc(table):
+                    for cname in {'RCB', 'RMB'}:
+                        fkey = is_fkey(table, cname)
+                        if fkey is not None:
+                            print('Dropping %s' % fkey.update_uri_path)
+                            fkey.delete(self.catalog)
+                            dirty = True
+        if dirty:
+            self.get_model()
+
         # keep original catalog ownership
         # since ERMrest will prevent a client from discarding ownership rights
-        acls['owner'].append(self.model_root.acls['owner'][0])
+        acls = dict(self.catalog_acls)
+        acls['owner'] = list(set(acls['owner']).union(self.model_root.acls['owner']))
         self.model_root.acls.update(acls)
         self.model_root.table('public', 'ERMrest_Client').acls.update(self.ermrestclient_acls)
         self.model_root.table('public', 'ERMrest_Group').acls.update(self.ermrestclient_acls)
@@ -335,6 +373,15 @@ class CfdeDataPackage (object):
                 if col.name not in {"RID", "RCT", "RMT", "RCB", "RMB"}
             ]
 
+        def visible_foreign_keys(table):
+            """Emulate Chaise heuristics while hiding denorm tables"""
+            # hack: we use a fixed prefix for these tables
+            return [
+                fkey.names[0]
+                for fkey in table.referenced_by
+                if not fkey.tname.startswith("Dataset_denorm")
+            ]
+
         for table in self.model_root.schemas['CFDE'].tables.values():
             if table.name not in ts_tables:
                 # ignore tables not in the input table-schema file
@@ -356,6 +403,7 @@ class CfdeDataPackage (object):
                 if to_name:
                     fkey.foreign_key["to_name"] = to_name
             table.visible_columns = {'compact': compact_visible_columns(table)}
+            table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
         # prettier display of built-in ERMrest_Client table entries
         _update(
