@@ -2,13 +2,14 @@
 
 import os
 import sys
-import subprocess
 import json
 import csv
 
 from deriva.core import DerivaServer, get_credential, urlquote, AttrDict
 from deriva.core.ermrest_config import tag
 from deriva.core.ermrest_model import Table, Column, Key, ForeignKey, builtin_types
+
+from . import tableschema
 
 """
 Basic C2M2 catalog sketch
@@ -21,28 +22,7 @@ Demonstrates use of deriva-py APIs:
 - small Chaise presentation tweaks via model annotations
 - simple insertion of tabular content
 
-Examples:
-
-   python3 ./examples/setup_c2m2_catalog.py ./table-schema/cfde-core-model.json
-
-   python3 /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
-
-when the JSON includes "path" attributes for the resources, as in the
-second example above, the data files (TSV assumed) are loaded for each
-resource after the schema is provisioned.
-
 """
-
-# this is the deriva server where we will create a catalog
-servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
-
-# this is an existing catalog we just want to re-configure!
-catid = os.getenv('DERIVA_CATALOGID')
-
-## bind to server
-credentials = get_credential(servername)
-server = DerivaServer('https', servername, credentials)
-
 
 # we'll use this utility function later...
 def topo_sorted(depmap):
@@ -112,14 +92,7 @@ class CfdeDataPackage (object):
         self.cfde_schema = None
 
         with open(self.filename, 'r') as f:
-            ## ugly: use subprocess to acquire ERMrest model definitions
-            self.model_doc = json.loads(
-                subprocess.run(
-                    ['python3', './examples/tableschema_to_deriva.py',],
-                    stdin=f,
-                    stdout=subprocess.PIPE
-                ).stdout
-            )
+            self.model_doc = tableschema.make_model(json.load(f))
 
         if set(self.model_doc['schemas']) != {'CFDE'}:
             raise NotImplementedError('Unexpected schema set in data package: %s' % (self.model_doc['schemas'],))
@@ -671,68 +644,95 @@ class CfdeDataPackage (object):
                         print("Table %s data load FAILED from %s: %s" % (table.name, fname, e))
                         raise
 
-# ugly quasi CLI...
-if len(sys.argv) < 2:
-    raise ValueError('At least one data package JSON filename required as argument')
+def main(args):
+    """Basic C2M2 catalog setup
 
-# pre-load all JSON files and convert to models
-# in order to abort early on basic usage errors
-datapackages = [
-    CfdeDataPackage(fname)
-    for fname in sys.argv[1:]
-]
+    Examples:
 
-if catid is None:
-    ## create catalog
-    newcat = server.create_ermrest_catalog()
-    print('New catalog has catalog_id=%s' % newcat.catalog_id)
-    print("Don't forget to delete it if you are done with it!")
+    python3 -m cfde_deriva.datapackage \
+     ./table-schema/cfde-core-model.json \
+     /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
 
-    try:
-        ## deploy model(s)
-        for dp in datapackages:
-            dp.set_catalog(newcat)
-            dp.provision()
-            print("Model deployed for %s." % (dp.filename,))
+    When multiple files are specified, they are loaded in the order given.
+    Earlier files take precedence in configuring the catalog model, while
+    later files can merely augment it.
 
+    When the JSON includes "path" attributes for the resources, the data
+    files (TSV assumed) are loaded for each resource after the schema is
+    provisioned.
 
-        ## customize catalog policy/presentation (only need to do once)
+    Environment variable parameters (with defaults):
+
+    DERIVA_SERVERNAME=demo.derivacloud.org
+    DERIVA_CATALOGID=
+
+    Setting a non-empty DERIVA_CATALOGID causes reconfiguration of an
+    existing catalog's presentation tweaks. It does not load data.
+    
+    """
+    # this is the deriva server where we will create a catalog
+    servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
+
+    # this is an existing catalog we just want to re-configure!
+    catid = os.getenv('DERIVA_CATALOGID')
+
+    ## bind to server
+    credentials = get_credential(servername)
+    server = DerivaServer('https', servername, credentials)
+
+    # ugly quasi CLI...
+    if len(args) < 1:
+        raise ValueError('At least one data package JSON filename required as argument')
+
+    # pre-load all JSON files and convert to models
+    # in order to abort early on basic usage errors
+    datapackages = [
+        CfdeDataPackage(fname)
+        for fname in args
+    ]
+
+    if catid is None:
+        ## create catalog
+        newcat = server.create_ermrest_catalog()
+        print('New catalog has catalog_id=%s' % newcat.catalog_id)
+        print("Don't forget to delete it if you are done with it!")
+
+        try:
+            ## deploy model(s)
+            for dp in datapackages:
+                dp.set_catalog(newcat)
+                dp.provision()
+                print("Model deployed for %s." % (dp.filename,))
+
+            ## customize catalog policy/presentation (only need to do once)
+            datapackages[0].apply_custom_config()
+            print("Policies and presentation configured.")
+
+            ## load some sample data?
+            for dp in datapackages:
+                dp.load_data_files()
+
+            ## compute transitive-closure relationships
+            datapackages[0].load_dataset_ancestor_tables()
+            datapackages[0].load_denorm_tables()
+
+            print("All data packages loaded.")
+        except Exception as e:
+            print('Provisioning failed: %s.\nDeleting catalog...' % e)
+            newcat.delete_ermrest_catalog(really=True)
+            raise
+        
+        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
+            servername,
+            newcat.catalog_id,
+        ))
+    else:
+        ## reconfigure existing catalog
+        oldcat = server.connect_ermrest(catid)
+        datapackages[0].set_catalog(oldcat)
         datapackages[0].apply_custom_config()
-        print("Policies and presentation configured.")
+        print('Policies and presentation configured for %s.' % (oldcat._server_uri,))
 
-        ## load some sample data?
-        for dp in datapackages:
-            dp.load_data_files()
-
-        ## compute transitive-closure relationships
-        datapackages[0].load_dataset_ancestor_tables()
-        datapackages[0].load_denorm_tables()
-
-        print("All data packages loaded.")
-    except Exception as e:
-        print('Provisioning failed: %s.\nDeleting catalog...' % e)
-        newcat.delete_ermrest_catalog(really=True)
-        raise
-
-    print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
-        servername,
-        newcat.catalog_id,
-    ))
-else:
-    ## reconfigure existing catalog
-    oldcat = server.connect_ermrest(catid)
-    datapackages[0].set_catalog(oldcat)
-    datapackages[0].apply_custom_config()
-    print('Policies and presentation configured for %s.' % (oldcat._server_uri,))
-
-## to re-bind to the same catalog in the future, extract catalog_id from URL
-
-# server = DerivaServer('https', servername, credentials)
-# catalog_id = '1234'
-# catalog = server.connect_ermrest(catalog_id)
-
-## after binding to your catalog, you can delete it too
-## but we force you to be explicit:
-
-# catalog.delete_ermrest_catalog(really=True)
+if __name__ == '__main__':
+    exit(main(sys.argv[1:]))
 

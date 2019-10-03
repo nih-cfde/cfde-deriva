@@ -1,25 +1,6 @@
 #!/usr/bin/python3
 
-"""Translate basic Frictionless Table-Schema table definitions to Deriva.
-
-- Reads table-schema JSON on standard input
-- Writes deriva schema JSON on standard output
-
-The output JSON is suitable for POST to an /ermrest/catalog/N/schema
-resource on a fresh, empty catalog.
-
-Example:
-
-   cd cfde-deriva
-   python3 examples/tableschema_to_deriva.py \
-     < table-schema/cfde-core-model.json
-
-Optionally:
-
-   run with SKIP_SYSTEM_COLUMNS=true to suppress generation of ERMrest
-   system columns RID,RCT,RCB,RMT,RMB for each table.
-
-"""
+"""Translate basic Frictionless Table-Schema table definitions to Deriva."""
 
 import os
 import sys
@@ -30,11 +11,7 @@ from deriva.core.ermrest_config import tag
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
 
-tableschema = json.load(sys.stdin)
-resources = tableschema['resources']
-
 # translate table-schema definitions into deriva definitions
-
 schema_name = 'CFDE'
 
 def make_type(type, format):
@@ -179,16 +156,41 @@ def make_table(tdef):
         annotations=annotations,
     )
 
-deriva_schema = {
-    "schemas": {
-        schema_name: {
-            "schema_name": schema_name,
-            "tables": {
-                tdef["name"]: make_table(tdef)
-                for tdef in resources
+def make_model(tableschema):
+    resources = tableschema['resources']
+    return {
+        "schemas": {
+            schema_name: {
+                "schema_name": schema_name,
+                "tables": {
+                    tdef["name"]: make_table(tdef)
+                    for tdef in resources
+                }
             }
         }
     }
-}
 
-json.dump(deriva_schema, sys.stdout, indent=2)
+def main():
+    """Translate basic Frictionless Table-Schema table definitions to Deriva.
+
+    - Reads table-schema JSON on standard input
+    - Writes deriva schema JSON on standard output
+
+    The output JSON is suitable for POST to an /ermrest/catalog/N/schema
+    resource on a fresh, empty catalog.
+
+    Example:
+
+    python3 -m cfde_deriva.tableschema < table-schema/cfde-core-model.json
+
+    Optionally:
+
+    run with SKIP_SYSTEM_COLUMNS=true to suppress generation of ERMrest
+    system columns RID,RCT,RCB,RMT,RMB for each table.
+
+"""
+    json.dump(make_model(json.load(sys.stdin)), sys.stdout, indent=2)
+    return 0
+
+if __name__ == '__main__':
+    exit(main())
