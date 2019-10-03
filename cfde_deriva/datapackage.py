@@ -5,9 +5,9 @@ import sys
 import json
 import csv
 
-from deriva.core import DerivaServer, get_credential, urlquote, AttrDict
+from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted
 from deriva.core.ermrest_config import tag
-from deriva.core.ermrest_model import Table, Column, Key, ForeignKey, builtin_types
+from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
 
 from . import tableschema
 
@@ -23,34 +23,6 @@ Demonstrates use of deriva-py APIs:
 - simple insertion of tabular content
 
 """
-
-# we'll use this utility function later...
-def topo_sorted(depmap):
-    """Return list of items topologically sorted.
-
-       depmap: { item: [required_item, ...], ... }
-
-    Raises ValueError if a required_item cannot be satisfied in any order.
-
-    The per-item required_item iterables must allow revisiting on
-    multiple iterations.
-
-    """
-    ordered = [ item for item, requires in depmap.items() if not requires ]
-    depmap = { item: set(requires) for item, requires in depmap.items() if requires }
-    satisfied = set(ordered)
-    while depmap:
-        additions = []
-        for item, requires in list(depmap.items()):
-            if requires.issubset(satisfied):
-                additions.append(item)
-                satisfied.add(item)
-                del depmap[item]
-        if not additions:
-            raise ValueError(("unsatisfiable", depmap))
-        ordered.extend(additions)
-        additions = []
-    return ordered
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -88,11 +60,13 @@ class CfdeDataPackage (object):
         self.filename = filename
         self.dirname = os.path.dirname(self.filename)
         self.catalog = None
-        self.model_root = None
-        self.cfde_schema = None
+        self.cat_model_root = None
+        self.cat_cfde_schema = None
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
+            self.doc_model_root = Model(None, self.model_doc)
+            self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
         if set(self.model_doc['schemas']) != {'CFDE'}:
             raise NotImplementedError('Unexpected schema set in data package: %s' % (self.model_doc['schemas'],))
@@ -102,8 +76,8 @@ class CfdeDataPackage (object):
         self.get_model()
 
     def get_model(self):
-        self.model_root = self.catalog.getCatalogModel()
-        self.cfde_schema = self.model_root.schemas.get('CFDE')
+        self.cat_model_root = self.catalog.getCatalogModel()
+        self.cat_cfde_schema = self.cat_model_root.schemas.get('CFDE')
 
     def provision_dataset_ancestor_tables(self):
         def tdef(tname):
@@ -129,10 +103,9 @@ class CfdeDataPackage (object):
                 comment="Flattened, transitive closure of nested DatasetsInDatasets relationship.",
             )
 
-        if 'Dataset_Ancestor' not in self.model_root.schemas['CFDE'].tables:
-            self.model_root.schemas['CFDE'].create_table(self.catalog, tdef("Dataset_Ancestor"))
-            self.model_root.schemas['CFDE'].create_table(self.catalog, tdef("Dataset_Ancestor_Reflexive"))
-        self.get_model()
+        if 'Dataset_Ancestor' not in self.cat_model_root.schemas['CFDE'].tables:
+            self.cat_model_root.schemas['CFDE'].create_table(tdef("Dataset_Ancestor"))
+            self.cat_model_root.schemas['CFDE'].create_table(tdef("Dataset_Ancestor_Reflexive"))
 
     def provision_denorm_tables(self):
         def dataset_property(srctable, srccolumn):
@@ -155,11 +128,11 @@ class CfdeDataPackage (object):
                         )
                     ] +  [
                         ForeignKey.define(
-                            [srccolumn.name], 'CFDE', fkey.referenced_columns[0]['table_name'], [ c['column_name'] for c in fkey.referenced_columns ],
+                            [srccolumn.name], 'CFDE', fkey.referenced_columns[0].table.name, [ c.name for c in fkey.referenced_columns ],
                             constraint_names=[['CFDE', '%s_prop_fkey' % tname]]
                         )
                         for fkey in srctable.foreign_keys
-                        if {srccolumn.name} == set([ c['column_name'] for c in fkey.foreign_key_columns ])
+                        if {srccolumn.name} == set([ c.name for c in fkey.foreign_key_columns ])
                     ],
                 )
             )
@@ -170,16 +143,14 @@ class CfdeDataPackage (object):
                 ('DataEvent', 'platform'),
                 ('BioSample', 'sample_type'),
         ]:
-            tab = self.model_root.table('CFDE', tname)
+            tab = self.cat_model_root.table('CFDE', tname)
             col = tab.column_definitions.elements[cname]
             tname, tdef = dataset_property(tab, col)
-            if tname not in self.model_root.schemas['CFDE'].tables:
-                self.model_root.schemas['CFDE'].create_table(self.catalog, tdef)
-
-        self.get_model()
+            if tname not in self.cat_model_root.schemas['CFDE'].tables:
+                self.cat_model_root.schemas['CFDE'].create_table(tdef)
 
     def provision(self):
-        if 'CFDE' not in self.model_root.schemas:
+        if 'CFDE' not in self.cat_model_root.schemas:
             # blindly load the whole model on an apparently empty catalog
             self.catalog.post('/schema', json=self.model_doc).raise_for_status()
         else:
@@ -188,18 +159,21 @@ class CfdeDataPackage (object):
             need_tables = []
             need_columns = []
             hazard_fkeys = {}
-            for tname, tdoc in self.model_doc['schemas']['CFDE']['tables'].items():
-                if tname in self.cfde_schema.tables:
-                    table = self.cfde_schema.tables[tname]
-                    for cdoc in tdoc['column_definitions']:
-                        if cdoc['name'] in table.column_definitions.elements:
-                            column = table.column_definitions.elements[cdoc['name']]
+            for ntable in self.doc_cfde_schema.tables.values():
+                table = self.cat_cfde_schema.tables.get(ntable.name)
+                if table is not None:
+                    for ncolumn in ntable.column_definitions:
+                        column = table.column_definitions.elements.get(ncolumn.name)
+                        if column is not None:
                             # TODO: check existing columns for compatibility?
+                            pass
                         else:
+                            cdoc = ncolumn.prejson()
                             cdoc.update({'table_name': tname, 'nullok': True})
                             need_columns.append(cdoc)
                     # TODO: check existing table keys/foreign keys for compatibility?
                 else:
+                    tdoc = ntable.prejson()
                     tdoc['schema_name'] = 'CFDE'
                     need_tables.append(tdoc)
 
@@ -221,53 +195,24 @@ class CfdeDataPackage (object):
     def apply_custom_config(self):
         self.get_model()
 
-        # prune foreign keys that cause trouble for Chaise heuristics
-        def is_fkey(table, cname):
-            for fkey in table.foreign_keys:
-                if {cname} == { col['column_name'] for col in fkey.foreign_key_columns }:
-                    return fkey
-            return None
-
-        def is_key(table, cnames):
-            for key in table.keys:
-                if set(cnames) == set(key.unique_columns):
-                    return True
-            return False
-
-        def is_assoc(table):
-            if len(table.column_definitions) == 7:
-                app_cnames = set(table.column_definitions.elements).difference({'RID', 'RCT', 'RMT', 'RCB', 'RMB'})
-                if not is_key(table, app_cnames):
-                    return False
-                for cname in app_cnames:
-                    if not is_fkey(table, cname):
-                        return False
-                return True
-            return False
-
-        dirty = False
-        for schema in self.model_root.schemas.values():
+        for schema in self.cat_model_root.schemas.values():
             for table in schema.tables.values():
-                if is_assoc(table):
+                if table.is_association():
                     for cname in {'RCB', 'RMB'}:
-                        fkey = is_fkey(table, cname)
-                        if fkey is not None:
+                        for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             print('Dropping %s' % fkey.update_uri_path)
-                            fkey.delete(self.catalog)
-                            dirty = True
-        if dirty:
-            self.get_model()
+                            fkey.drop()
 
         # keep original catalog ownership
         # since ERMrest will prevent a client from discarding ownership rights
         acls = dict(self.catalog_acls)
-        acls['owner'] = list(set(acls['owner']).union(self.model_root.acls['owner']))
-        self.model_root.acls.update(acls)
-        self.model_root.table('public', 'ERMrest_Client').acls.update(self.ermrestclient_acls)
-        self.model_root.table('public', 'ERMrest_Group').acls.update(self.ermrestclient_acls)
+        acls['owner'] = list(set(acls['owner']).union(self.cat_model_root.acls['owner']))
+        self.cat_model_root.acls.update(acls)
+        self.cat_model_root.table('public', 'ERMrest_Client').acls.update(self.ermrestclient_acls)
+        self.cat_model_root.table('public', 'ERMrest_Group').acls.update(self.ermrestclient_acls)
 
         # set custom chaise configuration values for this catalog
-        self.model_root.annotations[tag.chaise_config] = {
+        self.cat_model_root.annotations[tag.chaise_config] = {
             #"navbarBrandText": "CFDE Data Browser",
             "navbarMenu": {
                 "children": [
@@ -294,42 +239,10 @@ class CfdeDataPackage (object):
         
         # have Chaise display underscores in model element names as whitespace
         _update(
-            self.cfde_schema.display,
+            self.cat_cfde_schema.display,
             "name_style",
             {"underline_space": True, "title_case": True}
         )
-
-        # definitions from table-schema file (may be newer than deployed model's annotations)
-        ts_tables = self.model_doc['schemas']['CFDE']['tables']
-
-        def _ts_column(ts_table, column):
-            for cdef in ts_table['column_definitions']:
-                if cdef['name'] == column.name:
-                    return cdef
-            raise KeyError(column.name)
-
-        def _ts_fkey(ts_table, fkey):
-            def _cmap(fkey):
-                def _get(obj, key):
-                    if hasattr(obj, key):
-                        return getattr(obj, key)
-                    else:
-                        return obj[key]
-                return tuple(sorted([
-                    (
-                        _get(fkey, "foreign_key_columns")[i]['column_name'],
-                        _get(fkey, "referenced_columns")[i]['schema_name'],
-                        _get(fkey, "referenced_columns")[i]['table_name'],
-                        _get(fkey, "referenced_columns")[i]['column_name'],
-                    )
-                    for i in range(len(_get(fkey, "foreign_key_columns")))
-                ]))
-            
-            cmap = _cmap(fkey)
-            for fkdef in ts_table['foreign_keys']:
-                if cmap == _cmap(fkdef):
-                    return fkdef
-            raise KeyError(cmap)
 
         def compact_visible_columns(table):
             """Emulate Chaise heuristics while hiding system metadata"""
@@ -337,7 +250,7 @@ class CfdeDataPackage (object):
             # - assume we have an app-level primary key (besides RID)
             # - ignore possibility of compound or overlapping fkeys
             fkeys_by_col = {
-                fkey.foreign_key_columns[0]['column_name']: fkey.names[0]
+                fkey.foreign_key_columns[0].name: fkey.names[0]
                 for fkey in table.foreign_keys
             }
             return [
@@ -352,50 +265,55 @@ class CfdeDataPackage (object):
             return [
                 fkey.names[0]
                 for fkey in table.referenced_by
-                if not fkey.tname.startswith("Dataset_denorm")
+                if not fkey.table.name.startswith("Dataset_denorm")
             ]
 
-        for table in self.model_root.schemas['CFDE'].tables.values():
-            if table.name not in ts_tables:
-                # ignore tables not in the input table-schema file
+        for table in self.cat_cfde_schema.tables.values():
+            ntable = self.doc_cfde_schema.tables.get(table.name)
+            if ntable is None:
                 continue
-            ts_table = ts_tables[table.name]
-            table.comment = ts_table.get('annotations', {}).get(self.schema_tag, {}).get("description")
-            title = ts_table.get('annotations', {}).get(tag.display, {}).get("name")
-            if title:
-                table.display["name"] = title
+            table.comment = ntable.comment
+            table.display.update(ntable.display)
             for column in table.column_definitions:
-                ts_column = _ts_column(ts_table, column)
-                column.comment = ts_column.get('comment')
                 if column.name in {'id', 'url', 'md5'}:
                     # set these acronyms to all-caps
                     column.display["name"] = column.name.upper()
+                ncolumn = ntable.column_definitions.elements.get(column.name)
+                if ncolumn is None:
+                    continue
+                column.comment = ncolumn.comment
+                column.display.update(ncolumn.display)
             for fkey in table.foreign_keys:
-                ts_fkey = _ts_fkey(ts_table, fkey)
-                to_name = ts_fkey.get('annotations', {}).get(tag.foreign_key, {}).get("to_name")
-                if to_name:
-                    fkey.foreign_key["to_name"] = to_name
+                try:
+                    npktable = self.doc_model_root.table(fkey.pk_table.schema.name, fkey.pk_table.name)
+                    nfkey = ntable.fkey_by_column_map({
+                        ntable.column_definitions[fk_col.name]: npktable.column_definitions[pk_col.name]
+                        for fk_col, pk_col in fkey.column_map.items()
+                    }) 
+                    fkey.foreign_key.update(nfkey.foreign_key)
+                except KeyError:
+                    continue
             table.visible_columns = {'compact': compact_visible_columns(table)}
             table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
         # prettier display of built-in ERMrest_Client table entries
         _update(
-            self.model_root.table('public', 'ERMrest_Client').table_display,
+            self.cat_model_root.table('public', 'ERMrest_Client').table_display,
             'row_name',
             {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
         )
 
-        def find_fkey(from_table, from_columns):
-            from_table = self.model_root.table("CFDE", from_table)
-            if isinstance(from_columns, str):
-                from_columns = [from_columns]
-            for fkey in from_table.foreign_keys:
-                if set(from_columns) == set([ c['column_name'] for c in fkey.foreign_key_columns ]):
-                    return fkey
-            raise KeyError(from_columns)
+        def find_fkey(from_tname, from_cnames):
+            from_table = self.cat_model_root.table("CFDE", from_tname)
+            if isinstance(from_cnames, str):
+                from_cnames = [from_cnames]
+            fkeys = list(from_table.fkeys_by_columns(from_cnames))
+            if len(fkeys) > 1:
+                raise ValueError('found multiple fkeys for %s %s' % (from_table, from_cnames))
+            return fkeys[0]
 
-        def assoc_source(markdown_name, assoc_table, left_columns, right_columns, **kwargs):
-            d = {
+        def assoc_source(markdown_name, assoc_table, left_columns, right_columns):
+            return {
                 "source": [
                     {"inbound": find_fkey(assoc_table, left_columns).names[0]},
                     {"outbound": find_fkey(assoc_table, right_columns).names[0]},
@@ -403,8 +321,6 @@ class CfdeDataPackage (object):
                 ],
                 "markdown_name": markdown_name,
             }
-            d.update(kwargs)
-            return d
 
         dsa_to_dsd = [
             {"inbound": find_fkey("Dataset_Ancestor", "ancestor").names[0]},
@@ -453,7 +369,7 @@ class CfdeDataPackage (object):
             "markdown_name": "Common Fund Program",
             "open": True,
         }
-        self.model_root.table('CFDE', 'Dataset').visible_columns = {
+        self.cat_model_root.table('CFDE', 'Dataset').visible_columns = {
             "compact": ["title", program, orgs, "description", "url"],
             "filter": {"and": [
                 program,
@@ -501,7 +417,7 @@ class CfdeDataPackage (object):
         orgs_e = dict(orgs)
         del orgs_e['aggregate']
         del orgs_e['array_display']
-        self.model_root.table('CFDE', 'Dataset').visible_foreign_keys = {
+        self.cat_model_root.table('CFDE', 'Dataset').visible_foreign_keys = {
             "*": [
                 orgs_e,
                 {
@@ -515,12 +431,12 @@ class CfdeDataPackage (object):
             ]
         }
 
-        self.model_root.column('CFDE', 'Dataset', 'url').column_display["*"] = {
+        self.cat_model_root.column('CFDE', 'Dataset', 'url').column_display["*"] = {
             "markdown_pattern": "[{{{url}}}]({{{url}}})"
         }
 
         ## apply the above ACL and annotation changes to server
-        self.model_root.apply(self.catalog)
+        self.cat_model_root.apply()
         self.get_model()
 
     @classmethod
@@ -544,7 +460,7 @@ class CfdeDataPackage (object):
 
     def data_tnames_topo_sorted(self):
         def target_tname(fkey):
-            return fkey.referenced_columns[0]["table_name"]
+            return fkey.referenced_columns[0].table.name
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         return topo_sorted({
             table.name: [
@@ -552,7 +468,7 @@ class CfdeDataPackage (object):
                 for fkey in table.foreign_keys
                 if target_tname(fkey) != table.name and target_tname(fkey) in tables_doc
             ]
-            for table in self.cfde_schema.tables.values()
+            for table in self.cat_cfde_schema.tables.values()
             if table.name in tables_doc
         })
 
@@ -626,7 +542,7 @@ class CfdeDataPackage (object):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
             # we are doing a clean load of data in fkey dependency order
-            table = self.model_root.table("CFDE", tname)
+            table = self.cat_model_root.table("CFDE", tname)
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
             if "path" in resource:
                 fname = "%s/%s" % (self.dirname, resource["path"])
@@ -735,4 +651,3 @@ def main(args):
 
 if __name__ == '__main__':
     exit(main(sys.argv[1:]))
-
