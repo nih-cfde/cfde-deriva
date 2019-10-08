@@ -660,9 +660,9 @@ sub consumeLocationData {
       $files->{$seqFileID}->{'url'} = "gs://UNKNOWN_LOCATION.RAW_SEQUENCES.$seqFileID";
       $files->{$seqFileID}->{'information_type'} = $baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'};
       $files->{$seqFileID}->{'file_format'} = $baseURL->{'EDAM'} . $enumMap->{'File.file_format'}->{'FASTQ'};
-      $files->{$seqFileID}->{'length'} = 1;
+      $files->{$seqFileID}->{'length'} = '';
       $files->{$seqFileID}->{'filename'} = "RAW_SEQUENCES.$seqFileID";
-      $files->{$seqFileID}->{'md5'} = '.';
+      $files->{$seqFileID}->{'md5'} = '';
 
       $termsUsed->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = 1;
       $fullURL->{'InformationType'}->{$baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'}} = $baseURL->{'EDAM'} . $enumMap->{'File.information_type'}->{'Generic_sequence'};
