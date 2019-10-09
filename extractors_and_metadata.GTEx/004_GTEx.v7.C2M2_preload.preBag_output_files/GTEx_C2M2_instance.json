@@ -6,13 +6,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "File",
+         "title": "File",
          "path": "File.tsv",
          "description": "A digital asset",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this File",
+                  "description": "A globally unique ID representing this File",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -21,7 +22,7 @@
                },
                {
                   "name": "url",
-                  "title": "A resolvable identifier pointing to the location of this File",
+                  "description": "A resolvable identifier pointing to the location of this File",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -30,42 +31,33 @@
                },
                {
                   "name": "information_type",
-                  "title": "A CV term ID referencing the type of data contained in this File (target ontology: EDAM)",
+                  "description": "A CV term ID referencing the type of data contained in this File (target ontology: EDAM)",
                   "type": "string",
-                  "format": "uri",
-                  "constraints": {
-                     "required": true
-                  }
+                  "format": "uri"
                },
                {
                   "name": "file_format",
-                  "title": "A CV term ID referencing the data format in which this File is encoded (target ontology: EDAM)",
+                  "description": "A CV term ID referencing the data format in which this File is encoded (target ontology: EDAM)",
                   "type": "string",
-                  "format": "uri",
-                  "constraints": {
-                     "required": true
-                  }
+                  "format": "uri"
                },
                {
                   "name": "length",
-                  "title": "The length of this File in bytes",
+                  "description": "The length of this File in bytes",
                   "type": "integer",
                   "constraints": {
-                     "required": true,
+                     "required": false,
                      "minimum": 0
                   }
                },
                {
                   "name": "filename",
-                  "title": "A suggested local filename for this File",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
+                  "description": "A suggested local filename for this File",
+                  "type": "string"
                },
                {
                   "name": "md5",
-                  "title": "MD5 checksum for this File",
+                  "description": "MD5 checksum for this File",
                   "type": "string",
                   "format": "binary"
                }
@@ -93,13 +85,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "BioSample",
+         "title": "Biosample",
          "path": "BioSample.tsv",
          "description": "A tissue sample or other physical specimen",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this BioSample",
+                  "description": "A globally unique ID representing this BioSample",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -108,15 +101,12 @@
                },
                {
                   "name": "subject",
-                  "title": "A foreign key referencing the Subject (source organism(s)) that provided the material for this BioSample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
+                  "description": "A foreign key referencing the Subject (source organism(s)) that provided the material for this BioSample",
+                  "type": "string"
                },
                {
                   "name": "sample_type",
-                  "title": "A CV term ID referencing the type of material represented by this BioSample (target ontology: OBI)",
+                  "description": "A CV term ID referencing the type of material represented by this BioSample (target ontology: OBI)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -125,23 +115,23 @@
                },
                {
                   "name": "anatomy",
-                  "title": "A CV term ID locating the origin of this BioSample within the physiology of its Subject (target ontology: UBERON)",
+                  "description": "A CV term ID locating the origin of this BioSample within the physiology of its Subject (target ontology: UBERON)",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "protocol",
-                  "title": "A foreign key referencing the experimental protocol that generated this BioSample",
+                  "description": "A foreign key referencing the experimental protocol that generated this BioSample",
                   "type": "string"
                },
                {
                   "name": "rank",
-                  "title": "An integer specifying the relative sequence ordering associated with this BioSample within a set of associated BioSamples",
+                  "description": "An integer specifying the relative sequence ordering associated with this BioSample within a set of associated BioSamples",
                   "type": "number"
                },
                {
                   "name": "event_ts",
-                  "title": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
+                  "description": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
                   "type": "date",
                   "format": "%Y-%m-%d"
                }
@@ -183,13 +173,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Subject",
+         "title": "Subject",
          "path": "Subject.tsv",
          "description": "The source organism(s) from which a BioSample is generated",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Subject",
+                  "description": "A globally unique ID representing this Subject",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -198,7 +189,7 @@
                },
                {
                   "name": "granularity",
-                  "title": "A foreign key referencing the scope of this Subject: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
+                  "description": "A foreign key referencing the scope of this Subject: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -221,13 +212,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "DataEvent",
+         "title": "Data Event",
          "path": "DataEvent.tsv",
          "description": "An event which generates a data object, e.g.: an assay producing a BioSample; a procedure that produces one or more Files from a BioSample (e.g., sequencing); an observation producing a phenotypic datum (e.g. a BMI measurement); a procedure generating new data by processing existing Files (e.g., sequence assembly)",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this DataEvent",
+                  "description": "A globally unique ID representing this DataEvent",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -236,29 +228,29 @@
                },
                {
                   "name": "method",
-                  "title": "A CV term ID referencing the method used to generate the data produced by this DataEvent (target ontology: OBI)",
+                  "description": "A CV term ID referencing the method used to generate the data produced by this DataEvent (target ontology: OBI)",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "platform",
-                  "title": "A CV term ID referencing the particular technologies with which the method in this DataEvent is executed (target ontology: OBI)",
+                  "description": "A CV term ID referencing the particular technologies with which the method in this DataEvent is executed (target ontology: OBI)",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "protocol",
-                  "title": "A foreign key referencing the experimental protocol (or protocol portion) associated with this DataEvent",
+                  "description": "A foreign key referencing the experimental protocol (or protocol portion) associated with this DataEvent",
                   "type": "string"
                },
                {
                   "name": "rank",
-                  "title": "An integer specifying the relative sequence ordering associated with this BioSample within the set of associated BioSamples",
+                  "description": "An integer specifying the relative sequence ordering associated with this BioSample within the set of associated BioSamples",
                   "type": "number"
                },
                {
                   "name": "event_ts",
-                  "title": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
+                  "description": "A datestamp explicitly specifying the date on which this BioSample was collected/generated",
                   "type": "date",
                   "format": "%Y-%m-%d"
                }
@@ -293,13 +285,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Dataset",
+         "title": "Dataset",
          "path": "Dataset.tsv",
          "description": "A named collection of files",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Dataset",
+                  "description": "A globally unique ID representing this Dataset",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -308,7 +301,7 @@
                },
                {
                   "name": "data_source",
-                  "title": "A foreign key referencing the data-generating program or entity that produced this Dataset",
+                  "description": "A foreign key referencing the data-generating program or entity that produced this Dataset",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -316,18 +309,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Dataset",
+                  "description": "A URL referencing this Dataset",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "title",
-                  "title": "A short, human-readable, machine-read-friendly label for this Dataset",
+                  "description": "A short, human-readable, machine-read-friendly label for this Dataset",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Dataset",
+                  "description": "A human-readable description of this Dataset",
                   "type": "string"
                }
             ],
@@ -347,13 +340,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Organization",
+         "title": "Organization",
          "path": "Organization.tsv",
          "description": "INTERNAL CV: A data coordination center contributing to this database",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Organization",
+                  "description": "A globally unique ID representing this Organization",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -362,18 +356,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Organization",
+                  "description": "A URL referencing this Organization",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Organization",
+                  "description": "A short, human-readable, machine-read-friendly label for this Organization",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Organization",
+                  "description": "A human-readable description of this Organization",
                   "type": "string"
                }
             ],
@@ -384,13 +378,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "ProducedBy",
+         "title": "Produced By",
          "path": "ProducedBy.tsv",
          "description": "Association between a Dataset and an Organization which contributed to the generation of that Dataset",
          "schema": {
             "fields": [
                {
                   "name": "DatasetID",
-                  "title": "The ID of a Dataset",
+                  "description": "The ID of a Dataset",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -398,7 +393,7 @@
                },
                {
                   "name": "OrganizationID",
-                  "title": "The ID of an Organization which contributed to the generation of the Dataset identified in the first column",
+                  "description": "The ID of an Organization which contributed to the generation of the Dataset identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -413,6 +408,7 @@
                {
                   "fields": "DatasetID",
                   "reference": {
+                     "title": "Produced Dataset",
                      "resource": "Dataset",
                      "fields": "id"
                   }
@@ -420,6 +416,7 @@
                {
                   "fields": "OrganizationID",
                   "reference": {
+                     "title": "Producing Organization",
                      "resource": "Organization",
                      "fields": "id"
                   }
@@ -430,13 +427,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "SubjectGranularity",
+         "title": "Subject Granularity",
          "path": "SubjectGranularity.tsv",
          "description": "INTERNAL CV: A descriptor for the scope of a Subject (the source for a BioSample), e.g.: single organism; group of named organisms (e.g. host plus pathogen); environmental sample",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this SubjectGranularity",
+                  "description": "A globally unique ID representing this SubjectGranularity",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -445,18 +443,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this SubjectGranularity",
+                  "description": "A URL referencing this SubjectGranularity",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this SubjectGranularity",
+                  "description": "A short, human-readable, machine-read-friendly label for this SubjectGranularity",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this SubjectGranularity",
+                  "description": "A human-readable description of this SubjectGranularity",
                   "type": "string"
                }
             ],
@@ -467,13 +465,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Platform",
+         "title": "Platform",
          "path": "Platform.tsv",
          "description": "CV: Dictionary of terms describing particular technologies with which experimental procedures are performed",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Platform",
+                  "description": "A globally unique ID representing this Platform",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -482,18 +481,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Platform",
+                  "description": "A URL referencing this Platform",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Platform",
+                  "description": "A short, human-readable, machine-read-friendly label for this Platform",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Platform",
+                  "description": "A human-readable description of this Platform",
                   "type": "string"
                }
             ],
@@ -504,13 +503,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Method",
+         "title": "Method",
          "path": "Method.tsv",
          "description": "CV: Dictionary of terms describing specific experimental methods used to generate data",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Method",
+                  "description": "A globally unique ID representing this Method",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -519,23 +519,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Method",
+                  "description": "A URL referencing this Method",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Method",
+                  "description": "A short, human-readable, machine-read-friendly label for this Method",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Method",
+                  "description": "A human-readable description of this Method",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Method",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this Method",
                   "type": "string"
                }
             ],
@@ -546,13 +546,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "SampleType",
+         "title": "Sample Type",
          "path": "SampleType.tsv",
          "description": "CV: Dictionary of terms describing types of material that can be BioSamples",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this SampleType",
+                  "description": "A globally unique ID representing this SampleType",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -561,23 +562,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this SampleType",
+                  "description": "A URL referencing this SampleType",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this SampleType",
+                  "description": "A short, human-readable, machine-read-friendly label for this SampleType",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this SampleType",
+                  "description": "A human-readable description of this SampleType",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this SampleType",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this SampleType",
                   "type": "string"
                }
             ],
@@ -588,13 +589,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "InformationType",
+         "title": "Information Type",
          "path": "InformationType.tsv",
          "description": "CV: Dictionary of terms describing types of data contained in File objects",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this InformationType",
+                  "description": "A globally unique ID representing this InformationType",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -603,23 +605,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this InformationType",
+                  "description": "A URL referencing this InformationType",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this InformationType",
+                  "description": "A short, human-readable, machine-read-friendly label for this InformationType",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this InformationType",
+                  "description": "A human-readable description of this InformationType",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this InformationType",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this InformationType",
                   "type": "string"
                }
             ],
@@ -630,13 +632,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "FileFormat",
+         "title": "File Format",
          "path": "FileFormat.tsv",
          "description": "CV: Dictionary of terms describing formats in which File objects can be encoded",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this FileFormat",
+                  "description": "A globally unique ID representing this FileFormat",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -645,23 +648,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this FileFormat",
+                  "description": "A URL referencing this FileFormat",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this FileFormat",
+                  "description": "A short, human-readable, machine-read-friendly label for this FileFormat",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this FileFormat",
+                  "description": "A human-readable description of this FileFormat",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this FileFormat",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this FileFormat",
                   "type": "string"
                }
             ],
@@ -672,13 +675,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Anatomy",
+         "title": "Anatomy",
          "path": "Anatomy.tsv",
          "description": "CV: Dictionary of terms locating the origin of a BioSample within the physiology of its Subject",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Anatomy object",
+                  "description": "A globally unique ID representing this Anatomy object",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -687,23 +691,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Anatomy object",
+                  "description": "A URL referencing this Anatomy object",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Anatomy object",
+                  "description": "A short, human-readable, machine-read-friendly label for this Anatomy object",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Anatomy object",
+                  "description": "A human-readable description of this Anatomy object",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this Anatomy object",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this Anatomy object",
                   "type": "string"
                }
             ],
@@ -714,13 +718,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "Protocol",
+         "title": "Protocol",
          "path": "Protocol.tsv",
          "description": "INTERNAL CV: A sequence-based description of an experimental method",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Protocol",
+                  "description": "A globally unique ID representing this Protocol",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -729,18 +734,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Protocol",
+                  "description": "A URL referencing this Protocol",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Protocol",
+                  "description": "A short, human-readable, machine-read-friendly label for this Protocol",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Protocol",
+                  "description": "A human-readable description of this Protocol",
                   "type": "string"
                }
             ],
@@ -751,13 +756,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "CommonFundProgram",
+         "title": "Common Fund Program",
          "path": "CommonFundProgram.tsv",
          "description": "INTERNAL CV: A list of data-generating programs or entities; every Dataset object must be bound to a member of this collection",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this Common Fund Program",
+                  "description": "A globally unique ID representing this Common Fund Program",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -766,18 +772,18 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this Common Fund Program",
+                  "description": "A URL referencing this Common Fund Program",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "A short, human-readable, machine-read-friendly label for this Common Fund Program",
+                  "description": "A short, human-readable, machine-read-friendly label for this Common Fund Program",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this Common Fund Program",
+                  "description": "A human-readable description of this Common Fund Program",
                   "type": "string"
                }
             ],
@@ -788,13 +794,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "SubjectGroup",
+         "title": "Subject Group",
          "path": "SubjectGroup.tsv",
          "description": "A named collection of Subjects",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "A globally unique ID representing this SubjectGroup",
+                  "description": "A globally unique ID representing this SubjectGroup",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -803,12 +810,12 @@
                },
                {
                   "name": "title",
-                  "title": "A short, human-readable, machine-read-friendly label for this SubjectGroup",
+                  "description": "A short, human-readable, machine-read-friendly label for this SubjectGroup",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "A human-readable description of this SubjectGroup",
+                  "description": "A human-readable description of this SubjectGroup",
                   "type": "string"
                }
             ],
@@ -819,13 +826,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "FilesInDatasets",
+         "title": "Files In Datasets",
          "path": "FilesInDatasets.tsv",
          "description": "Association between a File and a containing Dataset",
          "schema": {
             "fields": [
                {
                   "name": "FileID",
-                  "title": "The ID of a File",
+                  "description": "The ID of a File",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -833,7 +841,7 @@
                },
                {
                   "name": "DatasetID",
-                  "title": "The ID of a Dataset containing the File identified in the first column",
+                  "description": "The ID of a Dataset containing the File identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -848,6 +856,7 @@
                {
                   "fields": "FileID",
                   "reference": {
+                     "title": "Contained File",
                      "resource": "File",
                      "fields": "id"
                   }
@@ -855,6 +864,7 @@
                {
                   "fields": "DatasetID",
                   "reference": {
+                     "title": "Containing Dataset",
                      "resource": "Dataset",
                      "fields": "id"
                   }
@@ -865,13 +875,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "DatasetsInDatasets",
+         "title": "Datasets In Datasets",
          "path": "DatasetsInDatasets.tsv",
          "description": "Association between a Dataset and a containing Dataset",
          "schema": {
             "fields": [
                {
                   "name": "ContainedDatasetID",
-                  "title": "The ID of a contained Dataset",
+                  "description": "The ID of a contained Dataset",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -879,7 +890,7 @@
                },
                {
                   "name": "ContainingDatasetID",
-                  "title": "The ID of a Dataset containing the Dataset identified in the first column",
+                  "description": "The ID of a Dataset containing the Dataset identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -894,6 +905,7 @@
                {
                   "fields": "ContainedDatasetID",
                   "reference": {
+                     "title": "Contained Dataset",
                      "resource": "Dataset",
                      "fields": "id"
                   }
@@ -901,6 +913,7 @@
                {
                   "fields": "ContainingDatasetID",
                   "reference": {
+                     "title": "Containing Dataset",
                      "resource": "Dataset",
                      "fields": "id"
                   }
@@ -911,13 +924,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "GeneratedBy",
+         "title": "Generated By",
          "path": "GeneratedBy.tsv",
          "description": "Association between a File and the (unique) DataEvent that generated it",
          "schema": {
             "fields": [
                {
                   "name": "FileID",
-                  "title": "The ID of a File",
+                  "description": "The ID of a File",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -925,7 +939,7 @@
                },
                {
                   "name": "DataEventID",
-                  "title": "The ID of the (unique) DataEvent that generated the File identified in the first column",
+                  "description": "The ID of the (unique) DataEvent that generated the File identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -940,6 +954,7 @@
                {
                   "fields": "FileID",
                   "reference": {
+                     "title": "Generated File",
                      "resource": "File",
                      "fields": "id"
                   }
@@ -947,6 +962,7 @@
                {
                   "fields": "DataEventID",
                   "reference": {
+                     "title": "Generating Event",
                      "resource": "DataEvent",
                      "fields": "id"
                   }
@@ -957,13 +973,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "AnalyzedBy",
+         "title": "Analyzed By",
          "path": "AnalyzedBy.tsv",
          "description": "Association between a File and a DataEvent that consumes it as an input",
          "schema": {
             "fields": [
                {
                   "name": "FileID",
-                  "title": "The ID of a File",
+                  "description": "The ID of a File",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -971,7 +988,7 @@
                },
                {
                   "name": "DataEventID",
-                  "title": "The ID of a DataEvent that consumes the File identified in the first column as input",
+                  "description": "The ID of a DataEvent that consumes the File identified in the first column as input",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -986,6 +1003,7 @@
                {
                   "fields": "FileID",
                   "reference": {
+                     "title": "Analyzed File",
                      "resource": "File",
                      "fields": "id"
                   }
@@ -993,6 +1011,7 @@
                {
                   "fields": "DataEventID",
                   "reference": {
+                     "title": "Analyzing Event",
                      "resource": "DataEvent",
                      "fields": "id"
                   }
@@ -1003,13 +1022,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "AssayedBy",
+         "title": "Assayed By",
          "path": "AssayedBy.tsv",
          "description": "Association between a BioSample and the (unique) DataEvent that produced it",
          "schema": {
             "fields": [
                {
                   "name": "BioSampleID",
-                  "title": "The ID of a BioSample",
+                  "description": "The ID of a BioSample",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1017,7 +1037,7 @@
                },
                {
                   "name": "DataEventID",
-                  "title": "The ID of the (unique) DataEvent that produced the BioSample identified in the first column",
+                  "description": "The ID of the (unique) DataEvent that produced the BioSample identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1032,6 +1052,7 @@
                {
                   "fields": "BioSampleID",
                   "reference": {
+                     "title": "Assayed Biosample",
                      "resource": "BioSample",
                      "fields": "id"
                   }
@@ -1039,6 +1060,7 @@
                {
                   "fields": "DataEventID",
                   "reference": {
+                     "title": "Assaying Event",
                      "resource": "DataEvent",
                      "fields": "id"
                   }
@@ -1049,13 +1071,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "SubjectsInSubjectGroups",
+         "title": "Subjects In Subject Groups",
          "path": "SubjectsInSubjectGroups.tsv",
          "description": "Association between a Subject and a containing SubjectGroup",
          "schema": {
             "fields": [
                {
                   "name": "SubjectID",
-                  "title": "The ID of a Subject",
+                  "description": "The ID of a Subject",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1063,7 +1086,7 @@
                },
                {
                   "name": "SubjectGroupID",
-                  "title": "The ID of a SubjectGroup that contains the Subject identified in the first column",
+                  "description": "The ID of a SubjectGroup that contains the Subject identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1078,6 +1101,7 @@
                {
                   "fields": "SubjectID",
                   "reference": {
+                     "title": "Grouped Subject",
                      "resource": "Subject",
                      "fields": "id"
                   }
@@ -1085,6 +1109,7 @@
                {
                   "fields": "SubjectGroupID",
                   "reference": {
+                     "title": "Subject Group",
                      "resource": "SubjectGroup",
                      "fields": "id"
                   }
@@ -1095,13 +1120,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "ObservedBy",
+         "title": "Observed By",
          "path": "ObservedBy.tsv",
          "description": "Association between a Subject and a DataEvent in which data about the Subject was collected",
          "schema": {
             "fields": [
                {
                   "name": "SubjectID",
-                  "title": "The ID of a Subject",
+                  "description": "The ID of a Subject",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1109,7 +1135,7 @@
                },
                {
                   "name": "DataEventID",
-                  "title": "The ID of a DataEvent in which data about the Subject identified in the first column was collected",
+                  "description": "The ID of a DataEvent in which data about the Subject identified in the first column was collected",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1124,6 +1150,7 @@
                {
                   "fields": "SubjectID",
                   "reference": {
+                     "title": "Observed Subject",
                      "resource": "Subject",
                      "fields": "id"
                   }
@@ -1131,6 +1158,7 @@
                {
                   "fields": "DataEventID",
                   "reference": {
+                     "title": "Observing Event",
                      "resource": "DataEvent",
                      "fields": "id"
                   }
@@ -1141,13 +1169,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "SubjectTaxonomy",
+         "title": "Subject Taxonomy",
          "path": "SubjectTaxonomy.tsv",
          "description": "Association between a Subject and a (numeric) NCBI Taxonomy Database ID describing the Subject",
          "schema": {
             "fields": [
                {
                   "name": "SubjectID",
-                  "title": "The ID of a Subject",
+                  "description": "The ID of a Subject",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1155,7 +1184,7 @@
                },
                {
                   "name": "NCBITaxonID",
-                  "title": "A CV term ID describing the taxonomy of the Subject identified in the first column (target ontology: NCBI Taxonomy Database)",
+                  "description": "A CV term ID describing the taxonomy of the Subject identified in the first column (target ontology: NCBI Taxonomy Database)",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -1171,6 +1200,7 @@
                {
                   "fields": "SubjectID",
                   "reference": {
+                     "title": "Subject",
                      "resource": "Subject",
                      "fields": "id"
                   }
@@ -1178,6 +1208,7 @@
                {
                   "fields": "NCBITaxonID",
                   "reference": {
+                     "title": "Taxonomy",
                      "resource": "NCBI_Taxonomy_DB",
                      "fields": "id"
                   }
@@ -1188,13 +1219,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "NCBI_Taxonomy_DB",
+         "title": "NCBI Taxonomy DB",
          "path": "NCBI_Taxonomy_DB.tsv",
          "description": "CV: Dictionary of terms describing taxa indexed in the NCBI Taxonomy database",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "title": "The canonical ID of this taxon",
+                  "description": "The canonical ID of this taxon",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
@@ -1203,23 +1235,23 @@
                },
                {
                   "name": "url",
-                  "title": "A URL referencing this taxon",
+                  "description": "A URL referencing this taxon",
                   "type": "string",
                   "format": "uri"
                },
                {
                   "name": "name",
-                  "title": "Short name for this taxon",
+                  "description": "Short name for this taxon",
                   "type": "string"
                },
                {
                   "name": "description",
-                  "title": "Long descriptor for this taxon",
+                  "description": "Long descriptor for this taxon",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "title": "Pipe-separated list of synonyms (alternate names) for this taxon",
+                  "description": "Pipe-separated list of synonyms (alternate names) for this taxon",
                   "type": "string"
                }
             ],
@@ -1230,13 +1262,14 @@
       {
          "profile": "tabular-data-resource",
          "name": "AuxiliaryData",
+         "title": "Auxiliary Data",
          "path": "AuxiliaryData.tsv",
          "description": "DCC-specific (extension) metadata not covered by the core C2M2 model",
          "schema": {
             "fields": [
                {
                   "name": "ObjectType",
-                  "title": "A keyword representing the type of metadata contained in the current record",
+                  "description": "A keyword representing the type of metadata contained in the current record",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1244,7 +1277,7 @@
                },
                {
                   "name": "ObjectID",
-                  "title": "An identifier unambiguously referencing the metadata in the current record",
+                  "description": "An identifier unambiguously referencing the metadata in the current record",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1252,7 +1285,7 @@
                },
                {
                   "name": "DataDescription",
-                  "title": "A short, human-readable description of the metadata in the current record",
+                  "description": "A short, human-readable description of the metadata in the current record",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -1260,7 +1293,7 @@
                },
                {
                   "name": "Value",
-                  "title": "The value of the metadata represented by the current record",
+                  "description": "The value of the metadata represented by the current record",
                   "type": "string"
                }
             ],
