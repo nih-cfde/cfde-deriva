@@ -4,7 +4,7 @@
 
 This directory contains the prototype GTEx extractor script along with
 - a `Table-Schema` JSON file describing the output (subfolder `000`)
-- raw input data from GTEx (subfolder `001`)
+- raw input data from GTEx (subfolder `001`; this contains two files prepared specially by GTEx people for last year's DCPPC round; replication on live data will require changes in GTEx's access model; see first item under 'Design notes that will definitely need to be addressed', below)
 - some auxiliary files (subfolder `002`) mapping GTEx terminology to terms in selected controlled vocabularies (cached in subfolder `003`)
 - a gzipped tarball containing example output (file `GTEx*tgz`; this is a bdbag of (a renamed copy of) subfolder `004`)
 
