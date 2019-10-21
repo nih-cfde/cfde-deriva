@@ -385,7 +385,7 @@ def consumeSampleData( inFile ):
 
 def consumeLocationData( dataType ):
    
-   global locationFiles, files, termsUsed, fullURL, dataEvents, analyzedBy, assayedBy, generatedBy, FilesInDatasets
+   global locationFiles, files, termsUsed, fullURL, dataEvents, analyzedBy, assayedBy, producedBy, FilesInDatasets
 
    inFile = locationFiles[dataType]
 
@@ -461,7 +461,7 @@ def consumeLocationData( dataType ):
          dataEvents[dataEventID]['event_ts'] = samples[sampleID]['event_ts']
 
          assayedBy[sampleID][dataEventID] = 1
-         generatedBy[seqFileID][dataEventID] = 1
+         producedBy[seqFileID][dataEventID] = 1
 
          # Alignment event.
 
@@ -478,7 +478,7 @@ def consumeLocationData( dataType ):
          dataEvents[dataEventID]['event_ts'] = samples[sampleID]['event_ts']
 
          analyzedBy[seqFileID][dataEventID] = 1
-         generatedBy[alnFileID][dataEventID] = 1
+         producedBy[alnFileID][dataEventID] = 1
 
          # END TEMPORARY BLOCK
 
@@ -525,7 +525,8 @@ def writeDummyTables( stubHash ):
 def writeDataTables():
    
    global outDir, auxData, samples, subjects, files, dataEvents, datasets, subjectGroups
-   global SubjectTaxonomy, GeneratedBy, AssayedBy, ObservedBy, AnalyzedBy, ProducedBy, SubjectsInSubjectGroups, FilesInDatasets, DatasetsInDatasets
+   global assayedBy, observedBy, analyzedBy, producedBy
+   global SubjectTaxonomy, SubjectsInSubjectGroups, FilesInDatasets, DatasetsInDatasets
    
    # Core data tables.
 
@@ -538,12 +539,11 @@ def writeDataTables():
 
    # Association tables.
 
-   writeAssociationTable( 'SubjectTaxonomy', SubjectTaxonomy, ['SubjectID', 'NCBITaxonID'] )
-   writeAssociationTable( 'GeneratedBy', generatedBy, ['FileID', 'DataEventID'] )
+   writeAssociationTable( 'ProducedBy', producedBy, ['FileID', 'DataEventID'] )
    writeAssociationTable( 'AssayedBy', assayedBy, ['BioSampleID', 'DataEventID'] )
    writeAssociationTable( 'ObservedBy', observedBy, ['SubjectID', 'DataEventID'] )
    writeAssociationTable( 'AnalyzedBy', analyzedBy, ['FileID', 'DataEventID'] )
-   writeAssociationTable( 'ProducedBy', producedBy, ['DatasetID', 'OrganizationID'] )
+   writeAssociationTable( 'SubjectTaxonomy', SubjectTaxonomy, ['SubjectID', 'NCBITaxonID'] )
    writeAssociationTable( 'SubjectsInSubjectGroups', SubjectsInSubjectGroups, ['SubjectID', 'SubjectGroupID'] )
    writeAssociationTable( 'FilesInDatasets', FilesInDatasets, ['FileID', 'DatasetID'] )
    writeAssociationTable( 'DatasetsInDatasets', DatasetsInDatasets, ['ContainedDatasetID', 'ContainingDatasetID'] )
@@ -872,23 +872,16 @@ ontoMap = {
 ontoMap = AutoVivifyingDict(ontoMap)
 
 ##########################################################################################
-# TEMPORARY: Loadable objects representing single-row CV table stubs that are
-#            specific to CFDE (Organization, Protocol, SubjectGranularity). Once
-#            these objects have been built into a target DB instance, code
-#            producing these tables will be replaced with code linking relevant
-#            fields to existing CV table records.
+# TEMPORARY: Loadable objects representing CV table stubs that are
+#            specific to CFDE. Once these objects have been built into a target DB
+#            instance, code producing these tables will be replaced with code linking
+#            relevant fields to existing CV table records.
 
 tempTables = {
    
    'CommonFundProgram'  :  {
                               'id' : 'COMMON_FUND_PROGRAM_ID.0',
                               'url' : 'https://commonfund.nih.gov/gtex',
-                              'name' : 'GTEx',
-                              'description' : 'The Genotype-Tissue Expression (GTEx) project'
-                           },
-   'Organization'       :  {
-                              'id' : 'ORGANIZATION_ID.0',
-                              'url' : '',
                               'name' : 'GTEx',
                               'description' : 'The Genotype-Tissue Expression (GTEx) project'
                            },
@@ -970,7 +963,6 @@ auxData = AutoVivifyingDict()
 
 # Association tables.
 
-generatedBy = AutoVivifyingDict()
 assayedBy = AutoVivifyingDict()
 observedBy = AutoVivifyingDict()
 analyzedBy = AutoVivifyingDict()
@@ -1046,16 +1038,6 @@ for setKeyword in ( 'rnaseq_alignment_files', 'wgs_alignment_files' ):
    
    DatasetsInDatasets[datasetIDs[setKeyword]] = { datasetIDs['alignment_files'] : 1 }
 
-# TEMPORARY: All creator attributions for Datasets are hard-coded
-# to the (local) ID for the 'GTEx' organization.
-
-for setKeyword in ( 'sequence_files', 'alignment_files', 'rnaseq_alignment_files', 'wgs_alignment_files' ):
-   
-   producedBy[datasetIDs[setKeyword]] = {
-      
-      'ORGANIZATION_ID.0': 1
-   }
-
 # Data structure to track SubjectGroups (includes init for top-level group).
 
 subjectGroups = AutoVivifyingDict()
@@ -1097,8 +1079,8 @@ consumeSampleData(sampleFile)
 consumeLocationData('RNA-Seq.reference_alignments')
 consumeLocationData('WGS.reference_alignments')
 
-# TEMPORARY: Write stub table objects for Organization, Protocol and
-#            SubjectGranularity.
+# TEMPORARY: Write stub table objects for CommonFundProgram, Platform, Protocol
+#            and SubjectGranularity.
 
 writeDummyTables(tempTables)
 
