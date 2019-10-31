@@ -5,8 +5,7 @@ import sys
 import json
 import csv
 
-from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted
-from deriva.core.ermrest_config import tag
+from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted, tag
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
 
 from . import tableschema
@@ -200,7 +199,7 @@ class CfdeDataPackage (object):
                 if table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
-                            print('Dropping %s' % fkey.update_uri_path)
+                            print('Dropping %s' % fkey.uri_path)
                             fkey.drop()
 
         # keep original catalog ownership
