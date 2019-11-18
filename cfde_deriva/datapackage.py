@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import csv
+import logging
 
 from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted, tag
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
@@ -22,6 +23,7 @@ Demonstrates use of deriva-py APIs:
 - simple insertion of tabular content
 
 """
+logger = logging.getLogger(__name__)
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -55,12 +57,16 @@ class CfdeDataPackage (object):
         "select": ["*"],
     }
 
-    def __init__(self, filename):
+    def __init__(self, filename, verbose=True):
         self.filename = filename
         self.dirname = os.path.dirname(self.filename)
         self.catalog = None
         self.cat_model_root = None
         self.cat_cfde_schema = None
+
+        if verbose:
+            logger.setLevel(logging.DEBUG)
+            logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
@@ -177,7 +183,7 @@ class CfdeDataPackage (object):
                     need_tables.append(tdoc)
 
             if need_tables:
-                print("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
+                logger.debug("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
                 self.catalog.post('/schema', json=need_tables).raise_for_status()
 
             for cdoc in need_columns:
@@ -185,7 +191,7 @@ class CfdeDataPackage (object):
                     '/schema/CFDE/table/%s/column' % urlquote(cdoc['table_name']),
                     json=cdoc
                 ).raise_for_status()
-                print("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
+                logger.debug("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
 
         self.get_model()
         self.provision_dataset_ancestor_tables()
@@ -535,7 +541,7 @@ class CfdeDataPackage (object):
         ]:
             rows = self.catalog.get("%s%s" % (query_prefix, query)).json()
             self.catalog.post("/entity/Dataset_denorm_%s" % cname, json=rows).raise_for_status()
-            print("Denormalization table for %s.%s loaded." % (tname, cname))
+            logger.debug("Denormalization table for %s.%s loaded." % (tname, cname))
 
     def load_data_files(self):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
@@ -554,9 +560,10 @@ class CfdeDataPackage (object):
                     entity_url = "/entity/CFDE:%s" % urlquote(table.name)
                     try:
                         self.catalog.post(entity_url, json=dict_rows)
-                        print("Table %s data loaded from %s." % (table.name, fname))
+                        logger.info("Table %s data loaded from %s." % (table.name, fname))
                     except Exception as e:
-                        print("Table %s data load FAILED from %s: %s" % (table.name, fname, e))
+                        logger.error("Table %s data load FAILED from "
+                                     "%s: %s" % (table.name, fname, e))
                         raise
 
 def main(args):
@@ -636,7 +643,7 @@ def main(args):
             print('Provisioning failed: %s.\nDeleting catalog...' % e)
             newcat.delete_ermrest_catalog(really=True)
             raise
-        
+
         print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
             servername,
             newcat.catalog_id,

@@ -1,0 +1,23 @@
+File_type_keyword	Description	EDAM_term_ID	EDAM_term_name
+BAM	BAM format, the binary, BGZF-formatted compressed version of SAM format for alignment of nucleotide sequences (e.g. sequencing reads) to (a) reference sequence(s). May contain base-call and alignment qualities and other data.	format_2572	BAM
+bam	BAM format, the binary, BGZF-formatted compressed version of SAM format for alignment of nucleotide sequences (e.g. sequencing reads) to (a) reference sequence(s). May contain base-call and alignment qualities and other data.	format_2572	BAM
+biom	The BIological Observation Matrix (BIOM) is a format for representing biological sample by observation contingency tables in broad areas of comparative omics. The primary use of this format is to represent OTU tables and metagenome tables.	format_3746	BIOM format
+coords	Text format for molecular sequence alignment information.	format_2554	Alignment format (text)
+csv	Tabular data represented as values in a text file delimited by some character.	format_3751	DSV
+FASTA	FASTA format including NCBI-style IDs.	format_1929	FASTA
+fasta	FASTA format including NCBI-style IDs.	format_1929	FASTA
+FASTQ	FASTQ short read format ignoring quality scores.	format_1930	FASTQ
+fastq	FASTQ short read format ignoring quality scores.	format_1930	FASTQ
+gff3	Generic Feature Format version 3 (GFF3) of sequence features.	format_1975	GFF3
+mzML	mzML format for raw spectrometer output data, standardised by HUPO PSI MSS.	format_3244	mzML
+mzXML	Common file format for proteomics mass spectrometric data developed at the Seattle Proteome Center/Institute for Systems Biology.	format_3654	mzXML
+nucleotide_fsa	FASTA format including NCBI-style IDs.	format_1929	FASTA
+peptide_fsa	FASTA format including NCBI-style IDs.	format_1929	FASTA
+SAM	Sequence Alignment/Map (SAM) format for alignment of nucleotide sequences (e.g. sequencing reads) to (a) reference sequence(s). May contain base-call and alignment qualities and other data.	format_2573	SAM
+sam	Sequence Alignment/Map (SAM) format for alignment of nucleotide sequences (e.g. sequencing reads) to (a) reference sequence(s). May contain base-call and alignment qualities and other data.	format_2573	SAM
+sff	Standard flowgram format (SFF) is a binary file format used to encode results of pyrosequencing from the 454 Life Sciences platform for high-throughput sequencing.	format_3284	SFF
+tbl	Tabular data represented as values in a text file delimited by some character.	format_3751	DSV
+thermoRaw	Proprietary file format for mass spectrometry data from Thermo Scientific.	format_3712	Thermo RAW
+tsv	Tabular data represented as tab-separated values in a text file.	format_3475	TSV
+VCF	Variant Call Format (VCF) for sequence variation (indels, polymorphisms, structural variation).	format_3016	VCF
+vcf	Variant Call Format (VCF) for sequence variation (indels, polymorphisms, structural variation).	format_3016	VCF
