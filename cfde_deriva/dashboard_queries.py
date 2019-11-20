@@ -173,20 +173,6 @@ class DashboardQueryHelper (object):
         path.link(self.builder.CFDE.FilesInDatasets)
         path.link(self.builder.CFDE.Dataset)
 
-        # find full time range and fill in missing bounds
-        bounds = path.aggregates(
-            Min(path.DataEvent.event_ts).alias('min_ts'),
-            Max(path.DataEvent.event_ts).alias('max_ts'),
-        ).fetch()[0]
-
-        if min_ts is None:
-            min_ts = bounds['min_ts']
-        if max_ts is None:
-            max_ts = bounds['max_ts']
-        if min_ts is None or max_ts is None:
-            # without bounds, this query is ill-defined...
-            raise ValueError('Time range [%s, %s) indeterminate' % (min_ts, max_ts))
-
         # build this list once so we can reuse it for grouping and sorting
         groupkey = [
             path.Dataset.data_source,
