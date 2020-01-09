@@ -69,10 +69,11 @@ class DashboardQueryHelper (object):
         path.link(self.builder.CFDE.FilesInDatasets)
         path.link(self.builder.CFDE.File)
         # and return grouped aggregate results
-        results = path.attributegroups(
-            path.Dataset.data_source, # the grouping key: a programid
-            file_cnt=Cnt(path.File),
-            byte_cnt=Sum(path.File.length),
+        results = path.groupby(
+            path.Dataset.data_source  # the grouping key: a programid
+        ).attributes(
+            Cnt(path.File).alias('file_cnt'),
+            Sum(path.File.length).alias('byte_cnt'),
         )
         return results.fetch()
 
@@ -90,15 +91,14 @@ class DashboardQueryHelper (object):
             path.filter(path.Dataset.data_source == programid)
         path.link(self.builder.CFDE.FilesInDatasets)
         path.link(self.builder.CFDE.File)
-        results = path.attributegroups(
-            (
+        results = path.groupby(
                 # compound grouping key
                 path.Dataset.data_source,
                 path.File.information_type,
-                path.File.file_format,
-            ),
-            file_cnt=Cnt(path.File),
-            byte_cnt=Sum(path.File.length),
+                path.File.file_format
+        ).attributes(
+            Cnt(path.File).alias('file_cnt'),
+            Sum(path.File.length).alias('byte_cnt'),
         )
         return results.fetch()
 
@@ -151,8 +151,8 @@ class DashboardQueryHelper (object):
         path.link(self.builder.CFDE.GeneratedBy)
         path.link(self.builder.CFDE.DataEvent)
         bounds = path.aggregates(
-            min_ts=Min(path.DataEvent.event_ts),
-            max_ts=Max(path.DataEvent.event_ts),
+            Min(path.DataEvent.event_ts).alias('min_ts'),
+            Max(path.DataEvent.event_ts).alias('max_ts'),
         ).fetch()[0]
         if min_ts is None:
             min_ts = bounds['min_ts']
