@@ -7,7 +7,7 @@ import sys
 import os
 import json
 from deriva.core import ErmrestCatalog, urlquote
-from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum
+from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 
 class DashboardQueryHelper (object):
 
@@ -24,7 +24,7 @@ class DashboardQueryHelper (object):
             'list_infotypes': list(self.list_infotypes()),
             'list_formats': list(self.list_formats()),
             'list_program_file_stats': list(self.list_program_file_stats()),
-            'list_program_infotype_format_file_stats': list(self.list_program_infotype_format_file_stats()),
+            'list_program_sampletype_file_stats': list(self.list_program_sampletype_file_stats()),
             'list_program_file_stats_by_time_bin': list(self.list_program_file_stats_by_time_bin()),
             'running_sum_program_file_stats': list(self.running_sum_program_file_stats()),
         }
@@ -69,37 +69,50 @@ class DashboardQueryHelper (object):
         path.link(self.builder.CFDE.FilesInDatasets)
         path.link(self.builder.CFDE.File)
         # and return grouped aggregate results
-        results = path.attributegroups(
-            path.Dataset.data_source, # the grouping key: a programid
-            file_cnt=Cnt(path.File),
-            byte_cnt=Sum(path.File.length),
+        results = path.groupby(
+            path.Dataset.data_source,
+        ).attributes(
+            Cnt(path.File).alias('file_cnt'),
+            Sum(path.File.length).alias('byte_cnt'),
         )
         return results.fetch()
 
-    def list_program_infotype_format_file_stats(self, programid=None):
-        """Return list of file statistics per (program, infotype, format).
+    def list_program_sampletype_file_stats(self, programid=None):
+        """Return list of file statistics per (program, sample_type).
 
-        Like list_program_file_stats, but also include
-        information_type and file_format in the group key, for more
-        detailed results.
+        Like list_program_file_stats, but also include biosample
+        sample_type in the group key, for more detailed result
+        cagegories.
 
         """
-        # much like list_program_file_stats, but with compound grouping keys
-        path = self.builder.CFDE.Dataset.path
+        path = self.builder.CFDE.SampleType.path
+        path.link(self.builder.CFDE.BioSample)
+        path.link(self.builder.CFDE.AssayedBy)
+        path.link(self.builder.CFDE.DataEvent)
+        path.link(self.builder.CFDE.GeneratedBy)
+        # right-outer join so we can count files w/o this biosample/event linkage
+        path.link(
+            self.builder.CFDE.File,
+            on=( path.GeneratedBy.FileID == self.builder.CFDE.File.id ),
+            join_type='right'
+        )
+        path.link(self.builder.CFDE.FilesInDatasets)
+        path.link(self.builder.CFDE.Dataset)
+        
         if programid is not None:
             path.filter(path.Dataset.data_source == programid)
-        path.link(self.builder.CFDE.FilesInDatasets)
-        path.link(self.builder.CFDE.File)
-        results = path.attributegroups(
-            (
-                # compound grouping key
-                path.Dataset.data_source,
-                path.File.information_type,
-                path.File.file_format,
-            ),
-            file_cnt=Cnt(path.File),
-            byte_cnt=Sum(path.File.length),
+
+        results = path.groupby(
+            # compound grouping key
+            path.Dataset.data_source,
+            path.BioSample.sample_type.alias('sample_type_id'),
+        ).attributes(
+            # 'name' is part of Table API so we cannot use attribute-based lookup...
+            path.SampleType.column_definitions['name'].alias('sample_type_name'),
+            Cnt(path.File).alias('file_cnt'),
+            Sum(path.File.length).alias('byte_cnt'),
         )
+        
         return results.fetch()
 
     def list_program_file_stats_by_time_bin(self, nbins=100, min_ts=None, max_ts=None):
@@ -119,6 +132,10 @@ class DashboardQueryHelper (object):
         such linkage are considered to have null event times.
 
         Results are keyed by data_source and ts_bin group keys.
+
+        NOTE: Results are sparse! Groups are only returned when at
+        least one matching row is found. This means that some bins,
+        described next, may be absent in a particular query result.
 
         Each group includes a ts_bin field which is a three-element
         list describing the time bin:
@@ -145,37 +162,32 @@ class DashboardQueryHelper (object):
         min_ts, or with event_ts above max_ts, respectively.
 
         """
-        path = self.builder.CFDE.Dataset.path
-        path.link(self.builder.CFDE.FilesInDatasets)
-        path.link(self.builder.CFDE.File)
+        path = self.builder.CFDE.DataEvent.path
         path.link(self.builder.CFDE.GeneratedBy)
-        path.link(self.builder.CFDE.DataEvent)
-        bounds = path.aggregates(
-            min_ts=Min(path.DataEvent.event_ts),
-            max_ts=Max(path.DataEvent.event_ts),
-        ).fetch()[0]
-        if min_ts is None:
-            min_ts = bounds['min_ts']
-        if max_ts is None:
-            max_ts = bounds['max_ts']
-        if min_ts is None or max_ts is None:
-            raise ValueError('Time range [%s, 0) indeterminate' % (min_ts, max_ts))
-        # build custom ermrest URL to access binning feature
-        # (not yet available via datapath API)
-        url = (
-            '/attributegroup'
-            '/D:=Dataset'
-            '/FilesInDatasets'
-            '/F:=File'
-            '/A:=left(F:id)=(GeneratedBy:FileID)'
-            '/E:=left(A:DataEventID)=(DataEvent:id)'
-            '/D:data_source'
-            + (',ts_bin:=bin(event_ts;%d;%s;%s)' % (nbins, urlquote(min_ts), urlquote(max_ts))) +
-            ';file_cnt:=cnt(F:id)'
-            ',byte_cnt:=sum(F:length)'
-            '@sort(data_source,ts_bin)'
+        # right-outer join so we can count files w/o this dataevent linkage
+        path.link(
+            self.builder.CFDE.File,
+            on=( path.GeneratedBy.FileID == self.builder.CFDE.File.id ),
+            join_type='right'
         )
-        return self.catalog.get(url).json()
+        path.link(self.builder.CFDE.FilesInDatasets)
+        path.link(self.builder.CFDE.Dataset)
+
+        # build this list once so we can reuse it for grouping and sorting
+        groupkey = [
+            path.Dataset.data_source,
+            Bin(path.DataEvent.event_ts, nbins, min_ts, max_ts).alias('ts_bin'),
+        ]
+
+        results = path.groupby(
+            *groupkey
+        ).attributes(
+            Cnt(path.File.id).alias('file_cnt'),
+            Sum(path.File.length).alias('byte_cnt'),
+        ).sort(
+            *groupkey
+        )
+        return results.fetch()
 
     def running_sum_program_file_stats(self, nbins=100, min_ts=None, max_ts=None):
         """Transform results of list_program_file_stats_by_time to produce running sums

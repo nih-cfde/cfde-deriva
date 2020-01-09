@@ -5,8 +5,8 @@
 import os
 import sys
 import json
+from deriva.core import tag
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
-from deriva.core.ermrest_config import tag
 
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
