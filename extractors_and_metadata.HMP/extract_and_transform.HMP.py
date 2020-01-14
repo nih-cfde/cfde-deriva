@@ -9,7 +9,7 @@
 # specification prior to ingestion into a central CFDE database.
 
 # Creation date: 2019-10-23
-# Lastmod date unless I forgot to change it: 2019-10-23
+# Lastmod date unless I forgot to change it: 2020-01-14
 
 # contact email: abrady@som.umaryland.edu
 
@@ -276,28 +276,28 @@ def flattenData(  ):
 
 # end sub flattenData(  )
 
-# Populate new C2M2 'Dataset' objects with relevant data.
+# Populate new C2M2 'dataset' objects with relevant data.
 
 def populateDatasets(  ):
    
    global objectsToWrite, objectsInDatasets, flatObjects, nativeTypeToNodeID, enumMap, DatasetNodeTypes, hmpCFProgramID
 
-   if 'Dataset' not in objectsToWrite:
+   if 'dataset' not in objectsToWrite:
       
-      objectsToWrite['Dataset'] = {}
+      objectsToWrite['dataset'] = {}
 
-   # end if ( we haven't yet created a 'Dataset' substructure in objectsToWrite )
+   # end if ( we haven't yet created a 'dataset' substructure in objectsToWrite )
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
-      objectsToWrite['AuxiliaryData']['Dataset'] = {}
+      objectsToWrite['auxiliary_data'] = {}
+      objectsToWrite['auxiliary_data']['dataset'] = {}
 
-   elif 'Dataset' not in objectsToWrite['AuxiliaryData']:
+   elif 'dataset' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['Dataset'] = {}
+      objectsToWrite['auxiliary_data']['dataset'] = {}
 
-   # end if ( we haven't yet created an 'AuxiliaryData.Dataset' substructure in objectsToWrite )
+   # end if ( we haven't yet created an 'auxiliary_data.dataset' substructure in objectsToWrite )
 
    for nodeType in DatasetNodeTypes:
       
@@ -309,7 +309,7 @@ def populateDatasets(  ):
 
       for currentID in nativeTypeToNodeID[nodeType]:
          
-         objectsToWrite['Dataset'][currentID] = {}
+         objectsToWrite['dataset'][currentID] = {}
 
          doNotReprocess = set()
 
@@ -324,18 +324,18 @@ def populateDatasets(  ):
             #########################
             # Simple-import metadata:
 
-            objectsToWrite['Dataset'][currentID]['title'] = flatObjects[currentID]['name']
+            objectsToWrite['dataset'][currentID]['title'] = flatObjects[currentID]['name']
 
-            objectsToWrite['Dataset'][currentID]['description'] = flatObjects[currentID]['description']
+            objectsToWrite['dataset'][currentID]['description'] = flatObjects[currentID]['description']
 
-            objectsToWrite['Dataset'][currentID]['data_source'] = hmpCFProgramID
+            objectsToWrite['dataset'][currentID]['data_source'] = hmpCFProgramID
 
          # end if ( nodeType switch )
 
          ############################################################################
          # Metadata not mapped to C2M2 objects: send to generic auxiliary data table.
 
-         objectsToWrite['AuxiliaryData']['Dataset'][currentID] = {}
+         objectsToWrite['auxiliary_data']['dataset'][currentID] = {}
 
          for fieldName in sorted(flatObjects[currentID].keys()):
             
@@ -357,13 +357,13 @@ def populateDatasets(  ):
 
                # end if ( fieldName has a suffix-encoded index )
 
-               if fieldName not in objectsToWrite['AuxiliaryData']['Dataset'][currentID]:
+               if fieldName not in objectsToWrite['auxiliary_data']['dataset'][currentID]:
                   
-                  objectsToWrite['AuxiliaryData']['Dataset'][currentID][fieldName] = { currentIndex: currentValue }
+                  objectsToWrite['auxiliary_data']['dataset'][currentID][fieldName] = { currentIndex: currentValue }
 
                else:
                   
-                  objectsToWrite['AuxiliaryData']['Dataset'][currentID][fieldName][currentIndex] = currentValue
+                  objectsToWrite['auxiliary_data']['dataset'][currentID][fieldName][currentIndex] = currentValue
 
                # end if ( we've created an entry yet for currentID.fieldName )
 
@@ -375,15 +375,15 @@ def populateDatasets(  ):
 
                linkedID = flatObjects[currentID][fieldName]
 
-               if 'Dataset' not in objectsInDatasets:
+               if 'dataset' not in objectsInDatasets:
                   
-                  objectsInDatasets['Dataset'] = {}
+                  objectsInDatasets['dataset'] = {}
 
-               # end if ( setup check for objectsInDatasets['Dataset']
+               # end if ( setup check for objectsInDatasets['dataset']
 
-               objectsInDatasets['Dataset'][currentID] = set()
+               objectsInDatasets['dataset'][currentID] = set()
 
-               objectsInDatasets['Dataset'][currentID] |= { linkedID }
+               objectsInDatasets['dataset'][currentID] |= { linkedID }
 
                if currentID not in parents:
                   
@@ -403,28 +403,28 @@ def populateDatasets(  ):
 
 # end sub populateDatasets(  )
 
-# Populate new C2M2 'Subject' objects with relevant data.
+# Populate new C2M2 'subject' objects with relevant data.
 
 def populateSubjects(  ):
    
    global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, SubjectNodeTypes, parents, singleOrgGranularityID
 
-   if 'Subject' not in objectsToWrite:
+   if 'subject' not in objectsToWrite:
       
-      objectsToWrite['Subject'] = {}
+      objectsToWrite['subject'] = {}
 
-   # end if ( we haven't yet created a 'Subject' substructure in objectsToWrite )
+   # end if ( we haven't yet created a 'subject' substructure in objectsToWrite )
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
-      objectsToWrite['AuxiliaryData']['Subject'] = {}
+      objectsToWrite['auxiliary_data'] = {}
+      objectsToWrite['auxiliary_data']['subject'] = {}
 
-   elif 'Subject' not in objectsToWrite['AuxiliaryData']:
+   elif 'subject' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['Subject'] = {}
+      objectsToWrite['auxiliary_data']['subject'] = {}
 
-   # end if ( we haven't yet created an 'AuxiliaryData.Subject' substructure in objectsToWrite )
+   # end if ( we haven't yet created an 'auxiliary_data.subject' substructure in objectsToWrite )
 
    for nodeType in SubjectNodeTypes:
       
@@ -436,19 +436,19 @@ def populateSubjects(  ):
 
       for currentID in nativeTypeToNodeID[nodeType]:
          
-         objectsToWrite['Subject'][currentID] = {}
+         objectsToWrite['subject'][currentID] = {}
 
          doNotReprocess = set()
 
          #########################
          # Simple-import metadata:
 
-         objectsToWrite['Subject'][currentID]['granularity'] = singleOrgGranularityID
+         objectsToWrite['subject'][currentID]['granularity'] = singleOrgGranularityID
 
          ############################################################################
          # Metadata not mapped to C2M2 objects: send to generic auxiliary data table.
 
-         objectsToWrite['AuxiliaryData']['Subject'][currentID] = {}
+         objectsToWrite['auxiliary_data']['subject'][currentID] = {}
 
          for fieldName in sorted(flatObjects[currentID].keys()):
             
@@ -470,13 +470,13 @@ def populateSubjects(  ):
 
                # end if ( fieldName has a suffix-encoded index )
 
-               if fieldName not in objectsToWrite['AuxiliaryData']['Subject'][currentID]:
+               if fieldName not in objectsToWrite['auxiliary_data']['subject'][currentID]:
                   
-                  objectsToWrite['AuxiliaryData']['Subject'][currentID][fieldName] = { currentIndex: currentValue }
+                  objectsToWrite['auxiliary_data']['subject'][currentID][fieldName] = { currentIndex: currentValue }
 
                else:
                   
-                  objectsToWrite['AuxiliaryData']['Subject'][currentID][fieldName][currentIndex] = currentValue
+                  objectsToWrite['auxiliary_data']['subject'][currentID][fieldName][currentIndex] = currentValue
 
                # end if ( we've created an entry yet for currentID.fieldName )
 
@@ -504,28 +504,28 @@ def populateSubjects(  ):
 
 # end sub populateSubjects(  )
 
-# Populate new C2M2 'Subject' objects with relevant data.
+# Populate new C2M2 'subject' objects with relevant data.
 
 def populateBioSamples(  ):
    
    global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, BioSampleNodeTypes, parents, termsUsed, fullURL, dummyProtocolID
 
-   if 'BioSample' not in objectsToWrite:
+   if 'bio_sample' not in objectsToWrite:
       
-      objectsToWrite['BioSample'] = {}
+      objectsToWrite['bio_sample'] = {}
 
-   # end if ( we haven't yet created a 'BioSample' substructure in objectsToWrite )
+   # end if ( we haven't yet created a 'bio_sample' substructure in objectsToWrite )
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
-      objectsToWrite['AuxiliaryData']['BioSample'] = {}
+      objectsToWrite['auxiliary_data'] = {}
+      objectsToWrite['auxiliary_data']['bio_sample'] = {}
 
-   elif 'BioSample' not in objectsToWrite['AuxiliaryData']:
+   elif 'bio_sample' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['BioSample'] = {}
+      objectsToWrite['auxiliary_data']['bio_sample'] = {}
 
-   # end if ( we haven't yet created an 'AuxiliaryData.BioSample' substructure in objectsToWrite )
+   # end if ( we haven't yet created an 'auxiliary_data.bio_sample' substructure in objectsToWrite )
 
    for nodeType in BioSampleNodeTypes:
       
@@ -537,7 +537,7 @@ def populateBioSamples(  ):
 
       for currentID in nativeTypeToNodeID[nodeType]:
          
-         objectsToWrite['BioSample'][currentID] = {}
+         objectsToWrite['bio_sample'][currentID] = {}
 
          doNotReprocess = set()
 
@@ -554,74 +554,74 @@ def populateBioSamples(  ):
 
             if flatObjects[currentID]['fma_body_site'] == '':
                
-               objectsToWrite['BioSample'][currentID]['anatomy'] = ''
+               objectsToWrite['bio_sample'][currentID]['anatomy'] = ''
 
             else:
                
                fmaCode = re.sub( r'^.*(FMA:\d+).*$', r'\1', flatObjects[currentID]['fma_body_site'] )
 
-               if fmaCode not in enumMap['BioSample.anatomy']:
+               if fmaCode not in enumMap['bio_sample.anatomy']:
                   
-                  objectsToWrite['BioSample'][currentID]['anatomy'] = ''
+                  objectsToWrite['bio_sample'][currentID]['anatomy'] = ''
                   # Nope.
                   # die("Unrecognized FMA code in sample object '%s': '%s'; aborting." % ( currentID, fmaCode ))
 
                else:
                   
-                  uberonTerm = enumMap['BioSample.anatomy'][fmaCode]
+                  uberonTerm = enumMap['bio_sample.anatomy'][fmaCode]
 
-                  objectsToWrite['BioSample'][currentID]['anatomy'] = baseURL['Uberon'] + uberonTerm
+                  objectsToWrite['bio_sample'][currentID]['anatomy'] = baseURL['Uberon'] + uberonTerm
 
-                  if 'Anatomy' not in fullURL:
+                  if 'anatomy' not in fullURL:
                      
-                     fullURL['Anatomy'] = {}
+                     fullURL['anatomy'] = {}
 
-                  # end if ( setup check for fullURL['Anatomy'] )
+                  # end if ( setup check for fullURL['anatomy'] )
 
-                  fullURL['Anatomy'][uberonTerm] = baseURL['Uberon'] + uberonTerm
+                  fullURL['anatomy'][uberonTerm] = baseURL['Uberon'] + uberonTerm
 
-                  if 'Anatomy' not in termsUsed:
+                  if 'anatomy' not in termsUsed:
                      
-                     termsUsed['Anatomy'] = {
+                     termsUsed['anatomy'] = {
                                                 uberonTerm: {}
                      }
 
                   else:
                      
-                     termsUsed['Anatomy'][uberonTerm] = {}
+                     termsUsed['anatomy'][uberonTerm] = {}
 
-                  # end if ( setup check for termsUsed['Anatomy'] )
+                  # end if ( setup check for termsUsed['anatomy'] )
 
                # end if ( we recognize the current FMA anatomy code )
 
             # end if ( we have a non-null value in 'fma_body_site' )
 
-            objectsToWrite['BioSample'][currentID]['protocol'] = dummyProtocolID
+            objectsToWrite['bio_sample'][currentID]['protocol'] = dummyProtocolID
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # BioSample.sample_type
+            # bio_sample.sample_type
 
-            typeTerm = enumMap['BioSample.sample_type']['material']
+            typeTerm = enumMap['bio_sample.sample_type']['material']
 
-            objectsToWrite['BioSample'][currentID]['sample_type'] = baseURL['OBI'] + typeTerm
+            objectsToWrite['bio_sample'][currentID]['sample_type'] = baseURL['OBI'] + typeTerm
 
-            if 'SampleType' not in termsUsed:
+            if 'sample_type' not in termsUsed:
                
-               termsUsed['SampleType'] = {}
+               termsUsed['sample_type'] = {}
 
-            # end if ( setup check on termsUsed['SampleType'] )
+            # end if ( setup check on termsUsed['sample_type'] )
 
-            termsUsed['SampleType'][typeTerm] = {}
+            termsUsed['sample_type'][typeTerm] = {}
 
-            if 'SampleType' not in fullURL:
+            if 'sample_type' not in fullURL:
                
-               fullURL['SampleType'] = {}
+               fullURL['sample_type'] = {}
 
-            # end if ( setup check for fullURL['SampleType']
+            # end if ( setup check for fullURL['sample_type']
 
-            fullURL['SampleType'][typeTerm] = baseURL['OBI'] + typeTerm
+            fullURL['sample_type'][typeTerm] = baseURL['OBI'] + typeTerm
 
          ######################################################################
          ######################## nodeType: *_prep ############################
@@ -632,36 +632,36 @@ def populateBioSamples(  ):
             #########################
             # Simple-import metadata:
 
-            typeTerm = enumMap['BioSample.sample_type']['library']
+            typeTerm = enumMap['bio_sample.sample_type']['library']
 
-            objectsToWrite['BioSample'][currentID]['sample_type'] = baseURL['OBI'] + typeTerm
+            objectsToWrite['bio_sample'][currentID]['sample_type'] = baseURL['OBI'] + typeTerm
 
-            if 'SampleType' not in termsUsed:
+            if 'sample_type' not in termsUsed:
                
-               termsUsed['SampleType'] = {}
+               termsUsed['sample_type'] = {}
 
-            # end if ( setup check on termsUsed['SampleType'] )
+            # end if ( setup check on termsUsed['sample_type'] )
 
-            termsUsed['SampleType'][typeTerm] = {}
+            termsUsed['sample_type'][typeTerm] = {}
 
-            if 'SampleType' not in fullURL:
+            if 'sample_type' not in fullURL:
                
-               fullURL['SampleType'] = {}
+               fullURL['sample_type'] = {}
 
-            # end if ( setup check for fullURL['SampleType']
+            # end if ( setup check for fullURL['sample_type']
 
-            fullURL['SampleType'][typeTerm] = baseURL['OBI'] + typeTerm
+            fullURL['sample_type'][typeTerm] = baseURL['OBI'] + typeTerm
 
-            objectsToWrite['BioSample'][currentID]['anatomy'] = ''
+            objectsToWrite['bio_sample'][currentID]['anatomy'] = ''
 
-            objectsToWrite['BioSample'][currentID]['protocol'] = dummyProtocolID
+            objectsToWrite['bio_sample'][currentID]['protocol'] = dummyProtocolID
 
          # end if ( nodeType switch )
 
          ############################################################################
          # Metadata not mapped to C2M2 objects: send to generic auxiliary data table.
 
-         objectsToWrite['AuxiliaryData']['BioSample'][currentID] = {}
+         objectsToWrite['auxiliary_data']['bio_sample'][currentID] = {}
 
          for fieldName in sorted(flatObjects[currentID].keys()):
             
@@ -683,20 +683,20 @@ def populateBioSamples(  ):
 
                # end if ( fieldName has a suffix-encoded index )
 
-               if fieldName not in objectsToWrite['AuxiliaryData']['BioSample'][currentID]:
+               if fieldName not in objectsToWrite['auxiliary_data']['bio_sample'][currentID]:
                   
-                  objectsToWrite['AuxiliaryData']['BioSample'][currentID][fieldName] = { currentIndex: currentValue }
+                  objectsToWrite['auxiliary_data']['bio_sample'][currentID][fieldName] = { currentIndex: currentValue }
 
                else:
                   
-                  objectsToWrite['AuxiliaryData']['BioSample'][currentID][fieldName][currentIndex] = currentValue
+                  objectsToWrite['auxiliary_data']['bio_sample'][currentID][fieldName][currentIndex] = currentValue
 
                # end if ( we've created an entry yet for currentID.fieldName )
 
             elif re.search(r'^linkage', fieldName) is not None:
                
                # There's only ever one linkage field for any of the HMP nodeTypes
-               # that map to C2M2.BioSample: to a visit ID for 'sample' nodeType, and
+               # that map to C2M2.bio_sample: to a visit ID for 'sample' nodeType, and
                # to the ID of a generating 'sample' object for the '*_prep' nodeTypes.
 
                linkedID = flatObjects[currentID][fieldName]
@@ -729,28 +729,28 @@ def populateBioSamples(  ):
 
 # end sub populateBioSamples(  )
 
-# Populate new C2M2 'File' objects with relevant data.
+# Populate new C2M2 'file' objects with relevant data.
 
 def populateFiles(  ):
    
    global objectsToWrite, flatObjects, nativeTypeToNodeID, baseURL, enumMap, FileNodeTypes, parents, processedBy, producedBy, dummyProtocolID, fullURL
 
-   if 'File' not in objectsToWrite:
+   if 'file' not in objectsToWrite:
       
-      objectsToWrite['File'] = {}
+      objectsToWrite['file'] = {}
 
-   # end if ( we haven't yet created a 'File' substructure in objectsToWrite )
+   # end if ( we haven't yet created a 'file' substructure in objectsToWrite )
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
-      objectsToWrite['AuxiliaryData']['File'] = {}
+      objectsToWrite['auxiliary_data'] = {}
+      objectsToWrite['auxiliary_data']['file'] = {}
 
-   elif 'File' not in objectsToWrite['AuxiliaryData']:
+   elif 'file' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['File'] = {}
+      objectsToWrite['auxiliary_data']['file'] = {}
 
-   # end if ( we haven't yet created an 'AuxiliaryData.File' substructure in objectsToWrite )
+   # end if ( we haven't yet created an 'auxiliary_data.file' substructure in objectsToWrite )
 
    for nodeType in FileNodeTypes:
       
@@ -762,24 +762,24 @@ def populateFiles(  ):
 
       for currentID in nativeTypeToNodeID[nodeType]:
          
-         objectsToWrite['File'][currentID] = {}
+         objectsToWrite['file'][currentID] = {}
 
          doNotReprocess = set()
 
          formatTerm = ''
          infoTerm = ''
 
-         if 'FileFormat' not in fullURL:
+         if 'file_format' not in fullURL:
             
-            fullURL['FileFormat'] = {}
+            fullURL['file_format'] = {}
 
-         # end if ( setup check on fullURL['FileFormat'] )
+         # end if ( setup check on fullURL['file_format'] )
 
-         if 'InformationType' not in fullURL:
+         if 'information_type' not in fullURL:
             
-            fullURL['InformationType'] = {}
+            fullURL['information_type'] = {}
 
-         # end if ( setup check on fullURL['InformationType'] )
+         # end if ( setup check on fullURL['information_type'] )
 
          ######################################################################
          ######################## nodeType: proteome ##########################
@@ -794,32 +794,36 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['raw_url__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if re.search(r'\.raw\.gz$', baseName) is not None:
                
-               formatTerm = enumMap['File.file_format']['thermoRaw']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + formatTerm
+               formatTerm = enumMap['file.file_format']['thermoRaw']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + formatTerm
 
             elif re.search(r'\.mzML\.gz', baseName) is not None:
                
-               formatTerm = enumMap['File.file_format']['mzML']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + formatTerm
+               formatTerm = enumMap['file.file_format']['mzML']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + formatTerm
 
             else:
                
@@ -827,10 +831,10 @@ def populateFiles(  ):
 
             # end if ( we have an identifiable filename extension )
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['proteomicsData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + infoTerm
+            infoTerm = enumMap['file.information_type']['proteomicsData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + infoTerm
          
          ######################################################################
          ######################## nodeType: metabolome ########################
@@ -845,32 +849,36 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if flatObjects[currentID]['format'] == 'raw':
                
-               formatTerm = enumMap['File.file_format']['thermoRaw']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format']['thermoRaw']
+               formatTerm = enumMap['file.file_format']['thermoRaw']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format']['thermoRaw']
 
             elif flatObjects[currentID]['format'] == 'mzXML':
                
-               formatTerm = enumMap['File.file_format']['mzXML']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format']['mzXML']
+               formatTerm = enumMap['file.file_format']['mzXML']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format']['mzXML']
 
             else:
                
@@ -878,10 +886,10 @@ def populateFiles(  ):
 
             # end if ( we have an identifiable filename extension )
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['metabolomicsData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['metabolomicsData']
+            infoTerm = enumMap['file.information_type']['metabolomicsData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['metabolomicsData']
          
          ######################################################################
          ######################## nodeType: serology ##########################
@@ -896,27 +904,31 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if flatObjects[currentID]['format'] == 'tsv':
                
-               formatTerm = enumMap['File.file_format']['tsv']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format']['tsv']
+               formatTerm = enumMap['file.file_format']['tsv']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format']['tsv']
 
             else:
                
@@ -924,10 +936,10 @@ def populateFiles(  ):
 
             # end if ( we have an identifiable filename extension )
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['serologyData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['serologyData']
+            infoTerm = enumMap['file.information_type']['serologyData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['serologyData']
          
          ######################################################################
          ######################## nodeType: cytokine ##########################
@@ -942,31 +954,35 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if flatObjects[currentID]['format'] == '':
                
-               objectsToWrite['File'][currentID]['file_format'] = ''
+               objectsToWrite['file'][currentID]['file_format'] = ''
 
             elif flatObjects[currentID]['format'] == 'tsv':
                
-               formatTerm = enumMap['File.file_format']['tsv']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format']['tsv']
+               formatTerm = enumMap['file.file_format']['tsv']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format']['tsv']
 
             else:
                
@@ -974,10 +990,10 @@ def populateFiles(  ):
 
             # end if ( we have an identifiable filename extension )
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['cytokineData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['cytokineData']
+            infoTerm = enumMap['file.information_type']['cytokineData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['cytokineData']
          
          ######################################################################
          ######################## nodeType: lipidome ##########################
@@ -992,29 +1008,33 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # This is always blank.
 
-            objectsToWrite['File'][currentID]['file_format'] = ''
+            objectsToWrite['file'][currentID]['file_format'] = ''
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['lipidomeData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['lipidomeData']
+            infoTerm = enumMap['file.information_type']['lipidomeData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['lipidomeData']
          
          ######################################################################
          ######################## nodeType: proteome_nonpride #################
@@ -1029,29 +1049,33 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['raw_url__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['md5'] = ''
+            objectsToWrite['file'][currentID]['md5'] = ''
 
             # This isn't stored anywhere.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if re.search(r'\.mzML\.gz', baseName) is not None:
                
-               formatTerm = enumMap['File.file_format']['mzML']
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format']['mzML']
+               formatTerm = enumMap['file.file_format']['mzML']
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format']['mzML']
 
             else:
                
@@ -1059,10 +1083,10 @@ def populateFiles(  ):
 
             # end if ( we have an identifiable filename extension )
 
-            # File.information_type
+            # file.information_type
 
-            infoTerm = enumMap['File.information_type']['proteomicsData']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['proteomicsData']
+            infoTerm = enumMap['file.information_type']['proteomicsData']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['proteomicsData']
          
          ######################################################################
          ######################## nodeType: clustered_seq_set #################
@@ -1077,25 +1101,29 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
 
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1103,17 +1131,17 @@ def populateFiles(  ):
 
             # end if ( we have a usable 'format' value )
 
-            # File.information_type
+            # file.information_type
 
             if flatObjects[currentID]['sequence_type'] == 'nucleotide':
                
-               infoTerm = enumMap['File.information_type']['nucleotideSequence']
-               objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['nucleotideSequence']
+               infoTerm = enumMap['file.information_type']['nucleotideSequence']
+               objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['nucleotideSequence']
          
             elif flatObjects[currentID]['sequence_type'] == 'peptide':
                
-               infoTerm = enumMap['File.information_type']['proteinSequence']
-               objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['proteinSequence']
+               infoTerm = enumMap['file.information_type']['proteinSequence']
+               objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['proteinSequence']
 
             else:
                
@@ -1134,28 +1162,32 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
-            infoTerm = enumMap['File.information_type']['sequenceFeatures']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['sequenceFeatures']
+            infoTerm = enumMap['file.information_type']['sequenceFeatures']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['sequenceFeatures']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1176,28 +1208,32 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
-            infoTerm = enumMap['File.information_type']['sequenceVariations']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['sequenceVariations']
+            infoTerm = enumMap['file.information_type']['sequenceVariations']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['sequenceVariations']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1218,28 +1254,32 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
-            infoTerm = enumMap['File.information_type']['alignment']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['alignment']
+            infoTerm = enumMap['file.information_type']['alignment']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['alignment']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1260,32 +1300,36 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
             # Not recorded for this node type.
 
-            objectsToWrite['File'][currentID]['length'] = ''
+            objectsToWrite['file'][currentID]['length'] = ''
 
             # Current data only has BAM files in this node type.
 
-            infoTerm = enumMap['File.information_type']['alignment']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['alignment']
+            infoTerm = enumMap['file.information_type']['alignment']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['alignment']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1306,34 +1350,38 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
             # These are all sequence files.
 
-            infoTerm = enumMap['File.information_type']['sequence']
-            objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type']['sequence']
+            infoTerm = enumMap['file.information_type']['sequence']
+            objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type']['sequence']
 
             #################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
             if flatObjects[currentID]['format'] == '':
                
-               objectsToWrite['File'][currentID]['file_format'] = ''
+               objectsToWrite['file'][currentID]['file_format'] = ''
                
-            elif flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            elif flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             else:
                
@@ -1354,25 +1402,29 @@ def populateFiles(  ):
 
             currentURL = flatObjects[currentID]['urls__000000000']
 
-            objectsToWrite['File'][currentID]['location'] = currentURL
+            if re.search(r'<private>', currentURL) is not None:
+               
+               currentURL = ''
+
+            objectsToWrite['file'][currentID]['location'] = currentURL
 
             baseName = re.sub(r'^.*\/', r'', currentURL)
 
-            objectsToWrite['File'][currentID]['filename'] = baseName
+            objectsToWrite['file'][currentID]['filename'] = baseName
 
-            objectsToWrite['File'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
+            objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
-            objectsToWrite['File'][currentID]['length'] = flatObjects[currentID]['size']
+            objectsToWrite['file'][currentID]['length'] = flatObjects[currentID]['size']
 
             ################################################################
             # Metadata mapped from a fixed set of values to third-party CVs:
 
-            # File.file_format
+            # file.file_format
 
-            if flatObjects[currentID]['format'] in enumMap['File.file_format']:
+            if flatObjects[currentID]['format'] in enumMap['file.file_format']:
                
-               formatTerm = enumMap['File.file_format'][flatObjects[currentID]['format']]
-               objectsToWrite['File'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['File.file_format'][flatObjects[currentID]['format']]
+               formatTerm = enumMap['file.file_format'][flatObjects[currentID]['format']]
+               objectsToWrite['file'][currentID]['file_format'] = baseURL['EDAM'] + enumMap['file.file_format'][flatObjects[currentID]['format']]
 
             elif ( not flatObjects[currentID]['format'] is None ) and ( not flatObjects[currentID]['format'] == '' ):
                
@@ -1380,16 +1432,16 @@ def populateFiles(  ):
 
             else:
                
-               objectsToWrite['File'][currentID]['file_format'] = ''
+               objectsToWrite['file'][currentID]['file_format'] = ''
 
             # end if ( switch on sanity of currentID.'format' )
 
-            # File.information_type
+            # file.information_type
 
-            if flatObjects[currentID]['matrix_type'] in enumMap['File.information_type']:
+            if flatObjects[currentID]['matrix_type'] in enumMap['file.information_type']:
                
-               infoTerm = enumMap['File.information_type'][flatObjects[currentID]['matrix_type']]
-               objectsToWrite['File'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['File.information_type'][flatObjects[currentID]['matrix_type']]
+               infoTerm = enumMap['file.information_type'][flatObjects[currentID]['matrix_type']]
+               objectsToWrite['file'][currentID]['information_type'] = baseURL['EDAM'] + enumMap['file.information_type'][flatObjects[currentID]['matrix_type']]
 
             elif ( not flatObjects[currentID]['matrix_type'] is None ) and ( not flatObjects[currentID]['matrix_type'] == '' ):
                
@@ -1397,42 +1449,42 @@ def populateFiles(  ):
 
             else:
                
-               objectsToWrite['File'][currentID]['information_type'] = ''
+               objectsToWrite['file'][currentID]['information_type'] = ''
 
             # end if ( switch on sanity of currentID.'matrix_type' )
 
          # end if ( nodeType switch )
 
-         if 'FileFormat' not in termsUsed:
+         if 'file_format' not in termsUsed:
             
-            termsUsed['FileFormat'] = {}
+            termsUsed['file_format'] = {}
 
-         # end if ( setup check on termsUsed['FileFormat'] )
+         # end if ( setup check on termsUsed['file_format'] )
 
-         if 'InformationType' not in termsUsed:
+         if 'information_type' not in termsUsed:
             
-            termsUsed['InformationType'] = {}
+            termsUsed['information_type'] = {}
 
-         # end if ( setup check on termsUsed['InformationType'] )
+         # end if ( setup check on termsUsed['information_type'] )
 
          if formatTerm != '':
             
-            termsUsed['FileFormat'][formatTerm] = {}
-            fullURL['FileFormat'][formatTerm] = baseURL['EDAM'] + formatTerm
+            termsUsed['file_format'][formatTerm] = {}
+            fullURL['file_format'][formatTerm] = baseURL['EDAM'] + formatTerm
 
          # end if ( null check on formatTerm )
 
          if infoTerm != '':
             
-            termsUsed['InformationType'][infoTerm] = {}
-            fullURL['InformationType'][infoTerm] = baseURL['EDAM'] + infoTerm
+            termsUsed['information_type'][infoTerm] = {}
+            fullURL['information_type'][infoTerm] = baseURL['EDAM'] + infoTerm
 
          # end if ( null check on infoTerm )
 
          ############################################################################
          # Metadata not mapped to C2M2 objects: send to generic auxiliary data table.
 
-         objectsToWrite['AuxiliaryData']['File'][currentID] = {}
+         objectsToWrite['auxiliary_data']['file'][currentID] = {}
 
          for fieldName in sorted(flatObjects[currentID].keys()):
             
@@ -1454,13 +1506,13 @@ def populateFiles(  ):
 
                # end if ( fieldName has a suffix-encoded index )
 
-               if fieldName not in objectsToWrite['AuxiliaryData']['File'][currentID]:
+               if fieldName not in objectsToWrite['auxiliary_data']['file'][currentID]:
                   
-                  objectsToWrite['AuxiliaryData']['File'][currentID][fieldName] = { currentIndex: currentValue }
+                  objectsToWrite['auxiliary_data']['file'][currentID][fieldName] = { currentIndex: currentValue }
 
                else:
                   
-                  objectsToWrite['AuxiliaryData']['File'][currentID][fieldName][currentIndex] = currentValue
+                  objectsToWrite['auxiliary_data']['file'][currentID][fieldName][currentIndex] = currentValue
 
                # end if ( we've created an entry yet for currentID.fieldName )
 
@@ -1476,39 +1528,39 @@ def populateFiles(  ):
 
                parents[currentID] |= { linkedID }
 
-               # Hook up a DataEvent that generated this file and link the current target as a processing input.
+               # Hook up a data_event that generated this file and link the current target as a processing input.
 
-               if 'File' not in producedBy:
+               if 'file' not in producedBy:
                   
-                  producedBy['File'] = {}
+                  producedBy['file'] = {}
 
-               # end if ( setup check for producedBy['File'] )
+               # end if ( setup check for producedBy['file'] )
 
-               if 'DataEvent' not in objectsToWrite:
+               if 'data_event' not in objectsToWrite:
                   
-                  objectsToWrite['DataEvent'] = {}
+                  objectsToWrite['data_event'] = {}
 
-               # end if ( we haven't yet created a 'DataEvent' substructure in objectsToWrite )
+               # end if ( we haven't yet created a 'data_event' substructure in objectsToWrite )
 
-               if currentID not in producedBy['File']:
+               if currentID not in producedBy['file']:
 
                   # This is the first input-linked target for currentID.
 
-                  # Create a DataEvent to log the File's creation.
+                  # Create a data_event to log the file's creation.
 
-                  eventID = getNewID('DataEvent.')
+                  eventID = getNewID('data_event.')
 
-                  objectsToWrite['DataEvent'][eventID] = {}
+                  objectsToWrite['data_event'][eventID] = {}
 
-                  objectsToWrite['DataEvent'][eventID]['protocol'] = dummyProtocolID
+                  objectsToWrite['data_event'][eventID]['protocol'] = dummyProtocolID
 
-                  objectsToWrite['DataEvent'][eventID]['rank'] = '0'
+                  objectsToWrite['data_event'][eventID]['rank'] = '0'
 
-                  objectsToWrite['DataEvent'][eventID]['event_ts'] = ''
+                  objectsToWrite['data_event'][eventID]['event_ts'] = ''
 
                   # Hook it up.
 
-                  producedBy['File'][currentID] = eventID
+                  producedBy['file'][currentID] = eventID
 
                   # Register that the current link target was processed by the same event.
 
@@ -1531,9 +1583,9 @@ def populateFiles(  ):
 
                else:
                   
-                  # A creation DataEvent has already been created for currentID. Add to it.
+                  # A creation data_event has already been created for currentID. Add to it.
 
-                  eventID = producedBy['File'][currentID]
+                  eventID = producedBy['file'][currentID]
 
                   # Register that the current link target was processed by the same event.
 
@@ -1554,7 +1606,7 @@ def populateFiles(  ):
 
                   # end if ( setup check for saving eventID to processedBy[linkedNodeType][linkedID] )
 
-               # end if ( a creation DataEvent exists for currentID )
+               # end if ( a creation data_event exists for currentID )
 
             # end if ( we're looking at a fieldName we should be processing )
 
@@ -1566,29 +1618,29 @@ def populateFiles(  ):
 
 # end sub populateFiles( nodeType )
 
-# Process all native-HMP 'visit' data into DataEvent objects; save
-# extra metadata to AuxiliaryData..
+# Process all native-HMP 'visit' data into data_event objects; save
+# extra metadata to auxiliary_data..
 
 def processVisits(  ):
    
    global flatObjects, objectsToWrite, nativeTypeToNodeID, parents, dummyProtocolID
 
-   if 'DataEvent' not in objectsToWrite:
+   if 'data_event' not in objectsToWrite:
       
-      objectsToWrite['DataEvent'] = {}
+      objectsToWrite['data_event'] = {}
 
-   # end if ( we haven't yet created a 'DataEvent' substructure in objectsToWrite )
+   # end if ( we haven't yet created a 'data_event' substructure in objectsToWrite )
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
-      objectsToWrite['AuxiliaryData']['DataEvent'] = {}
+      objectsToWrite['auxiliary_data'] = {}
+      objectsToWrite['auxiliary_data']['data_event'] = {}
 
-   elif 'DataEvent' not in objectsToWrite['AuxiliaryData']:
+   elif 'data_event' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['DataEvent'] = {}
+      objectsToWrite['auxiliary_data']['data_event'] = {}
 
-   # end if ( we haven't yet created an 'AuxiliaryData.File' substructure in objectsToWrite )
+   # end if ( we haven't yet created an 'auxiliary_data.file' substructure in objectsToWrite )
 
    nodeType = 'visit'
 
@@ -1612,22 +1664,22 @@ def processVisits(  ):
 
       parents[flatID] |= { flatObjects[flatID]['linkage__by__000000000'] }
 
-      currentID = getNewID('DataEvent.')
+      currentID = getNewID('data_event.')
 
       visitToDataEvent[flatID] = currentID
 
-      objectsToWrite['DataEvent'][currentID] = {}
+      objectsToWrite['data_event'][currentID] = {}
 
-      objectsToWrite['DataEvent'][currentID]['protocol'] = dummyProtocolID
+      objectsToWrite['data_event'][currentID]['protocol'] = dummyProtocolID
 
-      objectsToWrite['DataEvent'][currentID]['rank'] = flatObjects[flatID]['visit_number']
+      objectsToWrite['data_event'][currentID]['rank'] = flatObjects[flatID]['visit_number']
 
-      objectsToWrite['DataEvent'][currentID]['event_ts'] = ''
+      objectsToWrite['data_event'][currentID]['event_ts'] = ''
 
       ############################################################################
       # Metadata not mapped to C2M2 objects: send to generic auxiliary data table.
 
-      objectsToWrite['AuxiliaryData']['DataEvent'][currentID] = {}
+      objectsToWrite['auxiliary_data']['data_event'][currentID] = {}
 
       for fieldName in sorted(flatObjects[flatID].keys()):
          
@@ -1649,13 +1701,13 @@ def processVisits(  ):
 
             # end if ( fieldName has a suffix-encoded index )
 
-            if fieldName not in objectsToWrite['AuxiliaryData']['DataEvent'][currentID]:
+            if fieldName not in objectsToWrite['auxiliary_data']['data_event'][currentID]:
                
-               objectsToWrite['AuxiliaryData']['DataEvent'][currentID][fieldName] = { currentIndex: currentValue }
+               objectsToWrite['auxiliary_data']['data_event'][currentID][fieldName] = { currentIndex: currentValue }
 
             else:
                
-               objectsToWrite['AuxiliaryData']['DataEvent'][currentID][fieldName][currentIndex] = currentValue
+               objectsToWrite['auxiliary_data']['data_event'][currentID][fieldName][currentIndex] = currentValue
 
             # end if ( we've created an entry yet for flatID.fieldName )
 
@@ -1727,43 +1779,43 @@ def writeAuxTable(  ):
    
    global outDir, objectsToWrite, outputColumns
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      die("No data loaded for output table 'AuxiliaryData'; aborting.")
+      die("No data loaded for output table 'auxiliary_data'; aborting.")
 
-   # end if ( we have no data loaded into objectsToWrite for the AuxiliaryData table )
+   # end if ( we have no data loaded into objectsToWrite for the auxiliary_data table )
 
-   outFile = '%s/AuxiliaryData.tsv' % outDir
+   outFile = '%s/auxiliary_data.tsv' % outDir
 
    with open(outFile, 'w') as OUT:
       
-      OUT.write( '\t'.join( outputColumns['AuxiliaryData'] ) + '\n' )
+      OUT.write( '\t'.join( outputColumns['auxiliary_data'] ) + '\n' )
 
-      # objectsToWrite['AuxiliaryData'][objectType][currentID][fieldName][currentIndex] = currentValue
+      # objectsToWrite['auxiliary_data'][objectType][currentID][fieldName][currentIndex] = currentValue
 
-      for objectType in sorted(objectsToWrite['AuxiliaryData'].keys()):
+      for objectType in sorted(objectsToWrite['auxiliary_data'].keys()):
          
-         for currentID in sorted(objectsToWrite['AuxiliaryData'][objectType].keys()):
+         for currentID in sorted(objectsToWrite['auxiliary_data'][objectType].keys()):
             
-            for fieldName in sorted(objectsToWrite['AuxiliaryData'][objectType][currentID].keys()):
+            for fieldName in sorted(objectsToWrite['auxiliary_data'][objectType][currentID].keys()):
                
-               for currentIndex in sorted(objectsToWrite['AuxiliaryData'][objectType][currentID][fieldName].keys()):
+               for currentIndex in sorted(objectsToWrite['auxiliary_data'][objectType][currentID][fieldName].keys()):
                   
-                  OUT.write( '\t'.join([objectType, currentID, fieldName, currentIndex, objectsToWrite['AuxiliaryData'][objectType][currentID][fieldName][currentIndex]]) + '\n' )
+                  OUT.write( '\t'.join([objectType, currentID, fieldName, currentIndex, objectsToWrite['auxiliary_data'][objectType][currentID][fieldName][currentIndex]]) + '\n' )
 
-               # end for ( each currentIndex in objectsToWrite['AuxiliaryData'][objectType][currentID][fieldName] )
+               # end for ( each currentIndex in objectsToWrite['auxiliary_data'][objectType][currentID][fieldName] )
 
-            # end for ( each field in objectsToWrite['AuxiliaryData'][objectType][currentID] )
+            # end for ( each field in objectsToWrite['auxiliary_data'][objectType][currentID] )
 
-         # end for ( each currentID in objectsToWrite['AuxiliaryData'][objectType] )
+         # end for ( each currentID in objectsToWrite['auxiliary_data'][objectType] )
 
-      # end for ( each objectType in objectsToWrite['AuxiliaryData'] )
+      # end for ( each objectType in objectsToWrite['auxiliary_data'] )
 
    # end with ( outFile opened as 'OUT' )
 
 # end sub writeAuxTable(  )
 
-# Process all parent[] links to establish Dataset containment for all serialized objects.
+# Process all parent[] links to establish dataset containment for all serialized objects.
 
 def processDatasetContainment(  ):
    
@@ -1809,7 +1861,7 @@ def processDatasetContainment(  ):
 # end sub 
 
 # Recursively scan containment DAG to establish
-# top-level Dataset containment for a given object.
+# top-level dataset containment for a given object.
 
 def findContainingSets( objectID, containingSets ):
    
@@ -1821,11 +1873,11 @@ def findContainingSets( objectID, containingSets ):
 
    else:
       
-      if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'Dataset':
+      if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'dataset':
          
          containingSets |= { objectID }
 
-      # end if ( this is a Dataset type )
+      # end if ( this is a dataset type )
       
       if objectID in parents:
          
@@ -1847,7 +1899,7 @@ def writeObjectsInDatasets(  ):
 
    global outDir, objectsInDatasets
 
-   outFile = '%s/ObjectsInDatasets.tsv' % outDir
+   outFile = '%s/objects_in_datasets.tsv' % outDir
 
    with open(outFile, 'w') as OUT:
       
@@ -1872,15 +1924,15 @@ def writeSubjectTaxonomy(  ):
 
    global outDir, objectsToWrite
 
-   outFile = '%s/SubjectTaxonomy.tsv' % outDir
+   outFile = '%s/subject_taxonomy.tsv' % outDir
 
    with open(outFile, 'w') as OUT:
       
-      OUT.write( '\t'.join( ['SubjectID', 'NCBITaxonID' ] ) + '\n' )
+      OUT.write( '\t'.join( ['subject_id', 'ncbi_taxon_id' ] ) + '\n' )
 
-      for subjectID in sorted(objectsToWrite['Subject']):
+      for subjectID in sorted(objectsToWrite['subject']):
          
-         OUT.write( '\t'.join( [subjectID, baseURL['NCBI_Taxonomy_DB'] + '9606' ] ) + '\n' )
+         OUT.write( '\t'.join( [subjectID, baseURL['ncbi_taxonomy_db'] + '9606' ] ) + '\n' )
       #
    #
 
@@ -1892,7 +1944,7 @@ def writeProducedBy(  ):
 
    # producedBy[nodeType][objectID] = eventID
 
-   outFile = '%s/ProducedBy.tsv' % outDir
+   outFile = '%s/produced_by.tsv' % outDir
 
    with open(outFile, 'w') as OUT:
       
@@ -1917,7 +1969,7 @@ def writeProcessedBy(  ):
 
    # processedBy[nodeType][objectID] = { eventID_1, eventID_2, ... }
 
-   outFile = '%s/ProcessedBy.tsv' % outDir
+   outFile = '%s/processed_by.tsv' % outDir
 
    with open(outFile, 'w') as OUT:
       
@@ -1941,45 +1993,45 @@ def linkBioSamples(  ):
    
    global objectsToWrite, parents, prepToBioSample, producedBy, allowableNodeTypes, nodeIDToNativeType, processedBy, sampleToVisit, dummyProtocolID
 
-   if 'BioSample' not in producedBy:
+   if 'bio_sample' not in producedBy:
       
-      producedBy['BioSample'] = {}
+      producedBy['bio_sample'] = {}
 
-   # end if ( setup check for producedBy['BioSample'] )
+   # end if ( setup check for producedBy['bio_sample'] )
 
-   if 'BioSample' not in processedBy:
+   if 'bio_sample' not in processedBy:
       
-      processedBy['BioSample'] = {}
+      processedBy['bio_sample'] = {}
 
-   # end if ( setup check for processedBy['BioSample'] )
+   # end if ( setup check for processedBy['bio_sample'] )
 
-   if 'Subject' not in processedBy:
+   if 'subject' not in processedBy:
       
-      processedBy['Subject'] = {}
+      processedBy['subject'] = {}
 
-   # end if ( setup check for processedBy['Subject'] )
+   # end if ( setup check for processedBy['subject'] )
 
-   for sampleID in objectsToWrite['BioSample']:
+   for sampleID in objectsToWrite['bio_sample']:
       
       if sampleID in prepToBioSample:
          
          parentSampleID = prepToBioSample[sampleID]
 
-         # Create a DataEvent to log the BioSample's creation.
+         # Create a data_event to log the BioSample's creation.
 
-         eventID = getNewID('DataEvent.')
+         eventID = getNewID('data_event.')
 
-         objectsToWrite['DataEvent'][eventID] = {}
+         objectsToWrite['data_event'][eventID] = {}
 
-         objectsToWrite['DataEvent'][eventID]['protocol'] = dummyProtocolID
+         objectsToWrite['data_event'][eventID]['protocol'] = dummyProtocolID
 
-         objectsToWrite['DataEvent'][eventID]['rank'] = '0'
+         objectsToWrite['data_event'][eventID]['rank'] = '0'
 
-         objectsToWrite['DataEvent'][eventID]['event_ts'] = ''
+         objectsToWrite['data_event'][eventID]['event_ts'] = ''
 
          # Hook it up.
 
-         producedBy['BioSample'][sampleID] = eventID
+         producedBy['bio_sample'][sampleID] = eventID
 
          parentNodeType = allowableNodeTypes[nodeIDToNativeType[parentSampleID]]
 
@@ -2006,9 +2058,9 @@ def linkBioSamples(  ):
 
          eventID = visitToDataEvent[visitID]
 
-         producedBy['BioSample'][sampleID] = eventID
+         producedBy['bio_sample'][sampleID] = eventID
 
-         processedBy['Subject'][subjectID] = { eventID }
+         processedBy['subject'][subjectID] = { eventID }
 
       else:
          
@@ -2016,7 +2068,7 @@ def linkBioSamples(  ):
 
       # end if ( switch on sample type )
 
-   # end for ( each sampleID in objectsToWrite['BioSample'] )
+   # end for ( each sampleID in objectsToWrite['bio_sample'] )
 
 # end sub linkBioSamples(  )
 
@@ -2024,23 +2076,23 @@ def processAttrObjects(  ):
    
    global objectsToWrite, nativeTypeToNodeID, flatObjects, visitToDataEvent
 
-   if 'AuxiliaryData' not in objectsToWrite:
+   if 'auxiliary_data' not in objectsToWrite:
       
-      objectsToWrite['AuxiliaryData'] = {}
+      objectsToWrite['auxiliary_data'] = {}
 
-   if 'DataEvent' not in objectsToWrite['AuxiliaryData']:
+   if 'data_event' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['DataEvent'] = {}
+      objectsToWrite['auxiliary_data']['data_event'] = {}
 
-   if 'Subject' not in objectsToWrite['AuxiliaryData']:
+   if 'subject' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['Subject'] = {}
+      objectsToWrite['auxiliary_data']['subject'] = {}
 
-   if 'BioSample' not in objectsToWrite['AuxiliaryData']:
+   if 'bio_sample' not in objectsToWrite['auxiliary_data']:
       
-      objectsToWrite['AuxiliaryData']['BioSample'] = {}
+      objectsToWrite['auxiliary_data']['bio_sample'] = {}
 
-   # end if ( all setup checks on objectsToWrite['AuxiliaryData'][*] )
+   # end if ( all setup checks on objectsToWrite['auxiliary_data'][*] )
 
    for nodeType in ['sample_attr', 'subject_attr', 'visit_attr']:
       
@@ -2050,19 +2102,19 @@ def processAttrObjects(  ):
 
       # end if ( nodeType not in nativeTypeToNodeID )
 
-      decorationTarget = 'BioSample'
+      decorationTarget = 'bio_sample'
 
       if nodeType == 'subject_attr':
          
-         decorationTarget = 'Subject'
+         decorationTarget = 'subject'
 
       elif nodeType == 'visit_attr':
          
-         decorationTarget = 'DataEvent'
+         decorationTarget = 'data_event'
 
       for currentID in nativeTypeToNodeID[nodeType]:
          
-         objectsToWrite['AuxiliaryData'][decorationTarget][currentID] = {}
+         objectsToWrite['auxiliary_data'][decorationTarget][currentID] = {}
 
          linkedObjectID = flatObjects[currentID]['linkage__associated_with__000000000']
 
@@ -2072,7 +2124,7 @@ def processAttrObjects(  ):
 
             linkedObjectID = visitToDataEvent[linkedObjectID]
 
-         # end if ( type check for visit_attr -> map actual DataEvent ID to linked target )
+         # end if ( type check for visit_attr -> map actual data_event ID to linked target )
 
          for fieldName in sorted(flatObjects[currentID].keys()):
             
@@ -2094,13 +2146,13 @@ def processAttrObjects(  ):
 
                # end if ( fieldName has a suffix-encoded index )
 
-               if fieldName not in objectsToWrite['AuxiliaryData'][decorationTarget][currentID]:
+               if fieldName not in objectsToWrite['auxiliary_data'][decorationTarget][currentID]:
                   
-                  objectsToWrite['AuxiliaryData'][decorationTarget][currentID][fieldName] = { currentIndex: currentValue }
+                  objectsToWrite['auxiliary_data'][decorationTarget][currentID][fieldName] = { currentIndex: currentValue }
 
                else:
                   
-                  objectsToWrite['AuxiliaryData'][decorationTarget][currentID][fieldName][currentIndex] = currentValue
+                  objectsToWrite['auxiliary_data'][decorationTarget][currentID][fieldName][currentIndex] = currentValue
 
                # end if ( we've created an entry yet for currentID.fieldName )
 
@@ -2120,15 +2172,15 @@ def decorateTermsUsed(  ):
 
    for categoryID in termsUsed:
       
-      if categoryID == 'Anatomy' or categoryID == 'SampleType':
+      if categoryID == 'anatomy' or categoryID == 'sample_type':
          
          cv = ''
 
-         if categoryID == 'Anatomy':
+         if categoryID == 'anatomy':
             
             cv = 'Uberon'
 
-         elif categoryID == 'SampleType':
+         elif categoryID == 'sample_type':
             
             cv = 'OBI'
 
@@ -2208,7 +2260,7 @@ def decorateTermsUsed(  ):
 
          # end with ( open refFile as IN )
 
-      elif categoryID == 'FileFormat' or categoryID == 'InformationType':
+      elif categoryID == 'file_format' or categoryID == 'information_type':
          
          cv = 'EDAM'
 
@@ -2301,22 +2353,22 @@ def serializeTermsUsed(  ):
 
 def writeStubTables(  ):
    
-   outFile = '%s/%s.tsv' % ( outDir, 'SubjectGroup' )
+   outFile = '%s/%s.tsv' % ( outDir, 'subject_group' )
 
    with open( outFile, 'w' ) as OUT:
       
       OUT.write( '\t'.join(['id', 'title', 'description']) + '\n' )
 
-   outFile = '%s/%s.tsv' % ( outDir, 'SubjectsInSubjectGroups' )
+   outFile = '%s/%s.tsv' % ( outDir, 'subjects_in_subject_groups' )
 
    with open( outFile, 'w' ) as OUT:
       
-      OUT.write( '\t'.join(['SubjectID', 'SubjectGroupID']) + '\n' )
+      OUT.write( '\t'.join(['subject_id', 'subject_group_id']) + '\n' )
 
 # end sub ( writeStubTables )
 
 # Create three separate fake date-stamps for all iHMP-associated
-# File objects, for interface testing. THIS FUNCTION SHOULD NOT
+# file objects, for interface testing. THIS FUNCTION SHOULD NOT
 # BE CALLED IN A PRODUCTION VERSION OF THIS SCRIPT (check main
 # execution block below for invocation).
 
@@ -2352,25 +2404,25 @@ def createFakeDates(  ):
       'momspi': '2019-11-05'
    }
 
-   # objectsToWrite['File'][fileID] = { ... }
+   # objectsToWrite['file'][fileID] = { ... }
 
-   # objectsInDatasets['File'][fileID] = { containing_set_1, containing_set_2, ... }
+   # objectsInDatasets['file'][fileID] = { containing_set_1, containing_set_2, ... }
 
-   # objectsToWrite['AuxiliaryData']['File'][fileID][fieldName]['0'] = dateVal
+   # objectsToWrite['auxiliary_data']['file'][fileID][fieldName]['0'] = dateVal
 
-   for fileID in objectsToWrite['File']:
+   for fileID in objectsToWrite['file']:
       
       for setKeyword in ['ibd', 't2d', 'momspi']:
          
-         if setID[setKeyword] in objectsInDatasets['File'][fileID]:
+         if setID[setKeyword] in objectsInDatasets['file'][fileID]:
             
-            if fileID not in objectsToWrite['AuxiliaryData']['File']:
+            if fileID not in objectsToWrite['auxiliary_data']['file']:
                
-               objectsToWrite['AuxiliaryData']['File'][fileID] = {}
+               objectsToWrite['auxiliary_data']['file'][fileID] = {}
 
-            objectsToWrite['AuxiliaryData']['File'][fileID]['creationDate'] = { '0': creationDate[setKeyword] }
-            objectsToWrite['AuxiliaryData']['File'][fileID]['repoSubmissionDate'] = { '0': repoSubmissionDate[setKeyword] }
-            objectsToWrite['AuxiliaryData']['File'][fileID]['cfdeIngestDate'] = { '0': cfdeIngestDate[setKeyword] }
+            objectsToWrite['auxiliary_data']['file'][fileID]['creationDate'] = { '0': creationDate[setKeyword] }
+            objectsToWrite['auxiliary_data']['file'][fileID]['repoSubmissionDate'] = { '0': repoSubmissionDate[setKeyword] }
+            objectsToWrite['auxiliary_data']['file'][fileID]['cfdeIngestDate'] = { '0': cfdeIngestDate[setKeyword] }
          #
       #
    #
@@ -2384,7 +2436,7 @@ def createFakeDates(  ):
 ##########################################################################################
 # Location of the Table-Schema JSON file describing the output set.
 
-tableSchemaLoc = '000_tableschema/C2M2.json'
+tableSchemaLoc = '000_tableschema/datapackage.json'
 
 ##########################################################################################
 # Disambiguator for on-the-fly ID generation.
@@ -2415,10 +2467,10 @@ mapDir = '002_HMP_maps_from_HMP_enums_and_CVs_to_C2M2_controlled_vocabs'
 
 mapFiles = {
    
-   'File.file_format' : '%s/File_format_keyword_to_EDAM_for_File.file_format.tsv' % mapDir,
-   'File.information_type' : '%s/File_information_type_keyword_to_EDAM_for_File.information_type.tsv' % mapDir,
-   'BioSample.anatomy' : '%s/BioSample_anatomy_keyword_to_Uberon_for_BioSample.anatomy.tsv' % mapDir,
-   'BioSample.sample_type' : '%s/BioSample_type_keyword_to_OBI_for_BioSample.sample_type.tsv' % mapDir
+   'file.file_format' : '%s/File_format_keyword_to_EDAM_for_File.file_format.tsv' % mapDir,
+   'file.information_type' : '%s/File_information_type_keyword_to_EDAM_for_File.information_type.tsv' % mapDir,
+   'bio_sample.anatomy' : '%s/BioSample_anatomy_keyword_to_Uberon_for_BioSample.anatomy.tsv' % mapDir,
+   'bio_sample.sample_type' : '%s/BioSample_type_keyword_to_OBI_for_BioSample.sample_type.tsv' % mapDir
 }
 
 # Functions mapping value-constrained DCC-internal metadata field values
@@ -2436,7 +2488,7 @@ baseURL = {
    'EDAM' : 'http://edamontology.org/',
    'OBI' : 'http://purl.obolibrary.org/obo/',
    'Uberon' : 'http://purl.obolibrary.org/obo/',
-   'NCBI_Taxonomy_DB' : 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='
+   'ncbi_taxonomy_db' : 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='
 }
 
 ##########################################################################################
@@ -2471,44 +2523,44 @@ flatDir = 'zz98_flattened_HMP_object_TSVs'
 
 allowableNodeTypes = {
    
-   '16s_raw_seq_set': 'File',
-   '16s_trimmed_seq_set': 'File',
-   'abundance_matrix': 'File',
-   'alignment': 'File',
-   'annotation': 'File',
-   'clustered_seq_set': 'File',
-   'cytokine': 'File',
-   'host_epigenetics_raw_seq_set': 'File',
-   'host_transcriptomics_raw_seq_set': 'File',
-   'host_variant_call': 'File',
-   'host_wgs_raw_seq_set': 'File',
-   'lipidome': 'File',
-   'metabolome': 'File',
-   'microb_transcriptomics_raw_seq_set': 'File',
-   'proteome': 'File',
-   'proteome_nonpride': 'File',
-   'serology': 'File',
-   'viral_seq_set': 'File',
-   'wgs_assembled_seq_set': 'File',
-   'wgs_raw_seq_set': 'File',
+   '16s_raw_seq_set': 'file',
+   '16s_trimmed_seq_set': 'file',
+   'abundance_matrix': 'file',
+   'alignment': 'file',
+   'annotation': 'file',
+   'clustered_seq_set': 'file',
+   'cytokine': 'file',
+   'host_epigenetics_raw_seq_set': 'file',
+   'host_transcriptomics_raw_seq_set': 'file',
+   'host_variant_call': 'file',
+   'host_wgs_raw_seq_set': 'file',
+   'lipidome': 'file',
+   'metabolome': 'file',
+   'microb_transcriptomics_raw_seq_set': 'file',
+   'proteome': 'file',
+   'proteome_nonpride': 'file',
+   'serology': 'file',
+   'viral_seq_set': 'file',
+   'wgs_assembled_seq_set': 'file',
+   'wgs_raw_seq_set': 'file',
    
-   '16s_dna_prep': 'BioSample',
-   'host_assay_prep': 'BioSample',
-   'host_seq_prep': 'BioSample',
-   'microb_assay_prep': 'BioSample',
-   'sample': 'BioSample',
-   'wgs_dna_prep': 'BioSample',
+   '16s_dna_prep': 'bio_sample',
+   'host_assay_prep': 'bio_sample',
+   'host_seq_prep': 'bio_sample',
+   'microb_assay_prep': 'bio_sample',
+   'sample': 'bio_sample',
+   'wgs_dna_prep': 'bio_sample',
 
-   'subject': 'Subject',
+   'subject': 'subject',
 
    # Skipping these two for the moment; they're not
    # connected properly to the rest of the data and
    # will require some extra treatment.
    #   
-   #   'metagenomic_project_catalog_entry': 'Dataset',
-   #   'reference_genome_project_catalog_entry': 'Dataset',
-   'project': 'Dataset',
-   'study': 'Dataset',
+   #   'metagenomic_project_catalog_entry': 'dataset',
+   #   'reference_genome_project_catalog_entry': 'dataset',
+   'project': 'dataset',
+   'study': 'dataset',
 
    'visit': 'noType',
 
@@ -2517,7 +2569,7 @@ allowableNodeTypes = {
    'visit_attr': 'noType'
 }
 
-# Native HMP object types that map to C2M2 'File' objects.
+# Native HMP object types that map to C2M2 'file' objects.
 
 FileNodeTypes = {
    
@@ -2543,7 +2595,7 @@ FileNodeTypes = {
    'wgs_raw_seq_set'
 }
 
-# Native HMP object types that map to C2M2 'BioSample' objects.
+# Native HMP object types that map to C2M2 'bio_sample' objects.
 
 BioSampleNodeTypes = {
    
@@ -2555,14 +2607,14 @@ BioSampleNodeTypes = {
    'wgs_dna_prep'
 }
    
-# Native HMP object types that map to C2M2 'Subject' objects.
+# Native HMP object types that map to C2M2 'subject' objects.
 
 SubjectNodeTypes = {
    
    'subject'
 }
 
-# Native HMP object types that map to C2M2 'Dataset' objects.
+# Native HMP object types that map to C2M2 'dataset' objects.
 
 DatasetNodeTypes = {
 
@@ -2593,31 +2645,31 @@ scalarTypes = {
 
 outputColumns = {
    
-   'Anatomy': [
+   'anatomy': [
       'id',
       'name',
       'description',
       'synonyms'
    ],
-   'CommonFundProgram': [
+   'common_fund_program': [
       'id',
       'website',
       'name',
       'description'
    ],
-   'DataEvent': [
+   'data_event': [
       'id',
       'protocol',
       'rank',
       'event_ts'
    ],
-   'Dataset': [
+   'dataset': [
       'id',
       'data_source',
       'title',
       'description'
    ],
-   'File': [
+   'file': [
       'id',
       'location',
       'information_type',
@@ -2626,51 +2678,51 @@ outputColumns = {
       'filename',
       'md5'
    ],
-   'BioSample': [
+   'bio_sample': [
       'id',
       'sample_type',
       'anatomy',
       'protocol'
    ],
-   'FileFormat': [
+   'file_format': [
       'id',
       'name',
       'description',
       'synonyms'
    ],
-   'InformationType': [
+   'information_type': [
       'id',
       'name',
       'description',
       'synonyms'
    ],
-   'NCBI_Taxonomy_DB': [
+   'ncbi_taxonomy_db': [
       'id',
       'name',
       'description',
       'synonyms'
    ],
-   'Protocol': [
+   'protocol': [
       'id',
       'name',
       'description'
    ],
-   'SampleType': [
+   'sample_type': [
       'id',
       'name',
       'description',
       'synonyms'
    ],
-   'Subject': [
+   'subject': [
       'id',
       'granularity'
    ],
-   'SubjectGranularity': [
+   'subject_granularity': [
       'id',
       'name',
       'description'
    ],
-   'AuxiliaryData': [
+   'auxiliary_data': [
       'object_type',
       'id',
       'keyword',
@@ -2700,41 +2752,41 @@ termsUsed = {}
 # NCBI Taxonomy DB
 
 humanTaxID = '9606'
-humanURL = baseURL['NCBI_Taxonomy_DB'] + humanTaxID
+humanURL = baseURL['ncbi_taxonomy_db'] + humanTaxID
 
-termsUsed['NCBI_Taxonomy_DB'] = {}
-termsUsed['NCBI_Taxonomy_DB'][humanURL] = {}
-termsUsed['NCBI_Taxonomy_DB'][humanURL]['name'] = 'Homo sapiens'
-termsUsed['NCBI_Taxonomy_DB'][humanURL]['description'] = 'Homo sapiens (modern human species)'
-termsUsed['NCBI_Taxonomy_DB'][humanURL]['synonyms'] = ''
+termsUsed['ncbi_taxonomy_db'] = {}
+termsUsed['ncbi_taxonomy_db'][humanURL] = {}
+termsUsed['ncbi_taxonomy_db'][humanURL]['name'] = 'Homo sapiens'
+termsUsed['ncbi_taxonomy_db'][humanURL]['description'] = 'Homo sapiens (modern human species)'
+termsUsed['ncbi_taxonomy_db'][humanURL]['synonyms'] = ''
 
 # List of Common Fund programs
 
 hmpCFProgramID = 'COMMON_FUND_PROGRAM_ID.1'
 
-termsUsed['CommonFundProgram'] = {}
-termsUsed['CommonFundProgram'][hmpCFProgramID] = {}
-termsUsed['CommonFundProgram'][hmpCFProgramID]['website'] = 'https://hmpdacc.org/'
-termsUsed['CommonFundProgram'][hmpCFProgramID]['name'] = 'NIH Human Microbiome Project'
-termsUsed['CommonFundProgram'][hmpCFProgramID]['description'] = 'Characterization of microbiome and human hosts using multiple sequencing and omics methods'
+termsUsed['common_fund_program'] = {}
+termsUsed['common_fund_program'][hmpCFProgramID] = {}
+termsUsed['common_fund_program'][hmpCFProgramID]['website'] = 'https://hmpdacc.org/'
+termsUsed['common_fund_program'][hmpCFProgramID]['name'] = 'NIH Human Microbiome Project'
+termsUsed['common_fund_program'][hmpCFProgramID]['description'] = 'Characterization of microbiome and human hosts using multiple sequencing and omics methods'
 
 # Protocol specs (stubbed for now!)
 
 dummyProtocolID = 'DUMMY_PROTOCOL_ID.00000000'
 
-termsUsed['Protocol'] = {}
-termsUsed['Protocol'][dummyProtocolID] = {}
-termsUsed['Protocol'][dummyProtocolID]['name'] = 'dummy_protocol'
-termsUsed['Protocol'][dummyProtocolID]['description'] = 'This is a stub pending further elaboration of the model for specifying experimental protocols.'
+termsUsed['protocol'] = {}
+termsUsed['protocol'][dummyProtocolID] = {}
+termsUsed['protocol'][dummyProtocolID]['name'] = 'dummy_protocol'
+termsUsed['protocol'][dummyProtocolID]['description'] = 'This is a stub pending further elaboration of the model for specifying experimental protocols.'
 
-# Subject granularity (the only HMP entities described as 'Subject' are individual humans) 
+# Subject granularity (the only HMP entities described as 'subject' are individual humans) 
 
 singleOrgGranularityID = 'SUBJECT_GRANULARITY_ID.00000000'
 
-termsUsed['SubjectGranularity'] = {}
-termsUsed['SubjectGranularity'][singleOrgGranularityID] = {}
-termsUsed['SubjectGranularity'][singleOrgGranularityID]['name'] = 'single_organism'
-termsUsed['SubjectGranularity'][singleOrgGranularityID]['description'] = 'A subject representing a single organism'
+termsUsed['subject_granularity'] = {}
+termsUsed['subject_granularity'][singleOrgGranularityID] = {}
+termsUsed['subject_granularity'][singleOrgGranularityID]['name'] = 'single_organism'
+termsUsed['subject_granularity'][singleOrgGranularityID]['description'] = 'A subject representing a single organism'
 
 ##########################################################################################
 # Serialization objects: C2M2 output data structures
@@ -2785,60 +2837,60 @@ with open(inFile, 'r') as IN:
 
 flattenData()
 
-# Gather all data needed to serialize 'File' objects.
+# Gather all data needed to serialize 'file' objects.
 
 populateFiles()
 
-# Serialize all 'File' objects into a TSV.
+# Serialize all 'file' objects into a TSV.
 
-writeTable('File')
+writeTable('file')
 
-# Gather all data needed to serialize 'BioSample' objects.
+# Gather all data needed to serialize 'bio_sample' objects.
 
 populateBioSamples()
 
-# Serialize all 'BioSample' objects into a TSV.
+# Serialize all 'bio_sample' objects into a TSV.
 
-writeTable('BioSample')
+writeTable('bio_sample')
 
-# Gather all data needed to serialize 'Subject' objects.
+# Gather all data needed to serialize 'subject' objects.
 
 populateSubjects()
 
-# Serialize all 'Subject' objects into a TSV.
+# Serialize all 'subject' objects into a TSV.
 
-writeTable('Subject')
+writeTable('subject')
 
 # Process all HMP container structures which will be
-# mapped to C2M2 'Dataset' objects.
+# mapped to C2M2 'dataset' objects.
 
 populateDatasets()
 
-# Serialize all 'Dataset' objects into a TSV.
+# Serialize all 'dataset' objects into a TSV.
 
-writeTable('Dataset')
+writeTable('dataset')
 
-# Process all native-HMP 'visit' data into DataEvent objects.
+# Process all native-HMP 'visit' data into data_event objects.
 
 processVisits()
 
-# Write the 'DataEvent' table.
+# Write the 'data_event' table.
 
-writeTable('DataEvent')
+writeTable('data_event')
 
 # Process all containment links cached during previous passes.
 
 processDatasetContainment()
 
-# Serialize all info on Dataset containment.
+# Serialize all info on dataset containment.
 
 writeObjectsInDatasets()
 
-# Write stub tables (headers) for SubjectGroup and SubjectsInSubjectGroups, which we're not currently using.
+# Write stub tables (headers) for subject_group and subjects_in_subject_groups, which we're not currently using.
 
 writeStubTables()
 
-# Hook up BioSample objects to DataEvents in which they are used as inputs or outputs.
+# Hook up bio_sample objects to data_events in which they are used as inputs or outputs.
 
 linkBioSamples()
 
@@ -2846,7 +2898,7 @@ linkBioSamples()
 
 processAttrObjects()
 
-# Save DataEvent input/output processing linkage data.
+# Save data_event input/output processing linkage data.
 
 writeProducedBy()
 writeProcessedBy()
@@ -2864,9 +2916,9 @@ decorateTermsUsed()
 serializeTermsUsed()
 
 # BELOW IS FOR TESTING ONLY: DISABLE FOR HONEST DATA IMPORT
-# Create fake dates for File objects & store them in AuxiliaryData.
-# Create three fake dates for each File: creation, repository insertion (e.g. SRA), and CFDE ingest.
-# We'll be decorating File objects from the three iHMP subprojects: IBDMDB, T2D and momspi.
+# Create fake dates for file objects & store them in auxiliary_data.
+# Create three fake dates for each file: creation, repository insertion (e.g. SRA), and CFDE ingest.
+# We'll be decorating file objects from the three iHMP subprojects: IBDMDB, T2D and momspi.
 createFakeDates()
 # ABOVE IS FOR TESTING ONLY: DISABLE FOR HONEST DATA IMPORT
 

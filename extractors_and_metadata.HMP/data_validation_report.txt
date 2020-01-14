@@ -1,0 +1,258 @@
+DATASET
+=======
+{'error-count': 5,
+ 'preset': 'nested',
+ 'table-count': 20,
+ 'time': 1460.105,
+ 'valid': False}
+
+TABLE [1]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id',
+             'location',
+             'information_type',
+             'file_format',
+             'length',
+             'filename',
+             'md5'],
+ 'row-count': 133319,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/file.tsv',
+ 'time': 710.475,
+ 'valid': True}
+
+TABLE [2]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'sample_type', 'anatomy', 'protocol'],
+ 'row-count': 83747,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/bio_sample.tsv',
+ 'time': 334.058,
+ 'valid': True}
+
+TABLE [3]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'granularity'],
+ 'row-count': 2467,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/subject.tsv',
+ 'time': 3.375,
+ 'valid': True}
+
+TABLE [4]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'protocol', 'rank', 'event_ts'],
+ 'row-count': 149457,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/data_event.tsv',
+ 'time': 235.13,
+ 'valid': True}
+
+TABLE [5]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'data_source', 'title', 'description'],
+ 'row-count': 23,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/dataset.tsv',
+ 'time': 0.428,
+ 'valid': True}
+
+TABLE [6]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description'],
+ 'row-count': 2,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/subject_granularity.tsv',
+ 'time': 0.12,
+ 'valid': True}
+
+TABLE [7]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 3,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/sample_type.tsv',
+ 'time': 0.283,
+ 'valid': True}
+
+TABLE [8]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 9,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/information_type.tsv',
+ 'time': 0.369,
+ 'valid': True}
+
+TABLE [9]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 14,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/file_format.tsv',
+ 'time': 0.287,
+ 'valid': True}
+
+TABLE [10]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 25,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/anatomy.tsv',
+ 'time': 0.348,
+ 'valid': True}
+
+TABLE [11]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description'],
+ 'row-count': 2,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/protocol.tsv',
+ 'time': 0.192,
+ 'valid': True}
+
+TABLE [12]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'website', 'name', 'description'],
+ 'row-count': 2,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/common_fund_program.tsv',
+ 'time': 0.26,
+ 'valid': True}
+
+TABLE [13]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 3,
+ 'format': 'inline',
+ 'row-count': 0,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/subject_group.tsv',
+ 'time': 0.043,
+ 'valid': False}
+---------
+[-,1] [missing-header] There is a missing header in column 1
+[-,2] [missing-header] There is a missing header in column 2
+[-,3] [missing-header] There is a missing header in column 3
+
+TABLE [14]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'type', 'contained_in'],
+ 'row-count': 457859,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/objects_in_datasets.tsv',
+ 'time': 344.955,
+ 'valid': True}
+
+TABLE [15]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'type', 'produced_by'],
+ 'row-count': 217065,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/produced_by.tsv',
+ 'time': 208.821,
+ 'valid': True}
+
+TABLE [16]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'type', 'processed_by'],
+ 'row-count': 232132,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/processed_by.tsv',
+ 'time': 220.442,
+ 'valid': True}
+
+TABLE [17]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 2,
+ 'format': 'inline',
+ 'row-count': 0,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/subjects_in_subject_groups.tsv',
+ 'time': 0.372,
+ 'valid': False}
+---------
+[-,1] [missing-header] There is a missing header in column 1
+[-,2] [missing-header] There is a missing header in column 2
+
+TABLE [18]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['subject_id', 'ncbi_taxon_id'],
+ 'row-count': 2467,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/subject_taxonomy.tsv',
+ 'time': 14.981,
+ 'valid': True}
+
+TABLE [19]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 2,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/ncbi_taxonomy_db.tsv',
+ 'time': 0.025,
+ 'valid': True}
+
+TABLE [20]
+=========
+{'datapackage': '004_HMP__C2M2_preload__preBag_output_files/datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['object_type', 'id', 'keyword', 'index', 'value'],
+ 'row-count': 5262628,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/004_HMP__C2M2_preload__preBag_output_files/auxiliary_data.tsv',
+ 'time': 1453.472,
+ 'valid': True}
