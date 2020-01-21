@@ -1623,7 +1623,7 @@ def populateFiles(  ):
 
 def processVisits(  ):
    
-   global flatObjects, objectsToWrite, nativeTypeToNodeID, parents, dummyProtocolID
+   global flatObjects, objectsToWrite, nativeTypeToNodeID, parents, dummyProtocolID, visitToDataEvent, visitToSubject
 
    if 'data_event' not in objectsToWrite:
       
@@ -1991,7 +1991,7 @@ def writeProcessedBy(  ):
 
 def linkBioSamples(  ):
    
-   global objectsToWrite, parents, prepToBioSample, producedBy, allowableNodeTypes, nodeIDToNativeType, processedBy, sampleToVisit, dummyProtocolID
+   global objectsToWrite, parents, prepToBioSample, producedBy, allowableNodeTypes, nodeIDToNativeType, processedBy, sampleToVisit, dummyProtocolID, visitToSubject, visitToDataEvent
 
    if 'bio_sample' not in producedBy:
       
@@ -2874,6 +2874,10 @@ writeTable('dataset')
 
 processVisits()
 
+# Hook up bio_sample objects to data_events in which they are used as inputs or outputs.
+
+linkBioSamples()
+
 # Write the 'data_event' table.
 
 writeTable('data_event')
@@ -2889,10 +2893,6 @@ writeObjectsInDatasets()
 # Write stub tables (headers) for subject_group and subjects_in_subject_groups, which we're not currently using.
 
 writeStubTables()
-
-# Hook up bio_sample objects to data_events in which they are used as inputs or outputs.
-
-linkBioSamples()
 
 # Manage 'sample_attr', 'subject_attr' and 'visit_attr' HMP data-decorator types.
 
