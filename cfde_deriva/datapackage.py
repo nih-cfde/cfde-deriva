@@ -172,7 +172,7 @@ class CfdeDataPackage (object):
                             pass
                         else:
                             cdoc = ncolumn.prejson()
-                            cdoc.update({'table_name': tname, 'nullok': True})
+                            cdoc.update({'table_name': table.name, 'nullok': True})
                             need_columns.append(cdoc)
                     # TODO: check existing table keys/foreign keys for compatibility?
                 else:
@@ -550,17 +550,35 @@ class CfdeDataPackage (object):
                 with open(fname, "r") as f:
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
-                    raw_rows = list(reader)
-                    row2dict = self.make_row2dict(table, raw_rows[0])
-                    dict_rows = [ row2dict(row) for row in raw_rows[1:] ]
+                    row2dict = self.make_row2dict(table, next(reader))
                     entity_url = "/entity/CFDE:%s" % urlquote(table.name)
-                    try:
-                        self.catalog.post(entity_url, json=dict_rows)
-                        logger.info("Table %s data loaded from %s." % (table.name, fname))
-                    except Exception as e:
-                        logger.error("Table %s data load FAILED from "
-                                     "%s: %s" % (table.name, fname, e))
-                        raise
+                    batch_size = 50000  # TODO: Should this be configurable?
+                    # Batch catalog ingests; too-large ingests will hang and fail
+                    # Largest known CFDE ingest has file with >5m rows
+                    batch = []
+                    for raw_row in reader:
+                        # Collect full batch, then post at once
+                        batch.append(row2dict(raw_row))
+                        if len(batch) >= batch_size:
+                            try:
+                                self.catalog.post(entity_url, json=batch)
+                                logger.debug("Batch of rows for %s loaded" % table.name)
+                            except Exception as e:
+                                logger.error("Table %s data load FAILED from "
+                                             "%s: %s" % (table.name, fname, e))
+                                raise
+                            else:
+                                batch.clear()
+                    # After reader exhausted, ingest final batch
+                    if len(batch) > 0:
+                        try:
+                            self.catalog.post(entity_url, json=batch)
+                        except Exception as e:
+                            logger.error("Table %s data load FAILED from "
+                                         "%s: %s" % (table.name, fname, e))
+                            raise
+                    logger.info("All data for table %s loaded from %s." % (table.name, fname))
+
 
 def main(args):
     """Basic C2M2 catalog setup
