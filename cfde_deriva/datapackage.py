@@ -97,20 +97,20 @@ class CfdeDataPackage (object):
                 ],
                 [
                     ForeignKey.define(
-                        ["descendant"], "CFDE", "Dataset", ["id"],
+                        ["descendant"], "CFDE", "dataset", ["id"],
                         constraint_names=[["CFDE", tname + "_descendant_fkey"]],
                     ),
                     ForeignKey.define(
-                        ["ancestor"], "CFDE", "Dataset", ["id"],
+                        ["ancestor"], "CFDE", "dataset", ["id"],
                         constraint_names=[["CFDE", tname + "_ancestor_fkey"]],
                     ),
                 ],
                 comment="Flattened, transitive closure of nested DatasetsInDatasets relationship.",
             )
 
-        if 'Dataset_Ancestor' not in self.cat_model_root.schemas['CFDE'].tables:
-            self.cat_model_root.schemas['CFDE'].create_table(tdef("Dataset_Ancestor"))
-            self.cat_model_root.schemas['CFDE'].create_table(tdef("Dataset_Ancestor_Reflexive"))
+        if 'dataset_ancestor' not in self.cat_model_root.schemas['CFDE'].tables:
+            self.cat_model_root.schemas['CFDE'].create_table(tdef("dataset_ancestor"))
+            self.cat_model_root.schemas['CFDE'].create_table(tdef("dataset_ancestor_reflexive"))
 
     def provision_denorm_tables(self):
         def dataset_property(srctable, srccolumn):
@@ -128,7 +128,7 @@ class CfdeDataPackage (object):
                     ],
                     [
                         ForeignKey.define(
-                            ["dataset"], "CFDE", "Dataset", ["id"],
+                            ["dataset"], "CFDE", "dataset", ["id"],
                             constraint_names=[["CFDE", "%s_ds_fkey" % tname]],
                         )
                     ] +  [
@@ -143,10 +143,8 @@ class CfdeDataPackage (object):
             )
 
         for tname, cname in [
-                ('DataEvent', 'protocol'),
-                ('DataEvent', 'method'),
-                ('DataEvent', 'platform'),
-                ('BioSample', 'sample_type'),
+                ('data_event', 'protocol'),
+                ('bio_sample', 'sample_type'),
         ]:
             tab = self.cat_model_root.table('CFDE', tname)
             col = tab.column_definitions.elements[cname]
@@ -224,13 +222,13 @@ class CfdeDataPackage (object):
                     {
                         "name": "Browse",
                         "children": [
-                            { "name": "Dataset", "url": "/chaise/recordset/#%s/CFDE:Dataset" % self.catalog._catalog_id },
-                            { "name": "Data Event", "url": "/chaise/recordset/#%s/CFDE:DataEvent" % self.catalog._catalog_id },
-                            { "name": "File", "url": "/chaise/recordset/#%s/CFDE:File" % self.catalog._catalog_id },
-                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:BioSample" % self.catalog._catalog_id },
-                            { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:Subject" % self.catalog._catalog_id },
-                            { "name": "Organization", "url": "/chaise/recordset/#%s/CFDE:Organization" % self.catalog._catalog_id },
-                            { "name": "Common Fund Program", "url": "/chaise/recordset/#%s/CFDE:CommonFundProgram" % self.catalog._catalog_id },
+                            { "name": "Dataset", "url": "/chaise/recordset/#%s/CFDE:dataset" % self.catalog._catalog_id },
+                            { "name": "Data Event", "url": "/chaise/recordset/#%s/CFDE:data_event" % self.catalog._catalog_id },
+                            { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
+                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:bio_sample" % self.catalog._catalog_id },
+                            { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
+                            { "name": "Organization", "url": "/chaise/recordset/#%s/CFDE:organization" % self.catalog._catalog_id },
+                            { "name": "Common Fund Program", "url": "/chaise/recordset/#%s/CFDE:common_fund_program" % self.catalog._catalog_id },
                         ]
                     }
                 ]
@@ -270,7 +268,7 @@ class CfdeDataPackage (object):
             return [
                 fkey.names[0]
                 for fkey in table.referenced_by
-                if not fkey.table.name.startswith("Dataset_denorm")
+                if not fkey.table.name.startswith("dataset_denorm")
             ]
 
         for table in self.cat_cfde_schema.tables.values():
@@ -328,37 +326,37 @@ class CfdeDataPackage (object):
             }
 
         dsa_to_dsd = [
-            {"inbound": find_fkey("Dataset_Ancestor", "ancestor").names[0]},
-            {"outbound": find_fkey("Dataset_Ancestor", "descendant").names[0]},
+            {"inbound": find_fkey("dataset_ancestor", "ancestor").names[0]},
+            {"outbound": find_fkey("dataset_ancestor", "descendant").names[0]},
         ]
 
         dsa_to_dsd_r = [
-            {"inbound": find_fkey("Dataset_Ancestor_Reflexive", "ancestor").names[0]},
-            {"outbound": find_fkey("Dataset_Ancestor_Reflexive", "descendant").names[0]},
+            {"inbound": find_fkey("dataset_ancestor_reflexive", "ancestor").names[0]},
+            {"outbound": find_fkey("dataset_ancestor_reflexive", "descendant").names[0]},
         ]
 
         ds_to_file_flat = [
-            {"inbound": find_fkey("FilesInDatasets", "DatasetID").names[0]},
-            {"outbound": find_fkey("FilesInDatasets", "FileID").names[0]},
+            {"inbound": find_fkey("files_in_datasets", "dataset_id").names[0]},
+            {"outbound": find_fkey("files_in_datasets", "file_id").names[0]},
         ]
 
         ds_to_file = dsa_to_dsd_r + ds_to_file_flat
 
         ds_to_devent = ds_to_file_flat + [
-            {"inbound": find_fkey("GeneratedBy", "FileID").names[0]},
-            {"outbound": find_fkey("GeneratedBy", "DataEventID").names[0]},
+            {"inbound": find_fkey("generated_by", "file_id").names[0]},
+            {"outbound": find_fkey("generated_by", "data_event_id").names[0]},
         ]
 
         ds_to_bsamp = ds_to_devent + [
-            {"inbound": find_fkey("AssayedBy", "DataEventID").names[0]},
-            {"outbound": find_fkey("AssayedBy", "BioSampleID").names[0]},
+            {"inbound": find_fkey("assayed_by", "data_event_id").names[0]},
+            {"outbound": find_fkey("assayed_by", "bio_sample_id").names[0]},
         ]
         
         # improve Dataset with pseudo columns?
         orgs = {
             "source": [
-                {"inbound": find_fkey("ProducedBy", ["DatasetID"]).names[0]},
-                {"outbound": find_fkey("ProducedBy", ["OrganizationID"]).names[0]},
+                {"inbound": find_fkey("produced_by", ["dataset_id"]).names[0]},
+                {"outbound": find_fkey("produced_by", ["organization_id"]).names[0]},
                 "RID"
             ],
             "markdown_name": "Organization",
@@ -368,21 +366,21 @@ class CfdeDataPackage (object):
 
         program = {
             "source": [
-                {"outbound": find_fkey("Dataset", ["data_source"]).names[0]},
+                {"outbound": find_fkey("dataset", ["data_source"]).names[0]},
                 "RID"
             ],
             "markdown_name": "Common Fund Program",
             "open": True,
         }
-        self.cat_model_root.table('CFDE', 'Dataset').visible_columns = {
+        self.cat_model_root.table('CFDE', 'dataset').visible_columns = {
             "compact": ["title", program, orgs, "description", "url"],
             "filter": {"and": [
                 program,
                 {
                     "markdown_name": "Data Method",
                     "source": [
-                        {"inbound": ["CFDE", "Dataset_denorm_method_ds_fkey"]},
-                        {"outbound": ["CFDE", "Dataset_denorm_method_prop_fkey"]},
+                        {"inbound": ["CFDE", "dataset_denorm_method_ds_fkey"]},
+                        {"outbound": ["CFDE", "dataset_denorm_method_prop_fkey"]},
                         "RID",
                     ],
                     "open": True,
@@ -390,31 +388,31 @@ class CfdeDataPackage (object):
                 {
                     "markdown_name": "Data Platform",
                     "source": [
-                        {"inbound": ["CFDE", "Dataset_denorm_platform_ds_fkey"]},
-                        {"outbound": ["CFDE", "Dataset_denorm_platform_prop_fkey"]},
+                        {"inbound": ["CFDE", "dataset_denorm_platform_ds_fkey"]},
+                        {"outbound": ["CFDE", "dataset_denorm_platform_prop_fkey"]},
                         "RID",
                     ],
                 },
                 {
                     "markdown_name": "Data Protocol",
                     "source": [
-                        {"inbound": ["CFDE", "Dataset_denorm_protocol_ds_fkey"]},
-                        {"outbound": ["CFDE", "Dataset_denorm_protocol_prop_fkey"]},
+                        {"inbound": ["CFDE", "dataset_denorm_protocol_ds_fkey"]},
+                        {"outbound": ["CFDE", "dataset_denorm_protocol_prop_fkey"]},
                         "RID",
                     ],
                 },
                 {
                     "markdown_name": "Biosample Type",
                     "source": [
-                        {"inbound": ["CFDE", "Dataset_denorm_sample_type_ds_fkey"]},
-                        {"outbound": ["CFDE", "Dataset_denorm_sample_type_prop_fkey"]},
+                        {"inbound": ["CFDE", "dataset_denorm_sample_type_ds_fkey"]},
+                        {"outbound": ["CFDE", "dataset_denorm_sample_type_prop_fkey"]},
                         "RID",
                     ],
                     "open": True,
                 },
-                assoc_source("Containing Dataset", "Dataset_Ancestor", ["descendant"], ["ancestor"]),
-                assoc_source("Contained Dataset", "Dataset_Ancestor", ["ancestor"], ["descendant"]),
-                assoc_source("Contained File", "FilesInDatasets", ["DatasetID"], ["FileID"]),
+                assoc_source("Containing Dataset", "dataset_ancestor", ["descendant"], ["ancestor"]),
+                assoc_source("Contained Dataset", "dataset_ancestor", ["ancestor"], ["descendant"]),
+                assoc_source("Contained File", "files_in_datasets", ["dataset_id"], ["file_id"]),
                 orgs,
             ]}
         }
@@ -422,7 +420,7 @@ class CfdeDataPackage (object):
         orgs_e = dict(orgs)
         del orgs_e['aggregate']
         del orgs_e['array_display']
-        self.cat_model_root.table('CFDE', 'Dataset').visible_foreign_keys = {
+        self.cat_model_root.table('CFDE', 'dataset').visible_foreign_keys = {
             "*": [
                 orgs_e,
                 {
@@ -436,7 +434,7 @@ class CfdeDataPackage (object):
             ]
         }
 
-        self.cat_model_root.column('CFDE', 'Dataset', 'url').column_display["*"] = {
+        self.cat_model_root.column('CFDE', 'dataset', 'url').column_display["*"] = {
             "markdown_pattern": "[{{{url}}}]({{{url}}})"
         }
 
@@ -478,8 +476,8 @@ class CfdeDataPackage (object):
         })
 
     def load_dataset_ancestor_tables(self):
-        assoc_rows = self.catalog.get('/entity/DatasetsInDatasets').json()
-        ds_ids = [ row['id'] for row in self.catalog.get('/attributegroup/Dataset/id').json() ]
+        assoc_rows = self.catalog.get('/entity/datasets_in_datasets').json()
+        ds_ids = [ row['id'] for row in self.catalog.get('/attributegroup/dataset/id').json() ]
 
         contains = {} # ancestor -> {descendant, ...}
         contained = {} # descendant -> {ancestor, ...}
@@ -496,8 +494,8 @@ class CfdeDataPackage (object):
             add(contained, ds, ds)
 
         for row in assoc_rows:
-            child = row['ContainedDatasetID']
-            parent = row['ContainingDatasetID']
+            child = row['contained_dataset_id']
+            parent = row['containing_dataset_id']
             add(contains, parent, child)
             add(contained, child, parent)
             for descendant in contains.get(child, []):
@@ -514,7 +512,7 @@ class CfdeDataPackage (object):
         }
 
         self.catalog.post(
-            '/entity/Dataset_Ancestor_Reflexive',
+            '/entity/dataset_ancestor_reflexive',
             json=[
                 {"descendant": descendant, "ancestor": ancestor}
                 for descendant, ancestor in da_pairs
@@ -522,7 +520,7 @@ class CfdeDataPackage (object):
         )
 
         self.catalog.post(
-            '/entity/Dataset_Ancestor',
+            '/entity/dataset_ancestor',
             json=[
                 {"descendant": descendant, "ancestor": ancestor}
                 for descendant, ancestor in da_pairs
@@ -532,15 +530,13 @@ class CfdeDataPackage (object):
         )
 
     def load_denorm_tables(self):
-        query_prefix = '/attributegroup/D:=Dataset/FilesInDatasets/F:=File/GeneratedBy/DE:=DataEvent'
+        query_prefix = '/attributegroup/D:=dataset/files_in_datasets/F:=file/generated_by/DE:=data_event'
         for tname, cname, query in [
-                ('DataEvent', 'platform', '/dataset:=D:id,DE:platform'),
-                ('DataEvent', 'protocol', '/dataset:=D:id,DE:protocol'),
-                ('DataEvent', 'method', '/dataset:=D:id,DE:method'),
-                ('BioSample', 'sample_type', '/AssayedBy/B:=BioSample/dataset:=D:id,B:sample_type'),
+                ('data_event', 'protocol', '/dataset:=D:id,DE:protocol'),
+                ('bio_sample', 'sample_type', '/assayed_by/B:=bio_sample/dataset:=D:id,B:sample_type'),
         ]:
             rows = self.catalog.get("%s%s" % (query_prefix, query)).json()
-            self.catalog.post("/entity/Dataset_denorm_%s" % cname, json=rows).raise_for_status()
+            self.catalog.post("/entity/dataset_denorm_%s" % cname, json=rows).raise_for_status()
             logger.debug("Denormalization table for %s.%s loaded." % (tname, cname))
 
     def load_data_files(self):
@@ -644,7 +640,7 @@ def main(args):
             newcat.delete_ermrest_catalog(really=True)
             raise
 
-        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:Dataset'" % (
+        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:dataset'" % (
             servername,
             newcat.catalog_id,
         ))
