@@ -2,6 +2,8 @@
 
 * **Asset**
 
+**Asset**s include: a project, a subject, a sample, a data object created from an **Asset**
+
 * **CFDE Data Asset Manifest**
 
 A **CFDE Data Asset Manifest** consists of a list of **CFDE Data Asset Specification**s (see below) representing a collection of assets at a DCC.
@@ -22,5 +24,15 @@ The **CFDE Common Metadata Format** specifies a minimal set of attributes (metad
 
 * **Controlled Vocabulary**
 
+* **Data object**
+
+* **File**
+
 * **GUID**
+
+* **Project**
+
+* **Sample**
+
+* **Subject**
 
