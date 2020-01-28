@@ -2,15 +2,15 @@
 
 * **Asset**
 
-**Asset**s include: a project, a subject, a sample, a data object created from an **Asset**
+**Asset**: a sample or a file.
 
-* **CFDE Data Asset Manifest**
+* **CFDE Asset Manifest**
 
-A **CFDE Data Asset Manifest** consists of a list of **CFDE Data Asset Specification**s (see below) representing a collection of assets at a DCC.
+A **CFDE Asset Manifest** is a collection of **Asset**s described by the **CFDE Asset Specification**.
 
-* **CFDE Data Asset Specification**
+* **CFDE Asset Specification**
 
-The **CFDE Data Asset Specification** defines the set of attributes used to charaterize an **asset**.
+The **CFDE Asset Specification** defines the set of attributes used to charaterize an **asset**.
 
 ![data asset specification](https://user-images.githubusercontent.com/40363469/66134046-ac16bc80-e5c5-11e9-9b30-66407a3446e5.png)
 
