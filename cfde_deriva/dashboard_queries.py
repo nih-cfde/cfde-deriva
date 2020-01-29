@@ -39,17 +39,17 @@ class DashboardQueryHelper (object):
 
         """
         # trivial case: just return entities of a single table
-        return self.builder.CFDE.CommonFundProgram.path.entities().fetch()
+        return self.builder.CFDE.common_fund_program.path.entities().fetch()
 
     def list_infotypes(self):
         """Return list of information type terms
         """
-        return self.builder.CFDE.InformationType.path.entities().fetch()
+        return self.builder.CFDE.information_type.path.entities().fetch()
     
     def list_formats(self):
         """Return list of file format terms
         """
-        return self.builder.CFDE.FileFormat.path.entities().fetch()
+        return self.builder.CFDE.file_format.path.entities().fetch()
     
     def list_program_file_stats(self, programid=None):
         """Return list of file statistics per program.
@@ -63,17 +63,17 @@ class DashboardQueryHelper (object):
 
         """
         # more complex case: build joined table path
-        path = self.builder.CFDE.Dataset.path
+        path = self.builder.CFDE.dataset.path
         if programid is not None:
-            path.filter(path.Dataset.data_source == programid)
-        path.link(self.builder.CFDE.FilesInDatasets)
-        path.link(self.builder.CFDE.File)
+            path.filter(path.dataset.data_source == programid)
+        path.link(self.builder.CFDE.files_in_datasets)
+        path.link(self.builder.CFDE.file)
         # and return grouped aggregate results
         results = path.groupby(
-            path.Dataset.data_source,
+            path.dataset.data_source,
         ).attributes(
-            Cnt(path.File).alias('file_cnt'),
-            Sum(path.File.length).alias('byte_cnt'),
+            Cnt(path.file).alias('file_cnt'),
+            Sum(path.file.length).alias('byte_cnt'),
         )
         return results.fetch()
 
@@ -85,32 +85,32 @@ class DashboardQueryHelper (object):
         cagegories.
 
         """
-        path = self.builder.CFDE.SampleType.path
-        path.link(self.builder.CFDE.BioSample)
-        path.link(self.builder.CFDE.AssayedBy)
-        path.link(self.builder.CFDE.DataEvent)
-        path.link(self.builder.CFDE.GeneratedBy)
+        path = self.builder.CFDE.sample_type.path
+        path.link(self.builder.CFDE.bio_sample)
+        path.link(self.builder.CFDE.assayed_by)
+        path.link(self.builder.CFDE.data_event)
+        path.link(self.builder.CFDE.generated_by)
         # right-outer join so we can count files w/o this biosample/event linkage
         path.link(
-            self.builder.CFDE.File,
-            on=( path.GeneratedBy.FileID == self.builder.CFDE.File.id ),
+            self.builder.CFDE.file,
+            on=( path.GeneratedBy.file_id == self.builder.CFDE.file.id ),
             join_type='right'
         )
-        path.link(self.builder.CFDE.FilesInDatasets)
-        path.link(self.builder.CFDE.Dataset)
+        path.link(self.builder.CFDE.files_in_datasets)
+        path.link(self.builder.CFDE.dataset)
         
         if programid is not None:
-            path.filter(path.Dataset.data_source == programid)
+            path.filter(path.dataset.data_source == programid)
 
         results = path.groupby(
             # compound grouping key
-            path.Dataset.data_source,
-            path.BioSample.sample_type.alias('sample_type_id'),
+            path.dataset.data_source,
+            path.bio_sample.sample_type.alias('sample_type_id'),
         ).attributes(
             # 'name' is part of Table API so we cannot use attribute-based lookup...
-            path.SampleType.column_definitions['name'].alias('sample_type_name'),
-            Cnt(path.File).alias('file_cnt'),
-            Sum(path.File.length).alias('byte_cnt'),
+            path.sample_type.column_definitions['name'].alias('sample_type_name'),
+            Cnt(path.file).alias('file_cnt'),
+            Sum(path.file.length).alias('byte_cnt'),
         )
         
         return results.fetch()
@@ -162,28 +162,28 @@ class DashboardQueryHelper (object):
         min_ts, or with event_ts above max_ts, respectively.
 
         """
-        path = self.builder.CFDE.DataEvent.path
-        path.link(self.builder.CFDE.GeneratedBy)
+        path = self.builder.CFDE.data_event.path
+        path.link(self.builder.CFDE.generated_by)
         # right-outer join so we can count files w/o this dataevent linkage
         path.link(
-            self.builder.CFDE.File,
-            on=( path.GeneratedBy.FileID == self.builder.CFDE.File.id ),
+            self.builder.CFDE.file,
+            on=( path.generated_by.file_id == self.builder.CFDE.file.id ),
             join_type='right'
         )
-        path.link(self.builder.CFDE.FilesInDatasets)
-        path.link(self.builder.CFDE.Dataset)
+        path.link(self.builder.CFDE.files_in_datasets)
+        path.link(self.builder.CFDE.dataset)
 
         # build this list once so we can reuse it for grouping and sorting
         groupkey = [
-            path.Dataset.data_source,
-            Bin(path.DataEvent.event_ts, nbins, min_ts, max_ts).alias('ts_bin'),
+            path.dataset.data_source,
+            Bin(path.data_event.event_ts, nbins, min_ts, max_ts).alias('ts_bin'),
         ]
 
         results = path.groupby(
             *groupkey
         ).attributes(
-            Cnt(path.File.id).alias('file_cnt'),
-            Sum(path.File.length).alias('byte_cnt'),
+            Cnt(path.file.id).alias('file_cnt'),
+            Sum(path.file.length).alias('byte_cnt'),
         ).sort(
             *groupkey
         )
