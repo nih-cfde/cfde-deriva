@@ -2464,7 +2464,7 @@ bannedIDs = set()
 inFile = '001_raw_couchDB_JSON_backup_dump__2019_10_20/osdf-ihmp.igs.umaryland.edu_couchdb_2019-10-20.json'
 
 ##########################################################################################
-# Directory containing TSVs mapping named GTEx fields to terms in
+# Directory containing TSVs mapping named fields to terms in
 # third-party ontologies
 
 mapDir = '002_HMP_maps_from_HMP_enums_and_CVs_to_C2M2_controlled_vocabs'
