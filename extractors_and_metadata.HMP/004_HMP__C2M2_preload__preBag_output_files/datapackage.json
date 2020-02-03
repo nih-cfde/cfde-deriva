@@ -1,7 +1,7 @@
 {
    "profile": "tabular-data-package",
    "name": "table_schema_specs_for_c2m2_encoding_of_dcc_metadata",
-   "title": "A complete list of schematic specifications for the resources (tables) that will be used to represent DCC metadata prior to ingest into a CFDE C2M2 database instance.",
+   "title": "A complete list of schematic specifications for the resources (tables) that will be used to represent GTEx v7 (meta)data prior to ingest into a CFDE C2M2 database instance.",
    "resources": [
       {
          "profile": "tabular-data-resource",
@@ -567,28 +567,23 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "objects_in_datasets",
-         "title": "objects in datasets",
-         "path": "objects_in_datasets.tsv",
-         "description": "Association between an object (subject, subject_group, bio_sample, file or dataset) and a containing dataset",
+         "name": "bio_samples_in_datasets",
+         "title": "bio_samples in datasets",
+         "path": "bio_samples_in_datasets.tsv",
+         "description": "Association between a bio_sample and a dataset containing it",
          "schema": {
             "fields": [
                {
-                  "name": "id",
-                  "description": "The ID of a contained object",
+                  "name": "bio_sample_id",
+                  "description": "The ID of a contained bio_sample",
                   "type": "string",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "type",
-                  "description": "The (C2M2 table-name) type of the contained object",
-                  "type": "string"
-               },
-               {
-                  "name": "contained_in",
-                  "description": "The ID of a dataset containing the contained object",
+                  "name": "containing_dataset_id",
+                  "description": "The ID of a dataset containing the contained bio_sample",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -596,14 +591,169 @@
                }
             ],
             "primaryKey": [
-               "id",
-               "contained_in"
+               "bio_sample_id",
+               "containing_dataset_id"
             ],
             "foreignKeys": [
                {
-                  "fields": "contained_in",
+                  "fields": "bio_sample_id",
                   "reference": {
-                     "title": "containing dataset",
+                     "title": "contained bio_sample id",
+                     "resource": "bio_sample",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "containing_dataset_id",
+                  "reference": {
+                     "title": "containing dataset ID",
+                     "resource": "dataset",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datasets_in_datasets",
+         "title": "datasets in datasets",
+         "path": "datasets_in_datasets.tsv",
+         "description": "Association between a dataset and a dataset containing it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dataset_id",
+                  "description": "The ID of a contained dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "containing_dataset_id",
+                  "description": "The ID of a dataset containing the contained dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "dataset_id",
+               "containing_dataset_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "dataset_id",
+                  "reference": {
+                     "title": "contained dataset id",
+                     "resource": "dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "containing_dataset_id",
+                  "reference": {
+                     "title": "containing dataset ID",
+                     "resource": "dataset",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "files_in_datasets",
+         "title": "files in datasets",
+         "path": "files_in_datasets.tsv",
+         "description": "Association between a file and a dataset containing it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id",
+                  "description": "The ID of a contained file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "containing_dataset_id",
+                  "description": "The ID of a dataset containing the contained file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id",
+               "containing_dataset_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "file_id",
+                  "reference": {
+                     "title": "contained file id",
+                     "resource": "file",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "containing_dataset_id",
+                  "reference": {
+                     "title": "containing dataset ID",
+                     "resource": "dataset",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subjects_in_datasets",
+         "title": "subjects in datasets",
+         "path": "subjects_in_datasets.tsv",
+         "description": "Association between a subject and a dataset containing it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id",
+                  "description": "The ID of a contained subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "containing_dataset_id",
+                  "description": "The ID of a dataset containing the contained subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject_id",
+               "containing_dataset_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "subject_id",
+                  "reference": {
+                     "title": "contained subject id",
+                     "resource": "subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "containing_dataset_id",
+                  "reference": {
+                     "title": "containing dataset ID",
                      "resource": "dataset",
                      "fields": "id"
                   }

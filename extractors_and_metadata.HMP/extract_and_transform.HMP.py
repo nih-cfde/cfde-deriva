@@ -50,6 +50,14 @@ def die( errorMessage ):
 
 # end sub: die( errorMessage )
 
+# Print a logging message to STDERR.
+
+def progressReport( message ):
+   
+   print('%s' % message, file=sys.stderr)
+
+# end sub: progressReport( message )
+
 # Get banned nodeIDs for HMP DB: ignore test nodes and other such noise.
 
 def loadBannedIDs(  ):
@@ -1899,19 +1907,19 @@ def writeObjectsInDatasets(  ):
 
    global outDir, objectsInDatasets
 
-   outFile = '%s/objects_in_datasets.tsv' % outDir
-
-   with open(outFile, 'w') as OUT:
+   for nodeType in sorted(objectsInDatasets.keys()):
       
-      OUT.write( '\t'.join( ['id', 'type', 'contained_in' ] ) + '\n' )
+      outFile = '%s/%ss_in_datasets.tsv' % ( outDir, nodeType )
 
-      for nodeType in sorted(objectsInDatasets.keys()):
+      with open(outFile, 'w') as OUT:
          
+         OUT.write( '\t'.join( ['%s_id' % nodeType, 'containing_dataset_id' ] ) + '\n' )
+
          for objectID in sorted(objectsInDatasets[nodeType].keys()):
             
             for datasetID in sorted(objectsInDatasets[nodeType][objectID]):
                
-               OUT.write( '\t'.join( [objectID, nodeType, datasetID ] ) + '\n' )
+               OUT.write( '\t'.join( [objectID, datasetID ] ) + '\n' )
 
             #
          #
@@ -2808,6 +2816,8 @@ fullURL = {}
 
 # Make the output directory if it doesn't yet exist.
 
+progressReport("Creating output directory...")
+
 if not os.path.isdir(outDir) and os.path.exists(outDir):
    
    die('%s exists but is not a directory; aborting.' % outDir)
@@ -2818,14 +2828,20 @@ elif not os.path.isdir(outDir):
 
 # Load HMP DB node IDs to skip (test/junk nodes, etc.)
 
+progressReport("Loading banned node IDs...")
+
 loadBannedIDs()
 
 # Load functions mapping internal DCC-specific enums to terms
 # in pre-selected controlled vocabularies.
 
+progressReport("Loading enum map data...")
+
 loadEnumMaps()
 
 # Load the raw HMP metadata DB from its JSON dump file.
+
+progressReport("Loading HMP OSDF dump...")
 
 with open(inFile, 'r') as IN:
    
@@ -2835,83 +2851,123 @@ with open(inFile, 'r') as IN:
 
 # Flatten the data from the JSON dump for pre-serialization processing.
 
+progressReport("Flattening loaded JSON data...")
+
 flattenData()
 
 # Gather all data needed to serialize 'file' objects.
+
+progressReport("Building file table...")
 
 populateFiles()
 
 # Serialize all 'file' objects into a TSV.
 
+progressReport("Writing file table...")
+
 writeTable('file')
 
 # Gather all data needed to serialize 'bio_sample' objects.
+
+progressReport("Building bio_sample table...")
 
 populateBioSamples()
 
 # Serialize all 'bio_sample' objects into a TSV.
 
+progressReport("Writing bio_sample table...")
+
 writeTable('bio_sample')
 
 # Gather all data needed to serialize 'subject' objects.
 
+progressReport("Building subject table...")
+
 populateSubjects()
 
 # Serialize all 'subject' objects into a TSV.
+
+progressReport("Writing subject table...")
 
 writeTable('subject')
 
 # Process all HMP container structures which will be
 # mapped to C2M2 'dataset' objects.
 
+progressReport("Building dataset table...")
+
 populateDatasets()
 
 # Serialize all 'dataset' objects into a TSV.
+
+progressReport("Writing dataset table...")
 
 writeTable('dataset')
 
 # Process all native-HMP 'visit' data into data_event objects.
 
+progressReport("Processing visit data...")
+
 processVisits()
 
 # Hook up bio_sample objects to data_events in which they are used as inputs or outputs.
+
+progressReport("Linking bio_samples to data_events...")
 
 linkBioSamples()
 
 # Write the 'data_event' table.
 
+progressReport("Writing data_event table...")
+
 writeTable('data_event')
 
 # Process all containment links cached during previous passes.
+
+progressReport("Processing dataset containment relationships...")
 
 processDatasetContainment()
 
 # Serialize all info on dataset containment.
 
+progressReport("Writing all dataset containment tables...")
+
 writeObjectsInDatasets()
 
 # Write stub tables (headers) for subject_group and subjects_in_subject_groups, which we're not currently using.
+
+progressReport("Writing (stub) tables for subject_group tracking (currently unused)...")
 
 writeStubTables()
 
 # Manage 'sample_attr', 'subject_attr' and 'visit_attr' HMP data-decorator types.
 
+progressReport("Processing attr data decorations...")
+
 processAttrObjects()
 
 # Save data_event input/output processing linkage data.
+
+progressReport("Writing processed-by and produced-by tables...")
 
 writeProducedBy()
 writeProcessedBy()
 
 # Link subjects to their NCBI taxonomy designation (in this case, all are humans).
 
+progressReport("Writing subject-taxonomy table...")
+
 writeSubjectTaxonomy()
 
 # Decorate CV terms used with extra metadata (where available and relevant).
 
+progressReport("Decorating CV terms used with OBO data...")
+
 decorateTermsUsed()
 
 # Collect all CV terms used and save them in categorized tables.
+
+progressReport("Creating tables recording all CV terms used...")
 
 serializeTermsUsed()
 
@@ -2919,18 +2975,26 @@ serializeTermsUsed()
 # Create fake dates for file objects & store them in auxiliary_data.
 # Create three fake dates for each file: creation, repository insertion (e.g. SRA), and CFDE ingest.
 # We'll be decorating file objects from the three iHMP subprojects: IBDMDB, T2D and momspi.
+progressReport("Inserting fake creation/archive/repo dates for later query testing...")
+
 createFakeDates()
 # ABOVE IS FOR TESTING ONLY: DISABLE FOR HONEST DATA IMPORT
 
 # Dump all metadata that doesn't fit into C2M2 into a generic extension table.
 
+progressReport("Writing unlinked auxiliary-data table...")
+
 writeAuxTable()
 
 # Include the Table-Schema JSON document in the output for reference.
 
+progressReport("Copying JSON tableschema to bdbag data store...")
+
 os.system('cp ' + tableSchemaLoc + ' ' + outDir)
 
 # Make a BDBag for final delivery and rename it to remove local indexing info.
+
+progressReport("Making bdbag...")
 
 bagDir = re.sub(r'preBag_output_files', r'bdbag', re.sub(r'^\d+_', r'', outDir))
 
@@ -2945,6 +3009,8 @@ os.system('bdbag --quiet --archiver tgz ' + bagDir);
 os.system('bdbag --quiet --revert ' + bagDir);
 
 os.system('mv ' + bagDir + ' ' + outDir);
+
+progressReport("done!")
 
 """
 
