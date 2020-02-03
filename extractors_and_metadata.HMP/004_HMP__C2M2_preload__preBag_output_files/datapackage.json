@@ -1,7 +1,7 @@
 {
    "profile": "tabular-data-package",
    "name": "table_schema_specs_for_c2m2_encoding_of_dcc_metadata",
-   "title": "A complete list of schematic specifications for the resources (tables) that will be used to represent GTEx v7 (meta)data prior to ingest into a CFDE C2M2 database instance.",
+   "title": "A complete list of schematic specifications for the resources (tables) that will be used to represent DCC (meta)data prior to ingest into a CFDE C2M2 database instance.",
    "resources": [
       {
          "profile": "tabular-data-resource",
