@@ -763,28 +763,23 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "produced_by",
-         "title": "produced by",
-         "path": "produced_by.tsv",
-         "description": "Association between an object (bio_sample, file, or dataset) and the (unique) data_event that produced it",
+         "name": "bio_sample_produced_by",
+         "title": "bio_sample produced by data_event",
+         "path": "bio_sample_produced_by.tsv",
+         "description": "Association between a bio_sample and the (unique) data_event that produced it",
          "schema": {
             "fields": [
                {
-                  "name": "id",
-                  "description": "The ID of an object",
+                  "name": "bio_sample_id",
+                  "description": "The ID of a bio_sample",
                   "type": "string",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "type",
-                  "description": "The (C2M2 table-name) type of the object",
-                  "type": "string"
-               },
-               {
-                  "name": "produced_by",
-                  "description": "The ID of the (unique) data_event that produced the object identified in the first column",
+                  "name": "data_event_id",
+                  "description": "The ID of the (unique) data_event that produced the bio_sample identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -792,14 +787,22 @@
                }
             ],
             "primaryKey": [
-               "id",
-               "produced_by"
+               "bio_sample_id",
+               "data_event_id"
             ],
             "foreignKeys": [
                {
-                  "fields": "produced_by",
+                  "fields": "bio_sample_id",
                   "reference": {
-                     "title": "producing event",
+                     "title": "bio_sample ID",
+                     "resource": "bio_sample",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that produced this bio_sample",
                      "resource": "data_event",
                      "fields": "id"
                   }
@@ -809,28 +812,23 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "processed_by",
-         "title": "processed by",
-         "path": "processed_by.tsv",
-         "description": "Association between an object (bio_sample, file, or dataset) and a (not necessarily unique) data_event that processes it as an input",
+         "name": "file_produced_by",
+         "title": "file produced by data_event",
+         "path": "file_produced_by.tsv",
+         "description": "Association between a file and the (unique) data_event that produced it",
          "schema": {
             "fields": [
                {
-                  "name": "id",
-                  "description": "The ID of an object",
+                  "name": "file_id",
+                  "description": "The ID of a file",
                   "type": "string",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "type",
-                  "description": "The (C2M2 table-name) type of the object",
-                  "type": "string"
-               },
-               {
-                  "name": "processed_by",
-                  "description": "The ID of the data_event that processed the object identified in the first column",
+                  "name": "data_event_id",
+                  "description": "The ID of the (unique) data_event that produced the file identified in the first column",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -838,14 +836,218 @@
                }
             ],
             "primaryKey": [
-               "id",
-               "processed_by"
+               "file_id",
+               "data_event_id"
             ],
             "foreignKeys": [
                {
-                  "fields": "processed_by",
+                  "fields": "file_id",
                   "reference": {
-                     "title": "processing event",
+                     "title": "file ID",
+                     "resource": "file",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that produced this file",
+                     "resource": "data_event",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "bio_sample_processed_by",
+         "title": "bio_sample processed by data_event",
+         "path": "bio_sample_processed_by.tsv",
+         "description": "Association between a bio_sample and a (not necessarily unique) data_event that processes it as an input",
+         "schema": {
+            "fields": [
+               {
+                  "name": "bio_sample_id",
+                  "description": "The ID of a bio_sample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_event_id",
+                  "description": "The ID of a data_event that processed the bio_sample identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "bio_sample_id",
+               "data_event_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "bio_sample_id",
+                  "reference": {
+                     "title": "bio_sample ID",
+                     "resource": "bio_sample",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that processed this bio_sample",
+                     "resource": "data_event",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "dataset_processed_by",
+         "title": "dataset processed by data_event",
+         "path": "dataset_processed_by.tsv",
+         "description": "Association between a dataset and a (not necessarily unique) data_event that processes it as an input",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dataset_id",
+                  "description": "The ID of a dataset",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_event_id",
+                  "description": "The ID of a data_event that processed the dataset identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "dataset_id",
+               "data_event_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "dataset_id",
+                  "reference": {
+                     "title": "dataset ID",
+                     "resource": "dataset",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that processed this dataset",
+                     "resource": "data_event",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_processed_by",
+         "title": "file processed by data_event",
+         "path": "file_processed_by.tsv",
+         "description": "Association between a file and a (not necessarily unique) data_event that processes it as an input",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id",
+                  "description": "The ID of a file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_event_id",
+                  "description": "The ID of a data_event that processed the file identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id",
+               "data_event_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "file_id",
+                  "reference": {
+                     "title": "file ID",
+                     "resource": "file",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that processed this file",
+                     "resource": "data_event",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_processed_by",
+         "title": "subject processed by data_event",
+         "path": "subject_processed_by.tsv",
+         "description": "Association between a subject and a (not necessarily unique) data_event that processes it as an input",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id",
+                  "description": "The ID of a subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_event_id",
+                  "description": "The ID of a data_event that processed the subject identified in the first column",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject_id",
+               "data_event_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "subject_id",
+                  "reference": {
+                     "title": "subject ID",
+                     "resource": "subject",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_event_id",
+                  "reference": {
+                     "title": "ID of data_event that processed this subject",
                      "resource": "data_event",
                      "fields": "id"
                   }

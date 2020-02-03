@@ -1952,19 +1952,19 @@ def writeProducedBy(  ):
 
    # producedBy[nodeType][objectID] = eventID
 
-   outFile = '%s/produced_by.tsv' % outDir
-
-   with open(outFile, 'w') as OUT:
+   for nodeType in sorted(producedBy.keys()):
       
-      OUT.write( '\t'.join( ['id', 'type', 'produced_by' ] ) + '\n' )
+      outFile = '%s/%s_produced_by.tsv' % ( outDir, nodeType )
 
-      for nodeType in sorted(producedBy.keys()):
+      with open(outFile, 'w') as OUT:
          
+         OUT.write( '\t'.join( ['%s_id' % nodeType, 'data_event_id' ] ) + '\n' )
+
          for objectID in sorted(producedBy[nodeType].keys()):
             
             eventID = producedBy[nodeType][objectID]
 
-            OUT.write( '\t'.join( [objectID, nodeType, eventID ] ) + '\n' )
+            OUT.write( '\t'.join( [objectID, eventID ] ) + '\n' )
          #
       #
    #
@@ -1977,19 +1977,19 @@ def writeProcessedBy(  ):
 
    # processedBy[nodeType][objectID] = { eventID_1, eventID_2, ... }
 
-   outFile = '%s/processed_by.tsv' % outDir
-
-   with open(outFile, 'w') as OUT:
+   for nodeType in sorted(processedBy.keys()):
       
-      OUT.write( '\t'.join( ['id', 'type', 'processed_by' ] ) + '\n' )
+      outFile = '%s/%s_processed_by.tsv' % ( outDir, nodeType )
 
-      for nodeType in sorted(processedBy.keys()):
+      with open(outFile, 'w') as OUT:
          
+         OUT.write( '\t'.join( ['%s_id' % nodeType, 'data_event_id' ] ) + '\n' )
+
          for objectID in sorted(processedBy[nodeType].keys()):
             
             for eventID in sorted(processedBy[nodeType][objectID]):
                
-               OUT.write( '\t'.join( [objectID, nodeType, eventID ] ) + '\n' )
+               OUT.write( '\t'.join( [objectID, eventID ] ) + '\n' )
             #
          #
       #
