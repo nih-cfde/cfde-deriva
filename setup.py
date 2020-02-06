@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='cfde_deriva',
     description='CFDE Deriva Integration Utilities',
-    version='0.3',
+    version='0.4',
     packages=[
         'cfde_deriva',
     ],

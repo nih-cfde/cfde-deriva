@@ -227,7 +227,6 @@ class CfdeDataPackage (object):
                             { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
                             { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:bio_sample" % self.catalog._catalog_id },
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
-                            { "name": "Organization", "url": "/chaise/recordset/#%s/CFDE:organization" % self.catalog._catalog_id },
                             { "name": "Common Fund Program", "url": "/chaise/recordset/#%s/CFDE:common_fund_program" % self.catalog._catalog_id },
                         ]
                     }
@@ -336,33 +335,23 @@ class CfdeDataPackage (object):
         ]
 
         ds_to_file_flat = [
-            {"inbound": find_fkey("files_in_datasets", "dataset_id").names[0]},
+            {"inbound": find_fkey("files_in_datasets", "containing_dataset_id").names[0]},
             {"outbound": find_fkey("files_in_datasets", "file_id").names[0]},
         ]
 
         ds_to_file = dsa_to_dsd_r + ds_to_file_flat
 
         ds_to_devent = ds_to_file_flat + [
-            {"inbound": find_fkey("generated_by", "file_id").names[0]},
-            {"outbound": find_fkey("generated_by", "data_event_id").names[0]},
+            {"inbound": find_fkey("file_produced_by", "file_id").names[0]},
+            {"outbound": find_fkey("file_produced_by", "data_event_id").names[0]},
         ]
 
         ds_to_bsamp = ds_to_devent + [
-            {"inbound": find_fkey("assayed_by", "data_event_id").names[0]},
-            {"outbound": find_fkey("assayed_by", "bio_sample_id").names[0]},
+            {"inbound": find_fkey("bio_sample_processed_by", "data_event_id").names[0]},
+            {"outbound": find_fkey("bio_sample_processed_by", "bio_sample_id").names[0]},
         ]
         
         # improve Dataset with pseudo columns?
-        orgs = {
-            "source": [
-                {"inbound": find_fkey("produced_by", ["dataset_id"]).names[0]},
-                {"outbound": find_fkey("produced_by", ["organization_id"]).names[0]},
-                "RID"
-            ],
-            "markdown_name": "Organization",
-            "aggregate": "array_d",
-            "array_display": "ulist",
-        }
 
         program = {
             "source": [
@@ -373,7 +362,7 @@ class CfdeDataPackage (object):
             "open": True,
         }
         self.cat_model_root.table('CFDE', 'dataset').visible_columns = {
-            "compact": ["title", program, orgs, "description", "url"],
+            "compact": ["title", program, "description", "url"],
             "filter": {"and": [
                 program,
                 {
@@ -412,17 +401,12 @@ class CfdeDataPackage (object):
                 },
                 assoc_source("Containing Dataset", "dataset_ancestor", ["descendant"], ["ancestor"]),
                 assoc_source("Contained Dataset", "dataset_ancestor", ["ancestor"], ["descendant"]),
-                assoc_source("Contained File", "files_in_datasets", ["dataset_id"], ["file_id"]),
-                orgs,
+                assoc_source("Contained File", "files_in_datasets", ["containing_dataset_id"], ["file_id"]),
             ]}
         }
 
-        orgs_e = dict(orgs)
-        del orgs_e['aggregate']
-        del orgs_e['array_display']
         self.cat_model_root.table('CFDE', 'dataset').visible_foreign_keys = {
             "*": [
-                orgs_e,
                 {
                     "source": dsa_to_dsd + [ "RID" ],
                     "markdown_name": "Included Datasets",
@@ -434,8 +418,8 @@ class CfdeDataPackage (object):
             ]
         }
 
-        self.cat_model_root.column('CFDE', 'dataset', 'url').column_display["*"] = {
-            "markdown_pattern": "[{{{url}}}]({{{url}}})"
+        self.cat_model_root.column('CFDE', 'dataset', 'id').column_display["*"] = {
+            "markdown_pattern": "[{{{id}}}]({{{id}}})"
         }
 
         ## apply the above ACL and annotation changes to server
@@ -494,7 +478,7 @@ class CfdeDataPackage (object):
             add(contained, ds, ds)
 
         for row in assoc_rows:
-            child = row['contained_dataset_id']
+            child = row['dataset_id']
             parent = row['containing_dataset_id']
             add(contains, parent, child)
             add(contained, child, parent)
@@ -530,10 +514,10 @@ class CfdeDataPackage (object):
         )
 
     def load_denorm_tables(self):
-        query_prefix = '/attributegroup/D:=dataset/files_in_datasets/F:=file/generated_by/DE:=data_event'
+        query_prefix = '/attributegroup/D:=dataset/files_in_datasets/F:=file/file_produced_by/DE:=data_event'
         for tname, cname, query in [
                 ('data_event', 'protocol', '/dataset:=D:id,DE:protocol'),
-                ('bio_sample', 'sample_type', '/assayed_by/B:=bio_sample/dataset:=D:id,B:sample_type'),
+                ('bio_sample', 'sample_type', '/bio_sample_processed_by/B:=bio_sample/dataset:=D:id,B:sample_type'),
         ]:
             rows = self.catalog.get("%s%s" % (query_prefix, query)).json()
             self.catalog.post("/entity/dataset_denorm_%s" % cname, json=rows).raise_for_status()
