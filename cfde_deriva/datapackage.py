@@ -114,7 +114,7 @@ class CfdeDataPackage (object):
 
     def provision_denorm_tables(self):
         def dataset_property(srctable, srccolumn):
-            tname = 'Dataset_denorm_%s' % srccolumn.name
+            tname = 'dataset_denorm_%s' % srccolumn.name
             return (
                 tname,
                 Table.define(
