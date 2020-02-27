@@ -37,7 +37,7 @@
 
 **DERIVA** - Discovery Environment for Relational Information and Versioned Assets. A suite of tools and services that are designed to significantly reduce the overhead and complexity of creating and managing complex, big datasets. DERIVA provides a digital asset management system for scientific data to streamline the acquisition, modeling, management, and sharing of complex, big data, and provides interfaces so that these data can be delivered to diverse external tools for big-data analysis and analytic tools.
 
-**FAIR/FAIRness/FAIRshake**
+**FAIR/FAIRness/FAIRshake** 
 
 **Figshare** - an online open access repository where researchers can preserve and share their research outputs, including figures, datasets, images, and videos.
 
