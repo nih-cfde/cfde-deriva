@@ -1,0 +1,37 @@
+DATASET
+=======
+{'error-count': 0,
+ 'preset': 'nested',
+ 'table-count': 2,
+ 'time': 43.235,
+ 'valid': True}
+
+TABLE [1]
+=========
+{'datapackage': '002_HMP__C2M2_Level_0_preload__preBag_output_files/C2M2_Level_0.datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id_namespace',
+             'id',
+             'size_in_bytes',
+             'sha256',
+             'md5',
+             'persistent_id',
+             'filename'],
+ 'row-count': 133319,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/file.tsv',
+ 'time': 43.02,
+ 'valid': True}
+
+TABLE [2]
+=========
+{'datapackage': '002_HMP__C2M2_Level_0_preload__preBag_output_files/C2M2_Level_0.datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description'],
+ 'row-count': 2,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/namespace.tsv',
+ 'time': 0.01,
+ 'valid': True}
