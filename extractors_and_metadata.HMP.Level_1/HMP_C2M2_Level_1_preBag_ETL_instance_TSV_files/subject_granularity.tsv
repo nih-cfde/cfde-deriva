@@ -1,0 +1,9 @@
+id	name	description
+cfde_subject_granularity:0	single organism	One organism
+cfde_subject_granularity:1	host-pathogen system	A mixed system consisting of one host organism and one or more organisms acting as pathogens with respect to the host organism
+cfde_subject_granularity:2	symbiont system	A mixed system consisting of two or more organisms (symbionts) living in symbiosis: one such symbiont may optionally be identified as a host
+cfde_subject_granularity:3	host-associated microbiome	A microbiome associated with one host organism
+cfde_subject_granularity:4	environmental microbiome	A microbiome not associated with any host organism
+cfde_subject_granularity:5	single-organism cell line	A cell line derived from one species or strain
+cfde_subject_granularity:6	hybrid cell line	A cell line derived from multiple species or strains
+cfde_subject_granularity:7	synthetic	A synthetic biological entity
