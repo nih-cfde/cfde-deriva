@@ -415,7 +415,7 @@ def main(args):
             newcat.delete_ermrest_catalog(really=True)
             raise
 
-        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:dataset'" % (
+        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:collection'" % (
             servername,
             newcat.catalog_id,
         ))
