@@ -147,6 +147,8 @@ class CfdeDataPackage (object):
         # set custom chaise configuration values for this catalog
         self.cat_model_root.annotations[tag.chaise_config] = {
             #"navbarBrandText": "CFDE Data Browser",
+            "SystemColumnsDisplayCompact": [],
+            "SystemColumnsDisplayDetailed": [],
             "navbarMenu": {
                 "children": [
                     {
