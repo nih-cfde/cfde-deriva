@@ -313,7 +313,7 @@ class CfdeDataPackage (object):
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
                     entity_url = "/entity/CFDE:%s" % urlquote(table.name)
-                    batch_size = 50000  # TODO: Should this be configurable?
+                    batch_size = 10000  # TODO: Should this be configurable?
                     # Batch catalog ingests; too-large ingests will hang and fail
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
