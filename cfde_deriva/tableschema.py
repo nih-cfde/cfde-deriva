@@ -39,6 +39,13 @@ def make_column(cdef):
     cdef_name = cdef.pop("name")
     nullok = not constraints.pop("required", False)
     description = cdef.pop("description", None)
+    annotations = {
+        schema_tag: cdef,
+    }
+    pre_annotations = cdef.get("deriva", {})
+    for k, t in tag.items():
+        if k in pre_annotations:
+            annotations[t] = pre_annotations.pop(k)
     return Column.define(
         cdef_name,
         make_type(
@@ -47,9 +54,7 @@ def make_column(cdef):
         ),
         nullok=nullok,
         comment=description,
-        annotations={
-            schema_tag: cdef,
-        }
+        annotations=annotations
     )
 
 def make_id(*components):
@@ -102,6 +107,9 @@ def make_fkey(tname, fkdef):
     to_name = reference.pop("title", None)
     pkcols = reference.pop("fields")
     pkcols = [pkcols] if isinstance(pkcols, str) else pkcols
+    constraint_name = fkdef.pop("constraint_name", make_id(tname, fkcols, 'fkey'))
+    if len(constraint_name.encode('utf8')) > 63:
+        raise ValueError('Constraint name "%s" too long in %r' % (constraint_name, fkdef))
     annotations = {
         schema_tag: fkdef,
     }
@@ -112,7 +120,7 @@ def make_fkey(tname, fkdef):
         schema_name,
         pktable,
         pkcols,
-        constraint_names=[[ schema_name, make_id(tname, fkcols) ]],
+        constraint_names=[[ schema_name, constraint_name ]],
         annotations=annotations
     )
 
@@ -143,7 +151,7 @@ def make_table(tdef):
         system_fkeys = [
             ForeignKey.define(
                 [cname], 'public', 'ERMrest_Client', ['ID'],
-                constraint_names=[[ schema_name, make_id(tname, cname) ]]
+                constraint_names=[[ schema_name, make_id(tname, cname, 'fkey') ]]
             )
             for cname in ['RCB', 'RMB']
         ]
@@ -177,6 +185,10 @@ def make_table(tdef):
     }
     if title is not None:
         annotations[tag.display] = {"name": title}
+    pre_annotations = tdef_resource.get("deriva", {})
+    for k, t in tag.items():
+        if k in pre_annotations:
+            annotations[t] = pre_annotations.pop(k)
     return Table.define(
         tname,
         column_defs=system_columns + [
