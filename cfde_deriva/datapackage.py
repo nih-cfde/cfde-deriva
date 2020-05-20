@@ -84,74 +84,6 @@ class CfdeDataPackage (object):
         self.cat_model_root = self.catalog.getCatalogModel()
         self.cat_cfde_schema = self.cat_model_root.schemas.get('CFDE')
 
-    def provision_dataset_ancestor_tables(self):
-        def tdef(tname):
-            return Table.define(
-                tname,
-                [
-                    Column.define("descendant", builtin_types.text, nullok=False, comment="Contained dataset in transitive relationship."),
-                    Column.define("ancestor", builtin_types.text, nullok=False, comment="Containing dataset in transitive relationship."),
-                ],
-                [
-                    Key.define(["descendant", "ancestor"], constraint_names=[["CFDE", tname + "_assoc_key"]]),
-                ],
-                [
-                    ForeignKey.define(
-                        ["descendant"], "CFDE", "dataset", ["id"],
-                        constraint_names=[["CFDE", tname + "_descendant_fkey"]],
-                    ),
-                    ForeignKey.define(
-                        ["ancestor"], "CFDE", "dataset", ["id"],
-                        constraint_names=[["CFDE", tname + "_ancestor_fkey"]],
-                    ),
-                ],
-                comment="Flattened, transitive closure of nested DatasetsInDatasets relationship.",
-            )
-
-        if 'dataset_ancestor' not in self.cat_model_root.schemas['CFDE'].tables:
-            self.cat_model_root.schemas['CFDE'].create_table(tdef("dataset_ancestor"))
-            self.cat_model_root.schemas['CFDE'].create_table(tdef("dataset_ancestor_reflexive"))
-
-    def provision_denorm_tables(self):
-        def dataset_property(srctable, srccolumn):
-            tname = 'dataset_denorm_%s' % srccolumn.name
-            return (
-                tname,
-                Table.define(
-                    tname,
-                    [
-                        Column.define("dataset", builtin_types.text, nullok=False),
-                        Column.define(srccolumn.name, builtin_types.text, srccolumn.nullok),
-                    ],
-                    [
-                        Key.define(["dataset", srccolumn.name]),
-                    ],
-                    [
-                        ForeignKey.define(
-                            ["dataset"], "CFDE", "dataset", ["id"],
-                            constraint_names=[["CFDE", "%s_ds_fkey" % tname]],
-                        )
-                    ] +  [
-                        ForeignKey.define(
-                            [srccolumn.name], 'CFDE', fkey.referenced_columns[0].table.name, [ c.name for c in fkey.referenced_columns ],
-                            constraint_names=[['CFDE', '%s_prop_fkey' % tname]]
-                        )
-                        for fkey in srctable.foreign_keys
-                        if {srccolumn.name} == set([ c.name for c in fkey.foreign_key_columns ])
-                    ],
-                )
-            )
-
-        for tname, cname in [
-                ('data_event', 'protocol'),
-                ('bio_sample', 'sample_type'),
-        ]:
-            tab = self.cat_model_root.table('CFDE', tname)
-            col = tab.column_definitions.elements[cname]
-            tname, tdef = dataset_property(tab, col)
-            if tname not in self.cat_model_root.schemas['CFDE'].tables:
-                self.cat_model_root.schemas['CFDE'].create_table(tdef)
-
     def provision(self):
         if 'CFDE' not in self.cat_model_root.schemas:
             # blindly load the whole model on an apparently empty catalog
@@ -192,14 +124,20 @@ class CfdeDataPackage (object):
                 logger.debug("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
 
         self.get_model()
-        self.provision_dataset_ancestor_tables()
-        self.provision_denorm_tables()
 
     def apply_custom_config(self):
         self.get_model()
 
         for schema in self.cat_model_root.schemas.values():
+            doc_schema = self.doc_model_root.schemas.get(schema.name)
             for table in schema.tables.values():
+                doc_table = doc_schema.tables.get(table.name) if doc_schema is not None else None
+                if doc_table is not None:
+                    table.annotations.update(doc_table.annotations)
+                for column in table.columns:
+                    doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
+                    if doc_column is not None:
+                        column.annotations.update(doc_column.annotations)
                 if table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
@@ -217,17 +155,18 @@ class CfdeDataPackage (object):
         # set custom chaise configuration values for this catalog
         self.cat_model_root.annotations[tag.chaise_config] = {
             #"navbarBrandText": "CFDE Data Browser",
+            "SystemColumnsDisplayCompact": [],
+            "SystemColumnsDisplayDetailed": [],
             "navbarMenu": {
                 "children": [
                     {
                         "name": "Browse",
                         "children": [
-                            { "name": "Dataset", "url": "/chaise/recordset/#%s/CFDE:dataset" % self.catalog._catalog_id },
-                            { "name": "Data Event", "url": "/chaise/recordset/#%s/CFDE:data_event" % self.catalog._catalog_id },
+                            { "name": "Collection", "url": "/chaise/recordset/#%s/CFDE:collection" % self.catalog._catalog_id },
                             { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
-                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:bio_sample" % self.catalog._catalog_id },
+                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
-                            { "name": "Common Fund Program", "url": "/chaise/recordset/#%s/CFDE:common_fund_program" % self.catalog._catalog_id },
+                            { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
                         ]
                     }
                 ]
@@ -267,7 +206,7 @@ class CfdeDataPackage (object):
             return [
                 fkey.names[0]
                 for fkey in table.referenced_by
-                if not fkey.table.name.startswith("dataset_denorm")
+                #if not fkey.table.name.startswith("dataset_denorm")
             ]
 
         for table in self.cat_cfde_schema.tables.values():
@@ -277,7 +216,7 @@ class CfdeDataPackage (object):
             table.comment = ntable.comment
             table.display.update(ntable.display)
             for column in table.column_definitions:
-                if column.name in {'id', 'url', 'md5'}:
+                if column.name in {'id', 'url', 'md5', 'sha256'}:
                     # set these acronyms to all-caps
                     column.display["name"] = column.name.upper()
                 ncolumn = ntable.column_definitions.elements.get(column.name)
@@ -295,7 +234,7 @@ class CfdeDataPackage (object):
                     fkey.foreign_key.update(nfkey.foreign_key)
                 except KeyError:
                     continue
-            table.visible_columns = {'compact': compact_visible_columns(table)}
+            #table.visible_columns = {'compact': compact_visible_columns(table)}
             table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
         # prettier display of built-in ERMrest_Client table entries
@@ -306,6 +245,12 @@ class CfdeDataPackage (object):
         )
 
         def find_fkey(from_tname, from_cnames):
+            """Find sole fkey constraint governing column names in named "from" table.
+
+            Raises ValueError if column names set is governed by more
+            than one constraint.
+
+            """
             from_table = self.cat_model_root.table("CFDE", from_tname)
             if isinstance(from_cnames, str):
                 from_cnames = [from_cnames]
@@ -315,6 +260,8 @@ class CfdeDataPackage (object):
             return fkeys[0]
 
         def assoc_source(markdown_name, assoc_table, left_columns, right_columns):
+            """Build facet/pseudo column document structure to walk named association.
+            """
             return {
                 "source": [
                     {"inbound": find_fkey(assoc_table, left_columns).names[0]},
@@ -323,104 +270,6 @@ class CfdeDataPackage (object):
                 ],
                 "markdown_name": markdown_name,
             }
-
-        dsa_to_dsd = [
-            {"inbound": find_fkey("dataset_ancestor", "ancestor").names[0]},
-            {"outbound": find_fkey("dataset_ancestor", "descendant").names[0]},
-        ]
-
-        dsa_to_dsd_r = [
-            {"inbound": find_fkey("dataset_ancestor_reflexive", "ancestor").names[0]},
-            {"outbound": find_fkey("dataset_ancestor_reflexive", "descendant").names[0]},
-        ]
-
-        ds_to_file_flat = [
-            {"inbound": find_fkey("files_in_datasets", "containing_dataset_id").names[0]},
-            {"outbound": find_fkey("files_in_datasets", "file_id").names[0]},
-        ]
-
-        ds_to_file = dsa_to_dsd_r + ds_to_file_flat
-
-        ds_to_devent = ds_to_file_flat + [
-            {"inbound": find_fkey("file_produced_by", "file_id").names[0]},
-            {"outbound": find_fkey("file_produced_by", "data_event_id").names[0]},
-        ]
-
-        ds_to_bsamp = ds_to_devent + [
-            {"inbound": find_fkey("bio_sample_processed_by", "data_event_id").names[0]},
-            {"outbound": find_fkey("bio_sample_processed_by", "bio_sample_id").names[0]},
-        ]
-        
-        # improve Dataset with pseudo columns?
-
-        program = {
-            "source": [
-                {"outbound": find_fkey("dataset", ["data_source"]).names[0]},
-                "RID"
-            ],
-            "markdown_name": "Common Fund Program",
-            "open": True,
-        }
-        self.cat_model_root.table('CFDE', 'dataset').visible_columns = {
-            "compact": ["title", program, "description", "url"],
-            "filter": {"and": [
-                program,
-                {
-                    "markdown_name": "Data Method",
-                    "source": [
-                        {"inbound": ["CFDE", "dataset_denorm_method_ds_fkey"]},
-                        {"outbound": ["CFDE", "dataset_denorm_method_prop_fkey"]},
-                        "RID",
-                    ],
-                    "open": True,
-                },
-                {
-                    "markdown_name": "Data Platform",
-                    "source": [
-                        {"inbound": ["CFDE", "dataset_denorm_platform_ds_fkey"]},
-                        {"outbound": ["CFDE", "dataset_denorm_platform_prop_fkey"]},
-                        "RID",
-                    ],
-                },
-                {
-                    "markdown_name": "Data Protocol",
-                    "source": [
-                        {"inbound": ["CFDE", "dataset_denorm_protocol_ds_fkey"]},
-                        {"outbound": ["CFDE", "dataset_denorm_protocol_prop_fkey"]},
-                        "RID",
-                    ],
-                },
-                {
-                    "markdown_name": "Biosample Type",
-                    "source": [
-                        {"inbound": ["CFDE", "dataset_denorm_sample_type_ds_fkey"]},
-                        {"outbound": ["CFDE", "dataset_denorm_sample_type_prop_fkey"]},
-                        "RID",
-                    ],
-                    "open": True,
-                },
-                assoc_source("Containing Dataset", "dataset_ancestor", ["descendant"], ["ancestor"]),
-                assoc_source("Contained Dataset", "dataset_ancestor", ["ancestor"], ["descendant"]),
-                assoc_source("Contained File", "files_in_datasets", ["containing_dataset_id"], ["file_id"]),
-            ]}
-        }
-
-        self.cat_model_root.table('CFDE', 'dataset').visible_foreign_keys = {
-            "*": [
-                {
-                    "source": dsa_to_dsd + [ "RID" ],
-                    "markdown_name": "Included Datasets",
-                },
-                {
-                    "source": ds_to_file + [ "RID" ],
-                    "markdown_name": "Included Files",
-                }
-            ]
-        }
-
-        self.cat_model_root.column('CFDE', 'dataset', 'id').column_display["*"] = {
-            "markdown_pattern": "[{{{id}}}]({{{id}}})"
-        }
 
         ## apply the above ACL and annotation changes to server
         self.cat_model_root.apply()
@@ -459,70 +308,6 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
-    def load_dataset_ancestor_tables(self):
-        assoc_rows = self.catalog.get('/entity/datasets_in_datasets').json()
-        ds_ids = [ row['id'] for row in self.catalog.get('/attributegroup/dataset/id').json() ]
-
-        contains = {} # ancestor -> {descendant, ...}
-        contained = {} # descendant -> {ancestor, ...}
-
-        def add(d, k, v):
-            if k not in d:
-                d[k] = set([v])
-            else:
-                d[k].add(v)
-
-        # reflexive links
-        for ds in ds_ids:
-            add(contains, ds, ds)
-            add(contained, ds, ds)
-
-        for row in assoc_rows:
-            child = row['dataset_id']
-            parent = row['containing_dataset_id']
-            add(contains, parent, child)
-            add(contained, child, parent)
-            for descendant in contains.get(child, []):
-                add(contains, parent, descendant)
-                add(contained, descendant, parent)
-            for ancestor in contained.get(parent, []):
-                add(contains, ancestor, child)
-                add(contained, child, ancestor)
-
-        da_pairs = {
-            (descendant, ancestor)
-            for descendant, ancestors in contained.items()
-            for ancestor in ancestors
-        }
-
-        self.catalog.post(
-            '/entity/dataset_ancestor_reflexive',
-            json=[
-                {"descendant": descendant, "ancestor": ancestor}
-                for descendant, ancestor in da_pairs
-            ],
-        )
-
-        self.catalog.post(
-            '/entity/dataset_ancestor',
-            json=[
-                {"descendant": descendant, "ancestor": ancestor}
-                for descendant, ancestor in da_pairs
-                # drop reflexive pairs
-                if descendant != ancestor
-            ],
-        )
-
-    def load_denorm_tables(self):
-        query_prefix = '/attributegroup/D:=dataset/files_in_datasets/F:=file/file_produced_by/DE:=data_event'
-        for tname, cname, query in [
-                ('data_event', 'protocol', '/dataset:=D:id,DE:protocol'),
-                ('bio_sample', 'sample_type', '/bio_sample_processed_by/B:=bio_sample/dataset:=D:id,B:sample_type'),
-        ]:
-            rows = self.catalog.get("%s%s" % (query_prefix, query)).json()
-            self.catalog.post("/entity/dataset_denorm_%s" % cname, json=rows).raise_for_status()
-            logger.debug("Denormalization table for %s.%s loaded." % (tname, cname))
-
     def load_data_files(self):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
@@ -536,7 +321,7 @@ class CfdeDataPackage (object):
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
                     entity_url = "/entity/CFDE:%s" % urlquote(table.name)
-                    batch_size = 50000  # TODO: Should this be configurable?
+                    batch_size = 10000  # TODO: Should this be configurable?
                     # Batch catalog ingests; too-large ingests will hang and fail
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
@@ -632,17 +417,13 @@ def main(args):
             for dp in datapackages:
                 dp.load_data_files()
 
-            ## compute transitive-closure relationships
-            datapackages[0].load_dataset_ancestor_tables()
-            datapackages[0].load_denorm_tables()
-
             print("All data packages loaded.")
         except Exception as e:
             print('Provisioning failed: %s.\nDeleting catalog...' % e)
             newcat.delete_ermrest_catalog(really=True)
             raise
 
-        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:dataset'" % (
+        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:collection'" % (
             servername,
             newcat.catalog_id,
         ))

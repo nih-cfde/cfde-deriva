@@ -5,6 +5,8 @@
 import os
 import sys
 import json
+import hashlib
+import base64
 from deriva.core import tag
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
@@ -37,6 +39,13 @@ def make_column(cdef):
     cdef_name = cdef.pop("name")
     nullok = not constraints.pop("required", False)
     description = cdef.pop("description", None)
+    annotations = {
+        schema_tag: cdef,
+    }
+    pre_annotations = cdef.get("deriva", {})
+    for k, t in tag.items():
+        if k in pre_annotations:
+            annotations[t] = pre_annotations.pop(k)
     return Column.define(
         cdef_name,
         make_type(
@@ -45,15 +54,48 @@ def make_column(cdef):
         ),
         nullok=nullok,
         comment=description,
-        annotations={
-            schema_tag: cdef,
-        }
+        annotations=annotations
     )
+
+def make_id(*components):
+    """Build an identifier that will be OK for ERMrest and Postgres.
+
+    Naively, append as '_'.join(components).
+
+    Fallback to ugly hashing to try to shorten long identifiers.
+    """
+    expanded = []
+    for e in components:
+        if isinstance(e, list):
+            expanded.extend(e)
+        else:
+            expanded.append(e)
+    result = '_'.join(expanded)
+    if len(result.encode('utf8')) <= 63:
+        # happy path, use naive name as requested
+        return result
+    else:
+        # we have to shorten this id
+        truncate_threshold = 4
+        def helper(e):
+            if len(e) <= truncate_threshold:
+                # retain short elements
+                return e
+            else:
+                # replace long elements with truncated MD5 hash
+                h = hashlib.md5()
+                h.update(e.encode('utf8'))
+                return base64.b64encode(h.digest()).decode()[0:truncate_threshold]
+        truncated = [ helper(e) for e in expanded ]
+        result = '_'.join(truncated)
+        if len(result.encode('utf8')) <= 63:
+            return result
+    raise NotImplementedError('Could not generate valid ID for components "%r"' % expanded)
 
 def make_key(tname, cols):
     return Key.define(
         cols,
-        constraint_names=[ [schema_name, "%s_%s_key" % (tname, "_".join(cols))] ],
+        constraint_names=[[ schema_name, make_id(tname, cols, 'key') ]],
     )
 
 def make_fkey(tname, fkdef):
@@ -65,6 +107,9 @@ def make_fkey(tname, fkdef):
     to_name = reference.pop("title", None)
     pkcols = reference.pop("fields")
     pkcols = [pkcols] if isinstance(pkcols, str) else pkcols
+    constraint_name = fkdef.pop("constraint_name", make_id(tname, fkcols, 'fkey'))
+    if len(constraint_name.encode('utf8')) > 63:
+        raise ValueError('Constraint name "%s" too long in %r' % (constraint_name, fkdef))
     annotations = {
         schema_tag: fkdef,
     }
@@ -75,7 +120,7 @@ def make_fkey(tname, fkdef):
         schema_name,
         pktable,
         pkcols,
-        constraint_names=[ [schema_name, "%s_%s_fkey" % (tname, "_".join(fkcols))] ],
+        constraint_names=[[ schema_name, constraint_name ]],
         annotations=annotations
     )
 
@@ -106,7 +151,7 @@ def make_table(tdef):
         system_fkeys = [
             ForeignKey.define(
                 [cname], 'public', 'ERMrest_Client', ['ID'],
-                constraint_names=[['CFDE', '%s_%s_fkey' % (tname, cname)]]
+                constraint_names=[[ schema_name, make_id(tname, cname, 'fkey') ]]
             )
             for cname in ['RCB', 'RMB']
         ]
@@ -140,6 +185,10 @@ def make_table(tdef):
     }
     if title is not None:
         annotations[tag.display] = {"name": title}
+    pre_annotations = tdef_resource.get("deriva", {})
+    for k, t in tag.items():
+        if k in pre_annotations:
+            annotations[t] = pre_annotations.pop(k)
     return Table.define(
         tname,
         column_defs=system_columns + [
