@@ -277,12 +277,12 @@ termsUsed = {
 fileToColumnToCategory = {
    
    'file.tsv': {
-      9: 'file_format',
-      10: 'data_type'
+      10: 'file_format',
+      11: 'data_type'
    },
    'biosample.tsv': {
-      5: 'assay_type',
-      6: 'anatomy'
+      6: 'assay_type',
+      7: 'anatomy'
    }
 }
 

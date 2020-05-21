@@ -371,9 +371,11 @@ def populateFiles(  ):
          objectsToWrite['file'][currentID] = {}
 
          #----------------------------------------------------------------------
-         # This value is a constant across all HMP metadata.
+         # These values are constant across all HMP metadata.
 
          objectsToWrite['file'][currentID]['id_namespace'] = idNamespace
+
+         objectsToWrite['file'][currentID]['project_id_namespace'] = idNamespace
 
          #----------------------------------------------------------------------
          # We'll fill this in later after some needed transitive-association
@@ -914,9 +916,11 @@ def populateBiosamples(  ):
          objectsToWrite['biosample'][currentID] = {}
 
          #----------------------------------------------------------------------
-         # This value is a constant across all HMP metadata.
+         # These values are constant across all HMP metadata.
 
          objectsToWrite['biosample'][currentID]['id_namespace'] = idNamespace
+
+         objectsToWrite['biosample'][currentID]['project_id_namespace'] = idNamespace
 
          #----------------------------------------------------------------------
          # We'll fill this in later after some needed transitive-association
@@ -1069,9 +1073,11 @@ def populateSubjects(  ):
          objectsToWrite['subject'][currentID] = {}
 
          #----------------------------------------------------------------------
-         # This value is a constant across all HMP metadata.
+         # These values are constant across all HMP metadata.
 
          objectsToWrite['subject'][currentID]['id_namespace'] = idNamespace
+         
+         objectsToWrite['subject'][currentID]['project_id_namespace'] = idNamespace
 
          #----------------------------------------------------------------------
          # We'll fill this in later after some needed transitive-association
@@ -1618,7 +1624,7 @@ def writeProjectInProject(  ):
 
             first = False
 
-            if colName == 'id_namespace':
+            if re.search(r'id_namespace$', colName) is not None:
                
                OUT.write( idNamespace )
                
@@ -1678,7 +1684,7 @@ def writePairwiseAssociationTables(  ):
             
             for patientID in entityAssociations[tableName][agentID]:
                
-               OUT.write( '\t'.join( [ idNamespace, agentID, patientID ] ) + '\n')
+               OUT.write( '\t'.join( [ idNamespace, agentID, idNamespace, patientID ] ) + '\n')
 
 #-----------------------------------------------------------------------------------------
 # end sub writePairwiseAssociationTables(  )
@@ -2032,6 +2038,7 @@ outputColumns = {
    'file': [
       'id_namespace',
       'id',
+      'project_id_namespace',
       'project',
       'persistent_id',
       'creation_time',
@@ -2045,6 +2052,7 @@ outputColumns = {
    'biosample': [
       'id_namespace',
       'id',
+      'project_id_namespace',
       'project',
       'persistent_id',
       'creation_time',
@@ -2054,6 +2062,7 @@ outputColumns = {
    'subject': [
       'id_namespace',
       'id',
+      'project_id_namespace',
       'project',
       'persistent_id',
       'creation_time',
@@ -2068,8 +2077,9 @@ outputColumns = {
       'description'
    ],
    'project_in_project':  [
-      'id_namespace',
+      'parent_project_id_namespace',
       'parent_project_id',
+      'child_project_id_namespace',
       'child_project_id'
    ],
    'collection': [
@@ -2081,9 +2091,9 @@ outputColumns = {
       'description'
    ],
    'collection_in_collection': [
-      'superset_id_namespace',
+      'superset_collection_id_namespace',
       'superset_collection_id',
-      'subset_id_namespace',
+      'subset_collection_id_namespace',
       'subset_collection_id'
    ],
    'file_in_collection': [
@@ -2105,22 +2115,25 @@ outputColumns = {
       'collection_id'
    ],
    'file_describes_biosample': [
-      'id_namespace',
+      'file_id_namespace',
       'file_id',
+      'biosample_id_namespace',
       'biosample_id'
    ],
    'file_describes_subject': [
-      'id_namespace',
+      'file_id_namespace',
       'file_id',
+      'subject_id_namespace',
       'subject_id'
    ],
    'biosample_from_subject': [
-      'id_namespace',
+      'biosample_id_namespace',
       'biosample_id',
+      'subject_id_namespace',
       'subject_id'
    ],
    'subject_role_taxonomy': [
-      'id_namespace',
+      'subject_id_namespace',
       'subject_id',
       'role_id',
       'taxonomy_id'

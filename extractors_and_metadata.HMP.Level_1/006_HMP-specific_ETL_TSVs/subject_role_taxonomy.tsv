@@ -1,4 +1,4 @@
-id_namespace	subject_id	role_id	taxonomy_id
+subject_id_namespace	subject_id	role_id	taxonomy_id
 cfde_id_namespace:2	1419f08f554e0c93f3b62fe90c0042c3	cfde_subject_role:0	NCBI:txid9606
 cfde_id_namespace:2	1419f08f554e0c93f3b62fe90c0055f0	cfde_subject_role:0	NCBI:txid9606
 cfde_id_namespace:2	1419f08f554e0c93f3b62fe90c006f32	cfde_subject_role:0	NCBI:txid9606
