@@ -1,0 +1,315 @@
+{
+   "profile": "tabular-data-package",
+   "name": "denormalized_table_specs_for_level_1_c2m2",
+   "title": "A list of derived tables to augment C2M2 Level 1 metadata for seach and display purposes",
+   "resource": [
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_subject_granularity",
+         "title": "file_subject_granularity",
+         "description": "Collapsed association of subject-granularities for subjects described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "granularity",
+                  "description": "A CFDE CV term categorizing described subject by multiplicity",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_id",
+               "subject_granularity"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_id" ],
+                  "constraint_name": "file_subject_granularity_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "file_subject_granularity_granularity_fkey",
+                  "reference": {
+                     "title": "Subject Granularity",
+                     "resource": "subject_granularity",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_subject_granularity.sql"
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_subject_role_taxonomy",
+         "title": "file_subject_role_taxonomy",
+         "description": "Collapsed association of subject-role-taxonomies for subjects described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_role_id",
+                  "description": "The ID of the role assigned to this organism-level constituent component of described subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_taxonomy_id",
+                  "description": "An NCBI Taxonomy Database ID identifying taxon of described subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_id",
+               "granularity"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_id" ],
+                  "constraint_name": "file_subject_granularity_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "subject_role_id",
+                  "constraint_name": "file_subject_role_taxonomy_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "subject_taxonomy_id",
+                  "constraint_name": "file_subject_role_taxonomy_taxonomy_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_subject_role_taxonomy.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_biosample_creation_time",
+         "title": "file_biosample_creation_time",
+         "description": "Collapsed association of biosample-creation-times for biosamples described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "biosample_creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_id",
+               "biosample_creation_time"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_id" ],
+                  "constraint_name": "file_biosample_creation_time_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_biosample_creation_time.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_assay_type",
+         "title": "file_assay_type",
+         "description": "Collapsed association of assay-types described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "An OBI CV term ID describing the type of material represented by this file",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^OBI:[0-9]+$"
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_id",
+               "assay_type"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_id" ],
+                  "constraint_name": "file_assay_type_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "file_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_assay_type.sql"
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_anatomy",
+         "title": "file_anatomy",
+         "description": "Collapsed association of anatomies described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^UBERON:[0-9]+$"
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_id",
+               "anatomy"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_id" ],
+                  "constraint_name": "file_anatomy_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "file_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_anatomy.sql"
+      },
+   ]
+}
