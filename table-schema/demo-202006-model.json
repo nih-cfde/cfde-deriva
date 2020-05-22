@@ -34,6 +34,14 @@
                   }
                },
                {
+                  "name": "project_id_namespace",
+                  "description": "ID of the identifier namespace for the primary project within which this file was created",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "project",
                   "description": "Foreign key identifying the primary project within which this file was created",
                   "type": "string",
@@ -101,15 +109,15 @@
             "primaryKey": [ "id_namespace", "id" ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace" ],
+                  "fields": "id_namespace",
                   "constraint_name": "file_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": [ "id" ]
+                     "fields": "id"
                   }
                },
                {
-                  "fields": [ "id_namespace", "project" ],
+                  "fields": [ "project_id_namespace", "project" ],
                   "constraint_name": "file_project_fkey",
                   "reference": {
                      "resource": "project",
@@ -201,6 +209,14 @@
                   }
                },
                {
+                  "name": "project_id_namespace",
+                  "description": "ID of the identifier namespace for the primary project within which this biosample was created",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "project",
                   "description": "Foreign key identifying the primary project within which this biosample was created",
                   "type": "string",
@@ -243,7 +259,15 @@
             "primaryKey": [ "id_namespace", "id" ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "project" ],
+                  "fields": "id_namespace",
+                  "constraint_name": "biosample_id_namespace_fkey",
+                  "reference": {
+                     "resource": "id_namespace",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project" ],
                   "constraint_name": "biosample_project_fkey",
                   "reference": {
                      "resource": "project",
@@ -293,6 +317,14 @@
                   }
                },
                {
+                  "name": "project_id_namespace",
+                  "description": "ID of the identifier namespace for the primary project within which this subject was observed",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "project",
                   "description": "Foreign key identifying the primary project within which this subject was observed",
                   "type": "string",
@@ -327,7 +359,15 @@
             "primaryKey": [ "id_namespace", "id" ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "project" ],
+                  "fields": "id_namespace",
+                  "constraint_name": "subject_id_namespace_fkey",
+                  "reference": {
+                     "resource": "id_namespace",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project" ],
                   "constraint_name": "subject_project_fkey",
                   "reference": {
                      "resource": "project",
@@ -416,8 +456,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this parent-child project pair",
+                  "name": "parent_project_id_namespace",
+                  "description": "ID of the identifier namespace for the parent in this parent-child project pair",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -426,6 +466,14 @@
                {
                   "name": "parent_project_id",
                   "description": "The ID of the containing (parent) project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "child_project_id_namespace",
+                  "description": "ID of the identifier namespace for the child in this parent-child project pair",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -441,13 +489,14 @@
                }
             ],
             "primaryKey": [
-               "id_namespace",
+               "parent_project_id_namespace",
                "parent_project_id",
+               "child_project_id_namespace",
                "child_project_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "parent_project_id" ],
+                  "fields": [ "parent_project_id_namespace", "parent_project_id" ],
                   "constraint_name": "project_in_project_parent_fkey",
                   "reference": {
                      "title": "Parent Project",
@@ -456,7 +505,7 @@
                   }
                },
                {
-                  "fields": [ "id_namespace", "child_project_id" ],
+                  "fields": [ "child_project_id_namespace", "child_project_id" ],
                   "constraint_name": "project_in_project_child_fkey",
                   "reference": {
                      "title": "Child Project",
@@ -538,8 +587,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "superset_id_namespace",
-                  "description": "URI of the identifier namespace corresponding to the top-level C2M2 metadataset containing the superset collection",
+                  "name": "superset_collection_id_namespace",
+                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the superset collection",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -554,8 +603,8 @@
                   }
                },
                {
-                  "name": "subset_id_namespace",
-                  "description": "URI of the identifier namespace corresponding to the top-level C2M2 metadataset containing the subset collection",
+                  "name": "subset_collection_id_namespace",
+                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the subset collection",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -571,14 +620,14 @@
                }
             ],
             "primaryKey": [
-               "superset_id_namespace",
+               "superset_collection_id_namespace",
                "superset_collection_id",
-               "subset_id_namespace",
+               "subset_collection_id_namespace",
                "subset_collection_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "superset_id_namespace", "superset_collection_id" ],
+                  "fields": [ "superset_collection_id_namespace", "superset_collection_id" ],
                   "constraint_name": "collection_in_collection_superset_fkey",
                   "reference": {
                      "title": "Superset Collection",
@@ -587,7 +636,7 @@
                   }
                },
                {
-                  "fields": [ "subset_id_namespace", "subset_collection_id" ],
+                  "fields": [ "subset_collection_id_namespace", "subset_collection_id" ],
                   "constraint_name": "collection_in_collection_subset_fkey",
                   "reference": {
                      "title": "Subset Collection",
@@ -810,8 +859,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "description": "Identifier namespace for this file/biosample pair",
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -820,6 +869,14 @@
                {
                   "name": "file_id",
                   "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "biosample_id_namespace",
+                  "description": "Identifier namespace for this biosample",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -835,13 +892,14 @@
                }
             ],
             "primaryKey": [
-               "id_namespace",
+               "file_id_namespace",
                "file_id",
+               "biosample_id_namespace",
                "biosample_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "file_id" ],
+                  "fields": [ "file_id_namespace", "file_id" ],
                   "constraint_name": "file_describes_biosample_file_fkey",
                   "reference": {
                      "title": "Described by File",
@@ -850,7 +908,7 @@
                   }
                },
                {
-                  "fields": [ "id_namespace", "biosample_id" ],
+                  "fields": [ "biosample_id_namespace", "biosample_id" ],
                   "constraint_name": "file_describes_biosample_biosample_fkey",
                   "reference": {
                      "title": "Described Biosample",
@@ -869,8 +927,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "description": "Identifier namespace for this file/subject pair",
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -879,6 +937,14 @@
                {
                   "name": "file_id",
                   "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -894,13 +960,14 @@
                }
             ],
             "primaryKey": [
-               "id_namespace",
+               "file_id_namespace",
                "file_id",
+               "subject_id_namespace",
                "subject_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "file_id" ],
+                  "fields": [ "file_id_namespace", "file_id" ],
                   "constraint_name": "file_describes_subject_file_fkey",
                   "reference": {
                      "title": "Described by File",
@@ -909,7 +976,7 @@
                   }
                },
                {
-                  "fields": [ "id_namespace", "subject_id" ],
+                  "fields": [ "subject_id_namespace", "subject_id" ],
                   "constraint_name": "file_describes_subject_subject_fkey",
                   "reference": {
                      "title": "Described Subject",
@@ -928,8 +995,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "description": "Identifier namespace for this biosample/subject pair",
+                  "name": "biosample_id_namespace",
+                  "description": "Identifier namespace for this biosample",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -938,6 +1005,14 @@
                {
                   "name": "biosample_id",
                   "description": "The ID of this biosample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -953,13 +1028,14 @@
                }
             ],
             "primaryKey": [
-               "id_namespace",
+               "biosample_id_namespace",
                "biosample_id",
+               "subject_id_namespace",
                "subject_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "biosample_id" ],
+                  "fields": [ "biosample_id_namespace", "biosample_id" ],
                   "constraint_name": "biosample_from_subject_biosample_fkey",
                   "reference": {
                      "title": "Derived Biosample",
@@ -968,7 +1044,7 @@
                   }
                },
                {
-                  "fields": [ "id_namespace", "subject_id" ],
+                  "fields": [ "subject_id_namespace", "subject_id" ],
                   "constraint_name": "biosample_from_subject_subject_fkey",
                   "reference": {
                      "title": "Source Subject",
@@ -987,7 +1063,7 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
+                  "name": "subject_id_namespace",
                   "description": "Identifier namespace for this subject",
                   "type": "string",
                   "constraints": {
@@ -1020,14 +1096,14 @@
                }
             ],
             "primaryKey": [
-               "id_namespace",
+               "subject_id_namespace",
                "subject_id",
                "role_id",
                "taxonomy_id"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "id_namespace", "subject_id" ],
+                  "fields": [ "subject_id_namespace", "subject_id" ],
                   "constraint_name": "subject_role_taxonomy_subject_fkey",
                   "reference": {
                      "title": "Subject",
