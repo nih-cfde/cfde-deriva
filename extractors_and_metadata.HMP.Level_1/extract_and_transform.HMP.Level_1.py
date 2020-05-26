@@ -2096,7 +2096,7 @@ outputColumns = {
       'subset_collection_id_namespace',
       'subset_collection_id'
    ],
-   'collection_in_project': [
+   'collection_defined_by_project': [
       'collection_id_namespace',
       'collection_id',
       'project_id_namespace',

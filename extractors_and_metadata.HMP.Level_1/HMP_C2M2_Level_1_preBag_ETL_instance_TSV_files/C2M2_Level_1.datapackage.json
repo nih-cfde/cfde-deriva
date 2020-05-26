@@ -52,10 +52,8 @@
                {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this file's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
-                  }
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "size_in_bytes",
@@ -182,10 +180,8 @@
                {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
-                  }
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "assay_type",
@@ -287,10 +283,8 @@
                {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
-                  }
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "granularity",
@@ -586,10 +580,10 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "collection_in_project",
-         "title": "collection_in_project",
-         "path": "collection_in_project.tsv",
-         "description": "(Shallow) association between a collection and a project",
+         "name": "collection_defined_by_project",
+         "title": "collection_defined_by_project",
+         "path": "collection_defined_by_project.tsv",
+         "description": "(Shallow) association between a collection and a project that defined it",
          "schema": {
             "fields": [
                {
