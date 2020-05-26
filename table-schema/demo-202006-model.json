@@ -58,7 +58,7 @@
                {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this file's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "string",
+                  "type": "datetime",
                   "constraints": {
                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
                   }
