@@ -442,7 +442,7 @@ def populateFiles(  ):
 
          # MD5:
 
-         if ( nodeType in { 'proteome', 'metabolome', 'serology', 'cytokine', 'lipidome', 'clustered_seq_set', 'annotation', 'host_variant_call', 'alignment', 'viral_seq_set', 'abundance_matrix' } ) or ( re.search(r'_seq_set$', nodeType) is not None ):
+         if ( nodeType in { 'proteome', 'metabolome', 'serology', 'cytokine', 'lipidome', 'clustered_seq_set', 'annotation', 'host_variant_call', 'alignment', 'viral_seq_set', 'abundance_matrix' } ) or ( re.search(r'_seq_set$', nodeType) is not None ) or ( 'checksums__md5' in flatObjects[currentID] and re.search(r'^0000000', flatObjects[currentID]['checksums__md5']) is None ):
             
             objectsToWrite['file'][currentID]['md5'] = flatObjects[currentID]['checksums__md5']
 
@@ -450,7 +450,7 @@ def populateFiles(  ):
             
             # { 'proteome_nonpride' }
 
-            # MD5 isn't stored anywhere.
+            # MD5 isn't stored anywhere, or we have a non-valid stub value.
 
             objectsToWrite['file'][currentID]['md5'] = ''
 
@@ -461,7 +461,15 @@ def populateFiles(  ):
 
          if ( nodeType in { 'clustered_seq_set', 'annotation', 'host_variant_call', 'alignment', 'abundance_matrix' } ) or ( ( nodeType not in { 'viral_seq_set' } ) and ( re.search(r'_seq_set$', nodeType) is not None ) ):
             
-            objectsToWrite['file'][currentID]['size_in_bytes'] = flatObjects[currentID]['size']
+            if flatObjects[currentID]['size'] == 0 or flatObjects[currentID]['size'] == '0' or flatObjects[currentID]['size'] == 1 or flatObjects[currentID]['size'] == '1':
+               
+               # This is apparently a thing.
+
+               objectsToWrite['file'][currentID]['size_in_bytes'] = ''
+               
+            else:
+               
+               objectsToWrite['file'][currentID]['size_in_bytes'] = flatObjects[currentID]['size']
 
          else:
             
