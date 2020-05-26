@@ -2096,6 +2096,12 @@ outputColumns = {
       'subset_collection_id_namespace',
       'subset_collection_id'
    ],
+   'collection_in_project': [
+      'collection_id_namespace',
+      'collection_id',
+      'project_id_namespace',
+      'project_id'
+   ],
    'file_in_collection': [
       'file_id_namespace',
       'file_id',

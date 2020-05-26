@@ -1,9 +1,9 @@
 DATASET
 =======
-{'error-count': 22,
+{'error-count': 26,
  'preset': 'nested',
- 'table-count': 22,
- 'time': 63.687,
+ 'table-count': 23,
+ 'time': 63.673,
  'valid': False}
 
 TABLE [1]
@@ -26,7 +26,7 @@ TABLE [1]
  'row-count': 133319,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file.tsv',
- 'time': 63.174,
+ 'time': 63.232,
  'valid': True}
 
 TABLE [2]
@@ -45,7 +45,7 @@ TABLE [2]
  'row-count': 83747,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/biosample.tsv',
- 'time': 46.051,
+ 'time': 46.912,
  'valid': True}
 
 TABLE [3]
@@ -63,7 +63,7 @@ TABLE [3]
  'row-count': 2467,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject.tsv',
- 'time': 2.008,
+ 'time': 3.465,
  'valid': True}
 
 TABLE [4]
@@ -80,7 +80,7 @@ TABLE [4]
  'row-count': 23,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/project.tsv',
- 'time': 0.041,
+ 'time': 0.237,
  'valid': True}
 
 TABLE [5]
@@ -95,7 +95,7 @@ TABLE [5]
  'row-count': 21,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/project_in_project.tsv',
- 'time': 0.153,
+ 'time': 0.126,
  'valid': True}
 
 TABLE [6]
@@ -106,7 +106,7 @@ TABLE [6]
  'row-count': 0,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/collection.tsv',
- 'time': 0.031,
+ 'time': 0.033,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -124,7 +124,7 @@ TABLE [7]
  'row-count': 0,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/collection_in_collection.tsv',
- 'time': 0.041,
+ 'time': 0.031,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -139,8 +139,8 @@ TABLE [8]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_in_collection.tsv',
- 'time': 0.05,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/collection_in_project.tsv',
+ 'time': 0.076,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -155,8 +155,8 @@ TABLE [9]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/biosample_in_collection.tsv',
- 'time': 0.045,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_in_collection.tsv',
+ 'time': 0.056,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -171,8 +171,8 @@ TABLE [10]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_in_collection.tsv',
- 'time': 0.047,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/biosample_in_collection.tsv',
+ 'time': 0.114,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -181,6 +181,22 @@ TABLE [10]
 [-,4] [missing-header] There is a missing header in column 4
 
 TABLE [11]
+=========
+{'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
+ 'error-count': 4,
+ 'format': 'inline',
+ 'row-count': 0,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_in_collection.tsv',
+ 'time': 0.066,
+ 'valid': False}
+---------
+[-,1] [missing-header] There is a missing header in column 1
+[-,2] [missing-header] There is a missing header in column 2
+[-,3] [missing-header] There is a missing header in column 3
+[-,4] [missing-header] There is a missing header in column 4
+
+TABLE [12]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -192,10 +208,10 @@ TABLE [11]
  'row-count': 58211,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_describes_biosample.tsv',
- 'time': 27.001,
+ 'time': 28.17,
  'valid': True}
 
-TABLE [12]
+TABLE [13]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -207,10 +223,10 @@ TABLE [12]
  'row-count': 54803,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_describes_subject.tsv',
- 'time': 27.049,
+ 'time': 26.684,
  'valid': True}
 
-TABLE [13]
+TABLE [14]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -222,10 +238,10 @@ TABLE [13]
  'row-count': 83747,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/biosample_from_subject.tsv',
- 'time': 35.766,
+ 'time': 35.659,
  'valid': True}
 
-TABLE [14]
+TABLE [15]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -234,10 +250,10 @@ TABLE [14]
  'row-count': 2467,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_role_taxonomy.tsv',
- 'time': 1.138,
+ 'time': 1.607,
  'valid': True}
 
-TABLE [15]
+TABLE [16]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -246,10 +262,10 @@ TABLE [15]
  'row-count': 3,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/assay_type.tsv',
- 'time': 0.169,
+ 'time': 0.23,
  'valid': True}
 
-TABLE [16]
+TABLE [17]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -258,19 +274,7 @@ TABLE [16]
  'row-count': 2,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/ncbi_taxonomy.tsv',
- 'time': 0.032,
- 'valid': True}
-
-TABLE [17]
-=========
-{'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
- 'error-count': 0,
- 'format': 'inline',
- 'headers': ['id', 'name', 'description', 'synonyms'],
- 'row-count': 25,
- 'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/anatomy.tsv',
- 'time': 0.178,
+ 'time': 0.041,
  'valid': True}
 
 TABLE [18]
@@ -279,10 +283,10 @@ TABLE [18]
  'error-count': 0,
  'format': 'inline',
  'headers': ['id', 'name', 'description', 'synonyms'],
- 'row-count': 14,
+ 'row-count': 25,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_format.tsv',
- 'time': 0.024,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/anatomy.tsv',
+ 'time': 0.207,
  'valid': True}
 
 TABLE [19]
@@ -291,10 +295,10 @@ TABLE [19]
  'error-count': 0,
  'format': 'inline',
  'headers': ['id', 'name', 'description', 'synonyms'],
- 'row-count': 9,
+ 'row-count': 14,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/data_type.tsv',
- 'time': 0.161,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/file_format.tsv',
+ 'time': 0.061,
  'valid': True}
 
 TABLE [20]
@@ -302,11 +306,11 @@ TABLE [20]
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
  'format': 'inline',
- 'headers': ['id', 'name', 'description'],
- 'row-count': 8,
+ 'headers': ['id', 'name', 'description', 'synonyms'],
+ 'row-count': 9,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_role.tsv',
- 'time': 0.175,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/data_type.tsv',
+ 'time': 0.023,
  'valid': True}
 
 TABLE [21]
@@ -315,13 +319,25 @@ TABLE [21]
  'error-count': 0,
  'format': 'inline',
  'headers': ['id', 'name', 'description'],
- 'row-count': 7,
+ 'row-count': 8,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_granularity.tsv',
- 'time': 0.046,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_role.tsv',
+ 'time': 0.153,
  'valid': True}
 
 TABLE [22]
+=========
+{'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
+ 'error-count': 0,
+ 'format': 'inline',
+ 'headers': ['id', 'name', 'description'],
+ 'row-count': 7,
+ 'schema': 'table-schema',
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/subject_granularity.tsv',
+ 'time': 0.029,
+ 'valid': True}
+
+TABLE [23]
 =========
 {'datapackage': 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/C2M2_Level_1.datapackage.json',
  'error-count': 0,
@@ -330,5 +346,5 @@ TABLE [22]
  'row-count': 8,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz93_Level_1_ETL/HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files/id_namespace.tsv',
- 'time': 0.038,
+ 'time': 0.03,
  'valid': True}

@@ -586,6 +586,71 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "collection_in_project",
+         "title": "collection_in_project",
+         "path": "collection_in_project.tsv",
+         "description": "(Shallow) association between a collection and a project",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "project_id_namespace",
+               "project_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_id" ],
+                  "reference": {
+                     "resource": "project",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "file_in_collection",
          "title": "file_in_collection",
          "path": "file_in_collection.tsv",
