@@ -20,103 +20,100 @@ class DashboardQueryHelper (object):
         # use list() to convert each ResultSet
         # for easier JSON serialization...
         results = {
-            'list_programs': list(self.list_programs()),
-            'list_infotypes': list(self.list_infotypes()),
+            'list_projects': list(self.list_projects()),
+            'list_datatypes': list(self.list_datatypes()),
             'list_formats': list(self.list_formats()),
-            'list_program_file_stats': list(self.list_program_file_stats()),
-            'list_program_sampletype_file_stats': list(self.list_program_sampletype_file_stats()),
-            'list_program_file_stats_by_time_bin': list(self.list_program_file_stats_by_time_bin()),
-            'running_sum_program_file_stats': list(self.running_sum_program_file_stats()),
+            'list_project_file_stats': list(self.list_project_file_stats()),
+            'list_project_assaytype_file_stats': list(self.list_project_assaytype_file_stats()),
+            'list_program_file_stats_by_time_bin': list(self.list_project_file_stats_by_time_bin()),
+            'running_sum_project_file_stats': list(self.running_sum_project_file_stats()),
         }
         print(json.dumps(results, indent=2))
 
-    def list_programs(self):
-        """Return list of common fund programs
-
-        NOTE: in demo content, program 'name' is NOT unique, e.g. GTEx
-        occurs twice due to overlap in imports!  The 'id' column is
-        unique.
+    def list_projects(self):
+        """Return list of projects AKA funded activities
 
         """
         # trivial case: just return entities of a single table
-        return self.builder.CFDE.common_fund_program.path.entities().fetch()
+        return self.builder.CFDE.project.path.entities().fetch()
 
-    def list_infotypes(self):
-        """Return list of information type terms
+    def list_datatypes(self):
+        """Return list of data_type terms
         """
-        return self.builder.CFDE.information_type.path.entities().fetch()
+        return self.builder.CFDE.data_type.path.entities().fetch()
     
     def list_formats(self):
         """Return list of file format terms
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
     
-    def list_program_file_stats(self, programid=None):
-        """Return list of file statistics per program.
+    def list_project_file_stats(self, project_id_pair=None):
+        """Return list of file statistics per project.
 
-        Optionally filtered to a single programid.
+        Optionally filtered to a single project (namespace, id) pair.
 
         NOTE: this query will not return a row for a program with zero files...
 
-        NOTE: only non-null File.length values are summed, so null may
+        NOTE: only non-null File.size_in_bytes values are summed, so null may
         be returned if none of the files have specified a length...
 
         """
-        # more complex case: build joined table path
-        path = self.builder.CFDE.dataset.path
-        if programid is not None:
-            path.filter(path.dataset.data_source == programid)
-        path.link(self.builder.CFDE.files_in_datasets)
-        path.link(self.builder.CFDE.file)
+        path = self.builder.CFDE.file.path
+        if project_id_pair is not None:
+            # add filter for one (project_id_namespace, project_id)
+            project_id_ns, project_id = project_id_pair
+            path.filter(path.file.project_id_namespace == project_id_ns)
+            path.filter(path.file.project == project_id)
         # and return grouped aggregate results
         results = path.groupby(
-            path.dataset.data_source,
+            path.file.project_id_namespace,
+            path.file.project
         ).attributes(
             Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.length).alias('byte_cnt'),
+            Sum(path.file.size_in_bytes).alias('byte_cnt'),
         )
         return results.fetch()
 
-    def list_program_sampletype_file_stats(self, programid=None):
-        """Return list of file statistics per (program, sample_type).
+    def list_project_assaytype_file_stats(self, project_id_pair=None):
+        """Return list of file statistics per (project, assay_type).
 
-        Like list_program_file_stats, but also include biosample
-        sample_type in the group key, for more detailed result
-        cagegories.
+        Like list_project_file_stats, but also include biosample
+        assay_type in the group key, for more detailed result
+        categories.
 
         """
-        path = self.builder.CFDE.sample_type.path
-        path.link(self.builder.CFDE.bio_sample)
-        path.link(self.builder.CFDE.assayed_by)
-        path.link(self.builder.CFDE.data_event)
-        path.link(self.builder.CFDE.generated_by)
-        # right-outer join so we can count files w/o this biosample/event linkage
+        # include vocab table for human-readable assay_type.name field
+        path = self.builder.CFDE.assay_type.path
+        path.link(self.builder.CFDE.biosample)
+        path.link(self.builder.CFDE.file_describes_biosample)
+        # right-outer join so we can count files w/o this biosample/assay_type linkage
         path.link(
             self.builder.CFDE.file,
-            on=( path.GeneratedBy.file_id == self.builder.CFDE.file.id ),
+            on=( (path.file_describes_biosample.file_id_namespace == self.builder.CFDE.file.id_namespace)
+                 & (path.file_describes_biosample.file_id == self.builder.CFDE.file.id) ),
             join_type='right'
         )
-        path.link(self.builder.CFDE.files_in_datasets)
-        path.link(self.builder.CFDE.dataset)
-        
-        if programid is not None:
-            path.filter(path.dataset.data_source == programid)
-
+        if project_id_pair is not None:
+            # add filter for one (project_id_namespace, project_id)
+            project_id_ns, project_id = project_id_pair
+            path.filter(path.file.project_id_namespace == project_id_ns)
+            path.filter(path.file.project == project_id)
+        # and return grouped aggregate results
         results = path.groupby(
             # compound grouping key
-            path.dataset.data_source,
-            path.bio_sample.sample_type.alias('sample_type_id'),
+            path.file.project_id_namespace,
+            path.file.project,
+            path.biosample.assay_type.alias('assay_type_id'),
         ).attributes(
             # 'name' is part of Table API so we cannot use attribute-based lookup...
-            path.sample_type.column_definitions['name'].alias('sample_type_name'),
+            path.assay_type.column_definitions['name'].alias('assay_type_name'),
             Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.length).alias('byte_cnt'),
+            Sum(path.file.size_in_bytes).alias('byte_cnt'),
         )
-        
         return results.fetch()
 
-    def list_program_file_stats_by_time_bin(self, nbins=100, min_ts=None, max_ts=None):
-        """Return list of file statistics per (data_source, ts_bin)
+    def list_project_file_stats_by_time_bin(self, nbins=100, min_ts='2010-01-01', max_ts='2020-12-31'):
+        """Return list of file statistics per (project_id_namespace, project, ts_bin)
 
         :param nbins: The number of bins to divide the time range
         :param min_ts: The lower (closed) bound of the time range
@@ -127,11 +124,10 @@ class DashboardQueryHelper (object):
         source data. These values are used to configure the binning
         distribution.
 
-        Files generation times are found from DataEvent.event_ts where
-        linked to File by the GeneratedBy association. Files without
-        such linkage are considered to have null event times.
+        Files generation times are found from file.creation_time which
+        may be NULL.
 
-        Results are keyed by data_source and ts_bin group keys.
+        Results are keyed by project and ts_bin group keys.
 
         NOTE: Results are sparse! Groups are only returned when at
         least one matching row is found. This means that some bins,
@@ -149,8 +145,8 @@ class DashboardQueryHelper (object):
            ...
            [ nbins, max_ts - (max_ts - min_ts)/nbins, max_ts ]
 
-        Files without known event_ts will be summarized in a row with
-        a special null bin:
+        Files without known creation_time will be summarized in a row
+        with a special null bin:
 
         Other files will be summarized in rows with special bins:
 
@@ -158,39 +154,36 @@ class DashboardQueryHelper (object):
            [ 0, null, min_ts ]
            [ nbins+1, max_ts, null ]
 
-        i.e. for files with unknown event_ts, with event_ts below
-        min_ts, or with event_ts above max_ts, respectively.
+        i.e. for files with NULL creation_time, with creation_time
+        below min_ts, or with creation_time above max_ts,
+        respectively.
+
+        HACK: setting non-null default min_ts and max_ts to work
+        around failure mode when the entire catalog only has null
+        creation_time values (i.e. in a limited test load)...
 
         """
-        path = self.builder.CFDE.data_event.path
-        path.link(self.builder.CFDE.generated_by)
-        # right-outer join so we can count files w/o this dataevent linkage
-        path.link(
-            self.builder.CFDE.file,
-            on=( path.generated_by.file_id == self.builder.CFDE.file.id ),
-            join_type='right'
-        )
-        path.link(self.builder.CFDE.files_in_datasets)
-        path.link(self.builder.CFDE.dataset)
+        path = self.builder.CFDE.file.path
 
         # build this list once so we can reuse it for grouping and sorting
         groupkey = [
-            path.dataset.data_source,
-            Bin(path.data_event.event_ts, nbins, min_ts, max_ts).alias('ts_bin'),
+            path.file.project_id_namespace,
+            path.file.project,
+            Bin(path.file.creation_time, nbins, min_ts, max_ts).alias('ts_bin'),
         ]
 
         results = path.groupby(
             *groupkey
         ).attributes(
-            Cnt(path.file.id).alias('file_cnt'),
-            Sum(path.file.length).alias('byte_cnt'),
+            Cnt(path.file).alias('file_cnt'),
+            Sum(path.file.size_in_bytes).alias('byte_cnt'),
         ).sort(
             *groupkey
         )
         return results.fetch()
 
-    def running_sum_program_file_stats(self, nbins=100, min_ts=None, max_ts=None):
-        """Transform results of list_program_file_stats_by_time to produce running sums
+    def running_sum_project_file_stats(self, nbins=100, min_ts='2010-01-01', max_ts='2020-12-31'):
+        """Transform results of list_project_file_stats_by_time to produce running sums
 
         The underlying query counts files and sums bytecounts only
         within each time bin. I.e. it represents change rather than
@@ -199,14 +192,14 @@ class DashboardQueryHelper (object):
         This function accumulates values to show total capacity trends.
 
         """
-        data_source = None
+        project = None
         file_cnt = None
         byte_cnt = None
         # because underlying query results are sorted, we can just iterate...
-        for row in self.list_program_file_stats_by_time_bin(nbins, min_ts, max_ts):
-            if data_source != row['data_source']:
+        for row in self.list_project_file_stats_by_time_bin(nbins, min_ts, max_ts):
+            if (project != (row['project_id_namespace'], row['project'])):
                 # reset state for next group
-                data_source = row['data_source']
+                project = (row['project_id_namespace'], row['project'])
                 file_cnt = 0
                 byte_cnt = 0
             if row['file_cnt'] is not None:
@@ -214,7 +207,8 @@ class DashboardQueryHelper (object):
             if row['byte_cnt'] is not None:
                 byte_cnt += row['byte_cnt']
             yield {
-                'data_source': data_source,
+                'project_id_namespace': row['project_id_namespace'],
+                'project': row['project'],
                 'ts_bin': row['ts_bin'],
                 'file_cnt': file_cnt,
                 'byte_cnt': byte_cnt
