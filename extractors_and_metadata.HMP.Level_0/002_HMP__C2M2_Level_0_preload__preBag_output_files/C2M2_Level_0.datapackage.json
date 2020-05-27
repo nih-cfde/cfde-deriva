@@ -54,7 +54,10 @@
                {
                   "name": "filename",
                   "description": "A filename with no prepended PATH information.",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^[^\/\\:]+$"
+                  }
                }
             ],
             "missingValues": [ "" ],

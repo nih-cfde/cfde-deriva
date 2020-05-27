@@ -15,7 +15,7 @@ DATASET
 {'error-count': 0,
  'preset': 'nested',
  'table-count': 2,
- 'time': 43.225,
+ 'time': 45.267,
  'valid': True}
 
 TABLE [1]
@@ -33,7 +33,7 @@ TABLE [1]
  'row-count': 133319,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/file.tsv',
- 'time': 43.081,
+ 'time': 45.058,
  'valid': True}
 
 TABLE [2]
@@ -45,5 +45,5 @@ TABLE [2]
  'row-count': 8,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/id_namespace.tsv',
- 'time': 0.015,
+ 'time': 0.012,
  'valid': True}
