@@ -86,10 +86,12 @@ def make_id(*components):
                 h = hashlib.md5()
                 h.update(e.encode('utf8'))
                 return base64.b64encode(h.digest()).decode()[0:truncate_threshold]
-        truncated = [ helper(e) for e in expanded ]
-        result = '_'.join(truncated)
-        if len(result.encode('utf8')) <= 63:
-            return result
+        truncated = list(expanded)
+        for i in range(len(truncated)):
+            truncated[-1 - i] = helper(truncated[-1 - i])
+            result = '_'.join(truncated)
+            if len(result.encode('utf8')) <= 63:
+                return result
     raise NotImplementedError('Could not generate valid ID for components "%r"' % expanded)
 
 def make_key(tname, cols):
@@ -107,7 +109,10 @@ def make_fkey(tname, fkdef):
     to_name = reference.pop("title", None)
     pkcols = reference.pop("fields")
     pkcols = [pkcols] if isinstance(pkcols, str) else pkcols
-    constraint_name = fkdef.pop("constraint_name", make_id(tname, fkcols, 'fkey'))
+    constraint_name = fkdef.pop("constraint_name", None)
+    if constraint_name is None:
+        # don't run this if we don't need it...
+        constraint_name = make_id(tname, fkcols, 'fkey')
     if len(constraint_name.encode('utf8')) > 63:
         raise ValueError('Constraint name "%s" too long in %r' % (constraint_name, fkdef))
     annotations = {
