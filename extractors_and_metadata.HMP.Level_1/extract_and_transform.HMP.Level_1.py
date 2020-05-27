@@ -9,7 +9,7 @@
 # specification prior to ingestion into a central CFDE database.
 
 # Creation date: 2020-05-14
-# Lastmod date unless I forgot to change it: 2020-05-17
+# Lastmod date unless I forgot to change it: 2020-05-27
 
 # contact email: abrady@som.umaryland.edu
 
@@ -1175,6 +1175,8 @@ def populateProjects(  ):
 
          objectsToWrite['project'][currentID]['persistent_id'] = ''
 
+         objectsToWrite['project'][currentID]['creation_time'] = ''
+
          objectsToWrite['project'][currentID]['abbreviation'] = ''
 
          #----------------------------------------------------------------------
@@ -2080,6 +2082,7 @@ outputColumns = {
       'id_namespace',
       'id',
       'persistent_id',
+      'creation_time',
       'abbreviation',
       'name',
       'description'
@@ -2094,6 +2097,7 @@ outputColumns = {
       'id_namespace',
       'id',
       'persistent_id',
+      'creation_time',
       'abbreviation',
       'name',
       'description'
@@ -2230,36 +2234,25 @@ containedIn = {}
 ##########################################################################################
 ##########################################################################################
 
+# Make any output directories that don't yet exist.
+# 
+# draftDir == '006_HMP-specific_ETL_TSVs'
+# 
+# termTableDir == '007_HMP-specific_CV_term_usage_TSVs'
+# 
+# outDir == 'HMP_C2M2_Level_1_preBag_ETL_instance_TSV_files'
 
+progressReport("Creating output directories...")
 
-
-
-
-# Make all the subdirs from 000 through 007
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Make the output directory if it doesn't yet exist.
-
-progressReport("Creating output directory...")
-
-if not os.path.isdir(outDir) and os.path.exists(outDir):
+for checkDir in ( draftDir, termTableDir, outDir ):
    
-   die('%s exists but is not a directory; aborting.' % outDir)
+   if not os.path.isdir(checkDir) and os.path.exists(checkDir):
+      
+      die('%s exists but is not a directory; aborting.' % checkDir)
 
-elif not os.path.isdir(outDir):
-   
-   os.mkdir(outDir)
+   elif not os.path.isdir(checkDir):
+      
+      os.mkdir(checkDir)
 
 # Load HMP DB node IDs to skip (test/junk nodes, etc.)
 
