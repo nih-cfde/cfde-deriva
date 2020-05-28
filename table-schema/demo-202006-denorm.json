@@ -166,10 +166,8 @@
                {
                   "name": "biosample_creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}$"
-                  }
+                  "type": "datetime",
+                  "format": "any"
                }
             ],
             "primaryKey": [
@@ -450,6 +448,313 @@
             ]
          },
          "derivation_sql_path": "collection_in_collection_transitive.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_subject_granularity",
+         "title": "collection_subject_granularity",
+         "description": "Collapsed association of subject-granularities for subjects described by collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "granularity",
+                  "description": "A CFDE CV term categorizing described subject by multiplicity",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "subject_granularity"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "constraint_name": "collection_subject_granularity_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "collection_subject_granularity_granularity_fkey",
+                  "reference": {
+                     "title": "Subject Granularity",
+                     "resource": "subject_granularity",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_subject_granularity.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_subject_role_taxonomy",
+         "title": "collection_subject_role_taxonomy",
+         "description": "Collapsed association of subject-role-taxonomies for subjects described by collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_role_id",
+                  "description": "The ID of the role assigned to this organism-level constituent component of described subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_taxonomy_id",
+                  "description": "An NCBI Taxonomy Database ID identifying taxon of described subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "granularity"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "constraint_name": "collection_subject_granularity_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "subject_role_id",
+                  "constraint_name": "collection_subject_role_taxonomy_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "subject_taxonomy_id",
+                  "constraint_name": "collection_subject_role_taxonomy_taxonomy_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_subject_role_taxonomy.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_biosample_creation_time",
+         "title": "collection_biosample_creation_time",
+         "description": "Collapsed association of biosample-creation-times for biosamples described by collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "biosample_creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "biosample_creation_time"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "constraint_name": "collection_biosample_creation_time_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_biosample_creation_time.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_assay_type",
+         "title": "collection_assay_type",
+         "description": "Collapsed association of assay-types described by collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "An OBI CV term ID describing the type of material represented by this collection",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^OBI:[0-9]+$"
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "assay_type"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "constraint_name": "collection_assay_type_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "collection_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_assay_type.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_anatomy",
+         "title": "collection_anatomy",
+         "description": "Collapsed association of anatomies described by collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^UBERON:[0-9]+$"
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_id",
+               "anatomy"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_id" ],
+                  "constraint_name": "collection_anatomy_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "collection_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_anatomy.sql"
       }
 
    ]
