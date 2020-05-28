@@ -311,5 +311,146 @@
          },
          "derivation_sql_path": "file_anatomy.sql"
       },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "project_in_project_transitive",
+         "title": "project_in_project_transitive",
+         "description": "Reflexive transitive-closure of project_in_project relationship",
+         "schema": {
+            "fields": [
+               {
+                  "name": "leader_project_id_namespace",
+                  "description": "ID of the identifier namespace for the leader in this leader-member project pair",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "leader_project_id",
+                  "description": "The ID of the leader (containing) project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_project_id_namespace",
+                  "description": "ID of the identifier namespace for the member in this leader-member project pair",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_project_id",
+                  "description": "The ID of the member (contained or reflexive) project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "leader_project_id_namespace",
+               "leader_project_id",
+               "member_project_id_namespace",
+               "member_project_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "leader_project_id_namespace", "leader_project_id" ],
+                  "constraint_name": "project_in_project_transitive_leader_fkey",
+                  "reference": {
+                     "title": "Leader Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": [ "member_project_id_namespace", "member_project_id" ],
+                  "constraint_name": "project_in_project_transitive_member_fkey",
+                  "reference": {
+                     "title": "Member Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "project_in_project_transitive.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_in_collection_transitive",
+         "title": "collection_in_collection_transitive",
+         "description": "Reflexive transitive-closure of collection_in_collection relationship",
+         "schema": {
+            "fields": [
+               {
+                  "name": "leader_collection_id_namespace",
+                  "description": "ID of the identifier namespace for the leader in this leader-member collection pair",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "leader_collection_id",
+                  "description": "The ID of the leader (containing) collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_collection_id_namespace",
+                  "description": "ID of the identifier namespace for the member in this leader-member collection pair",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_collection_id",
+                  "description": "The ID of the member (contained or reflexive) collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "leader_collection_id_namespace",
+               "leader_collection_id",
+               "member_collection_id_namespace",
+               "member_collection_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "leader_collection_id_namespace", "leader_collection_id" ],
+                  "constraint_name": "collection_in_collection_transitive_leader_fkey",
+                  "reference": {
+                     "title": "Leader Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               },
+               {
+                  "fields": [ "member_collection_id_namespace", "member_collection_id" ],
+                  "constraint_name": "collection_in_collection_transitive_member_fkey",
+                  "reference": {
+                     "title": "Member Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_in_collection_transitive.sql"
+      }
+
    ]
 }
