@@ -2,7 +2,8 @@
    "profile": "tabular-data-package",
    "name": "denormalized_table_specs_for_level_1_c2m2",
    "title": "A list of derived tables to augment C2M2 Level 1 metadata for seach and display purposes",
-   "resource": [
+   "resources": [
+
       {
          "profile": "tabular-data-resource",
          "name": "file_subject_granularity",
@@ -27,7 +28,7 @@
                   }
                },
                {
-                  "name": "granularity",
+                  "name": "subject_granularity",
                   "description": "A CFDE CV term categorizing described subject by multiplicity",
                   "type": "string",
                   "constraints": {
@@ -107,7 +108,8 @@
             "primaryKey": [
                "file_id_namespace",
                "file_id",
-               "granularity"
+               "subject_role_id",
+               "subject_taxonomy_id"
             ],
             "foreignKeys": [
                {
@@ -474,7 +476,7 @@
                   }
                },
                {
-                  "name": "granularity",
+                  "name": "subject_granularity",
                   "description": "A CFDE CV term categorizing described subject by multiplicity",
                   "type": "string",
                   "constraints": {
@@ -554,7 +556,8 @@
             "primaryKey": [
                "collection_id_namespace",
                "collection_id",
-               "granularity"
+               "subject_role_id",
+               "subject_taxonomy_id"
             ],
             "foreignKeys": [
                {

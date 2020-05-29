@@ -9,8 +9,8 @@ JOIN subject s
 UNION
 
 SELECT
-  fds.file_id_namespace,
-  fds.file_id,
+  fdb.file_id_namespace,
+  fdb.file_id,
   s.granularity AS subject_granularity
 FROM file_describes_biosample fdb
 JOIN biosample_from_subject bfs

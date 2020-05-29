@@ -1,9 +1,4 @@
-WITH RECURSIVE t(
-  leader_collection_id_namespace,
-  leader_collection_id,
-  member_collection_id_namespace,
-  member_collection_id
-) AS (
+WITH RECURSIVE t AS (
 
   SELECT
     id_namespace AS leader_collection_id_namespace,
@@ -15,8 +10,8 @@ WITH RECURSIVE t(
   UNION
 
   SELECT
-    t.superset_collection_id_namespace AS lead_collection_id_namespace,
-    t.superset_collection_id AS lead_collection_id,
+    t.leader_collection_id_namespace AS leader_collection_id_namespace,
+    t.leader_collection_id AS leader_collection_id,
     a.subset_collection_id_namespace AS member_collection_id_namespace,
     a.subset_collection_id AS member_collection_id
   FROM collection_in_collection a
@@ -24,8 +19,8 @@ WITH RECURSIVE t(
 
 )
 SELECT 
-  lead_collection_id_namespace,
-  lead_collection_id,
+  leader_collection_id_namespace,
+  leader_collection_id,
   member_collection_id_namespace,
   member_collection_id
 FROM t;

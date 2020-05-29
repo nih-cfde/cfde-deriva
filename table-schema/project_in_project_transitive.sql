@@ -1,9 +1,4 @@
-WITH RECURSIVE t(
-  leader_project_id_namespace,
-  leader_project_id,
-  member_project_id_namespace,
-  member_project_id
-) AS (
+WITH RECURSIVE t AS (
 
   SELECT
     id_namespace AS leader_project_id_namespace,
