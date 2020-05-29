@@ -21,6 +21,70 @@ import sys
 ##########################################################################################
 ##########################################################################################
 ##########################################################################################
+#                                USER-DEFINED PARAMETERS
+##########################################################################################
+##########################################################################################
+##########################################################################################
+
+##########################################################################################
+# Directory containing full CV reference info (see below, 'cvFile' dictionary, for file
+# list).
+
+cvRefDir = '003_external_CVs_versioned_reference_files'
+
+##########################################################################################
+# Directory in which core-entity ETL instance TSVs (for the purposes of this script,
+# this means 'file.tsv' and 'biosample.tsv') have been built and stored, prior to running
+# this script.
+
+draftDir = '006_HMP-specific_ETL_TSVs'
+
+##########################################################################################
+# Directory into which TSVs will be written (by this script) summarizing all
+# controlled vocabulary term usage throughout this Level 1 C2M2 instance
+# (as prescribed by the Level 1 specification).
+
+outDir = '007_HMP-specific_CV_term_usage_TSVs'
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
+#                          CONSTANT PARAMETERS: DO NOT MODIFY
+##########################################################################################
+##########################################################################################
+##########################################################################################
+
+##########################################################################################
+# Map of CV names to reference files. These files should be present in cvRefDir before
+# running this script.
+
+cvFile = {
+   
+   'EDAM' : '%s/EDAM.version_1.21.tsv' % cvRefDir,
+   'OBI' : '%s/OBI.version_2019-08-15.obo' % cvRefDir,
+   'Uberon' : '%s/uberon.version_2019-06-27.obo' % cvRefDir
+}
+
+##########################################################################################
+# TSV filenames to scan for term usage. These files should be present in draftDir before
+# running this script.
+
+targetTSVs = ( 'file.tsv', 'biosample.tsv' )
+
+##########################################################################################
+# Term-tracker data structure.
+
+termsUsed = {
+   
+   'file_format': {},
+   'data_type': {},
+   'assay_type': {},
+   'anatomy': {}
+}
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
 #                   SUBROUTINES (in call order, including recursion)
 ##########################################################################################
 ##########################################################################################
@@ -44,9 +108,9 @@ def progressReport( message ):
 
 def identifyTermsUsed(  ):
    
-   global termsUsed, draftDir, fileToColumnToCategory
+   global termsUsed, draftDir, targetTSVs
 
-   for basename in fileToColumnToCategory:
+   for basename in targetTSVs:
       
       inFile = draftDir + '/' + basename
 
@@ -54,13 +118,27 @@ def identifyTermsUsed(  ):
          
          header = IN.readline()
 
+         colNames = re.split(r'\t', header.rstrip('\r\n'))
+
+         currentColIndex = 0
+
+         columnToCategory = dict()
+
+         for colName in colNames:
+            
+            if colName in termsUsed:
+               
+               columnToCategory[currentColIndex] = colName
+
+            currentColIndex += 1
+
          for line in IN:
             
             fields = re.split(r'\t', line.rstrip('\r\n'))
 
-            for colIndex in fileToColumnToCategory[basename]:
+            for colIndex in columnToCategory:
                
-               currentCategory = fileToColumnToCategory[basename][colIndex]
+               currentCategory = columnToCategory[colIndex]
 
                if fields[colIndex] != '':
                   
@@ -206,11 +284,11 @@ def decorateTermsUsed(  ):
 
 def writeTermsUsed(  ):
    
-   global termTableDir, termsUsed
+   global outDir, termsUsed
 
    for categoryID in termsUsed:
       
-      outFile = '%s/%s.tsv' % ( termTableDir, categoryID )
+      outFile = '%s/%s.tsv' % ( outDir, categoryID )
 
       with open(outFile, 'w') as OUT:
          
@@ -229,70 +307,20 @@ def writeTermsUsed(  ):
 ##########################################################################################
 ##########################################################################################
 ##########################################################################################
-#                                        PARAMETERS
-##########################################################################################
-##########################################################################################
-##########################################################################################
-
-##########################################################################################
-# Subdirectory containing full info for CVs, versioned to match the current data release.
-
-cvRefDir = '003_external_CVs_versioned_reference_files'
-
-##########################################################################################
-# Map of CV names to reference files.
-
-cvFile = {
-   
-   'EDAM' : '%s/EDAM.version_1.21.tsv' % cvRefDir,
-   'OBI' : '%s/OBI.version_2019-08-15.obo' % cvRefDir,
-   'Uberon' : '%s/uberon.version_2019-06-27.obo' % cvRefDir
-}
-
-##########################################################################################
-# Directory in which HMP-written ETL data TSVs will be produced prior to combination with
-# (constant) stub tables CFDE-provided CV and JSON files for bdbagging.
-
-draftDir = '006_HMP-specific_ETL_TSVs'
-
-##########################################################################################
-# Directory in which HMP-written TSVs will be produced to track all controlled-vocabulary
-# terms used throughout this Level 1 C2M2 instance (as specified in the Level 1
-# specification).
-
-termTableDir = '007_HMP-specific_CV_term_usage_TSVs'
-
-# Term-tracker data structure.
-
-termsUsed = {
-   
-   'file_format': {},
-   'data_type': {},
-   'assay_type': {},
-   'anatomy': {}
-}
-
-# Map indicating which columns in which files contain terms from which CV categories.
-
-fileToColumnToCategory = {
-   
-   'file.tsv': {
-      10: 'file_format',
-      11: 'data_type'
-   },
-   'biosample.tsv': {
-      6: 'assay_type',
-      7: 'anatomy'
-   }
-}
-
-##########################################################################################
-##########################################################################################
-##########################################################################################
 #                                       EXECUTION
 ##########################################################################################
 ##########################################################################################
 ##########################################################################################
+
+# Create the outpuit directory if need be.
+
+if not os.path.isdir(outDir) and os.path.exists(outDir):
+   
+   die('%s exists but is not a directory; aborting.' % outDir)
+
+elif not os.path.isdir(outDir):
+   
+   os.mkdir(outDir)
 
 # Find all the CV terms used in the ETL draft instance in "draftDir".
 
