@@ -4,9 +4,10 @@
 #                                     AUTHOR INFO
 ##########################################################################################
 
-# Arthur Brady (Univ. of MD Inst. for Genome Sciences) wrote this script to extract
-# HMP experimental data and transform it to conform to the draft C2M2 Level 1 data
-# specification prior to ingestion into a central CFDE database.
+# Arthur Brady (Univ. of MD Inst. for Genome Sciences) wrote this script to automatically
+# load and summarize (via term-tracking TSV files) controlled-vocabulary term usage across
+# all core resource entity records in a given C2M2 Level 1 ETL instance to assist with
+# instance preparation prior to ingestion into a central CFDE database.
 
 # Creation date: 2020-05-17
 # Lastmod date unless I forgot to change it: 2020-05-29
@@ -30,21 +31,21 @@ import sys
 # Directory containing full CV reference info (see below, 'cvFile' dictionary, for file
 # list).
 
-cvRefDir = '003_external_CVs_versioned_reference_files'
+cvRefDir = './003_external_CVs_versioned_reference_files'
 
 ##########################################################################################
 # Directory in which core-entity ETL instance TSVs (for the purposes of this script,
 # this means 'file.tsv' and 'biosample.tsv') have been built and stored, prior to running
 # this script.
 
-draftDir = '006_HMP-specific_ETL_TSVs'
+draftDir = './006_HMP-specific_ETL_TSVs'
 
 ##########################################################################################
 # Directory into which TSVs will be written (by this script) summarizing all
 # controlled vocabulary term usage throughout this Level 1 C2M2 instance
 # (as prescribed by the Level 1 specification).
 
-outDir = '007_HMP-specific_CV_term_usage_TSVs'
+outDir = './007_HMP-specific_CV_term_usage_TSVs'
 
 ##########################################################################################
 ##########################################################################################
