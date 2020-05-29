@@ -113,8 +113,8 @@ class CfdeDataPackage (object):
                     need_tables.append(tdoc)
 
             if need_tables:
-                logger.debug("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
                 self.catalog.post('/schema', json=need_tables).raise_for_status()
+                logger.debug("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
 
             for cdoc in need_columns:
                 self.catalog.post(

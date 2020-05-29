@@ -134,7 +134,9 @@ def make_table(tdef):
     tname = tdef["name"]
     if provide_system:
         system_columns = Table.system_column_defs()
-        system_keys = Table.system_key_defs()
+        # bypass bug in deriva-py producing invalid default constraint name for system key
+        #system_keys = Table.system_key_defs()
+        system_keys = [ make_key(tname, ['RID']) ]
         # customize the system column templates...
         for col in system_columns:
             cname = col['name']

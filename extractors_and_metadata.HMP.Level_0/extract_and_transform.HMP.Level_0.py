@@ -642,6 +642,16 @@ def populateFiles(  ):
 
          # end if ( nodeType switch )
 
+         # Fix bad (stub-value) data from a few otherwise good OSDF nodes.
+
+         if objectsToWrite['file'][currentID]['size_in_bytes'] == 0 or objectsToWrite['file'][currentID]['size_in_bytes'] == 1 or objectsToWrite['file'][currentID]['size_in_bytes'] == '0' or objectsToWrite['file'][currentID]['size_in_bytes'] == '1':
+            
+            objectsToWrite['file'][currentID]['size_in_bytes'] = ''
+
+         if re.search( r'^0000000', objectsToWrite['file'][currentID]['md5'] ) is not None:
+            
+            objectsToWrite['file'][currentID]['md5'] = ''
+
       # end for ( currentID in nativeTypeToNodeID[nodeType] )
 
    # end for ( nodeType in FileNodeTypes )
@@ -712,17 +722,17 @@ def writeTable( objectName ):
 # The value of the `id_namespace` field required by C2M2 Level 0 for all file objects;
 # to be assigned by CFDE (eventually; for now, I'm making one up).
 
-id_namespace = 'HMP'
+id_namespace = 'cfde_id_namespace:2'
 
 ##########################################################################################
 # Location of the Table-Schema JSON file describing the output set.
 
-tableSchemaLoc = '000_tableschema_and_namespace_TSV/C2M2_Level_0.datapackage.json'
+tableSchemaLoc = '000_tableschema_and_id_namespace_TSV/C2M2_Level_0.datapackage.json'
 
 ##########################################################################################
-# Location of the CFDE namespace.tsv file that accompanies each Level 0 submission.
+# Location of the CFDE id_namespace.tsv file that accompanies each Level 0 submission.
 
-namespaceTsvLoc = '000_tableschema_and_namespace_TSV/namespace.tsv'
+namespaceTsvLoc = '000_tableschema_and_id_namespace_TSV/id_namespace.tsv'
 
 ##########################################################################################
 # Disambiguator for on-the-fly ID generation.
@@ -820,10 +830,10 @@ outputColumns = {
    'file': [
       'id_namespace',
       'id',
+      'persistent_id',
       'size_in_bytes',
       'sha256',
       'md5',
-      'persistent_id',
       'filename'
    ]
 }
@@ -903,7 +913,7 @@ writeTable('file')
 
 # Include the Table-Schema JSON document in the output for reference.
 
-progressReport("Copying JSON tableschema and namespace.tsv to bdbag data store...")
+progressReport("Copying JSON tableschema and id_namespace.tsv to bdbag data store...")
 
 os.system('cp ' + tableSchemaLoc + ' ' + outDir)
 
