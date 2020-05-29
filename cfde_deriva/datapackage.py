@@ -167,6 +167,19 @@ class CfdeDataPackage (object):
                             { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
                             { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
+                            {
+                                "name": "Vocabulary",
+                                "children": [
+                                    { "name": "Anatomy", "url": "/chaise/recordset/#%s/CFDE:anatomy" % self.catalog._catalog_id },
+                                    { "name": "Assay Type", "url": "/chaise/recordset/#%s/CFDE:assay_type" % self.catalog._catalog_id },
+                                    { "name": "Data Type", "url": "/chaise/recordset/#%s/CFDE:data_type" % self.catalog._catalog_id },
+                                    { "name": "File Format", "url": "/chaise/recordset/#%s/CFDE:file_format" % self.catalog._catalog_id },
+                                    { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#%s/CFDE:ncbi_taxonomy" % self.catalog._catalog_id },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#%s/CFDE:subject_granularity" % self.catalog._catalog_id },
+                                    { "name": "Subject Role", "url": "/chaise/recordset/#%s/CFDE:subject_role" % self.catalog._catalog_id },
+                                ]
+                            },
+                            { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
                         ]
                     }
                 ]
@@ -235,7 +248,7 @@ class CfdeDataPackage (object):
                 except KeyError:
                     continue
             #table.visible_columns = {'compact': compact_visible_columns(table)}
-            table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
+            #table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
         # prettier display of built-in ERMrest_Client table entries
         _update(

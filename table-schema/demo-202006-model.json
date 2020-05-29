@@ -142,6 +142,39 @@
             ]
          },
          "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_biosample_file_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_subject_file_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_subject_subject_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Part of Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ]
+            },
             "visible_columns": {
                "compact": [
                   {"source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]},
@@ -152,6 +185,22 @@
                   {"source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]},
                   {"source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]},
                   "creation_time"
+               ],
+               "detailed": [
+                  {"source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "persistent_id",
+                  "filename",
+                  "size_in_bytes",
+                  {
+                     "markdown_name": "project",
+                     "source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]
+                  },
+                  {"source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]},
+                  "creation_time",
+                  "sha256",
+                  "md5"
                ],
                "filter": {"and": [
                   {"source": "size_in_bytes"},
@@ -167,6 +216,7 @@
                      ]
                   },
                   {
+                     "markdown_name": "Project",
                      "source": [
                         {"outbound": ["CFDE", "file_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
@@ -187,16 +237,16 @@
                   {
                      "markdown_name": "Subject Role",
                      "source": [
-                        {"inbound": ["CFDE", "file_subject_granularity_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_granularity_role_fkey"]},
+                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
+                        {"outbound": ["CFDE", "file_subject_role_taxonomy_role_fkey"]},
                         "RID"
                      ]
                   },
                   {
                      "markdown_name": "Subject Taxonomy",
                      "source": [
-                        {"inbound": ["CFDE", "file_subject_granularity_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_granularity_taxonomy_fkey"]},
+                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
+                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
                         "RID"
                      ]
                   },
@@ -209,9 +259,12 @@
                      ]
                   },
                   {
+                     "markdown_name": "Part of Collection",
                      "source": [
                         {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
                         "RID"
                      ]
                   },
@@ -337,6 +390,75 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"source": [{"outbound": ["CFDE", "biosample_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  {"source": [{"outbound": ["CFDE", "biosample_assay_type_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "biosample_anatomy_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]},
+                  "creation_time"
+               ],
+               "detailed": [
+                  {"source": [{"outbound": ["CFDE", "biosample_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "persistent_id",
+                  {"source": [{"outbound": ["CFDE", "biosample_assay_type_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "biosample_anatomy_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]},
+                  "creation_time",
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ],
+               "filter": {"and": [
+                  {"source": "creation_time"},
+                  {
+                     "markdown_name": "Project",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Part of Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
+                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_biosample_file_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ]}
+            }
          }
       },
       {
@@ -427,6 +549,75 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Role Taxonomy",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        "RID"
+                     ],
+                     "entity": true
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        {"outbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_subject_subject_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_subject_file_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Part of Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_in_collection_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_in_collection_collection_fkey"]},
+                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  {"source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "subject_granularity_fkey"]}, "RID"]},
+                  {
+                     "markdown_name": "Taxonomy",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
+                        "name"
+                     ],
+                     "aggregate": "array"
+                  },
+                  "creation_time"
+               ],
+               "detailed": [
+                  {"source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "persistent_id",
+                  {"source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "subject_granularity_fkey"]}, "RID"]},
+                  "creation_time"
+               ]
+            }
          }
       },
       {
@@ -496,6 +687,81 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Parent Project",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_child_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Child Project",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_parent_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_child_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Attributed File",
+                     "source": [{"inbound": ["CFDE", "file_project_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Attributed Biosample",
+                     "source": [{"inbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Attributed Subject",
+                     "source": [{"inbound": ["CFDE", "subject_project_fkey"]}, "RID"]
+                  }
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "name",
+                  "description",
+                  "creation_time"
+               ],
+               "detailed":  [
+                  {"source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "persistent_id",
+                  "name",
+                  "abbreviation",
+                  "description",
+                  "creation_time"
+               ],
+               "filter": {"and": [
+                  {"source": "creation_time"},
+                  {
+                     "markdown_name": "Super-Project",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_child_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Sub-Project",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_parent_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_child_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        "RID"
+                     ]
+                  }               
+               ]}
+            }
          }
       },
       {
@@ -1252,6 +1518,15 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]}, "RID"]},
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]}, "RID"]}
+               ]
+            }
          }
       },
       {
