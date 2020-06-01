@@ -194,10 +194,7 @@
                   "persistent_id",
                   "filename",
                   "size_in_bytes",
-                  {
-                     "markdown_name": "project",
-                     "source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]
-                  },
+                  {"source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]},
                   {"source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]},
                   {"source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]},
                   "creation_time",
@@ -909,6 +906,159 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Part of Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_in_collection_child_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_parent_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"source": [{"outbound": ["CFDE", "collection_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  {"source": [{"outbound": ["CFDE", "collection_project_fkey"]}, "RID"]},
+                  "name",
+                  "description",
+                  "creation_time"
+               ],
+               "detailed": [
+                  {"source": [{"outbound": ["CFDE", "collection_id_namespace_fkey"]}, "RID"]},
+                  "id",
+                  "persistent_id",
+                  {"source": [{"outbound": ["CFDE", "collection_project_fkey"]}, "RID"]},
+                  "name",
+                  "description",
+                  "creation_time"
+               ],
+               "filter": {"and": [
+                  {
+                     "markdown_name": "Collection Creation Time",
+                     "source": "creation_time"
+                  },
+                  {
+                     "markdown_name": "File Creation Time",
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        "creation_time"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Biosample Creation Time",
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
+                        "biosample_creation_time"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Defined By Project",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Subject Granularity",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Subject Role",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Subject Taxonomy",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Assay Type",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_assay_type_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_assay_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Part of Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
+                        "RID"
+                     ]
+                  }
+               ]}
+            }
          }
       },
       {
