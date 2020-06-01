@@ -1,3 +1,8 @@
+INSERT INTO file_subject_granularity (
+  file_id_namespace,
+  file_id,
+  subject_granularity
+)
 SELECT
   fds.file_id_namespace,
   fds.file_id,

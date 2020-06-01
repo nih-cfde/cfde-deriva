@@ -1,3 +1,8 @@
+INSERT INTO collection_anatomy (
+  collection_id_namespace,
+  collection_id,
+  anatomy
+)
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
   cg.leader_collection_id AS collection_id,

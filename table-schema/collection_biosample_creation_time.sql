@@ -1,3 +1,8 @@
+INSERT INTO collection_biosample_creation_time (
+  collection_id_namespace,
+  collection_id,
+  biosample_creation_time
+)
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
   cg.leader_collection_id AS collection_id,

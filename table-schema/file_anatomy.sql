@@ -1,3 +1,8 @@
+INSERT INTO file_anatomy (
+  file_id_namespace,
+  file_id,
+  anatomy
+)
 SELECT DISTINCT
   fdb.file_id_namespace,
   fdb.file_id,

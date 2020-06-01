@@ -1,3 +1,9 @@
+INSERT INTO collection_in_collection_transitive (
+    leader_collection_id_namespace,
+    leader_collection_id,
+    member_collection_id_namespace,
+    member_collection_id
+)
 WITH RECURSIVE t AS (
 
   SELECT

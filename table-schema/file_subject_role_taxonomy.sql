@@ -1,3 +1,9 @@
+INSERT INTO file_subject_role_taxonomy (
+  file_id_namespace,
+  file_id,
+  subject_role_id,
+  subject_taxonomy_id
+)
 SELECT DISTINCT
   fds.file_id_namespace,
   fds.file_id,

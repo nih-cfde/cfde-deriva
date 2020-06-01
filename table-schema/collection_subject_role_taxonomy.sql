@@ -1,3 +1,9 @@
+INSERT INTO collection_subject_role_taxonomy (
+  collection_id_namespace,
+  collection_id,
+  subject_role_id,
+  subject_taxonomy_id
+)
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
   cg.leader_collection_id AS collection_id,

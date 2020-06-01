@@ -1,3 +1,8 @@
+INSERT INTO collection_assay_type (
+  collection_id_namespace,
+  collection_id,
+  assay_type
+)
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
   cg.leader_collection_id AS collection_id,

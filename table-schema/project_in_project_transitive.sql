@@ -1,3 +1,9 @@
+INSERT INTO project_in_project_transitive (
+  leader_project_id_namespace,
+  leader_project_id,
+  member_project_id_namespace,
+  member_project_id
+)
 WITH RECURSIVE t AS (
 
   SELECT

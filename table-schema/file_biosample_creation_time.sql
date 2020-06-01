@@ -1,3 +1,8 @@
+INSERT INTO file_biosample_creation_time (
+  file_id_namespace,
+  file_id,
+  biosample_creation_time
+)
 SELECT DISTINCT
   fdb.file_id_namespace,
   fdb.file_id,
