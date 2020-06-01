@@ -23,6 +23,7 @@ class DashboardQueryHelper (object):
             'list_projects': list(self.list_projects()),
             'list_datatypes': list(self.list_datatypes()),
             'list_formats': list(self.list_formats()),
+            'list_project_role_taxonomy_stats': list(self.list_project_role_taxonomy_stats()),
             'list_project_file_stats': list(self.list_project_file_stats()),
             'list_project_assaytype_file_stats': list(self.list_project_assaytype_file_stats()),
             'list_program_file_stats_by_time_bin': list(self.list_project_file_stats_by_time_bin()),
@@ -46,7 +47,7 @@ class DashboardQueryHelper (object):
         """Return list of file format terms
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
-    
+
     def list_project_file_stats(self, project_id_pair=None):
         """Return list of file statistics per project.
 
@@ -73,6 +74,73 @@ class DashboardQueryHelper (object):
             Sum(path.file.size_in_bytes).alias('byte_cnt'),
         )
         return results.fetch()
+
+    def list_project_role_taxonomy_stats(self, subject_role=None):
+        """Return list of statistics per (project, role, taxonomy)
+        """
+        # build 2 parallel query structures for 2 source tables
+        path1 = self.builder.CFDE.subject.path
+        path2 = self.builder.CFDE.file.path
+
+        path1.link(self.builder.CFDE.subject_role_taxonomy)
+        path2.link(self.builder.CFDE.file_subject_role_taxonomy)
+
+        if subject_role is not None:
+            # add filters for one subject role
+            path1.filter(path.subject_role_taxonomy.role_id == subject_role)
+            path2.filter(path.file_subject_role_taxonomy.subject_role_id == subject_role)
+
+        # build group keys that we will reuse
+        groupkey1 = (
+            path1.subject.project_id_namespace,
+            path1.subject.project,
+            path1.subject_role_taxonomy.role_id,
+            path1.subject_role_taxonomy.taxonomy_id
+        )
+        groupkey2 = (
+            path2.file.project_id_namespace,
+            path2.file.project,
+            path2.file_subject_role_taxonomy.subject_role_id,
+            path2.file_subject_role_taxonomy.subject_taxonomy_id
+        )
+
+        # define grouped and sorted aggregates
+        results1 = path1.groupby(*groupkey1).attributes(
+            Cnt(path1.subject).alias("num_subjects")
+        ).sort(*groupkey1)
+        results2 = path2.groupby(*groupkey2).attributes(
+            Cnt(path2.file).alias("num_files")
+        ).sort(*groupkey2)
+
+        # fetch results and prepare for client-side merge
+        results1 = {
+            (row['project_id_namespace'],
+             row['project'],
+             row['role_id'],
+             row['taxonomy_id']): row
+            for row in results1.fetch()
+        }
+        results2 = {
+            (row['project_id_namespace'],
+             row['project'],
+             row['subject_role_id'],
+             row['subject_taxonomy_id']): row
+            for row in results2.fetch()
+        }
+        # get all group keys and do merge
+        all_groups = set(results1) & set(results2)
+        return [
+            {
+                'project_id_namespace': group[0],
+                'project': group[1],
+                'role_id': group[2],
+                'taxonomy_id': group[3],
+                # pretend we got a null count back if group is absent in one of the result sets
+                'num_subjects': results1.get(group, {"num_subjects": None})['num_subjects'],
+                'num_files': results2.get(group, {"num_files":None})['num_files'],
+            }
+            for group in all_groups
+        ]
 
     def list_project_assaytype_file_stats(self, project_id_pair=None):
         """Return list of file statistics per (project, assay_type).
