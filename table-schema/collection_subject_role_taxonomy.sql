@@ -42,3 +42,4 @@ JOIN biosample_from_subject bfs
   ON (bic.biosample_id_namespace = bfs.biosample_id_namespace AND bic.biosample_id = bfs.biosample_id)
 JOIN subject_role_taxonomy srt
   ON (bfs.subject_id_namespace = srt.subject_id_namespace AND bfs.subject_id = srt.subject_id)
+;

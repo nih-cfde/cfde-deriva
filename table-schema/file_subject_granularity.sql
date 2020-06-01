@@ -22,3 +22,4 @@ JOIN biosample_from_subject bfs
   ON (fdb.biosample_id_namespace = bfs.biosample_id_namespace AND fdb.biosample_id = bfs.biosample_id)
 JOIN subject s
   ON (bfs.subject_id_namespace = s.id_namespace AND bfs.subject_id = s.id)
+;

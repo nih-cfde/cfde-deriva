@@ -29,4 +29,5 @@ SELECT
   leader_collection_id,
   member_collection_id_namespace,
   member_collection_id
-FROM t;
+FROM t
+;

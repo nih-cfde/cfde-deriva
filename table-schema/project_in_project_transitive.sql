@@ -29,4 +29,5 @@ SELECT
   leader_project_id,
   member_project_id_namespace,
   member_project_id
-FROM t;
+FROM t
+;

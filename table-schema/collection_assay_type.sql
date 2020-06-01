@@ -25,3 +25,4 @@ JOIN biosample_in_collection bic
 JOIN biosample b
   ON (bic.biosample_id_namespace = b.id_namespace AND bic.biosample_id = b.id)
 WHERE b.assay_type IS NOT NULL
+;

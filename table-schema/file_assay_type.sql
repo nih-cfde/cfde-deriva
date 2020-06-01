@@ -11,3 +11,4 @@ FROM file_describes_biosample fdb
 JOIN biosample b
   ON (fdb.biosample_id_namespace = b.id_namespace AND fdb.biosample_id = b.id)
 WHERE b.assay_type IS NOT NULL
+;
