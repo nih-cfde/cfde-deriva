@@ -37,11 +37,14 @@ def make_column(cdef):
     cdef = dict(cdef)
     constraints = cdef.get("constraints", {})
     cdef_name = cdef.pop("name")
+    title = cdef.get("title", None)
     nullok = not constraints.pop("required", False)
     description = cdef.pop("description", None)
     annotations = {
         schema_tag: cdef,
     }
+    if title is not None:
+        annotations[tag.display] = {"name": title}
     pre_annotations = cdef.get("deriva", {})
     for k, t in tag.items():
         if k in pre_annotations:
