@@ -21,6 +21,7 @@ class DashboardQueryHelper (object):
         # for easier JSON serialization...
         results = {
             'list_projects': list(self.list_projects()),
+            'list_root_projects': list(self.list_root_projects()),
             'list_datatypes': list(self.list_datatypes()),
             'list_formats': list(self.list_formats()),
             'list_project_role_taxonomy_stats': list(self.list_project_role_taxonomy_stats()),
@@ -37,6 +38,23 @@ class DashboardQueryHelper (object):
         """
         # trivial case: just return entities of a single table
         return self.builder.CFDE.project.path.entities().fetch()
+
+    def list_root_projects(self):
+        """Return list of root projects, i.e. those not listed as child projects of any other.
+        """
+        path = self.builder.CFDE.project_in_project.path
+        # use right-outer-join to distinguish rows with and without child role
+        path.link(
+            self.builder.CFDE.project,
+            on=( (path.project_in_project.child_project_id_namespace == self.builder.CFDE.project.id_namespace)
+                 & (path.project_in_project.child_project_id == self.builder.CFDE.project.id) ),
+            join_type="right"
+        )
+        # look for projects without a project_in_project child association
+        # note, this relies on subtle ermrest API composition rules.
+        # the filter is applied after the outer join is computed.
+        path.filter(path.project_in_project.RID == None)
+        return path.entities().fetch()
 
     def list_datatypes(self):
         """Return list of data_type terms
