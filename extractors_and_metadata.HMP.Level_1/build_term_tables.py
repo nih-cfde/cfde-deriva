@@ -267,6 +267,8 @@ def decorateTermsUsed(  ):
 
                   definition = definition.strip().strip('"\'').strip()
 
+                  definition = re.sub( r'\|.*$', r'', definition )
+
                   termsUsed[categoryID][currentTerm]['name'] = name;
                   termsUsed[categoryID][currentTerm]['description'] = definition;
                   termsUsed[categoryID][currentTerm]['synonyms'] = synonyms;
