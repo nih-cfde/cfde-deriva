@@ -10,6 +10,10 @@ import base64
 from deriva.core import tag
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
+if 'source_definitions' not in tag:
+    # monkey-patch this newer annotation key until it appears in deriva-py
+    tag['source_definitions'] = 'tag:isrd.isi.edu,2019:source-definitions'
+
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
 
