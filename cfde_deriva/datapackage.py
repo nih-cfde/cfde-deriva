@@ -195,7 +195,18 @@ class CfdeDataPackage (object):
         _update(
             self.cat_cfde_schema.display,
             "name_style",
-            {"underline_space": True, "title_case": True}
+            {
+                "underline_space": True,
+                "title_case": True,
+            }
+        )
+        # turn off clutter of many links in tabular views
+        _update(
+            self.cat_cfde_schema.display,
+            "show_foreign_key_link",
+            {
+                "compact": False
+            }
         )
 
         def compact_visible_columns(table):
