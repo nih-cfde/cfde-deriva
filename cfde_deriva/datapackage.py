@@ -24,6 +24,9 @@ Demonstrates use of deriva-py APIs:
 
 """
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler(stream=sys.stdout))
+
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -66,7 +69,8 @@ class CfdeDataPackage (object):
 
         if verbose:
             logger.setLevel(logging.DEBUG)
-            logger.addHandler(logging.StreamHandler(stream=sys.stdout))
+        else:
+            logger.setLevel(logging.INFO)
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
