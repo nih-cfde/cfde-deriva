@@ -1298,7 +1298,7 @@
                   "fields": [ "file_id_namespace", "file_id" ],
                   "constraint_name": "file_in_collection_file_fkey",
                   "reference": {
-                     "title": "Included File",
+                     "title": "Contained File",
                      "resource": "file",
                      "fields": [ "id_namespace", "id" ]
                   }
