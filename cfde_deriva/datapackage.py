@@ -24,6 +24,9 @@ Demonstrates use of deriva-py APIs:
 
 """
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler(stream=sys.stdout))
+
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -57,16 +60,12 @@ class CfdeDataPackage (object):
         "select": ["*"],
     }
 
-    def __init__(self, filename, verbose=True):
+    def __init__(self, filename):
         self.filename = filename
         self.dirname = os.path.dirname(self.filename)
         self.catalog = None
         self.cat_model_root = None
         self.cat_cfde_schema = None
-
-        if verbose:
-            logger.setLevel(logging.DEBUG)
-            logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
