@@ -609,32 +609,74 @@
                   "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
                }
             },
-            "visible_foreign_keys": {
-               "*": [
-                  {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_id_namespace": {
+                     "comment": "The namespace qualifier for the subject ID.",
+                     "source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]
+                  },
+                  "S_project": {
+                     "comment": "The project attributed as the source of the subject.",
+                     "source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]
+                  },
+                  "S_granularity": {
+                     "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
+                     "source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]
+                  },
+                  "S_role": {
+                     "markdown_name": "Taxonomic Role",
+                     "comment": "The taxonomic role concept(s) characterizing the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
+                        "name"
+                     ],
+                     "aggregate": "array"
+                  },
+                  "S_taxonomy": {
+                     "markdown_name": "Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
+                        "name"
+                     ],
+                     "aggregate": "array"
+                  },
+                  "S_creation_time": {
+                     "comment": "The time when the subject record created.",
+                     "source": "creation_time"
+                  },
+                  "S_role_taxonomy": {
                      "markdown_name": "Role Taxonomy",
+                     "comment": "Taxonomic characterizations of the subject.",
                      "source": [
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         "RID"
                      ],
                      "entity": true
                   },
-                  {
+                  "S_biosamples": {
+                     "comment": "Biosamples derived from the subject.",
                      "source": [
                         {"inbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
                         {"outbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         "RID"
                      ]
                   },
-                  {
+                  "S_files": {
+                     "comment": "Files whose content describes the subject.",
                      "source": [
                         {"inbound": ["CFDE", "file_describes_subject_subject_fkey"]},
                         {"outbound": ["CFDE", "file_describes_subject_file_fkey"]},
                         "RID"
                      ]
                   },
-                  {
+                  "S_part_of_collections": {
                      "markdown_name": "Part of Collection",
+                     "comment": "Collections with the subject record as a directly or indirectly constituent member.",
                      "source": [
                         {"inbound": ["CFDE", "subject_in_collection_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_in_collection_collection_fkey"]},
@@ -643,33 +685,52 @@
                         "RID"
                      ]
                   }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_role_taxonomy"},
+                  {"sourcekey": "S_biosamples"},
+                  {"sourcekey": "S_files"},
+                  {"sourcekey": "S_part_of_collections"}
                ]
             },
             "visible_columns": {
                "compact": [
-                  {"source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
-                  {"source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]},
-                  {"source": [{"outbound": ["CFDE", "subject_granularity_fkey"]}, "RID"]},
-                  {
-                     "markdown_name": "Taxonomy",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        "name"
-                     ],
-                     "aggregate": "array"
-                  },
-                  "creation_time"
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
-                  {"source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
                   "persistent_id",
-                  {"source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]},
-                  {"source": [{"outbound": ["CFDE", "subject_granularity_fkey"]}, "RID"]},
-                  "creation_time"
-               ]
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_creation_time"}
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_creation_time"},
+                  {
+                     "markdown_name": "Project",
+                     "comment": "The project (or any super-projects) attributed as source of the subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_role"},
+                  {"sourcekey": "S_biosamples"},
+                  {"sourcekey": "S_files"},
+                  {"sourcekey": "S_part_of_collections"}
+               ]}
             }
          }
       },
@@ -744,6 +805,20 @@
             ]
          },
          "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_id_namespace": {
+                     "comment": "The namespace qualifier for the project ID.",
+                     "source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]
+                  },
+                  "S_creation_time": {
+                     "comment": "The time when the project was created.",
+                     "source": "creation_time"
+                  }
+               }
+            },
             "visible_foreign_keys": {
                "*": [
                   {
@@ -763,40 +838,49 @@
                      ]
                   },
                   {
-                     "markdown_name": "Attributed File",
-                     "source": [{"inbound": ["CFDE", "file_project_fkey"]}, "RID"]
+                     "markdown_name": "Attributed Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Attributed Subject",
+                     "source": [{"inbound": ["CFDE", "subject_project_fkey"]}, "RID"]
                   },
                   {
                      "markdown_name": "Attributed Biosample",
                      "source": [{"inbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
                   },
                   {
-                     "markdown_name": "Attributed Subject",
-                     "source": [{"inbound": ["CFDE", "subject_project_fkey"]}, "RID"]
+                     "markdown_name": "Attributed File",
+                     "source": [{"inbound": ["CFDE", "file_project_fkey"]}, "RID"]
                   }
                ]
             },
             "visible_columns": {
                "compact": [
-                  {"source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
                   "name",
                   "description",
-                  "creation_time"
+                  {"sourcekey": "S_creation_time"}
                ],
                "detailed":  [
-                  {"source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
                   "persistent_id",
                   "name",
                   "abbreviation",
                   "description",
-                  "creation_time"
+                  {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"source": "creation_time"},
+                  {"sourcekey": "S_creation_time"},
                   {
                      "markdown_name": "Super-Project",
+                     "comment": "Direct or indirect super-projects of the project.",
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
@@ -807,6 +891,7 @@
                   },
                   {
                      "markdown_name": "Sub-Project",
+                     "comment": "Direct or indirect sub-projects of the project.",
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_parent_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_child_fkey"]},
@@ -814,7 +899,66 @@
                         {"outbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         "RID"
                      ]
-                  }               
+                  },
+                  {
+                     "comment": "The granularity of a subject attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_project_fkey"]},
+                        {"outbound": ["CFDE", "subject_granularity_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "comment": "The taxonomic role of a subject attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_project_fkey"]},
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy of a subject attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_project_fkey"]},
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "comment": "The anatomy of a biosample attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_project_fkey"]},
+                        {"outbound": ["CFDE", "biosample_anatomy_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "comment": "The assay type of a biosample attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_project_fkey"]},
+                        {"outbound": ["CFDE", "biosample_assay_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "comment": "The content format of a file attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_project_fkey"]},
+                        {"outbound": ["CFDE", "file_file_format_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "comment": "The type of data represented by a file attributed to the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_project_fkey"]},
+                        {"outbound": ["CFDE", "file_data_type_fkey"]},
+                        "RID"
+                     ]
+                  }
                ]}
             }
          }
@@ -963,6 +1107,31 @@
                   "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
                }
             },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_id_namespace": {
+                     "comment": "The namespace qualifying the collection ID.",
+                     "source": [
+                        {"outbound": ["CFDE", "collection_id_namespace_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_project": {
+                     "comment": "The project which defined the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_creation_time": {
+                     "comment": "The time when the collection was created.",
+                     "source": "creation_time"
+                  }
+               }
+            },
             "visible_foreign_keys": {
                "*": [
                   {
@@ -975,8 +1144,8 @@
                   },
                   {
                      "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
                         "RID"
                      ]
                   },
@@ -989,8 +1158,8 @@
                   },
                   {
                      "source": [
-                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
                         "RID"
                      ]
                   }
@@ -998,29 +1167,30 @@
             },
             "visible_columns": {
                "compact": [
-                  {"source": [{"outbound": ["CFDE", "collection_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
-                  {"source": [{"outbound": ["CFDE", "collection_project_fkey"]}, "RID"]},
+                  {"sourcekey": "S_project"},
                   "name",
                   "description",
-                  "creation_time"
+                  {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
-                  {"source": [{"outbound": ["CFDE", "collection_id_namespace_fkey"]}, "RID"]},
+                  {"sourcekey": "S_id_namespace"},
                   "id",
                   "persistent_id",
-                  {"source": [{"outbound": ["CFDE", "collection_project_fkey"]}, "RID"]},
+                  {"sourcekey": "S_project"},
                   "name",
                   "description",
-                  "creation_time"
+                  {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
                   {
                      "markdown_name": "Collection Creation Time",
-                     "source": "creation_time"
+                     "sourcekey": "S_creation_time"
                   },
                   {
                      "markdown_name": "File Creation Time",
+                     "comment": "The time when a constituent file was created.",
                      "source": [
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
@@ -1029,6 +1199,7 @@
                   },
                   {
                      "markdown_name": "Biosample Creation Time",
+                     "comment": "The time when a constituent biosample was created.",
                      "source": [
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
@@ -1038,6 +1209,7 @@
                   },
                   {
                      "markdown_name": "Defined By Project",
+                     "comment": "A project (or super-project) which defined the collection.",
                      "source": [
                         {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
@@ -1048,6 +1220,7 @@
                   },
                   {
                      "markdown_name": "Subject Granularity",
+                     "comment": "The specificity of description for a directly or indirectly consituent subject.",
                      "source": [
                         {"inbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
@@ -1056,6 +1229,7 @@
                   },
                   {
                      "markdown_name": "Subject Role",
+                     "comment": "The taxonomic role for a directly or indirectly constituent subject.",
                      "source": [
                         {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
@@ -1064,6 +1238,7 @@
                   },
                   {
                      "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy of a directly or indirectly constituent subject.",
                      "source": [
                         {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
@@ -1071,7 +1246,17 @@
                      ]
                   },
                   {
+                     "markdown_name": "Anatomy",
+                     "comment": "The anatomical source of a directly or indirectly constituent biosample.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_anatomy_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
                      "markdown_name": "Assay Type",
+                     "comment": "The assay type of a directly or indirectly constituent biosample.",
                      "source": [
                         {"inbound": ["CFDE", "collection_assay_type_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_assay_type_fkey"]},
@@ -1080,6 +1265,7 @@
                   },
                   {
                      "markdown_name": "Part of Collection",
+                     "comment": "Collections directly or indirectly containing the collection.",
                      "source": [
                         {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
@@ -1087,13 +1273,15 @@
                      ]
                   },
                   {
+                     "comment": "Constituent subjects of the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
                         "RID"
                      ]
                   },
                   {
+                     "comment": "Constituent biosamples of the collection.",
                      "source": [
                         {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
@@ -1101,9 +1289,10 @@
                      ]
                   },
                   {
+                     "comment": "Constituent files of the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
                         "RID"
                      ]
                   }
