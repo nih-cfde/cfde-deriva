@@ -755,8 +755,7 @@
                   "description": "An ID representing this project, unique within this id_namespace",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -783,7 +782,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this project",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "unique": false
+                  }
                },
                {
                   "name": "description",
@@ -1080,7 +1082,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this collection",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -1996,7 +2001,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this taxon",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -2036,7 +2044,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -2076,7 +2087,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -2116,7 +2130,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -2155,7 +2172,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this subject_role",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -2186,7 +2206,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
-                  "type": "string"
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
