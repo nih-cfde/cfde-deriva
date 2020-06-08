@@ -468,6 +468,7 @@ def main(args):
         if incremental_load:
             for dp in datapackages:
                 dp.set_catalog(oldcat)
+                dp.provision()
                 dp.load_data_files(onconflict=onconflict)
         ## reconfigure
         datapackages[0].set_catalog(oldcat)
