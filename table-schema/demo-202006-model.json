@@ -2260,6 +2260,49 @@
             "primaryKey": "id"
          }
       },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "project_root",
+         "title": "Root Project",
+         "description": "Top-level projects not declared a sub-project of any other.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for the project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "project_id_namespace",
+               "project_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "project_id_namespace", "project_id" ],
+                  "constraint_name": "project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "project_root.sql"
+      },
       
       {
          "profile": "tabular-data-resource",
