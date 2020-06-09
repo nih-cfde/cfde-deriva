@@ -20,15 +20,15 @@ class DashboardQueryHelper (object):
         # use list() to convert each ResultSet
         # for easier JSON serialization...
         results = {
-            'list_projects': list(self.list_projects()),
+            #'list_projects': list(self.list_projects()),
             'list_root_projects': list(self.list_root_projects()),
-            'list_datatypes': list(self.list_datatypes()),
-            'list_formats': list(self.list_formats()),
-            'list_project_role_taxonomy_stats': list(self.list_project_role_taxonomy_stats()),
+            #'list_datatypes': list(self.list_datatypes()),
+            #'list_formats': list(self.list_formats()),
             'list_project_file_stats': list(self.list_project_file_stats()),
             'list_project_assaytype_file_stats': list(self.list_project_assaytype_file_stats()),
-            'list_program_file_stats_by_time_bin': list(self.list_project_file_stats_by_time_bin()),
-            'running_sum_project_file_stats': list(self.running_sum_project_file_stats()),
+            'list_project_anatomy_file_stats': list(self.list_project_anatomy_file_stats()),
+            #'list_program_file_stats_by_time_bin': list(self.list_project_file_stats_by_time_bin()),
+            #'running_sum_project_file_stats': list(self.running_sum_project_file_stats()),
         }
         print(json.dumps(results, indent=2))
 
@@ -42,18 +42,11 @@ class DashboardQueryHelper (object):
     def list_root_projects(self):
         """Return list of root projects, i.e. those not listed as child projects of any other.
         """
-        path = self.builder.CFDE.project_in_project.path
-        # use right-outer-join to distinguish rows with and without child role
-        path.link(
-            self.builder.CFDE.project,
-            on=( (path.project_in_project.child_project_id_namespace == self.builder.CFDE.project.id_namespace)
-                 & (path.project_in_project.child_project_id == self.builder.CFDE.project.id) ),
-            join_type="right"
-        )
-        # look for projects without a project_in_project child association
-        # note, this relies on subtle ermrest API composition rules.
-        # the filter is applied after the outer join is computed.
-        path.filter(path.project_in_project.RID == None)
+        # use pre-computed table to find subset of project table
+        path = self.builder.CFDE.project_root.path
+        # inner join on foreign key from project_root -> project
+        path.link(self.builder.CFDE.project)
+        # returns entities from last table in path (project)
         return path.entities().fetch()
 
     def list_datatypes(self):
@@ -66,10 +59,20 @@ class DashboardQueryHelper (object):
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
 
-    def list_project_file_stats(self, project_id_pair=None):
+    def list_project_file_stats(self, project_id_pair=None, use_root_projects=True, extras=(lambda builder, path: path, lambda path: [], lambda path: [])):
         """Return list of file statistics per project.
 
-        Optionally filtered to a single project (namespace, id) pair.
+        :param project_pair_id: Only summarize a specific (project_id_namespace, project_id) pair.
+        :param use_root_projects: Summarize by root project rather than attributed sub-projects (default true).
+        :param extras: tuple of extension functions to invoke (path_func, groupkey_func, attribute_thunk).
+
+        The extras functions allow composition of more
+        material. Effectively, they modify the result as follows:
+
+           return path_func(builder, core_path)
+           .groupby(* core_groupkeys + groupkey_func(path))
+           .attributes(* core_attributes + attributes_func(path))
+           .fetch()
 
         NOTE: this query will not return a row for a program with zero files...
 
@@ -77,87 +80,84 @@ class DashboardQueryHelper (object):
         be returned if none of the files have specified a length...
 
         """
-        path = self.builder.CFDE.file.path
+        if use_root_projects:
+            # start with smaller set of root projects
+            path = self.builder.CFDE.project_root
+            path = path.link(self.builder.CFDE.project)
+            # linked as leader...
+            path = path.link(
+                self.builder.CFDE.project_in_project_transitive,
+                on=(
+                    (path.project.id_namespace
+                     == self.builder.CFDE.project_in_project_transitive.leader_project_id_namespace)
+                    & (path.project.id
+                       == self.builder.CFDE.project_in_project_transitive.leader_project_id)
+                )
+            )
+            # to actual project attribution of file
+            path = path.link(
+                self.builder.CFDE.file,
+                on=(
+                    (path.project_in_project_transitive.member_project_id_namespace
+                     == self.builder.CFDE.file.project_id_namespace)
+                    & (path.project_in_project_transitive.member_project_id
+                       == self.builder.CFDE.file.project)
+                )
+            )
+        else:
+            # start with full project set
+            path = self.builder.CFDE.project
+            # linked as project attribution of file
+            path = path.link(self.builder.CFDE.file)
+
+        extend_path, extend_groupkeys, extend_attributes = extras
+        path = extend_path(self.builder, path)
+
         if project_id_pair is not None:
             # add filter for one (project_id_namespace, project_id)
             project_id_ns, project_id = project_id_pair
-            path.filter(path.file.project_id_namespace == project_id_ns)
-            path.filter(path.file.project == project_id)
+            path.filter(path.project.id_namespace == project_id_ns)
+            path.filter(path.project.id == project_id)
         # and return grouped aggregate results
         results = path.groupby(
-            path.file.project_id_namespace,
-            path.file.project
+            *(
+                [
+                    path.project.id_namespace.alias('project_id_namespace'),
+                    path.project.id.alias('project_id')
+                ] + extend_groupkeys(path)
+            )
         ).attributes(
-            Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.size_in_bytes).alias('byte_cnt'),
+            *(
+                [
+                    Cnt(path.file).alias('file_cnt'),
+                    Sum(path.file.size_in_bytes).alias('byte_cnt'),
+                    # .name is part of API so need to use dict-style lookup of column...
+                    path.project.column_definitions['name'].alias('project_name')
+                ] + extend_attributes(path)
+            )
         )
         return results.fetch()
 
-    def list_project_role_taxonomy_stats(self, subject_role=None):
-        """Return list of statistics per (project, role, taxonomy)
-        """
-        # build 2 parallel query structures for 2 source tables
-        path1 = self.builder.CFDE.subject.path
-        path2 = self.builder.CFDE.file.path
+    @classmethod
+    def extend_file_path_for_assaytype(cls, builder, path):
+        # use explicit join in case file is not last element of path
+        # i.e. due to stacked extensions
+        return path.link(
+            builder.CFDE.file_assay_type,
+            on=( (path.file.id_namespace == builder.CFDE.file_assay_type.file_id_namespace)
+                 & (path.file.id == builder.CFDE.file_assay_type.file_id) )
+        ).link(builder.CFDE.assay_type)
 
-        path1.link(self.builder.CFDE.subject_role_taxonomy)
-        path2.link(self.builder.CFDE.file_subject_role_taxonomy)
-
-        if subject_role is not None:
-            # add filters for one subject role
-            path1.filter(path.subject_role_taxonomy.role_id == subject_role)
-            path2.filter(path.file_subject_role_taxonomy.subject_role_id == subject_role)
-
-        # build group keys that we will reuse
-        groupkey1 = (
-            path1.subject.project_id_namespace,
-            path1.subject.project,
-            path1.subject_role_taxonomy.role_id,
-            path1.subject_role_taxonomy.taxonomy_id
-        )
-        groupkey2 = (
-            path2.file.project_id_namespace,
-            path2.file.project,
-            path2.file_subject_role_taxonomy.subject_role_id,
-            path2.file_subject_role_taxonomy.subject_taxonomy_id
-        )
-
-        # define grouped and sorted aggregates
-        results1 = path1.groupby(*groupkey1).attributes(
-            Cnt(path1.subject).alias("num_subjects")
-        ).sort(*groupkey1)
-        results2 = path2.groupby(*groupkey2).attributes(
-            Cnt(path2.file).alias("num_files")
-        ).sort(*groupkey2)
-
-        # fetch results and prepare for client-side merge
-        results1 = {
-            (row['project_id_namespace'],
-             row['project'],
-             row['role_id'],
-             row['taxonomy_id']): row
-            for row in results1.fetch()
-        }
-        results2 = {
-            (row['project_id_namespace'],
-             row['project'],
-             row['subject_role_id'],
-             row['subject_taxonomy_id']): row
-            for row in results2.fetch()
-        }
-        # get all group keys and do merge
-        all_groups = set(results1) & set(results2)
+    @classmethod
+    def extend_file_groupkeys_for_assaytype(cls, path):
         return [
-            {
-                'project_id_namespace': group[0],
-                'project': group[1],
-                'role_id': group[2],
-                'taxonomy_id': group[3],
-                # pretend we got a null count back if group is absent in one of the result sets
-                'num_subjects': results1.get(group, {"num_subjects": None})['num_subjects'],
-                'num_files': results2.get(group, {"num_files":None})['num_files'],
-            }
-            for group in all_groups
+            path.assay_type.id
+        ]
+
+    @classmethod
+    def extend_file_attributes_for_assaytype(cls, path):
+        return [
+            path.assay_type.column_definitions['name'].alias('assay_type_name')
         ]
 
     def list_project_assaytype_file_stats(self, project_id_pair=None):
@@ -168,35 +168,49 @@ class DashboardQueryHelper (object):
         categories.
 
         """
-        # include vocab table for human-readable assay_type.name field
-        path = self.builder.CFDE.assay_type.path
-        path.link(self.builder.CFDE.biosample)
-        path.link(self.builder.CFDE.file_describes_biosample)
-        # right-outer join so we can count files w/o this biosample/assay_type linkage
-        path.link(
-            self.builder.CFDE.file,
-            on=( (path.file_describes_biosample.file_id_namespace == self.builder.CFDE.file.id_namespace)
-                 & (path.file_describes_biosample.file_id == self.builder.CFDE.file.id) ),
-            join_type='right'
+        extras = (
+            self.extend_file_path_for_assaytype,
+            self.extend_file_groupkeys_for_assaytype,
+            self.extend_file_attributes_for_assaytype
         )
-        if project_id_pair is not None:
-            # add filter for one (project_id_namespace, project_id)
-            project_id_ns, project_id = project_id_pair
-            path.filter(path.file.project_id_namespace == project_id_ns)
-            path.filter(path.file.project == project_id)
-        # and return grouped aggregate results
-        results = path.groupby(
-            # compound grouping key
-            path.file.project_id_namespace,
-            path.file.project,
-            path.biosample.assay_type.alias('assay_type_id'),
-        ).attributes(
-            # 'name' is part of Table API so we cannot use attribute-based lookup...
-            path.assay_type.column_definitions['name'].alias('assay_type_name'),
-            Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.size_in_bytes).alias('byte_cnt'),
+        return self.list_project_file_stats(project_id_pair=project_id_pair, extras=extras)
+
+    @classmethod
+    def extend_file_path_for_anatomy(cls, builder, path):
+        # use explicit join in case file is not last element of path
+        # i.e. due to stacked extensions
+        return path.link(
+            builder.CFDE.file_anatomy,
+            on=( (path.file.id_namespace == builder.CFDE.file_anatomy.file_id_namespace)
+                 & (path.file.id == builder.CFDE.file_anatomy.file_id) )
+        ).link(builder.CFDE.anatomy)
+
+    @classmethod
+    def extend_file_groupkeys_for_anatomy(cls, path):
+        return [
+            path.anatomy.id
+        ]
+
+    @classmethod
+    def extend_file_attributes_for_anatomy(cls, path):
+        return [
+            path.anatomy.column_definitions['name'].alias('anatomy_name')
+        ]
+
+    def list_project_anatomy_file_stats(self, project_id_pair=None):
+        """Return list of file statistics per (project, anatomy).
+
+        Like list_project_file_stats, but also include biosample
+        anatomy in the group key, for more detailed result
+        categories.
+
+        """
+        extras = (
+            self.extend_file_path_for_anatomy,
+            self.extend_file_groupkeys_for_anatomy,
+            self.extend_file_attributes_for_anatomy
         )
-        return results.fetch()
+        return self.list_project_file_stats(project_id_pair=project_id_pair, extras=extras)
 
     def list_project_file_stats_by_time_bin(self, nbins=100, min_ts='2010-01-01', max_ts='2020-12-31'):
         """Return list of file statistics per (project_id_namespace, project, ts_bin)
