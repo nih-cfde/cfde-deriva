@@ -161,6 +161,16 @@
                      "comment": "The project attributed as the source of the file.",
                      "source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]
                   },
+                  "S_super_projects": {
+                     "markdown_name": "Project",
+                     "comment": "The project (or any super-projects) attributed as source of the file.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_file_format": {
                      "comment": "The content format of the file.",
                      "source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]
@@ -179,6 +189,22 @@
                         {"inbound": ["CFDE", "file_describes_biosample_file_fkey"]},
                         {"outbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
                         "RID"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "comment": "Anatomy for biosamples described by file.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_anatomy_file_fkey"]},
+                        {"outbound": ["CFDE", "file_anatomy_fkey"]},
+                        "id"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "Assay type for biosamples described by file.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_assay_type_file_fkey"]},
+                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
+                        "id"
                      ]
                   },
                   "S_described_subjects": {
@@ -247,16 +273,7 @@
                         "biosample_creation_time"
                      ]
                   },
-                  {
-                     "markdown_name": "Project",
-                     "comment": "The project (or any super-projects) attributed as source of the file.",
-                     "source": [
-                        {"outbound": ["CFDE", "file_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_data_type"},
                   {
@@ -286,15 +303,8 @@
                         "RID"
                      ]
                   },
-                  {
-                     "markdown_name": "Assay Type",
-                     "comment": "The assay type of biosamples by the file.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_assay_type_file_fkey"]},
-                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_part_of_collections"},
                   {"sourcekey": "S_described_biosamples"},
                   {"sourcekey": "S_described_subjects"}
