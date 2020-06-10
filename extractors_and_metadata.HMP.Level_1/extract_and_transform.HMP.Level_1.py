@@ -950,7 +950,19 @@ def populateBiosamples(  ):
             
             if flatObjects[currentID]['fma_body_site'] == '':
                
-               objectsToWrite['biosample'][currentID]['anatomy'] = ''
+               if flatObjects[currentID]['body_site'] == '':
+                  
+                  objectsToWrite['biosample'][currentID]['anatomy'] = ''
+
+               else:
+                  
+                  if flatObjects[currentID]['body_site'] not in enumMap['biosample.anatomy']:
+                     
+                     objectsToWrite['biosample'][currentID]['anatomy'] = ''
+
+                  else:
+                     
+                     objectsToWrite['biosample'][currentID]['anatomy'] = enumMap['biosample.anatomy'][flatObjects[currentID]['body_site']]
 
             else:
                
