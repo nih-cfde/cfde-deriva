@@ -515,6 +515,8 @@
                         "RID"
                      ]
                   },
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_subjects"},
                   {"sourcekey": "S_described_by_file"},
                   {"sourcekey": "S_part_of_collections"}
