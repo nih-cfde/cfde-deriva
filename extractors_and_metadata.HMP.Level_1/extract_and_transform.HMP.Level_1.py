@@ -1206,6 +1206,13 @@ def populateProjects(  ):
                # The only linkages hanging off the 'study' nodeType are pointers to
                # supersets (other studies or projects). 'project' nodeTypes have
                # no linkages: they are top-level objects, and all links flow upward.
+               # 
+               # Sometimes there are redundant (transitively flattened) links
+               # directly connecting studies to top-level projects. Sometimes there
+               # aren't. Make sure we only associate the lowest-level binding:
+               # if there's a 'subset_of' linkage, use that; if not, and if
+               # there's a 'part_of' linkage, then use that. If both, prefer
+               # 'subset_of'.
 
                linkedID = flatObjects[currentID][fieldName]
 
@@ -1413,31 +1420,23 @@ def computeProjectDepth(  ):
 
 def findContainingSets( objectID, containingSets ):
    
-   global parents, nodeIDToNativeType, ProjectNodeTypes, containedIn, allowableNodeTypes
+   global parents, nodeIDToNativeType, ProjectNodeTypes, allowableNodeTypes
 
-   if objectID in containedIn:
+   if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'project':
       
-      containingSets |= containedIn[objectID]
+      containingSets |= { objectID }
 
-   else:
+   # end if ( this is a project type )
       
-      if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'project':
+   if objectID in parents:
+      
+      for parent in parents[objectID]:
          
-         containingSets |= { objectID }
+         containingSets |= findContainingSets(parent, containingSets)
 
-      # end if ( this is a project type )
-      
-      if objectID in parents:
-         
-         for parent in parents[objectID]:
-            
-            containingSets |= findContainingSets(parent, containingSets)
+      # end for ( each parent of objectID )
 
-         # end for ( each parent of objectID )
-
-      # end if ( objectID has any parents )
-
-   # end if ( containedIn already has a record for objectID )
+   # end if ( objectID has any parents )
 
    return containingSets
 
@@ -1455,7 +1454,7 @@ def findContainingSets( objectID, containingSets ):
 # 
 #-----------------------------------------------------------------------------------------
 
-def findDeepestParentProjectID( containingSets ):
+def findDeepestParentProjectID( containingSets, debug ):
    
    global projectDepth
 
@@ -1465,6 +1464,10 @@ def findDeepestParentProjectID( containingSets ):
 
    for projectID in containingSets:
       
+      if debug == 1:
+         
+         print("[%s] %s \"%s\"" % (projectDepth[projectID], projectID, objectsToWrite['project'][projectID]['name']))
+
       if minSeen < projectDepth[projectID]:
          
          minSeen = projectDepth[projectID]
@@ -1487,7 +1490,7 @@ def findDeepestParentProjectID( containingSets ):
 
 def processProjectContainment(  ):
    
-   global parents, projectDepth, containedIn, objectsToWrite, allowableNodeTypes, entityAssociations
+   global parents, projectDepth, objectsToWrite, allowableNodeTypes, entityAssociations
 
    # Identify the number of hops from each node in the project DAG to the closest root.
    # Used to identify the most specific project division available for "primary project"
@@ -1505,30 +1508,40 @@ def processProjectContainment(  ):
 
       containingSets -= { objectID }
 
-      # Cache results to speed later lookups.
-
-      containedIn[objectID] = containingSets.copy()
-
       targetType = allowableNodeTypes[nodeIDToNativeType[objectID]]
+
+      # Trigger reporting from findDeepestParentProjectID for a target ID.
+
+      debugFlag = 0
 
       if targetType == 'project':
          
          # Cache the relationship to the parent project (if there is one) in a
          # project_in_project record.
 
+#         if objectID in { '3a51534abc6e1a5ee6d9cc86c400d4a4', '3a51534abc6e1a5ee6d9cc86c400a91f', '3a51534abc6e1a5ee6d9cc86c4010465' }:
+#            
+#            debugFlag = 1
+#
+#            print("%s:\n" % objectID)
+
          if objectID in parents:
             
-            entityAssociations['project_in_project'][objectID] = findDeepestParentProjectID(containingSets)
+            entityAssociations['project_in_project'][objectID] = findDeepestParentProjectID(containingSets, debugFlag)
 
       elif targetType in { 'file', 'biosample', 'subject' }:
          
          # Save the most specific parent project ID as an entity field.
 
-         objectsToWrite[targetType][objectID]['project'] = findDeepestParentProjectID(containingSets)
+         objectsToWrite[targetType][objectID]['project'] = findDeepestParentProjectID(containingSets, debugFlag)
 
       # end if ( valid targetType switch )
 
    # end for ( each ingested object )
+
+   # TEMPORARY HEURISTIC: Make sure 'HMP' sits alone at the top of the project DAG: nest 'iHMP' under it.
+
+   entityAssociations['project_in_project']['3fffbefb34d749c629dc9d147b18e893'] = '3a51534abc6e1a5ee6d9cc86c4007b56'
 
 #-----------------------------------------------------------------------------------------
 # end sub processProjectContainment(  )
@@ -2222,9 +2235,6 @@ parents = {}
 # the most specific project division available for "primary project" foreign-key
 # references.
 projectDepth = {}
-
-# Cache for cutting off containment-scan recursion.
-containedIn = {}
 
 ##########################################################################################
 ##########################################################################################
