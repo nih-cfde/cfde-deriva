@@ -1183,13 +1183,18 @@ def populateProjects(  ):
          objectsToWrite['project'][currentID]['id_namespace'] = idNamespace
 
          #----------------------------------------------------------------------
-         # We're not doing these fields yet.
+         # We're not doing these fields yet, except for an abbreviation for the
+         # top-level project (HMP).
 
          objectsToWrite['project'][currentID]['persistent_id'] = ''
 
          objectsToWrite['project'][currentID]['creation_time'] = ''
 
          objectsToWrite['project'][currentID]['abbreviation'] = ''
+
+         if currentID == '3a51534abc6e1a5ee6d9cc86c4007b56':
+            
+            objectsToWrite['project'][currentID]['abbreviation'] = 'HMP'
 
          #----------------------------------------------------------------------
          # We can load these straight from the native fields.
