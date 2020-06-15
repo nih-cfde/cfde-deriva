@@ -350,7 +350,7 @@ def flattenData(  ):
 
 def populateFiles(  ):
    
-   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, FileNodeTypes, entityAssociations, parents, idNamespace, allowableNodeTypes
+   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, FileNodeTypes, entityAssociations, parents, idNamespace, allowableNodeTypes, biosampleToFile
 
    if 'file' not in objectsToWrite:
       
@@ -862,6 +862,14 @@ def populateFiles(  ):
                      
                      entityAssociations['file_describes_biosample'][currentID] |= { linkedID }
 
+                  if linkedID not in biosampleToFile:
+                     
+                     biosampleToFile[linkedID] = { currentID }
+
+                  else:
+                     
+                     biosampleToFile[linkedID] |= { currentID }
+
                elif linkedNodeType == 'subject':
                   
                   if currentID not in entityAssociations['file_describes_subject']:
@@ -903,7 +911,7 @@ def populateFiles(  ):
 
 def populateBiosamples(  ):
    
-   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, BiosampleNodeTypes, parents, idNamespace
+   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, BiosampleNodeTypes, parents, idNamespace, biosampleToFile, entityAssociations
 
    if 'biosample' not in objectsToWrite:
       
@@ -1047,6 +1055,21 @@ def populateBiosamples(  ):
                else:
                   
                   prepToBiosample[currentID] = linkedID
+
+                  # Collapse sample-from-sample chains to hook files up
+                  # to ancestor samples:
+
+                  if currentID in biosampleToFile:
+                     
+                     for fileID in biosampleToFile[currentID]:
+                        
+                        if fileID in entityAssociations['file_describes_biosample']:
+                           
+                           entityAssociations['file_describes_biosample'][fileID] |= { linkedID }
+
+                        else:
+                           
+                           entityAssociations['file_describes_biosample'][fileID] = { linkedID }
 
                # end if ( nodeType switch to determine how link caching will take place )
 
@@ -2242,6 +2265,11 @@ entityAssociations = {
    'project_in_project' : {},
    'subject_role_taxonomy' : {}
 }
+
+# Intermediate structure to transitively collapse file->biosample associations
+# across biosample-from-biosample provenance links
+
+biosampleToFile = {}
 
 # Inter-entity association DAG. Populated on the fly while loading entity data; scanned
 # after completion to compute all required primary_project<->biosample|file|subject
