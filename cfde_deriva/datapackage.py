@@ -167,7 +167,10 @@ class CfdeDataPackage (object):
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
                             { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
                         ]
-                    }
+                    },
+                    { "name": "Dashboard", "url": "/dashboard.html" },
+                    { "name": "Documentation", "url": "#" },
+                    { "name": "Contact", "url": "#" }
                 ]
             }
         }
