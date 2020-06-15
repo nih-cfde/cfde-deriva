@@ -47,7 +47,8 @@ class CfdeDataPackage (object):
         "demo_curator": "https://auth.globus.org/a5cfa412-e2ed-11e8-a768-0e368f3075e8",
         "demo_reader": "https://auth.globus.org/b9100ea4-e2ed-11e8-8b39-0e368f3075e8",
     })
-    writers = [grp.demo_curator, grp.demo_writer]
+    #writers = [grp.demo_curator, grp.demo_writer]
+    writers = []
     catalog_acls = {
         "owner": [grp.demo_admin],
         "insert": writers,
