@@ -33,6 +33,9 @@ class DashboardQueryHelper (object):
             'list_project_datatype_file_stats': list(self.query_combination(True, "file", "data_type")),
             'list_project_datatype_biosample_stats': list(self.query_combination(True, "biosample", "data_type")),
             'list_project_datatype_subject_stats': list(self.query_combination(True, "subject", "data_type")),
+            'list_project_species_file_stats': list(self.query_combination(True, "file", "species")),
+            'list_project_species_biosample_stats': list(self.query_combination(True, "biosample", "species")),
+            'list_project_species_subject_stats': list(self.query_combination(True, "subject", "species")),
         }
         print(json.dumps(results, indent=2))
 
@@ -307,6 +310,65 @@ class DashboardQueryHelper (object):
             .link(builder.CFDE.file)
         )
 
+    @classmethod
+    def extend_file_path_to_species(cls, builder, path):
+        fsrt = builder.CFDE.file_subject_role_taxonomy.alias('fsrt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            fsrt,
+            on=( (path.file.id_namespace == fsrt.file_id_namespace)
+                 & (path.file.id == fsrt.file_id) )
+        ).link(
+            sr,
+            on=( path.fsrt.subject_role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.fsrt.subject_taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_subject_path_to_species(cls, builder, path):
+        srt = builder.CFDE.subject_role_taxonomy.alias('srt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            srt,
+            on=( (path.subject.id_namespace == srt.subject_id_namespace)
+                 & (path.subject.id == srt.subject_id) )
+        ).link(
+            sr,
+            on=( path.srt.role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.srt.taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_biosample_path_to_subject(cls, builder, path):
+        return (
+            path.link(builder.CFDE.biosample_from_subject)
+            .link(builder.CFDE.subject)
+        )
+
+    @classmethod
+    def extend_groupkeys_for_species(cls, path):
+        return [
+            path.tax.id.alias('species_id')
+        ]
+
+    @classmethod
+    def extend_attributes_for_species(cls, path):
+        return [
+            path.tax.column_definitions['name'].alias('species_name')
+        ]
+
     def query_combination(self, root_projects=True, entity="file", vocabulary="anatomy"):
         """Perform dashboard query for desired combination of project, vocabulary, and entity stats.
 
@@ -323,21 +385,24 @@ class DashboardQueryHelper (object):
             raise ValueError("Bad dimension key root_projects=%r" % root_projects)
         if entity not in { "subject", "biosample", "file" }:
             raise ValueError("Bad dimension key entity=%r" % entity)
-        if vocabulary not in { "anatomy", "assay_type", "data_type" }:
+        if vocabulary not in { "anatomy", "assay_type", "data_type", "species" }:
             raise ValueError("Bad dimension key vocabular=%r" % vocabulary)
 
         path_func2 = {
             ("file", "anatomy"): self.extend_file_path_to_anatomy,
             ("file", "assay_type"): self.extend_file_path_to_assaytype,
             ("file", "data_type"): self.extend_file_path_to_datatype,
+            ("file", "species"): self.extend_file_path_to_species,
 
             ("biosample", "anatomy"): self.extend_biosample_path_to_anatomy,
             ("biosample", "assay_type"): self.extend_biosample_path_to_assaytype,
             ("biosample", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_biosample_path_to_file(builder, path)),
+            ("biosample", "species"): lambda builder, path: self.extend_subject_path_to_species(builder, self.extend_biosample_path_to_subject(builder, path)),
 
             ("subject", "anatomy"): self.extend_subject_path_to_anatomy,
             ("subject", "assay_type"): self.extend_subject_path_to_assaytype,
             ("subject", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_subject_path_to_file(builder, path)),
+            ("subject", "species"): self.extend_subject_path_to_species,
         }[(entity, vocabulary)]
 
         path_func, proj_func = {
@@ -350,6 +415,7 @@ class DashboardQueryHelper (object):
             "anatomy": (self.extend_groupkeys_for_anatomy, self.extend_attributes_for_anatomy),
             "assay_type": (self.extend_groupkeys_for_assaytype, self.extend_attributes_for_assaytype),
             "data_type": (self.extend_groupkeys_for_datatype, self.extend_attributes_for_datatype),
+            "species": (self.extend_groupkeys_for_species, self.extend_attributes_for_species),
         }[vocabulary]
 
         return self.list_projects(
