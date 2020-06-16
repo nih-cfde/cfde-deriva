@@ -10,6 +10,10 @@ import base64
 from deriva.core import tag
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
+if 'source_definitions' not in tag:
+    # monkey-patch this newer annotation key until it appears in deriva-py
+    tag['source_definitions'] = 'tag:isrd.isi.edu,2019:source-definitions'
+
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
 
@@ -37,11 +41,14 @@ def make_column(cdef):
     cdef = dict(cdef)
     constraints = cdef.get("constraints", {})
     cdef_name = cdef.pop("name")
+    title = cdef.get("title", None)
     nullok = not constraints.pop("required", False)
     description = cdef.pop("description", None)
     annotations = {
         schema_tag: cdef,
     }
+    if title is not None:
+        annotations[tag.display] = {"name": title}
     pre_annotations = cdef.get("deriva", {})
     for k, t in tag.items():
         if k in pre_annotations:

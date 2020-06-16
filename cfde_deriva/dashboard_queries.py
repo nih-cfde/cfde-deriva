@@ -20,22 +20,40 @@ class DashboardQueryHelper (object):
         # use list() to convert each ResultSet
         # for easier JSON serialization...
         results = {
-            'list_projects': list(self.list_projects()),
-            'list_datatypes': list(self.list_datatypes()),
-            'list_formats': list(self.list_formats()),
-            'list_project_file_stats': list(self.list_project_file_stats()),
-            'list_project_assaytype_file_stats': list(self.list_project_assaytype_file_stats()),
-            'list_program_file_stats_by_time_bin': list(self.list_project_file_stats_by_time_bin()),
-            'running_sum_project_file_stats': list(self.running_sum_project_file_stats()),
+            #'list_projects': list(self.list_projects()),
+            #'list_root_projects': list(self.list_projects(use_root_projects=True)),
+            #'list_datatypes': list(self.list_datatypes()),
+            #'list_formats': list(self.list_formats()),
+            'list_project_anatomy_file_stats': list(self.query_combination(True, "file", "anatomy")),
+            'list_project_anatomy_biosample_stats': list(self.query_combination(True, "biosample", "anatomy")),
+            'list_project_anatomy_subject_stats': list(self.query_combination(True, "subject", "anatomy")),
+            'list_project_assaytype_file_stats': list(self.query_combination(True, "file", "assay_type")),
+            'list_project_assaytype_biosample_stats': list(self.query_combination(True, "biosample", "assay_type")),
+            'list_project_assaytype_subject_stats': list(self.query_combination(True, "subject", "assay_type")),
+            'list_project_datatype_file_stats': list(self.query_combination(True, "file", "data_type")),
+            'list_project_datatype_biosample_stats': list(self.query_combination(True, "biosample", "data_type")),
+            'list_project_datatype_subject_stats': list(self.query_combination(True, "subject", "data_type")),
+            'list_project_species_file_stats': list(self.query_combination(True, "file", "species")),
+            'list_project_species_biosample_stats': list(self.query_combination(True, "biosample", "species")),
+            'list_project_species_subject_stats': list(self.query_combination(True, "subject", "species")),
         }
         print(json.dumps(results, indent=2))
 
-    def list_projects(self):
+    def list_projects(self, use_root_projects=False, path_func=(lambda builder, path: path), proj_func=(lambda path: path.entities())):
         """Return list of projects AKA funded activities
 
+        :param use_root_projects: Only consider root projects (default False)
+        :param path_func: Function to allow path chaining (default no-change)
+        :param proj_func: Function to project set from path (default get .entities())
         """
-        # trivial case: just return entities of a single table
-        return self.builder.CFDE.project.path.entities().fetch()
+        if use_root_projects:
+            path = (
+                self.builder.CFDE.project_root
+                .link(self.builder.CFDE.project)
+            )
+        else:
+            path = self.builder.CFDE.project
+        return proj_func(path_func(self.builder, path)).fetch()
 
     def list_datatypes(self):
         """Return list of data_type terms
@@ -46,174 +64,366 @@ class DashboardQueryHelper (object):
         """Return list of file format terms
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
-    
-    def list_project_file_stats(self, project_id_pair=None):
-        """Return list of file statistics per project.
 
-        Optionally filtered to a single project (namespace, id) pair.
+    @classmethod
+    def extend_project_path_to_file(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
+        """Function to link file to existing project path by attribution.
 
-        NOTE: this query will not return a row for a program with zero files...
-
-        NOTE: only non-null File.size_in_bytes values are summed, so null may
-        be returned if none of the files have specified a length...
-
+        :param builder: A builder appropriate to use when extending path
+        :param path: The path we will build from
+        :param use_root_projects: Only consider root projects (default False)
+        :param path_func: Function to allow path chaining (default no-change)
         """
-        path = self.builder.CFDE.file.path
-        if project_id_pair is not None:
-            # add filter for one (project_id_namespace, project_id)
-            project_id_ns, project_id = project_id_pair
-            path.filter(path.file.project_id_namespace == project_id_ns)
-            path.filter(path.file.project == project_id)
-        # and return grouped aggregate results
-        results = path.groupby(
-            path.file.project_id_namespace,
-            path.file.project
-        ).attributes(
-            Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.size_in_bytes).alias('byte_cnt'),
-        )
-        return results.fetch()
+        file = builder.CFDE.file
+        if use_root_projects:
+            # link to transitively-attributed root project
+            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
+            path = path.link(
+                pipt,
+                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
+                     & (path.project.id == pipt.leader_project_id) )
+            ).link(
+                file,
+                on=( (path.pipt.member_project_id_namespace == file.project_id_namespace)
+                     & (path.pipt.member_project_id == file.project) )
+            )
+        else:
+            # link to directly attributed project
+            path = path.link(file)
+        # allow chained path-extension for caller
+        return path_func(builder, path)
 
-    def list_project_assaytype_file_stats(self, project_id_pair=None):
-        """Return list of file statistics per (project, assay_type).
+    @classmethod
+    def projection_for_file_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
+        """Function to build grouped projection of file stats.
 
-        Like list_project_file_stats, but also include biosample
-        assay_type in the group key, for more detailed result
-        categories.
-
+        :param path: The path we will project from
+        :param grpk_func: Function returning extra groupby cols (default empty)
+        :param attr_func: Function returning extra attribute cols (default empty)
         """
-        # include vocab table for human-readable assay_type.name field
-        path = self.builder.CFDE.assay_type.path
-        path.link(self.builder.CFDE.biosample)
-        path.link(self.builder.CFDE.file_describes_biosample)
-        # right-outer join so we can count files w/o this biosample/assay_type linkage
-        path.link(
-            self.builder.CFDE.file,
-            on=( (path.file_describes_biosample.file_id_namespace == self.builder.CFDE.file.id_namespace)
-                 & (path.file_describes_biosample.file_id == self.builder.CFDE.file.id) ),
-            join_type='right'
-        )
-        if project_id_pair is not None:
-            # add filter for one (project_id_namespace, project_id)
-            project_id_ns, project_id = project_id_pair
-            path.filter(path.file.project_id_namespace == project_id_ns)
-            path.filter(path.file.project == project_id)
-        # and return grouped aggregate results
-        results = path.groupby(
-            # compound grouping key
-            path.file.project_id_namespace,
-            path.file.project,
-            path.biosample.assay_type.alias('assay_type_id'),
-        ).attributes(
-            # 'name' is part of Table API so we cannot use attribute-based lookup...
-            path.assay_type.column_definitions['name'].alias('assay_type_name'),
-            Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.size_in_bytes).alias('byte_cnt'),
-        )
-        return results.fetch()
+        return path.groupby(*(
+            [
+                path.project.id_namespace.alias('project_id_namespace'),
+                path.project.id.alias('project_id')
+            ] + grpk_func(path)
+        )).attributes(*(
+            [
+                CntD(path.file.RID).alias('file_cnt'),
+                Sum(path.file.size_in_bytes).alias('byte_cnt'),
+                # .name is part of API so need to use dict-style lookup of column...
+                path.project.column_definitions['name'].alias('project_name'),
+                path.project.RID.alias('project_RID')
+            ] + attr_func(path)
+        ))
 
-    def list_project_file_stats_by_time_bin(self, nbins=100, min_ts='2010-01-01', max_ts='2020-12-31'):
-        """Return list of file statistics per (project_id_namespace, project, ts_bin)
+    @classmethod
+    def extend_project_path_to_biosample(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
+        """Function to link biosample to existing project path by attribution.
 
-        :param nbins: The number of bins to divide the time range
-        :param min_ts: The lower (closed) bound of the time range
-        :param max_ts: The upper (open) bound of the time range
-
-        If min_ts or max_ts are unspecified, preliminary queries are
-        performed to determine the actual timestamp range found in the
-        source data. These values are used to configure the binning
-        distribution.
-
-        Files generation times are found from file.creation_time which
-        may be NULL.
-
-        Results are keyed by project and ts_bin group keys.
-
-        NOTE: Results are sparse! Groups are only returned when at
-        least one matching row is found. This means that some bins,
-        described next, may be absent in a particular query result.
-
-        Each group includes a ts_bin field which is a three-element
-        list describing the time bin:
-
-           [ bin_number, lower_bound, upper_bound ]
-
-        The files within the selected range will be summarized in groups
-        with bins:
-
-           [ 1, min_ts, (max_ts - min_ts)/nbins ]
-           ...
-           [ nbins, max_ts - (max_ts - min_ts)/nbins, max_ts ]
-
-        Files without known creation_time will be summarized in a row
-        with a special null bin:
-
-        Other files will be summarized in rows with special bins:
-
-           [ null, null, null ]
-           [ 0, null, min_ts ]
-           [ nbins+1, max_ts, null ]
-
-        i.e. for files with NULL creation_time, with creation_time
-        below min_ts, or with creation_time above max_ts,
-        respectively.
-
-        HACK: setting non-null default min_ts and max_ts to work
-        around failure mode when the entire catalog only has null
-        creation_time values (i.e. in a limited test load)...
-
+        :param builder: A builder appropriate to use when extending path
+        :param path: The path we will build from
+        :param use_root_projects: Only consider root projects (default False)
+        :param path_func: Function to allow path chaining (default no-change)
         """
-        path = self.builder.CFDE.file.path
+        biosample = builder.CFDE.biosample
+        if use_root_projects:
+            # link to transitively-attributed root project
+            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
+            path = path.link(
+                pipt,
+                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
+                     & (path.project.id == pipt.leader_project_id) )
+            ).link(
+                biosample,
+                on=( (path.pipt.member_project_id_namespace == biosample.project_id_namespace)
+                     & (path.pipt.member_project_id == biosample.project) )
+            )
+        else:
+            # link to directly attributed project
+            path = path.link(biosample)
+        # allow chained path-extension for caller
+        return path_func(builder, path)
 
-        # build this list once so we can reuse it for grouping and sorting
-        groupkey = [
-            path.file.project_id_namespace,
-            path.file.project,
-            Bin(path.file.creation_time, nbins, min_ts, max_ts).alias('ts_bin'),
+    @classmethod
+    def projection_for_biosample_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
+        """Function to build grouped projection of biosample stats.
+
+        :param path: The path we will project from
+        :param grpk_func: Function returning extra groupby cols (default empty)
+        :param attr_func: Function returning extra attribute cols (default empty)
+        """
+        return path.groupby(*(
+            [
+                path.project.id_namespace.alias('project_id_namespace'),
+                path.project.id.alias('project_id')
+            ] + grpk_func(path)
+        )).attributes(*(
+            [
+                CntD(path.biosample.RID).alias('biosample_cnt'),
+                # .name is part of API so need to use dict-style lookup of column...
+                path.project.column_definitions['name'].alias('project_name'),
+                path.project.RID.alias('project_RID')
+            ] + attr_func(path)
+        ))
+
+    @classmethod
+    def extend_project_path_to_subject(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
+        """Function to link subject to existing project path by attribution.
+
+        :param builder: A builder appropriate to use when extending path
+        :param path: The path we will build from
+        :param use_root_projects: Only consider root projects (default False)
+        :param path_func: Function to allow path chaining (default no-change)
+        """
+        subject = builder.CFDE.subject
+        if use_root_projects:
+            # link to transitively-attributed root project
+            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
+            path = path.link(
+                pipt,
+                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
+                     & (path.project.id == pipt.leader_project_id) )
+            ).link(
+                subject,
+                on=( (path.pipt.member_project_id_namespace == subject.project_id_namespace)
+                     & (path.pipt.member_project_id == subject.project) )
+            )
+        else:
+            # link to directly attributed project
+            path = path.link(subject)
+        # allow chained path-extension for caller
+        return path_func(builder, path)
+
+    @classmethod
+    def projection_for_subject_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
+        """Function to build grouped projection of subject stats.
+
+        :param path: The path we will project from
+        :param grpk_func: Function returning extra groupby cols (default empty)
+        :param attr_func: Function returning extra attribute cols (default empty)
+        """
+        return path.groupby(*(
+            [
+                path.project.id_namespace.alias('project_id_namespace'),
+                path.project.id.alias('project_id')
+            ] + grpk_func(path)
+        )).attributes(*(
+            [
+                CntD(path.subject.RID).alias('subject_cnt'),
+                # .name is part of API so need to use dict-style lookup of column...
+                path.project.column_definitions['name'].alias('project_name'),
+                path.project.RID.alias('project_RID')
+            ] + attr_func(path)
+        ))
+
+    @classmethod
+    def extend_file_path_to_assaytype(cls, builder, path):
+        return path.link(
+            builder.CFDE.file_assay_type,
+            on=( (path.file.id_namespace == builder.CFDE.file_assay_type.file_id_namespace)
+                 & (path.file.id == builder.CFDE.file_assay_type.file_id) )
+        ).link(builder.CFDE.assay_type)
+
+    @classmethod
+    def extend_biosample_path_to_assaytype(cls, builder, path):
+        return path.link(builder.CFDE.assay_type)
+
+    @classmethod
+    def extend_subject_path_to_assaytype(cls, builder, path):
+        return (
+            path.link(builder.CFDE.biosample_from_subject)
+            .link(builder.CFDE.biosample)
+            .link(builder.CFDE.assay_type)
+        )
+
+    @classmethod
+    def extend_groupkeys_for_assaytype(cls, path):
+        return [
+            path.assay_type.id.alias('assay_type_id')
         ]
 
-        results = path.groupby(
-            *groupkey
-        ).attributes(
-            Cnt(path.file).alias('file_cnt'),
-            Sum(path.file.size_in_bytes).alias('byte_cnt'),
-        ).sort(
-            *groupkey
+    @classmethod
+    def extend_attributes_for_assaytype(cls, path):
+        return [
+            path.assay_type.column_definitions['name'].alias('assay_type_name')
+        ]
+
+    @classmethod
+    def extend_file_path_to_anatomy(cls, builder, path):
+        return path.link(
+            builder.CFDE.file_anatomy,
+            on=( (path.file.id_namespace == builder.CFDE.file_anatomy.file_id_namespace)
+                 & (path.file.id == builder.CFDE.file_anatomy.file_id) )
+        ).link(builder.CFDE.anatomy)
+
+    @classmethod
+    def extend_biosample_path_to_anatomy(cls, builder, path):
+        return path.link(builder.CFDE.anatomy)
+
+    @classmethod
+    def extend_subject_path_to_anatomy(cls, builder, path):
+        return (
+            path.link(builder.CFDE.biosample_from_subject)
+            .link(builder.CFDE.biosample)
+            .link(builder.CFDE.anatomy)
         )
-        return results.fetch()
 
-    def running_sum_project_file_stats(self, nbins=100, min_ts='2010-01-01', max_ts='2020-12-31'):
-        """Transform results of list_project_file_stats_by_time to produce running sums
+    @classmethod
+    def extend_groupkeys_for_anatomy(cls, path):
+        return [
+            path.anatomy.id.alias('anatomy_id')
+        ]
 
-        The underlying query counts files and sums bytecounts only
-        within each time bin. I.e. it represents change rather than
-        total data capacities at given times.
+    @classmethod
+    def extend_attributes_for_anatomy(cls, path):
+        return [
+            path.anatomy.column_definitions['name'].alias('anatomy_name')
+        ]
 
-        This function accumulates values to show total capacity trends.
+    @classmethod
+    def extend_file_path_to_datatype(cls, builder, path):
+        return path.link(builder.CFDE.data_type)
 
+    @classmethod
+    def extend_groupkeys_for_datatype(cls, path):
+        return [
+            path.data_type.id.alias('data_type_id')
+        ]
+
+    @classmethod
+    def extend_attributes_for_datatype(cls, path):
+        return [
+            path.data_type.column_definitions['name'].alias('data_type_name')
+        ]
+
+    @classmethod
+    def extend_subject_path_to_file(cls, builder, path):
+        return (
+            path.link(builder.CFDE.file_describes_subject)
+            .link(builder.CFDE.file)
+        )
+
+    @classmethod
+    def extend_biosample_path_to_file(cls, builder, path):
+        return (
+            path.link(builder.CFDE.file_describes_biosample)
+            .link(builder.CFDE.file)
+        )
+
+    @classmethod
+    def extend_file_path_to_species(cls, builder, path):
+        fsrt = builder.CFDE.file_subject_role_taxonomy.alias('fsrt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            fsrt,
+            on=( (path.file.id_namespace == fsrt.file_id_namespace)
+                 & (path.file.id == fsrt.file_id) )
+        ).link(
+            sr,
+            on=( path.fsrt.subject_role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.fsrt.subject_taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_subject_path_to_species(cls, builder, path):
+        srt = builder.CFDE.subject_role_taxonomy.alias('srt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            srt,
+            on=( (path.subject.id_namespace == srt.subject_id_namespace)
+                 & (path.subject.id == srt.subject_id) )
+        ).link(
+            sr,
+            on=( path.srt.role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.srt.taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_biosample_path_to_subject(cls, builder, path):
+        return (
+            path.link(builder.CFDE.biosample_from_subject)
+            .link(builder.CFDE.subject)
+        )
+
+    @classmethod
+    def extend_groupkeys_for_species(cls, path):
+        return [
+            path.tax.id.alias('species_id')
+        ]
+
+    @classmethod
+    def extend_attributes_for_species(cls, path):
+        return [
+            path.tax.column_definitions['name'].alias('species_name')
+        ]
+
+    def query_combination(self, root_projects=True, entity="file", vocabulary="anatomy"):
+        """Perform dashboard query for desired combination of project, vocabulary, and entity stats.
+
+        :param root_projects: Whether to only use root projects (default True)
+        :param entity: Which entity table to summarize (default "file")
+        :param vocabulary: Which concept to cross with project for grouping (default "anatomy")
+
+        Allowed values:
+        root_projects: True, False
+        entity: "subject", "biosample", "file"
+        vocabulary: "anatomy", "assay_type", "data_type"
         """
-        project = None
-        file_cnt = None
-        byte_cnt = None
-        # because underlying query results are sorted, we can just iterate...
-        for row in self.list_project_file_stats_by_time_bin(nbins, min_ts, max_ts):
-            if (project != (row['project_id_namespace'], row['project'])):
-                # reset state for next group
-                project = (row['project_id_namespace'], row['project'])
-                file_cnt = 0
-                byte_cnt = 0
-            if row['file_cnt'] is not None:
-                file_cnt += row['file_cnt']
-            if row['byte_cnt'] is not None:
-                byte_cnt += row['byte_cnt']
-            yield {
-                'project_id_namespace': row['project_id_namespace'],
-                'project': row['project'],
-                'ts_bin': row['ts_bin'],
-                'file_cnt': file_cnt,
-                'byte_cnt': byte_cnt
-            }
-   
+        if root_projects not in { True, False }:
+            raise ValueError("Bad dimension key root_projects=%r" % root_projects)
+        if entity not in { "subject", "biosample", "file" }:
+            raise ValueError("Bad dimension key entity=%r" % entity)
+        if vocabulary not in { "anatomy", "assay_type", "data_type", "species" }:
+            raise ValueError("Bad dimension key vocabular=%r" % vocabulary)
+
+        path_func2 = {
+            ("file", "anatomy"): self.extend_file_path_to_anatomy,
+            ("file", "assay_type"): self.extend_file_path_to_assaytype,
+            ("file", "data_type"): self.extend_file_path_to_datatype,
+            ("file", "species"): self.extend_file_path_to_species,
+
+            ("biosample", "anatomy"): self.extend_biosample_path_to_anatomy,
+            ("biosample", "assay_type"): self.extend_biosample_path_to_assaytype,
+            ("biosample", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_biosample_path_to_file(builder, path)),
+            ("biosample", "species"): lambda builder, path: self.extend_subject_path_to_species(builder, self.extend_biosample_path_to_subject(builder, path)),
+
+            ("subject", "anatomy"): self.extend_subject_path_to_anatomy,
+            ("subject", "assay_type"): self.extend_subject_path_to_assaytype,
+            ("subject", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_subject_path_to_file(builder, path)),
+            ("subject", "species"): self.extend_subject_path_to_species,
+        }[(entity, vocabulary)]
+
+        path_func, proj_func = {
+            "file": (self.extend_project_path_to_file, self.projection_for_file_stats),
+            "biosample": (self.extend_project_path_to_biosample, self.projection_for_biosample_stats),
+            "subject": (self.extend_project_path_to_subject, self.projection_for_subject_stats),
+        }[entity]
+
+        grpk_func, attr_func = {
+            "anatomy": (self.extend_groupkeys_for_anatomy, self.extend_attributes_for_anatomy),
+            "assay_type": (self.extend_groupkeys_for_assaytype, self.extend_attributes_for_assaytype),
+            "data_type": (self.extend_groupkeys_for_datatype, self.extend_attributes_for_datatype),
+            "species": (self.extend_groupkeys_for_species, self.extend_attributes_for_species),
+        }[vocabulary]
+
+        return self.list_projects(
+            use_root_projects=root_projects,
+            path_func=lambda builder, path: path_func(builder, path, root_projects, path_func2),
+            proj_func=lambda path: proj_func(path, grpk_func, attr_func),
+        )
+
 
 ## ugly CLI wrapping...
 def main():

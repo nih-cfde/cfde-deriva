@@ -47,7 +47,8 @@ class CfdeDataPackage (object):
         "demo_curator": "https://auth.globus.org/a5cfa412-e2ed-11e8-a768-0e368f3075e8",
         "demo_reader": "https://auth.globus.org/b9100ea4-e2ed-11e8-8b39-0e368f3075e8",
     })
-    writers = [grp.demo_curator, grp.demo_writer]
+    #writers = [grp.demo_curator, grp.demo_writer]
+    writers = []
     catalog_acls = {
         "owner": [grp.demo_admin],
         "insert": writers,
@@ -166,6 +167,19 @@ class CfdeDataPackage (object):
                             { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
                             { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
+                            {
+                                "name": "Vocabulary",
+                                "children": [
+                                    { "name": "Anatomy", "url": "/chaise/recordset/#%s/CFDE:anatomy" % self.catalog._catalog_id },
+                                    { "name": "Assay Type", "url": "/chaise/recordset/#%s/CFDE:assay_type" % self.catalog._catalog_id },
+                                    { "name": "Data Type", "url": "/chaise/recordset/#%s/CFDE:data_type" % self.catalog._catalog_id },
+                                    { "name": "File Format", "url": "/chaise/recordset/#%s/CFDE:file_format" % self.catalog._catalog_id },
+                                    { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#%s/CFDE:ncbi_taxonomy" % self.catalog._catalog_id },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#%s/CFDE:subject_granularity" % self.catalog._catalog_id },
+                                    { "name": "Subject Role", "url": "/chaise/recordset/#%s/CFDE:subject_role" % self.catalog._catalog_id },
+                                ]
+                            },
+                            { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
                         ]
                     }
                 ]
@@ -181,7 +195,18 @@ class CfdeDataPackage (object):
         _update(
             self.cat_cfde_schema.display,
             "name_style",
-            {"underline_space": True, "title_case": True}
+            {
+                "underline_space": True,
+                "title_case": True,
+            }
+        )
+        # turn off clutter of many links in tabular views
+        _update(
+            self.cat_cfde_schema.display,
+            "show_foreign_key_link",
+            {
+                "compact": False
+            }
         )
 
         def compact_visible_columns(table):
@@ -234,7 +259,7 @@ class CfdeDataPackage (object):
                 except KeyError:
                     continue
             #table.visible_columns = {'compact': compact_visible_columns(table)}
-            table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
+            #table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
         # prettier display of built-in ERMrest_Client table entries
         _update(
@@ -307,7 +332,7 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
-    def load_data_files(self):
+    def load_data_files(self, onconflict='abort'):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
             # we are doing a clean load of data in fkey dependency order
@@ -319,7 +344,7 @@ class CfdeDataPackage (object):
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
-                    entity_url = "/entity/CFDE:%s" % urlquote(table.name)
+                    entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
                     batch_size = 10000  # TODO: Should this be configurable?
                     # Batch catalog ingests; too-large ingests will hang and fail
                     # Largest known CFDE ingest has file with >5m rows
@@ -329,8 +354,11 @@ class CfdeDataPackage (object):
                         batch.append(row2dict(raw_row))
                         if len(batch) >= batch_size:
                             try:
-                                self.catalog.post(entity_url, json=batch)
+                                r = self.catalog.post(entity_url, json=batch)
                                 logger.debug("Batch of rows for %s loaded" % table.name)
+                                skipped = len(batch) - len(r.json())
+                                if skipped:
+                                    logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
                             except Exception as e:
                                 logger.error("Table %s data load FAILED from "
                                              "%s: %s" % (table.name, fname, e))
@@ -340,7 +368,11 @@ class CfdeDataPackage (object):
                     # After reader exhausted, ingest final batch
                     if len(batch) > 0:
                         try:
-                            self.catalog.post(entity_url, json=batch)
+                            r = self.catalog.post(entity_url, json=batch)
+                            logger.debug("Batch of rows for %s loaded" % table.name)
+                            skipped = len(batch) - len(r.json())
+                            if skipped:
+                                logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
                         except Exception as e:
                             logger.error("Table %s data load FAILED from "
                                          "%s: %s" % (table.name, fname, e))
@@ -369,6 +401,8 @@ def main(args):
 
     DERIVA_SERVERNAME=demo.derivacloud.org
     DERIVA_CATALOGID=
+    DERIVA_ONCONFLICT=abort
+    DERIVA_INCREMENTAL_LOAD=false
 
     Setting a non-empty DERIVA_CATALOGID causes reconfiguration of an
     existing catalog's presentation tweaks. It does not load data.
@@ -383,6 +417,9 @@ def main(args):
     ## bind to server
     credentials = get_credential(servername)
     server = DerivaServer('https', servername, credentials)
+
+    onconflict = os.getenv('DERIVA_ONCONFLICT', 'abort')
+    incremental_load = os.getenv('DERIVA_INCREMENTAL_LOAD', 'false').lower() == 'true'
 
     # ugly quasi CLI...
     if len(args) < 1:
@@ -414,7 +451,7 @@ def main(args):
 
             ## load some sample data?
             for dp in datapackages:
-                dp.load_data_files()
+                dp.load_data_files(onconflict=onconflict)
 
             print("All data packages loaded.")
         except Exception as e:
@@ -427,8 +464,14 @@ def main(args):
             newcat.catalog_id,
         ))
     else:
-        ## reconfigure existing catalog
+        ## work with existing catalog
         oldcat = server.connect_ermrest(catid)
+        if incremental_load:
+            for dp in datapackages:
+                dp.set_catalog(oldcat)
+                dp.provision()
+                dp.load_data_files(onconflict=onconflict)
+        ## reconfigure
         datapackages[0].set_catalog(oldcat)
         datapackages[0].apply_custom_config()
         print('Policies and presentation configured for %s.' % (oldcat._server_uri,))
