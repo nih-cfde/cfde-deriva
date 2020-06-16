@@ -108,7 +108,7 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.file).alias('file_cnt'),
+                CntD(path.file.RID).alias('file_cnt'),
                 Sum(path.file.size_in_bytes).alias('byte_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
@@ -159,7 +159,7 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.biosample).alias('biosample_cnt'),
+                CntD(path.biosample.RID).alias('biosample_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
                 path.project.RID.alias('project_RID')
@@ -209,7 +209,7 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.subject).alias('subject_cnt'),
+                CntD(path.subject.RID).alias('subject_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
                 path.project.RID.alias('project_RID')
