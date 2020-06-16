@@ -169,8 +169,7 @@ class CfdeDataPackage (object):
                         ]
                     },
                     { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Documentation", "url": "#" },
-                    { "name": "Contact", "url": "#" }
+                    { "name": "Documentation", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" }
                 ]
             }
         }
