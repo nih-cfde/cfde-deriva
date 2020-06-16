@@ -24,18 +24,18 @@ class DashboardQueryHelper (object):
             #'list_root_projects': list(self.list_projects(use_root_projects=True)),
             #'list_datatypes': list(self.list_datatypes()),
             #'list_formats': list(self.list_formats()),
-            #'list_project_biosample_stats': list(self.list_project_biosample_stats()),
-            #'list_project_file_stats': list(self.list_project_file_stats()),
-            #'list_project_subject_stats': list(self.list_project_subject_stats()),
-            'list_project_anatomy_file_stats': list(self.list_project_anatomy_file_stats()),
-            'list_project_anatomy_biosample_stats': list(self.list_project_anatomy_biosample_stats()),
-            'list_project_anatomy_subject_stats': list(self.list_project_anatomy_subject_stats()),
-            'list_project_assaytype_file_stats': list(self.list_project_assaytype_file_stats()),
-            'list_project_assaytype_biosample_stats': list(self.list_project_assaytype_biosample_stats()),
-            'list_project_assaytype_subject_stats': list(self.list_project_assaytype_subject_stats()),
-            'list_project_datatype_file_stats': list(self.list_project_datatype_file_stats()),
-            'list_project_datatype_biosample_stats': list(self.list_project_datatype_biosample_stats()),
-            'list_project_datatype_subject_stats': list(self.list_project_datatype_subject_stats()),
+            'list_project_anatomy_file_stats': list(self.query_combination(True, "file", "anatomy")),
+            'list_project_anatomy_biosample_stats': list(self.query_combination(True, "biosample", "anatomy")),
+            'list_project_anatomy_subject_stats': list(self.query_combination(True, "subject", "anatomy")),
+            'list_project_assaytype_file_stats': list(self.query_combination(True, "file", "assay_type")),
+            'list_project_assaytype_biosample_stats': list(self.query_combination(True, "biosample", "assay_type")),
+            'list_project_assaytype_subject_stats': list(self.query_combination(True, "subject", "assay_type")),
+            'list_project_datatype_file_stats': list(self.query_combination(True, "file", "data_type")),
+            'list_project_datatype_biosample_stats': list(self.query_combination(True, "biosample", "data_type")),
+            'list_project_datatype_subject_stats': list(self.query_combination(True, "subject", "data_type")),
+            'list_project_species_file_stats': list(self.query_combination(True, "file", "species")),
+            'list_project_species_biosample_stats': list(self.query_combination(True, "biosample", "species")),
+            'list_project_species_subject_stats': list(self.query_combination(True, "subject", "species")),
         }
         print(json.dumps(results, indent=2))
 
@@ -108,27 +108,13 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.file).alias('file_cnt'),
+                CntD(path.file.RID).alias('file_cnt'),
                 Sum(path.file.size_in_bytes).alias('byte_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
                 path.project.RID.alias('project_RID')
             ] + attr_func(path)
         ))
-
-    def list_project_file_stats(self, use_root_projects=True, path_func=(lambda builder, path: path), grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Return list of file statistics per project.
-
-        :param use_root_projects: Summarize by root project rather than attributed sub-projects (default true).
-        :param path_func: Function to allow path chaining (default no-change)
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return self.list_projects(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_project_path_to_file(builder, path, use_root_projects, path_func)),
-            proj_func=(lambda path: self.projection_for_file_stats(path, grpk_func, attr_func))
-        )
 
     @classmethod
     def extend_project_path_to_biosample(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
@@ -173,26 +159,12 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.biosample).alias('biosample_cnt'),
+                CntD(path.biosample.RID).alias('biosample_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
                 path.project.RID.alias('project_RID')
             ] + attr_func(path)
         ))
-
-    def list_project_biosample_stats(self, use_root_projects=True, path_func=(lambda builder, path: path), grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Return list of biosample statistics per project.
-
-        :param use_root_projects: Summarize by root project rather than attributed sub-projects (default true).
-        :param path_func: Function to allow path chaining (default no-change)
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return self.list_projects(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_project_path_to_biosample(builder, path, use_root_projects, path_func)),
-            proj_func=(lambda path: self.projection_for_biosample_stats(path, grpk_func, attr_func))
-        )
 
     @classmethod
     def extend_project_path_to_subject(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
@@ -237,26 +209,12 @@ class DashboardQueryHelper (object):
             ] + grpk_func(path)
         )).attributes(*(
             [
-                Cnt(path.subject).alias('subject_cnt'),
+                CntD(path.subject.RID).alias('subject_cnt'),
                 # .name is part of API so need to use dict-style lookup of column...
                 path.project.column_definitions['name'].alias('project_name'),
                 path.project.RID.alias('project_RID')
             ] + attr_func(path)
         ))
-
-    def list_project_subject_stats(self, use_root_projects=True, path_func=(lambda builder, path: path), grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Return list of subject statistics per project.
-
-        :param use_root_projects: Summarize by root project rather than attributed sub-projects (default true).
-        :param path_func: Function to allow path chaining (default no-change)
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return self.list_projects(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_project_path_to_subject(builder, path, use_root_projects, path_func)),
-            proj_func=(lambda path: self.projection_for_subject_stats(path, grpk_func, attr_func))
-        )
 
     @classmethod
     def extend_file_path_to_assaytype(cls, builder, path):
@@ -290,30 +248,6 @@ class DashboardQueryHelper (object):
             path.assay_type.column_definitions['name'].alias('assay_type_name')
         ]
 
-    def list_project_assaytype_file_stats(self, use_root_projects=True):
-        return self.list_project_file_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_file_path_to_assaytype(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_assaytype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_assaytype(path))
-        )
-
-    def list_project_assaytype_biosample_stats(self, use_root_projects=True):
-        return self.list_project_biosample_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_biosample_path_to_assaytype(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_assaytype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_assaytype(path))
-        )
-
-    def list_project_assaytype_subject_stats(self, use_root_projects=True):
-        return self.list_project_subject_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_subject_path_to_assaytype(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_assaytype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_assaytype(path))
-        )
-
     @classmethod
     def extend_file_path_to_anatomy(cls, builder, path):
         return path.link(
@@ -346,30 +280,6 @@ class DashboardQueryHelper (object):
             path.anatomy.column_definitions['name'].alias('anatomy_name')
         ]
 
-    def list_project_anatomy_file_stats(self, use_root_projects=True):
-        return self.list_project_file_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_file_path_to_anatomy(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_anatomy(path)),
-            attr_func=(lambda path: self.extend_attributes_for_anatomy(path))
-        )
-
-    def list_project_anatomy_biosample_stats(self, use_root_projects=True):
-        return self.list_project_biosample_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_biosample_path_to_anatomy(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_anatomy(path)),
-            attr_func=(lambda path: self.extend_attributes_for_anatomy(path))
-        )
-
-    def list_project_anatomy_subject_stats(self, use_root_projects=True):
-        return self.list_project_subject_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_subject_path_to_anatomy(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_anatomy(path)),
-            attr_func=(lambda path: self.extend_attributes_for_anatomy(path))
-        )
-
     @classmethod
     def extend_file_path_to_datatype(cls, builder, path):
         return path.link(builder.CFDE.data_type)
@@ -400,28 +310,120 @@ class DashboardQueryHelper (object):
             .link(builder.CFDE.file)
         )
 
-    def list_project_datatype_file_stats(self, use_root_projects=True):
-        return self.list_project_file_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_file_path_to_datatype(builder, path)),
-            grpk_func=(lambda path: self.extend_groupkeys_for_datatype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_datatype(path))
+    @classmethod
+    def extend_file_path_to_species(cls, builder, path):
+        fsrt = builder.CFDE.file_subject_role_taxonomy.alias('fsrt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            fsrt,
+            on=( (path.file.id_namespace == fsrt.file_id_namespace)
+                 & (path.file.id == fsrt.file_id) )
+        ).link(
+            sr,
+            on=( path.fsrt.subject_role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.fsrt.subject_taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_subject_path_to_species(cls, builder, path):
+        srt = builder.CFDE.subject_role_taxonomy.alias('srt')
+        sr = builder.CFDE.subject_role.alias('sr')
+        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
+        path = path.link(
+            srt,
+            on=( (path.subject.id_namespace == srt.subject_id_namespace)
+                 & (path.subject.id == srt.subject_id) )
+        ).link(
+            sr,
+            on=( path.srt.role_id == sr.id )
+        ).link(
+            tax,
+            on=( path.srt.taxonomy_id == tax.id )
+        )
+        path = path.filter( sr.column_definitions['name'] == 'single organism' )
+        path = path.filter( tax.clade == 'species' )
+        return path
+
+    @classmethod
+    def extend_biosample_path_to_subject(cls, builder, path):
+        return (
+            path.link(builder.CFDE.biosample_from_subject)
+            .link(builder.CFDE.subject)
         )
 
-    def list_project_datatype_biosample_stats(self, use_root_projects=True):
-        return self.list_project_biosample_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_biosample_path_to_file(builder, path))),
-            grpk_func=(lambda path: self.extend_groupkeys_for_datatype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_datatype(path))
+    @classmethod
+    def extend_groupkeys_for_species(cls, path):
+        return [
+            path.tax.id.alias('species_id')
+        ]
+
+    @classmethod
+    def extend_attributes_for_species(cls, path):
+        return [
+            path.tax.column_definitions['name'].alias('species_name')
+        ]
+
+    def query_combination(self, root_projects=True, entity="file", vocabulary="anatomy"):
+        """Perform dashboard query for desired combination of project, vocabulary, and entity stats.
+
+        :param root_projects: Whether to only use root projects (default True)
+        :param entity: Which entity table to summarize (default "file")
+        :param vocabulary: Which concept to cross with project for grouping (default "anatomy")
+
+        Allowed values:
+        root_projects: True, False
+        entity: "subject", "biosample", "file"
+        vocabulary: "anatomy", "assay_type", "data_type"
+        """
+        if root_projects not in { True, False }:
+            raise ValueError("Bad dimension key root_projects=%r" % root_projects)
+        if entity not in { "subject", "biosample", "file" }:
+            raise ValueError("Bad dimension key entity=%r" % entity)
+        if vocabulary not in { "anatomy", "assay_type", "data_type", "species" }:
+            raise ValueError("Bad dimension key vocabular=%r" % vocabulary)
+
+        path_func2 = {
+            ("file", "anatomy"): self.extend_file_path_to_anatomy,
+            ("file", "assay_type"): self.extend_file_path_to_assaytype,
+            ("file", "data_type"): self.extend_file_path_to_datatype,
+            ("file", "species"): self.extend_file_path_to_species,
+
+            ("biosample", "anatomy"): self.extend_biosample_path_to_anatomy,
+            ("biosample", "assay_type"): self.extend_biosample_path_to_assaytype,
+            ("biosample", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_biosample_path_to_file(builder, path)),
+            ("biosample", "species"): lambda builder, path: self.extend_subject_path_to_species(builder, self.extend_biosample_path_to_subject(builder, path)),
+
+            ("subject", "anatomy"): self.extend_subject_path_to_anatomy,
+            ("subject", "assay_type"): self.extend_subject_path_to_assaytype,
+            ("subject", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_subject_path_to_file(builder, path)),
+            ("subject", "species"): self.extend_subject_path_to_species,
+        }[(entity, vocabulary)]
+
+        path_func, proj_func = {
+            "file": (self.extend_project_path_to_file, self.projection_for_file_stats),
+            "biosample": (self.extend_project_path_to_biosample, self.projection_for_biosample_stats),
+            "subject": (self.extend_project_path_to_subject, self.projection_for_subject_stats),
+        }[entity]
+
+        grpk_func, attr_func = {
+            "anatomy": (self.extend_groupkeys_for_anatomy, self.extend_attributes_for_anatomy),
+            "assay_type": (self.extend_groupkeys_for_assaytype, self.extend_attributes_for_assaytype),
+            "data_type": (self.extend_groupkeys_for_datatype, self.extend_attributes_for_datatype),
+            "species": (self.extend_groupkeys_for_species, self.extend_attributes_for_species),
+        }[vocabulary]
+
+        return self.list_projects(
+            use_root_projects=root_projects,
+            path_func=lambda builder, path: path_func(builder, path, root_projects, path_func2),
+            proj_func=lambda path: proj_func(path, grpk_func, attr_func),
         )
-    def list_project_datatype_subject_stats(self, use_root_projects=True):
-        return self.list_project_subject_stats(
-            use_root_projects=use_root_projects,
-            path_func=(lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_subject_path_to_file(builder, path))),
-            grpk_func=(lambda path: self.extend_groupkeys_for_datatype(path)),
-            attr_func=(lambda path: self.extend_attributes_for_datatype(path))
-        )
+
 
 ## ugly CLI wrapping...
 def main():
