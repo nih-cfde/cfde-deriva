@@ -32,84 +32,74 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 #
 
 def _add_file_path(queryobj):
+    """Idempotently add file to path and set it as path context"""
     if 'file' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
-        fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
-        queryobj.path = queryobj.path.link(
-            fdb,
-            on=( (queryobj.path.biosample.id_namespace == fdb.biosample_id_namespace)
-                 & (queryobj.path.biosample.id == fdb.biosample_id) )
-        ).link(queryobj.helper.builder.CFDE.file)
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file_describes_biosample)
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file)
+    else:
+        queryobj.path.context = queryobj.path.file
 
 def _add_biosample_path(queryobj):
+    """Idempotently add biosample to path and set it as path context"""
     if 'biosample' not in queryobj.path.table_instances:
         if 'file' in queryobj.path.table_instances:
-            fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
-            queryobj.path = queryobj.path.link(
-                fdb,
-                on=( (queryobj.path.file.id_namespace == fdb.file_id_namespace)
-                     & (queryobj.path.file.id == fdb.file_id) )
-            ).link(queryobj.helper.builder.CFDE.biosample)
+            queryobj.path.context = queryobj.path.file
+            queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file_describes_biosample)
         elif 'subject' in queryobj.path.table_instances:
-            bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
-            queryobj.path = queryobj.path.link(
-                bfs,
-                on=( (queryobj.path.subject.id_namespace == bfs.subject_id_namespace)
-                     & (queryobj.path.subject.id == bfs.subject_id) )
-            ).link(queryobj.helper.builder.CFDE.biosample)
+            queryobj.path.context = queryobj.path.subject
+            queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample_from_subject)
         else:
-            raise NotImplementedError()
+            raise NotImplementedError('prerequisites not met for _add_biosample_path')
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample)
+    else:
+        queryobj.path.context = queryobj.path.biosample
 
 def _add_subject_path(queryobj):
+    """Idempotently add subject to path and set it as path context"""
     if 'subject' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
-        bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
-        queryobj.path = queryobj.path.link(
-            bfs,
-            on=( (queryobj.path.biosample.id_namespace == bfs.biosample_id_namespace)
-                 & (queryobj.path.biosample.id == bfs.biosample_id) )
-        ).link(queryobj.helper.builder.CFDE.subject)
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample_from_subject)
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject)
+    else:
+        queryobj.path.context = queryobj.path.subject
 
 def _add_datatype_path(queryobj):
+    """Idempotently add data_type to path"""
     if 'data_type' not in queryobj.path.table_instances:
         _add_file_path(queryobj)
-        dt = queryobj.helper.builder.CFDE.data_type
-        queryobj.path = queryobj.path.link(dt, on=(queryobj.path.file.data_type == dt.id))
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.data_type)
 
 def _add_anatomy_path(queryobj):
+    """Idempotently add anatomy to path"""
     if 'anatomy' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
-        anatomy = queryobj.helper.builder.CFDE.anatomy
-        queryobj.path = queryobj.path.link(anatomy, on=(queryobj.path.biosample.anatomy == anatomy.id))
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.anatomy)
 
 def _add_assaytype_path(queryobj):
+    """Idempotently add assay_type to path"""
     if 'assay_type' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
-        assaytype = queryobj.helper.builder.CFDE.assay_type
-        queryobj.path = queryobj.path.link(assaytype, on=(queryobj.path.biosample.assay_type == assaytype.id))
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.assay_type)
 
 def _add_species_path(queryobj):
+    """Idempotently add species concept to path"""
     if 'species' not in queryobj.path.table_instances:
         _add_subject_path(queryobj)
-        species = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species')
-        subrole = queryobj.helper.builder.CFDE.subject_role.alias('subjrole')
-        srt = queryobj.helper.builder.CFDE.subject_role_taxonomy.alias('srt')
-        queryobj.path = queryobj.path.link(
-            srt,
-            on=( (queryobj.path.subject.id_namespace == srt.subject_id_namespace)
-                 & (queryobj.path.subject.id == srt.subject_id) )
-        ).link(
-            subrole
-        ).filter(subrole.column_definitions['name'] == 'single organism')
-        queryobj.path = queryobj.path.link(
-            species, on=(queryobj.path.srt.taxonomy_id == species.id)
-        ).filter(species.clade == 'species')
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject_role_taxonomy.alias('srt'))
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject_role.alias('subrole'))
+        queryobj.path = queryobj.path.filter(queryobj.path.subrole.column_definitions['name'] == 'single organism')
+        queryobj.path.context = queryobj.path.srt
+        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species'))
+        queryobj.path = queryobj.path.filter(queryobj.path.species.clade == 'species')
 
 def _add_rootproject_path(queryobj):
+    """Idempotently add root project concept to path"""
     if 'project_root' not in queryobj.path.table_instances:
         entity = queryobj.path.table_instances[queryobj.entity_name]
         project_root = queryobj.helper.builder.CFDE.project_root
         pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+        # need to select directionality of association, so reduce number of joins while we're at it
         queryobj.path = queryobj.path.link(
             pipt,
             on=( (entity.project_id_namespace == pipt.leader_project_id_namespace)
