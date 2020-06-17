@@ -181,7 +181,9 @@ class CfdeDataPackage (object):
                             },
                             { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
                         ]
-                    }
+                    },
+                    { "name": "Dashboard", "url": "/dashboard.html" },
+                    { "name": "Documentation", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" }
                 ]
             }
         }
