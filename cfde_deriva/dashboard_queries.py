@@ -102,12 +102,12 @@ def _add_rootproject_path(queryobj):
         # need to select directionality of association, so reduce number of joins while we're at it
         queryobj.path = queryobj.path.link(
             pipt,
-            on=( (entity.project_id_namespace == pipt.leader_project_id_namespace)
-                 & (entity.project == pipt.leader_project_id) )
+            on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
+                 & (entity.project == pipt.member_project_id) )
         ).link(
             project_root,
-            on=( (queryobj.path.pipt.member_project_id_namespace == project_root.project_id_namespace)
-                 & (queryobj.path.pipt.member_project_id == project_root.project_id) )
+            on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
+                 & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
         ).link(queryobj.helper.builder.CFDE.project)
 
 class StatsQuery (object):
