@@ -32,7 +32,7 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 #
 
 def _add_file_path(queryobj):
-    if 'file' not in queryobj.included_tables:
+    if 'file' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
         queryobj.path = queryobj.path.link(
@@ -40,31 +40,28 @@ def _add_file_path(queryobj):
             on=( (queryobj.path.biosample.id_namespace == fdb.biosample_id_namespace)
                  & (queryobj.path.biosample.id == fdb.biosample_id) )
         ).link(queryobj.helper.builder.CFDE.file)
-        queryobj.included_tables.add('file')
 
 def _add_biosample_path(queryobj):
-    if 'biosample' not in queryobj.included_tables:
-        if 'file' in queryobj.included_tables:
+    if 'biosample' not in queryobj.path.table_instances:
+        if 'file' in queryobj.path.table_instances:
             fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
             queryobj.path = queryobj.path.link(
                 fdb,
                 on=( (queryobj.path.file.id_namespace == fdb.file_id_namespace)
                      & (queryobj.path.file.id == fdb.file_id) )
             ).link(queryobj.helper.builder.CFDE.biosample)
-            queryobj.included_tables.add('biosample')
-        elif 'subject' in queryobj.included_tables:
+        elif 'subject' in queryobj.path.table_instances:
             bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
             queryobj.path = queryobj.path.link(
                 bfs,
                 on=( (queryobj.path.subject.id_namespace == bfs.subject_id_namespace)
                      & (queryobj.path.subject.id == bfs.subject_id) )
             ).link(queryobj.helper.builder.CFDE.biosample)
-            queryobj.included_tables.add('biosample')
         else:
             raise NotImplementedError()
 
 def _add_subject_path(queryobj):
-    if 'subject' not in queryobj.included_tables:
+    if 'subject' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
         queryobj.path = queryobj.path.link(
@@ -72,31 +69,27 @@ def _add_subject_path(queryobj):
             on=( (queryobj.path.biosample.id_namespace == bfs.biosample_id_namespace)
                  & (queryobj.path.biosample.id == bfs.biosample_id) )
         ).link(queryobj.helper.builder.CFDE.subject)
-        queryobj.included_tables.add('subject')
 
 def _add_datatype_path(queryobj):
-    if 'data_type' not in queryobj.included_tables:
+    if 'data_type' not in queryobj.path.table_instances:
         _add_file_path(queryobj)
         dt = queryobj.helper.builder.CFDE.data_type
         queryobj.path = queryobj.path.link(dt, on=(queryobj.path.file.data_type == dt.id))
-        queryobj.included_tables.add('data_type')
 
 def _add_anatomy_path(queryobj):
-    if 'anatomy' not in queryobj.included_tables:
+    if 'anatomy' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         anatomy = queryobj.helper.builder.CFDE.anatomy
         queryobj.path = queryobj.path.link(anatomy, on=(queryobj.path.biosample.anatomy == anatomy.id))
-        queryobj.included_tables.add('anatomy')
 
 def _add_assaytype_path(queryobj):
-    if 'assay_type' not in queryobj.included_tables:
+    if 'assay_type' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         assaytype = queryobj.helper.builder.CFDE.assay_type
         queryobj.path = queryobj.path.link(assaytype, on=(queryobj.path.biosample.assay_type == assaytype.id))
-        queryobj.included_tables.add('assay_type')
 
 def _add_species_path(queryobj):
-    if 'species' not in queryobj.included_tables:
+    if 'species' not in queryobj.path.table_instances:
         _add_subject_path(queryobj)
         species = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species')
         subrole = queryobj.helper.builder.CFDE.subject_role.alias('subjrole')
@@ -111,10 +104,9 @@ def _add_species_path(queryobj):
         queryobj.path = queryobj.path.link(
             species, on=(queryobj.path.srt.taxonomy_id == species.id)
         ).filter(species.clade == 'species')
-        queryobj.included_tables.add('species')
 
 def _add_rootproject_path(queryobj):
-    if 'project_root' not in queryobj.included_tables:
+    if 'project_root' not in queryobj.path.table_instances:
         entity = queryobj.path.table_instances[queryobj.entity_name]
         project_root = queryobj.helper.builder.CFDE.project_root
         pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
@@ -127,7 +119,6 @@ def _add_rootproject_path(queryobj):
             on=( (queryobj.path.pipt.member_project_id_namespace == project_root.project_id_namespace)
                  & (queryobj.path.pipt.member_project_id == project_root.project_id) )
         ).link(queryobj.helper.builder.CFDE.project)
-        queryobj.included_tables.add('project_root')
 
 class StatsQuery (object):
     """C2M2 statistics query generator
@@ -210,7 +201,6 @@ class StatsQuery (object):
         """
         self.helper = helper
         self.entity_name = None
-        self.included_tables = set()
         self.included_dimensions = set()
         self.path = None
         self.grpk_funcs = []
@@ -226,7 +216,6 @@ class StatsQuery (object):
 
         try:
             self.attr_funcs.extend(self.supported_entities[entity_name])
-            self.included_tables.add(entity_name)
             self.entity_name = entity_name
         except KeyError:
             raise ValueError('Unsupported entity_name "%s"' % (entity_name,))
