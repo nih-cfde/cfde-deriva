@@ -328,9 +328,6 @@ class DashboardQueryHelper (object):
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
 
-    def list_file_stats(self, dimensions=[]):
-        file = builder.CFDE.file
-
 ## ugly CLI wrapping...
 def main():
     """Runs demo of catalog dashboard queries."""
