@@ -9,6 +9,272 @@ import json
 from deriva.core import ErmrestCatalog, urlquote
 from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 
+######
+# utility functions to idempotently build up the path in a StatsQuery object
+#
+# based on minimal subset of this possible core-entity query path:
+#
+#   file -- file-describes-biosample -- biosample -- biosample-from-subject -- subject
+#
+# attaching vocabulary tables as needed to access terms:
+#
+#   file -- data_type
+#   biosample -- anatomy
+#   biosample -- assay_type
+#   subject -- subject_role_taxonomy -- ncbi_taxonomy (species)
+#   [stats entity] -- project_in_project_transitive -- project -- project_root
+#
+# when core path is extended, grouped dimension terms are correlated
+# by shared table instances for all intermediate tables, i.e.
+#
+#    anatomy X assay_type  come from same biosample
+#    anatomy X species consider a biosample and its matching subject
+#
+
+def _add_file_path(queryobj):
+    if 'file' not in queryobj.included_tables:
+        _add_biosample_path(queryobj)
+        fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
+        queryobj.path = queryobj.path.link(
+            fdb,
+            on=( (queryobj.path.biosample.id_namespace == fdb.biosample_id_namespace)
+                 & (queryobj.path.biosample.id == fdb.biosample_id) )
+        ).link(queryobj.helper.builder.CFDE.file)
+        queryobj.included_tables.add('file')
+
+def _add_biosample_path(queryobj):
+    if 'biosample' not in queryobj.included_tables:
+        if 'file' in queryobj.included_tables:
+            fdb = queryobj.helper.builder.CFDE.file_describes_biosample.alias('fdb')
+            queryobj.path = queryobj.path.link(
+                fdb,
+                on=( (queryobj.path.file.id_namespace == fdb.file_id_namespace)
+                     & (queryobj.path.file.id == fdb.file_id) )
+            ).link(queryobj.helper.builder.CFDE.biosample)
+            queryobj.included_tables.add('biosample')
+        elif 'subject' in queryobj.included_tables:
+            bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
+            queryobj.path = queryobj.path.link(
+                bfs,
+                on=( (queryobj.path.subject.id_namespace == bfs.subject_id_namespace)
+                     & (queryobj.path.subject.id == bfs.subject_id) )
+            ).link(queryobj.helper.builder.CFDE.biosample)
+            queryobj.included_tables.add('biosample')
+        else:
+            raise NotImplementedError()
+
+def _add_subject_path(queryobj):
+    if 'subject' not in queryobj.included_tables:
+        _add_biosample_path(queryobj)
+        bfs = queryobj.helper.builder.CFDE.biosample_from_subject.alias('bfs')
+        queryobj.path = queryobj.path.link(
+            bfs,
+            on=( (queryobj.path.biosample.id_namespace == bfs.biosample_id_namespace)
+                 & (queryobj.path.biosample.id == bfs.biosample_id) )
+        ).link(queryobj.helper.builder.CFDE.subject)
+        queryobj.included_tables.add('subject')
+
+def _add_datatype_path(queryobj):
+    if 'data_type' not in queryobj.included_tables:
+        _add_file_path(queryobj)
+        dt = queryobj.helper.builder.CFDE.data_type
+        queryobj.path = queryobj.path.link(dt, on=(queryobj.path.file.data_type == dt.id))
+        queryobj.included_tables.add('data_type')
+
+def _add_anatomy_path(queryobj):
+    if 'anatomy' not in queryobj.included_tables:
+        _add_biosample_path(queryobj)
+        anatomy = queryobj.helper.builder.CFDE.anatomy
+        queryobj.path = queryobj.path.link(anatomy, on=(queryobj.path.biosample.anatomy == anatomy.id))
+        queryobj.included_tables.add('anatomy')
+
+def _add_assaytype_path(queryobj):
+    if 'assay_type' not in queryobj.included_tables:
+        _add_biosample_path(queryobj)
+        assaytype = queryobj.helper.builder.CFDE.assay_type
+        queryobj.path = queryobj.path.link(assaytype, on=(queryobj.path.biosample.assay_type == assaytype.id))
+        queryobj.included_tables.add('assay_type')
+
+def _add_species_path(queryobj):
+    if 'species' not in queryobj.included_tables:
+        _add_subject_path(queryobj)
+        species = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species')
+        subrole = queryobj.helper.builder.CFDE.subject_role.alias('subjrole')
+        srt = queryobj.helper.builder.CFDE.subject_role_taxonomy.alias('srt')
+        queryobj.path = queryobj.path.link(
+            srt,
+            on=( (queryobj.path.subject.id_namespace == srt.subject_id_namespace)
+                 & (queryobj.path.subject.id == srt.subject_id) )
+        ).link(
+            subrole
+        ).filter(subrole.column_definitions['name'] == 'single organism')
+        queryobj.path = queryobj.path.link(
+            species, on=(queryobj.path.srt.taxonomy_id == species.id)
+        ).filter(species.clade == 'species')
+        queryobj.included_tables.add('species')
+
+def _add_rootproject_path(queryobj):
+    if 'project_root' not in queryobj.included_tables:
+        entity = queryobj.path.table_instances[queryobj.entity_name]
+        project_root = queryobj.helper.builder.CFDE.project_root
+        pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+        queryobj.path = queryobj.path.link(
+            pipt,
+            on=( (entity.project_id_namespace == pipt.leader_project_id_namespace)
+                 & (entity.project == pipt.leader_project_id) )
+        ).link(
+            project_root,
+            on=( (queryobj.path.pipt.member_project_id_namespace == project_root.project_id_namespace)
+                 & (queryobj.path.pipt.member_project_id == project_root.project_id) )
+        ).link(queryobj.helper.builder.CFDE.project)
+        queryobj.included_tables.add('project_root')
+
+class StatsQuery (object):
+    """C2M2 statistics query generator
+
+    Construct with a DashboardQueryHelper instance to bind to a
+    catalog, select base entity for statistics, and select optional
+    dimensions for multi-dimensional grouping of results.
+
+    StatsQuery(helper)
+    .entity('file')
+    .dimension('data_type')
+    .dimension('project_root')
+    .fetch()
+
+    Exactly one entity MUST be configured. Zero or more dimensions MAY
+    be configured.
+
+    Beware, overly complex queries (with too many dimensions) may
+    timeout due to query cost.
+
+    """
+
+    # define supported keys, mapped to implementation bits...
+    supported_entities = {
+        'file': [
+            lambda path: CntD(path.file.RID).alias('num_files'),
+            lambda path: Sum(path.file.size_in_bytes).alias('num_bytes'),
+        ],
+        'biosample': [
+            lambda path: CntD(path.biosample.RID).alias('num_biosamples'),
+        ],
+        'subject': [
+            lambda path: CntD(path.subject.RID).alias('num_subjects'),
+        ],
+    }
+    supported_dimensions = {
+        'anatomy': (
+            _add_anatomy_path, [
+                lambda path: path.anatomy.id.alias('anatomy_id'),
+            ], [
+                lambda path: path.anatomy.column_definitions['name'].alias('anatomy_name'),
+            ]
+        ),
+        'assay_type': (
+            _add_assaytype_path, [
+                lambda path: path.assay_type.id.alias('assay_type_id'),
+            ], [
+                lambda path: path.assay_type.column_definitions['name'].alias('assay_type_name'),
+            ]
+        ),
+        'data_type': (
+            _add_datatype_path, [
+                lambda path: path.data_type.id.alias('data_type_id'),
+            ], [
+                lambda path: path.data_type.column_definitions['name'].alias('data_type_name'),
+            ]
+        ),
+        'species': (
+            _add_species_path, [
+                lambda path: path.species.id.alias('species_id'),
+            ], [
+                lambda path: path.species.column_definitions['name'].alias('species_name'),
+            ]
+        ),
+        'project_root': (
+            _add_rootproject_path, [
+                lambda path: path.project.RID.alias('project_RID'),
+            ], [
+                lambda path: path.project.id_namespace.alias('project_id_namespace'),
+                lambda path: path.project.id.alias('project_id'),
+                lambda path: path.project.column_definitions['name'].alias('project_name'),
+            ]
+        ),
+    }
+
+    def __init__(self, helper):
+        """Construct a StatsQuery builder object
+
+        :param helper: Instance of DashboardQueryHelper
+        """
+        self.helper = helper
+        self.entity_name = None
+        self.included_tables = set()
+        self.included_dimensions = set()
+        self.path = None
+        self.grpk_funcs = []
+        self.attr_funcs = []
+
+    def entity(self, entity_name):
+        """Select entity which will be source of statistics
+
+        :param entity_name: One of the StatsQuery.supported_entities key strings
+        """
+        if self.path is not None:
+            raise TypeError('Cannot call .entity() method on a StatsQuery instance more than once.')
+
+        try:
+            self.attr_funcs.extend(self.supported_entities[entity_name])
+            self.included_tables.add(entity_name)
+            self.entity_name = entity_name
+        except KeyError:
+            raise ValueError('Unsupported entity_name "%s"' % (entity_name,))
+
+        self.path = self.helper.builder.CFDE.tables[entity_name].path
+
+        return self
+
+    def dimension(self, dimension_name):
+        """Configure a grouping dimension
+
+        :param dimension_name: One of the StatsQuery.supported_dimension key strings
+        """
+        if self.path is None:
+            raise TypeError('Cannot call .dimension() method on a StatsQuery instance prior to calling .entity() method.')
+        if dimension_name in self.included_dimensions:
+            raise TypeError('Cannot use dimension_name "%s" more than once in a StatsQuery instance.' % (dimension_name,))
+
+        try:
+            add_path_func, grpk_funcs, attr_funcs = self.supported_dimensions[dimension_name]
+            self.grpk_funcs.extend(grpk_funcs)
+            self.attr_funcs.extend(attr_funcs)
+            self.included_dimensions.add(dimension_name)
+        except KeyError:
+            raise ValueError('Unsupported dimension_name "%s"' % (dimension_name,))
+
+        add_path_func(self)
+
+        return self
+
+    def fetch(self):
+        """Fetch results for configured query"""
+        if self.path is None:
+            raise TypeError('Cannot call .fetch() method on a StatsQuery instance prior to calling .entity() method.')
+        if self.grpk_funcs:
+            return self.path.groupby(*[
+                grpk_func(self.path)
+                for grpk_func in self.grpk_funcs
+            ]).attributes(*[
+                attr_func(self.path)
+                for attr_func in self.attr_funcs
+            ]).fetch()
+        else:
+            return self.path.aggregates(*[
+                attr_func(self.path)
+                for attr_func in self.attr_funcs
+            ]).fetch()
+
 class DashboardQueryHelper (object):
 
     def __init__(self, hostname, catalogid, scheme='https'):
@@ -24,18 +290,36 @@ class DashboardQueryHelper (object):
             #'list_root_projects': list(self.list_projects(use_root_projects=True)),
             #'list_datatypes': list(self.list_datatypes()),
             #'list_formats': list(self.list_formats()),
-            'list_project_anatomy_file_stats': list(self.query_combination(True, "file", "anatomy")),
-            'list_project_anatomy_biosample_stats': list(self.query_combination(True, "biosample", "anatomy")),
-            'list_project_anatomy_subject_stats': list(self.query_combination(True, "subject", "anatomy")),
-            'list_project_assaytype_file_stats': list(self.query_combination(True, "file", "assay_type")),
-            'list_project_assaytype_biosample_stats': list(self.query_combination(True, "biosample", "assay_type")),
-            'list_project_assaytype_subject_stats': list(self.query_combination(True, "subject", "assay_type")),
-            'list_project_datatype_file_stats': list(self.query_combination(True, "file", "data_type")),
-            'list_project_datatype_biosample_stats': list(self.query_combination(True, "biosample", "data_type")),
-            'list_project_datatype_subject_stats': list(self.query_combination(True, "subject", "data_type")),
-            'list_project_species_file_stats': list(self.query_combination(True, "file", "species")),
-            'list_project_species_biosample_stats': list(self.query_combination(True, "biosample", "species")),
-            'list_project_species_subject_stats': list(self.query_combination(True, "subject", "species")),
+
+            'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
+            'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
+            'file_stats_anatomy_species': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('species').fetch()),
+            'file_stats_anatomy_project': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('project_root').fetch()),
+            'file_stats_assaytype_datatype': list(StatsQuery(self).entity('file').dimension('assay_type').dimension('data_type').fetch()),
+            'file_stats_assaytype_species': list(StatsQuery(self).entity('file').dimension('assay_type').dimension('species').fetch()),
+            'file_stats_assaytype_project': list(StatsQuery(self).entity('file').dimension('assay_type').dimension('project_root').fetch()),
+            'file_stats_datatype_species': list(StatsQuery(self).entity('file').dimension('data_type').dimension('species').fetch()),
+            'file_stats_datatype_project': list(StatsQuery(self).entity('file').dimension('data_type').dimension('project_root').fetch()),
+
+            'biosample_stats_anatomy_assaytype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('assay_type').fetch()),
+            'biosample_stats_anatomy_datatype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('data_type').fetch()),
+            'biosample_stats_anatomy_species': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('species').fetch()),
+            'biosample_stats_anatomy_project': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('project_root').fetch()),
+            'biosample_stats_assaytype_datatype': list(StatsQuery(self).entity('biosample').dimension('assay_type').dimension('data_type').fetch()),
+            'biosample_stats_assaytype_species': list(StatsQuery(self).entity('biosample').dimension('assay_type').dimension('species').fetch()),
+            'biosample_stats_assaytype_project': list(StatsQuery(self).entity('biosample').dimension('assay_type').dimension('project_root').fetch()),
+            'biosample_stats_datatype_species': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('species').fetch()),
+            'biosample_stats_datatype_project': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('project_root').fetch()),
+
+            'subject_stats_anatomy_assaytype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('assay_type').fetch()),
+            'subject_stats_anatomy_datatype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('data_type').fetch()),
+            'subject_stats_anatomy_species': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('species').fetch()),
+            'subject_stats_anatomy_project': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('project_root').fetch()),
+            'subject_stats_assaytype_datatype': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('data_type').fetch()),
+            'subject_stats_assaytype_species': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('species').fetch()),
+            'subject_stats_assaytype_project': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('project_root').fetch()),
+            'subject_stats_datatype_species': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('species').fetch()),
+            'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
         }
         print(json.dumps(results, indent=2))
 
@@ -65,365 +349,8 @@ class DashboardQueryHelper (object):
         """
         return self.builder.CFDE.file_format.path.entities().fetch()
 
-    @classmethod
-    def extend_project_path_to_file(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
-        """Function to link file to existing project path by attribution.
-
-        :param builder: A builder appropriate to use when extending path
-        :param path: The path we will build from
-        :param use_root_projects: Only consider root projects (default False)
-        :param path_func: Function to allow path chaining (default no-change)
-        """
+    def list_file_stats(self, dimensions=[]):
         file = builder.CFDE.file
-        if use_root_projects:
-            # link to transitively-attributed root project
-            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
-            path = path.link(
-                pipt,
-                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
-                     & (path.project.id == pipt.leader_project_id) )
-            ).link(
-                file,
-                on=( (path.pipt.member_project_id_namespace == file.project_id_namespace)
-                     & (path.pipt.member_project_id == file.project) )
-            )
-        else:
-            # link to directly attributed project
-            path = path.link(file)
-        # allow chained path-extension for caller
-        return path_func(builder, path)
-
-    @classmethod
-    def projection_for_file_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Function to build grouped projection of file stats.
-
-        :param path: The path we will project from
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return path.groupby(*(
-            [
-                path.project.id_namespace.alias('project_id_namespace'),
-                path.project.id.alias('project_id')
-            ] + grpk_func(path)
-        )).attributes(*(
-            [
-                CntD(path.file.RID).alias('file_cnt'),
-                Sum(path.file.size_in_bytes).alias('byte_cnt'),
-                # .name is part of API so need to use dict-style lookup of column...
-                path.project.column_definitions['name'].alias('project_name'),
-                path.project.RID.alias('project_RID')
-            ] + attr_func(path)
-        ))
-
-    @classmethod
-    def extend_project_path_to_biosample(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
-        """Function to link biosample to existing project path by attribution.
-
-        :param builder: A builder appropriate to use when extending path
-        :param path: The path we will build from
-        :param use_root_projects: Only consider root projects (default False)
-        :param path_func: Function to allow path chaining (default no-change)
-        """
-        biosample = builder.CFDE.biosample
-        if use_root_projects:
-            # link to transitively-attributed root project
-            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
-            path = path.link(
-                pipt,
-                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
-                     & (path.project.id == pipt.leader_project_id) )
-            ).link(
-                biosample,
-                on=( (path.pipt.member_project_id_namespace == biosample.project_id_namespace)
-                     & (path.pipt.member_project_id == biosample.project) )
-            )
-        else:
-            # link to directly attributed project
-            path = path.link(biosample)
-        # allow chained path-extension for caller
-        return path_func(builder, path)
-
-    @classmethod
-    def projection_for_biosample_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Function to build grouped projection of biosample stats.
-
-        :param path: The path we will project from
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return path.groupby(*(
-            [
-                path.project.id_namespace.alias('project_id_namespace'),
-                path.project.id.alias('project_id')
-            ] + grpk_func(path)
-        )).attributes(*(
-            [
-                CntD(path.biosample.RID).alias('biosample_cnt'),
-                # .name is part of API so need to use dict-style lookup of column...
-                path.project.column_definitions['name'].alias('project_name'),
-                path.project.RID.alias('project_RID')
-            ] + attr_func(path)
-        ))
-
-    @classmethod
-    def extend_project_path_to_subject(cls, builder, path, use_root_projects, path_func=(lambda builder, path: path)):
-        """Function to link subject to existing project path by attribution.
-
-        :param builder: A builder appropriate to use when extending path
-        :param path: The path we will build from
-        :param use_root_projects: Only consider root projects (default False)
-        :param path_func: Function to allow path chaining (default no-change)
-        """
-        subject = builder.CFDE.subject
-        if use_root_projects:
-            # link to transitively-attributed root project
-            pipt = builder.CFDE.project_in_project_transitive.alias('pipt')
-            path = path.link(
-                pipt,
-                on=( (path.project.id_namespace == pipt.leader_project_id_namespace)
-                     & (path.project.id == pipt.leader_project_id) )
-            ).link(
-                subject,
-                on=( (path.pipt.member_project_id_namespace == subject.project_id_namespace)
-                     & (path.pipt.member_project_id == subject.project) )
-            )
-        else:
-            # link to directly attributed project
-            path = path.link(subject)
-        # allow chained path-extension for caller
-        return path_func(builder, path)
-
-    @classmethod
-    def projection_for_subject_stats(cls, path, grpk_func=(lambda path: []), attr_func=(lambda path: [])):
-        """Function to build grouped projection of subject stats.
-
-        :param path: The path we will project from
-        :param grpk_func: Function returning extra groupby cols (default empty)
-        :param attr_func: Function returning extra attribute cols (default empty)
-        """
-        return path.groupby(*(
-            [
-                path.project.id_namespace.alias('project_id_namespace'),
-                path.project.id.alias('project_id')
-            ] + grpk_func(path)
-        )).attributes(*(
-            [
-                CntD(path.subject.RID).alias('subject_cnt'),
-                # .name is part of API so need to use dict-style lookup of column...
-                path.project.column_definitions['name'].alias('project_name'),
-                path.project.RID.alias('project_RID')
-            ] + attr_func(path)
-        ))
-
-    @classmethod
-    def extend_file_path_to_assaytype(cls, builder, path):
-        return path.link(
-            builder.CFDE.file_assay_type,
-            on=( (path.file.id_namespace == builder.CFDE.file_assay_type.file_id_namespace)
-                 & (path.file.id == builder.CFDE.file_assay_type.file_id) )
-        ).link(builder.CFDE.assay_type)
-
-    @classmethod
-    def extend_biosample_path_to_assaytype(cls, builder, path):
-        return path.link(builder.CFDE.assay_type)
-
-    @classmethod
-    def extend_subject_path_to_assaytype(cls, builder, path):
-        return (
-            path.link(builder.CFDE.biosample_from_subject)
-            .link(builder.CFDE.biosample)
-            .link(builder.CFDE.assay_type)
-        )
-
-    @classmethod
-    def extend_groupkeys_for_assaytype(cls, path):
-        return [
-            path.assay_type.id.alias('assay_type_id')
-        ]
-
-    @classmethod
-    def extend_attributes_for_assaytype(cls, path):
-        return [
-            path.assay_type.column_definitions['name'].alias('assay_type_name')
-        ]
-
-    @classmethod
-    def extend_file_path_to_anatomy(cls, builder, path):
-        return path.link(
-            builder.CFDE.file_anatomy,
-            on=( (path.file.id_namespace == builder.CFDE.file_anatomy.file_id_namespace)
-                 & (path.file.id == builder.CFDE.file_anatomy.file_id) )
-        ).link(builder.CFDE.anatomy)
-
-    @classmethod
-    def extend_biosample_path_to_anatomy(cls, builder, path):
-        return path.link(builder.CFDE.anatomy)
-
-    @classmethod
-    def extend_subject_path_to_anatomy(cls, builder, path):
-        return (
-            path.link(builder.CFDE.biosample_from_subject)
-            .link(builder.CFDE.biosample)
-            .link(builder.CFDE.anatomy)
-        )
-
-    @classmethod
-    def extend_groupkeys_for_anatomy(cls, path):
-        return [
-            path.anatomy.id.alias('anatomy_id')
-        ]
-
-    @classmethod
-    def extend_attributes_for_anatomy(cls, path):
-        return [
-            path.anatomy.column_definitions['name'].alias('anatomy_name')
-        ]
-
-    @classmethod
-    def extend_file_path_to_datatype(cls, builder, path):
-        return path.link(builder.CFDE.data_type)
-
-    @classmethod
-    def extend_groupkeys_for_datatype(cls, path):
-        return [
-            path.data_type.id.alias('data_type_id')
-        ]
-
-    @classmethod
-    def extend_attributes_for_datatype(cls, path):
-        return [
-            path.data_type.column_definitions['name'].alias('data_type_name')
-        ]
-
-    @classmethod
-    def extend_subject_path_to_file(cls, builder, path):
-        return (
-            path.link(builder.CFDE.file_describes_subject)
-            .link(builder.CFDE.file)
-        )
-
-    @classmethod
-    def extend_biosample_path_to_file(cls, builder, path):
-        return (
-            path.link(builder.CFDE.file_describes_biosample)
-            .link(builder.CFDE.file)
-        )
-
-    @classmethod
-    def extend_file_path_to_species(cls, builder, path):
-        fsrt = builder.CFDE.file_subject_role_taxonomy.alias('fsrt')
-        sr = builder.CFDE.subject_role.alias('sr')
-        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
-        path = path.link(
-            fsrt,
-            on=( (path.file.id_namespace == fsrt.file_id_namespace)
-                 & (path.file.id == fsrt.file_id) )
-        ).link(
-            sr,
-            on=( path.fsrt.subject_role_id == sr.id )
-        ).link(
-            tax,
-            on=( path.fsrt.subject_taxonomy_id == tax.id )
-        )
-        path = path.filter( sr.column_definitions['name'] == 'single organism' )
-        path = path.filter( tax.clade == 'species' )
-        return path
-
-    @classmethod
-    def extend_subject_path_to_species(cls, builder, path):
-        srt = builder.CFDE.subject_role_taxonomy.alias('srt')
-        sr = builder.CFDE.subject_role.alias('sr')
-        tax = builder.CFDE.ncbi_taxonomy.alias('tax')
-        path = path.link(
-            srt,
-            on=( (path.subject.id_namespace == srt.subject_id_namespace)
-                 & (path.subject.id == srt.subject_id) )
-        ).link(
-            sr,
-            on=( path.srt.role_id == sr.id )
-        ).link(
-            tax,
-            on=( path.srt.taxonomy_id == tax.id )
-        )
-        path = path.filter( sr.column_definitions['name'] == 'single organism' )
-        path = path.filter( tax.clade == 'species' )
-        return path
-
-    @classmethod
-    def extend_biosample_path_to_subject(cls, builder, path):
-        return (
-            path.link(builder.CFDE.biosample_from_subject)
-            .link(builder.CFDE.subject)
-        )
-
-    @classmethod
-    def extend_groupkeys_for_species(cls, path):
-        return [
-            path.tax.id.alias('species_id')
-        ]
-
-    @classmethod
-    def extend_attributes_for_species(cls, path):
-        return [
-            path.tax.column_definitions['name'].alias('species_name')
-        ]
-
-    def query_combination(self, root_projects=True, entity="file", vocabulary="anatomy"):
-        """Perform dashboard query for desired combination of project, vocabulary, and entity stats.
-
-        :param root_projects: Whether to only use root projects (default True)
-        :param entity: Which entity table to summarize (default "file")
-        :param vocabulary: Which concept to cross with project for grouping (default "anatomy")
-
-        Allowed values:
-        root_projects: True, False
-        entity: "subject", "biosample", "file"
-        vocabulary: "anatomy", "assay_type", "data_type"
-        """
-        if root_projects not in { True, False }:
-            raise ValueError("Bad dimension key root_projects=%r" % root_projects)
-        if entity not in { "subject", "biosample", "file" }:
-            raise ValueError("Bad dimension key entity=%r" % entity)
-        if vocabulary not in { "anatomy", "assay_type", "data_type", "species" }:
-            raise ValueError("Bad dimension key vocabular=%r" % vocabulary)
-
-        path_func2 = {
-            ("file", "anatomy"): self.extend_file_path_to_anatomy,
-            ("file", "assay_type"): self.extend_file_path_to_assaytype,
-            ("file", "data_type"): self.extend_file_path_to_datatype,
-            ("file", "species"): self.extend_file_path_to_species,
-
-            ("biosample", "anatomy"): self.extend_biosample_path_to_anatomy,
-            ("biosample", "assay_type"): self.extend_biosample_path_to_assaytype,
-            ("biosample", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_biosample_path_to_file(builder, path)),
-            ("biosample", "species"): lambda builder, path: self.extend_subject_path_to_species(builder, self.extend_biosample_path_to_subject(builder, path)),
-
-            ("subject", "anatomy"): self.extend_subject_path_to_anatomy,
-            ("subject", "assay_type"): self.extend_subject_path_to_assaytype,
-            ("subject", "data_type"): lambda builder, path: self.extend_file_path_to_datatype(builder, self.extend_subject_path_to_file(builder, path)),
-            ("subject", "species"): self.extend_subject_path_to_species,
-        }[(entity, vocabulary)]
-
-        path_func, proj_func = {
-            "file": (self.extend_project_path_to_file, self.projection_for_file_stats),
-            "biosample": (self.extend_project_path_to_biosample, self.projection_for_biosample_stats),
-            "subject": (self.extend_project_path_to_subject, self.projection_for_subject_stats),
-        }[entity]
-
-        grpk_func, attr_func = {
-            "anatomy": (self.extend_groupkeys_for_anatomy, self.extend_attributes_for_anatomy),
-            "assay_type": (self.extend_groupkeys_for_assaytype, self.extend_attributes_for_assaytype),
-            "data_type": (self.extend_groupkeys_for_datatype, self.extend_attributes_for_datatype),
-            "species": (self.extend_groupkeys_for_species, self.extend_attributes_for_species),
-        }[vocabulary]
-
-        return self.list_projects(
-            use_root_projects=root_projects,
-            path_func=lambda builder, path: path_func(builder, path, root_projects, path_func2),
-            proj_func=lambda path: proj_func(path, grpk_func, attr_func),
-        )
-
 
 ## ugly CLI wrapping...
 def main():
