@@ -172,8 +172,8 @@
                      ]
                   },
                   "S_root_project": {
-                     "markdown_name": "DCC",
-                     "comment": "The root project a.k.a. DCC attributed as source of the file.",
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program attributed as source of the file.",
                      "source": [
                         {"outbound": ["CFDE", "file_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
@@ -240,10 +240,11 @@
                   },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
                      "source": [
                         {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
                         {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
-                        "id"
+                        "RID"
                      ]
                   }
                }
@@ -280,34 +281,13 @@
                   "md5"
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_root_project", "open": true},
-                  {
-                     "markdown_name": "File Creation Time",
-                     "sourcekey": "S_creation_time"
-                  },
-                  {
-                     "markdown_name": "Biosample Creation Time",
-                     "comment": "The time when a biosample described by this file was created.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
-                        "biosample_creation_time"
-                     ]
-                  },
-                  {"source": "size_in_bytes"},
-                  {"sourcekey": "S_super_projects"},
-                  {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_data_type", "open": true},
+                  {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_anatomy"},
-                  {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_anatomy", "open": true},
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_super_projects"},
                   {
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
@@ -326,6 +306,19 @@
                         "RID"
                      ]
                   },
+                  {
+                     "markdown_name": "File Creation Time",
+                     "sourcekey": "S_creation_time"
+                  },
+                  {
+                     "markdown_name": "Biosample Creation Time",
+                     "comment": "The time when a biosample described by this file was created.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
+                        "biosample_creation_time"
+                     ]
+                  },
+                  {"source": "size_in_bytes"},
                   {"sourcekey": "S_part_of_collections"},
                   {"sourcekey": "S_described_biosamples"},
                   {"sourcekey": "S_described_subjects"}
@@ -462,13 +455,24 @@
                      "comment": "The anatomy from which the biosample is derived.",
                      "source": [{"outbound": ["CFDE", "biosample_anatomy_fkey"]}, "RID"]
                   },
+                  "S_taxonomy": {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing the subject of the biosampling.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
                      "source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
                   },
                   "S_root_project": {
-                     "markdown_name": "DCC",
-                     "comment": "The root project a.k.a. DCC attributed as source of the biosample.",
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program attributed as source of the biosample.",
                      "source": [
                         {"outbound": ["CFDE", "biosample_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
@@ -547,11 +551,12 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_root_project", "open": true},
-                  {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_assay_type", "open": true},
-                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_anatomy", "open": true},
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_super_projects"},
+                  {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_subjects"},
                   {"sourcekey": "S_described_by_file"},
                   {"sourcekey": "S_part_of_collections"}
@@ -669,8 +674,8 @@
                      "source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]
                   },
                   "S_root_project": {
-                     "markdown_name": "DCC",
-                     "comment": "The root project a.k.a. DCC attributed as source of the subject.",
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program attributed as source of the subject.",
                      "source": [
                         {"outbound": ["CFDE", "subject_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
@@ -682,7 +687,10 @@
                   },
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
-                     "source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]
+                     "source": [
+                        {"outbound": ["CFDE", "subject_granularity_fkey"]},
+                        "RID"
+                     ]
                   },
                   "S_role": {
                      "markdown_name": "Taxonomic Role",
@@ -773,8 +781,10 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_root_project", "open": true},
-                  {"sourcekey": "S_creation_time"},
+                  {"sourcekey": "S_taxonomy", "open": true},
+                  {"sourcekey": "S_granularity", "open": true},
+                  {"sourcekey": "S_role"},
+                  {"sourcekey": "S_root_project"},
                   {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the subject.",
@@ -785,8 +795,7 @@
                         "RID"
                      ]
                   },
-                  {"sourcekey": "S_taxonomy", "open": true},
-                  {"sourcekey": "S_role"},
+                  {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_biosamples"},
                   {"sourcekey": "S_files"},
                   {"sourcekey": "S_part_of_collections"}
@@ -1192,8 +1201,8 @@
                      ]
                   },
                   "S_root_project": {
-                     "markdown_name": "DCC",
-                     "comment": "The root-project a.k.a. DCC which defined the collection.",
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program which defined the collection.",
                      "source": [
                         {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
@@ -1212,6 +1221,42 @@
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_file_format": {
+                     "comment": "The content format of a constituent file.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"outbound": ["CFDE", "file_file_format_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_data_type": {
+                     "comment": "The type of data represented by a constituent file.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"outbound": ["CFDE", "file_data_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "markdown_name": "Assay Type",
+                     "comment": "The assay type of a directly or indirectly constituent biosample.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_assay_type_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_assay_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "markdown_name": "Anatomy",
+                     "comment": "The anatomical source of a directly or indirectly constituent biosample.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_anatomy_fkey"]},
                         "RID"
                      ]
                   },
@@ -1273,7 +1318,39 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_root_project", "open": true},
+                  {"sourcekey": "S_data_type", "open": true},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_anatomy", "open": true},
+                  {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy of a directly or indirectly constituent subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_super_projects"},
+                  {
+                     "markdown_name": "Subject Granularity",
+                     "comment": "The specificity of description for a directly or indirectly consituent subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Subject Role",
+                     "comment": "The taxonomic role for a directly or indirectly constituent subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
+                        "RID"
+                     ]
+                  },
                   {
                      "markdown_name": "Collection Creation Time",
                      "sourcekey": "S_creation_time"
@@ -1295,52 +1372,6 @@
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
                         {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
                         "biosample_creation_time"
-                     ]
-                  },
-                  {"sourcekey": "S_super_projects"},
-                  {
-                     "markdown_name": "Subject Granularity",
-                     "comment": "The specificity of description for a directly or indirectly consituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Subject Role",
-                     "comment": "The taxonomic role for a directly or indirectly constituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The taxonomy of a directly or indirectly constituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Anatomy",
-                     "comment": "The anatomical source of a directly or indirectly constituent biosample.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_anatomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_anatomy_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Assay Type",
-                     "comment": "The assay type of a directly or indirectly constituent biosample.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_assay_type_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_assay_type_fkey"]},
-                        "RID"
                      ]
                   },
                   {
