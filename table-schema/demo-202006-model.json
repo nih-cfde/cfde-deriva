@@ -171,6 +171,18 @@
                         "RID"
                      ]
                   },
+                  "S_root_project": {
+                     "markdown_name": "DCC",
+                     "comment": "The root project a.k.a. DCC attributed as source of the file.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "project_root_project_fkey"]},
+                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_file_format": {
                      "comment": "The content format of the file.",
                      "source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]
@@ -225,6 +237,14 @@
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
                         "RID"
                      ]
+                  },
+                  "S_taxonomy": {
+                     "markdown_name": "Subject Taxonomy",
+                     "source": [
+                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
+                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
+                        "id"
+                     ]
                   }
                }
             },
@@ -260,7 +280,7 @@
                   "md5"
                ],
                "filter": {"and": [
-                  {"source": "size_in_bytes"},
+                  {"sourcekey": "S_root_project", "open": true},
                   {
                      "markdown_name": "File Creation Time",
                      "sourcekey": "S_creation_time"
@@ -273,9 +293,21 @@
                         "biosample_creation_time"
                      ]
                   },
+                  {"source": "size_in_bytes"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_data_type", "open": true},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_anatomy"},
+                  {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
+                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                     ]
+                  },
                   {
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
@@ -294,17 +326,6 @@
                         "RID"
                      ]
                   },
-                  {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {"sourcekey": "S_anatomy"},
-                  {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_part_of_collections"},
                   {"sourcekey": "S_described_biosamples"},
                   {"sourcekey": "S_described_subjects"}
@@ -445,6 +466,28 @@
                      "comment": "The project attributed as the source of the biosample.",
                      "source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
                   },
+                  "S_root_project": {
+                     "markdown_name": "DCC",
+                     "comment": "The root project a.k.a. DCC attributed as source of the biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "project_root_project_fkey"]},
+                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_super_projects": {
+                     "markdown_name": "Project",
+                     "comment": "The project (or any super-projects) attributed as source of the biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_creation_time": {
                      "comment": "The time when the biosample was created.",
                      "source": "creation_time"
@@ -504,18 +547,10 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
+                  {"sourcekey": "S_root_project", "open": true},
                   {"sourcekey": "S_creation_time"},
-                  {
-                     "markdown_name": "Project",
-                     "comment": "The project (or any super-projects) attributed as source of the biosample.",
-                     "source": [
-                        {"outbound": ["CFDE", "biosample_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_super_projects"},
+                  {"sourcekey": "S_assay_type", "open": true},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_subjects"},
                   {"sourcekey": "S_described_by_file"},
@@ -633,6 +668,18 @@
                      "comment": "The project attributed as the source of the subject.",
                      "source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]
                   },
+                  "S_root_project": {
+                     "markdown_name": "DCC",
+                     "comment": "The root project a.k.a. DCC attributed as source of the subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "project_root_project_fkey"]},
+                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
                      "source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]
@@ -726,6 +773,7 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
+                  {"sourcekey": "S_root_project", "open": true},
                   {"sourcekey": "S_creation_time"},
                   {
                      "markdown_name": "Project",
@@ -737,7 +785,7 @@
                         "RID"
                      ]
                   },
-                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_taxonomy", "open": true},
                   {"sourcekey": "S_role"},
                   {"sourcekey": "S_biosamples"},
                   {"sourcekey": "S_files"},
@@ -1143,6 +1191,30 @@
                         "RID"
                      ]
                   },
+                  "S_root_project": {
+                     "markdown_name": "DCC",
+                     "comment": "The root-project a.k.a. DCC which defined the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "project_root_project_fkey"]},
+                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_super_projects": {
+                     "markdown_name": "Project",
+                     "comment": "A project (or super-project) which defined the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_creation_time": {
                      "comment": "The time when the collection was created.",
                      "source": "creation_time"
@@ -1201,6 +1273,7 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
+                  {"sourcekey": "S_root_project", "open": true},
                   {
                      "markdown_name": "Collection Creation Time",
                      "sourcekey": "S_creation_time"
@@ -1224,17 +1297,7 @@
                         "biosample_creation_time"
                      ]
                   },
-                  {
-                     "markdown_name": "Defined By Project",
-                     "comment": "A project (or super-project) which defined the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_super_projects"},
                   {
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of description for a directly or indirectly consituent subject.",
