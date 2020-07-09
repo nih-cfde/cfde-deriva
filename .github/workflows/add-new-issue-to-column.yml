@@ -8,5 +8,5 @@ jobs:
     - uses: konradpabjan/actions-add-new-issue-to-column@v1.1
       with:
         action-token: "${{ secrets.ALLTHEACTIONS }}"
-        project-url: "https://github.com/orgs/nih-cfde/projects/2"
-        column-name: "NewIssues"
+        project-url: "https://github.com/orgs/nih-cfde/projects/1"
+        column-name: "To do"
