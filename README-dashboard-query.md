@@ -163,31 +163,38 @@ These examples all involve only a base entity (for counting) and some
 metadata about that entity (including the attributed project which
 produced the entity).
 
-Global file statistics: ```
+Global file statistics:
+```
 StatsQuery(helper).entity("file").fetch()
 ```
 
-Per-DCC file statistics: ```
+Per-DCC file statistics:
+```
 StatsQuery(helper).entity("file").dimension("project_root").fetch()
 ```
 
-Per-DCC file statistics further divided by file data type: ```
+Per-DCC file statistics further divided by file data type:
+```
 StatsQuery(helper).entity("file").dimension("project_root").dimension("data_type").fetch()
 ```
 
-Global biosample counts: ```
+Global biosample counts:
+```
 StatsQuery(helper).entity("biosample").fetch()
 ```
 
-Per-DCC biosample counts: ```
+Per-DCC biosample counts:
+```
 StatsQuery(helper).entity("biosample").dimension("project_root").fetch()
 ```
 
-Per-DCC biosample counts further divided by biosample assay type: ```
+Per-DCC biosample counts further divided by biosample assay type:
+```
 StatsQuery(helper).entity("biosample").dimension("project_root").dimension("assay_type").fetch()
 ```
 
-Per-DCC biosample counts further divided by biosample anatomy and assay type: ```
+Per-DCC biosample counts further divided by biosample anatomy and assay type:
+```
 StatsQuery(helper).entity("biosample").dimension("project_root").dimension("anatomy").dimension("assay_type").fetch()
 ```
 
@@ -199,7 +206,8 @@ dimensions involve different C2M2 entity types and therefore
 instantiate more of the core backbone joined query understood by this
 module.
 
-Per-DCC file statistics further divided by biosample anatomy and subject species: ```
+Per-DCC file statistics further divided by biosample anatomy and subject species:
+```
 StatsQuery(helper).entity("file").dimension("project_root").dimension("anatomy").dimension("species")
 ```
 
