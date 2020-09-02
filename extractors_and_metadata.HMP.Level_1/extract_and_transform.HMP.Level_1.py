@@ -350,7 +350,7 @@ def flattenData(  ):
 
 def populateFiles(  ):
    
-   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, FileNodeTypes, entityAssociations, parents, idNamespace, allowableNodeTypes
+   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, FileNodeTypes, entityAssociations, parents, idNamespace, allowableNodeTypes, biosampleToFile
 
    if 'file' not in objectsToWrite:
       
@@ -862,6 +862,14 @@ def populateFiles(  ):
                      
                      entityAssociations['file_describes_biosample'][currentID] |= { linkedID }
 
+                  if linkedID not in biosampleToFile:
+                     
+                     biosampleToFile[linkedID] = { currentID }
+
+                  else:
+                     
+                     biosampleToFile[linkedID] |= { currentID }
+
                elif linkedNodeType == 'subject':
                   
                   if currentID not in entityAssociations['file_describes_subject']:
@@ -903,7 +911,7 @@ def populateFiles(  ):
 
 def populateBiosamples(  ):
    
-   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, BiosampleNodeTypes, parents, idNamespace
+   global objectsToWrite, flatObjects, nativeTypeToNodeID, enumMap, BiosampleNodeTypes, parents, idNamespace, biosampleToFile, entityAssociations
 
    if 'biosample' not in objectsToWrite:
       
@@ -950,7 +958,19 @@ def populateBiosamples(  ):
             
             if flatObjects[currentID]['fma_body_site'] == '':
                
-               objectsToWrite['biosample'][currentID]['anatomy'] = ''
+               if flatObjects[currentID]['body_site'] == '':
+                  
+                  objectsToWrite['biosample'][currentID]['anatomy'] = ''
+
+               else:
+                  
+                  if flatObjects[currentID]['body_site'] not in enumMap['biosample.anatomy']:
+                     
+                     objectsToWrite['biosample'][currentID]['anatomy'] = ''
+
+                  else:
+                     
+                     objectsToWrite['biosample'][currentID]['anatomy'] = enumMap['biosample.anatomy'][flatObjects[currentID]['body_site']]
 
             else:
                
@@ -1035,6 +1055,21 @@ def populateBiosamples(  ):
                else:
                   
                   prepToBiosample[currentID] = linkedID
+
+                  # Collapse sample-from-sample chains to hook files up
+                  # to ancestor samples:
+
+                  if currentID in biosampleToFile:
+                     
+                     for fileID in biosampleToFile[currentID]:
+                        
+                        if fileID in entityAssociations['file_describes_biosample']:
+                           
+                           entityAssociations['file_describes_biosample'][fileID] |= { linkedID }
+
+                        else:
+                           
+                           entityAssociations['file_describes_biosample'][fileID] = { linkedID }
 
                # end if ( nodeType switch to determine how link caching will take place )
 
@@ -1171,13 +1206,18 @@ def populateProjects(  ):
          objectsToWrite['project'][currentID]['id_namespace'] = idNamespace
 
          #----------------------------------------------------------------------
-         # We're not doing these fields yet.
+         # We're not doing these fields yet, except for an abbreviation for the
+         # top-level project (HMP).
 
          objectsToWrite['project'][currentID]['persistent_id'] = ''
 
          objectsToWrite['project'][currentID]['creation_time'] = ''
 
          objectsToWrite['project'][currentID]['abbreviation'] = ''
+
+         if currentID == '3a51534abc6e1a5ee6d9cc86c4007b56':
+            
+            objectsToWrite['project'][currentID]['abbreviation'] = 'HMP'
 
          #----------------------------------------------------------------------
          # We can load these straight from the native fields.
@@ -1206,6 +1246,13 @@ def populateProjects(  ):
                # The only linkages hanging off the 'study' nodeType are pointers to
                # supersets (other studies or projects). 'project' nodeTypes have
                # no linkages: they are top-level objects, and all links flow upward.
+               # 
+               # Sometimes there are redundant (transitively flattened) links
+               # directly connecting studies to top-level projects. Sometimes there
+               # aren't. Make sure we only associate the lowest-level binding:
+               # if there's a 'subset_of' linkage, use that; if not, and if
+               # there's a 'part_of' linkage, then use that. If both, prefer
+               # 'subset_of'.
 
                linkedID = flatObjects[currentID][fieldName]
 
@@ -1413,31 +1460,23 @@ def computeProjectDepth(  ):
 
 def findContainingSets( objectID, containingSets ):
    
-   global parents, nodeIDToNativeType, ProjectNodeTypes, containedIn, allowableNodeTypes
+   global parents, nodeIDToNativeType, ProjectNodeTypes, allowableNodeTypes
 
-   if objectID in containedIn:
+   if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'project':
       
-      containingSets |= containedIn[objectID]
+      containingSets |= { objectID }
 
-   else:
+   # end if ( this is a project type )
       
-      if allowableNodeTypes[nodeIDToNativeType[objectID]] == 'project':
+   if objectID in parents:
+      
+      for parent in parents[objectID]:
          
-         containingSets |= { objectID }
+         containingSets |= findContainingSets(parent, containingSets)
 
-      # end if ( this is a project type )
-      
-      if objectID in parents:
-         
-         for parent in parents[objectID]:
-            
-            containingSets |= findContainingSets(parent, containingSets)
+      # end for ( each parent of objectID )
 
-         # end for ( each parent of objectID )
-
-      # end if ( objectID has any parents )
-
-   # end if ( containedIn already has a record for objectID )
+   # end if ( objectID has any parents )
 
    return containingSets
 
@@ -1455,7 +1494,7 @@ def findContainingSets( objectID, containingSets ):
 # 
 #-----------------------------------------------------------------------------------------
 
-def findDeepestParentProjectID( containingSets ):
+def findDeepestParentProjectID( containingSets, debug ):
    
    global projectDepth
 
@@ -1465,6 +1504,10 @@ def findDeepestParentProjectID( containingSets ):
 
    for projectID in containingSets:
       
+      if debug == 1:
+         
+         print("[%s] %s \"%s\"" % (projectDepth[projectID], projectID, objectsToWrite['project'][projectID]['name']))
+
       if minSeen < projectDepth[projectID]:
          
          minSeen = projectDepth[projectID]
@@ -1487,7 +1530,7 @@ def findDeepestParentProjectID( containingSets ):
 
 def processProjectContainment(  ):
    
-   global parents, projectDepth, containedIn, objectsToWrite, allowableNodeTypes, entityAssociations
+   global parents, projectDepth, objectsToWrite, allowableNodeTypes, entityAssociations
 
    # Identify the number of hops from each node in the project DAG to the closest root.
    # Used to identify the most specific project division available for "primary project"
@@ -1505,30 +1548,40 @@ def processProjectContainment(  ):
 
       containingSets -= { objectID }
 
-      # Cache results to speed later lookups.
-
-      containedIn[objectID] = containingSets.copy()
-
       targetType = allowableNodeTypes[nodeIDToNativeType[objectID]]
+
+      # Trigger reporting from findDeepestParentProjectID for a target ID.
+
+      debugFlag = 0
 
       if targetType == 'project':
          
          # Cache the relationship to the parent project (if there is one) in a
          # project_in_project record.
 
+#         if objectID in { '3a51534abc6e1a5ee6d9cc86c400d4a4', '3a51534abc6e1a5ee6d9cc86c400a91f', '3a51534abc6e1a5ee6d9cc86c4010465' }:
+#            
+#            debugFlag = 1
+#
+#            print("%s:\n" % objectID)
+
          if objectID in parents:
             
-            entityAssociations['project_in_project'][objectID] = findDeepestParentProjectID(containingSets)
+            entityAssociations['project_in_project'][objectID] = findDeepestParentProjectID(containingSets, debugFlag)
 
       elif targetType in { 'file', 'biosample', 'subject' }:
          
          # Save the most specific parent project ID as an entity field.
 
-         objectsToWrite[targetType][objectID]['project'] = findDeepestParentProjectID(containingSets)
+         objectsToWrite[targetType][objectID]['project'] = findDeepestParentProjectID(containingSets, debugFlag)
 
       # end if ( valid targetType switch )
 
    # end for ( each ingested object )
+
+   # TEMPORARY HEURISTIC: Make sure 'HMP' sits alone at the top of the project DAG: nest 'iHMP' under it.
+
+   entityAssociations['project_in_project']['3fffbefb34d749c629dc9d147b18e893'] = '3a51534abc6e1a5ee6d9cc86c4007b56'
 
 #-----------------------------------------------------------------------------------------
 # end sub processProjectContainment(  )
@@ -2213,6 +2266,11 @@ entityAssociations = {
    'subject_role_taxonomy' : {}
 }
 
+# Intermediate structure to transitively collapse file->biosample associations
+# across biosample-from-biosample provenance links
+
+biosampleToFile = {}
+
 # Inter-entity association DAG. Populated on the fly while loading entity data; scanned
 # after completion to compute all required primary_project<->biosample|file|subject
 # associations.
@@ -2222,9 +2280,6 @@ parents = {}
 # the most specific project division available for "primary project" foreign-key
 # references.
 projectDepth = {}
-
-# Cache for cutting off containment-scan recursion.
-containedIn = {}
 
 ##########################################################################################
 ##########################################################################################

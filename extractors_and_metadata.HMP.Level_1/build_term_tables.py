@@ -303,7 +303,13 @@ def writeTermsUsed(  ):
             
             # The synonyms we loaded from the OBO files don't conform to the spec constraints. Punting to blank values for now.
 
-            OUT.write( '\t'.join( [ termID, termsUsed[categoryID][termID]['name'], termsUsed[categoryID][termID]['description'],                  ''                       ] ) + '\n' )
+            termDesc = ''
+
+            if 'description' in termsUsed[categoryID][termID]:
+               
+               termDesc = termsUsed[categoryID][termID]['description']
+
+            OUT.write( '\t'.join( [ termID, termsUsed[categoryID][termID]['name'], termDesc,                  ''                       ] ) + '\n' )
 
 # end sub writeTermsUsed(  )
 

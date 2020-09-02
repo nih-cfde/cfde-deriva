@@ -5801,3 +5801,35 @@ FMA:9945	The sixth thoracic vertebra counting from the top down. Note that membe
 FMA:9968	The seventh thoracic vertebra counting from the top down. Note that members of this class are not necessarily homologous[ncit,modified].	UBERON:0004632	thoracic vertebra 7
 FMA:9991	The eighth thoracic vertebra counting from the top down. Note that members of this class are not necessarily homologous[ncit,modified].	UBERON:0011050	thoracic vertebra 8
 FMA:ENTITY	Biological entity that is either an individual member of a biological species or constitutes the structural organization of an individual member of a biological species.	UBERON:0001062	anatomical entity
+abdomen		UBERON:0000916	
+antecubital_fossa		UBERON:0001461	
+back		UBERON:0001137	
+blood		UBERON:0000178	
+buccal_mucosa		UBERON:0006956	
+cervix		UBERON:0000002	
+colon		UBERON:0001155	
+elbow		UBERON:0001461	
+foot		UBERON:0002387	
+forearm		UBERON:0003403	
+gut		UBERON:0000160	
+hand		UBERON:0002398	
+ileal_pouch		UBERON:0002116	
+ileum		UBERON:0002116	
+knee		UBERON:0001465	
+leg		UBERON:0000978	
+mid_vagina		UBERON:0000996	
+nare		UBERON:0000004	
+oral_cavity		UBERON:0000165	
+perianal_region		UBERON:0012336	
+popliteal_fossa		UBERON:0001465	
+rectal		UBERON:0001052	
+scalp		UBERON:0000403	
+shin		UBERON:0004264	
+shoulder		UBERON:0001467	
+stool		UBERON:0001988	
+thigh		UBERON:0004262	
+urethra		UBERON:0000057	
+vaginal		UBERON:0000996	
+vaginal_introitus		UBERON:0012317	
+volar_forearm		UBERON:0008878	
+wall_of_vagina		UBERON:0000996	
