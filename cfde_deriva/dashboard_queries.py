@@ -64,25 +64,25 @@ def _add_subject_path(queryobj):
     else:
         queryobj.path.context = queryobj.path.subject
 
-def _add_datatype_path(queryobj):
+def _add_datatype_path(queryobj, **kwargs):
     """Idempotently add data_type to path"""
     if 'data_type' not in queryobj.path.table_instances:
         _add_file_path(queryobj)
         queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.data_type)
 
-def _add_anatomy_path(queryobj):
+def _add_anatomy_path(queryobj, **kwargs):
     """Idempotently add anatomy to path"""
     if 'anatomy' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.anatomy)
 
-def _add_assaytype_path(queryobj):
+def _add_assaytype_path(queryobj, **kwargs):
     """Idempotently add assay_type to path"""
     if 'assay_type' not in queryobj.path.table_instances:
         _add_biosample_path(queryobj)
         queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.assay_type)
 
-def _add_species_path(queryobj):
+def _add_species_path(queryobj, **kwargs):
     """Idempotently add species concept to path"""
     if 'species' not in queryobj.path.table_instances:
         _add_subject_path(queryobj)
@@ -93,8 +93,10 @@ def _add_species_path(queryobj):
         queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species'))
         queryobj.path = queryobj.path.filter(queryobj.path.species.clade == 'species')
 
-def _add_rootproject_path(queryobj):
+def _add_rootproject_path(queryobj, **kwargs):
     """Idempotently add root project concept to path"""
+    if 'subproject' in queryobj.path.table_instances:
+        raise TypeError('Cannot combine subproject and project_root dimensions')
     if 'project_root' not in queryobj.path.table_instances:
         entity = queryobj.path.table_instances[queryobj.entity_name]
         project_root = queryobj.helper.builder.CFDE.project_root
@@ -109,6 +111,41 @@ def _add_rootproject_path(queryobj):
             on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
                  & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
         ).link(queryobj.helper.builder.CFDE.project)
+
+def _add_subproject_path(queryobj, **kwargs):
+    """Idempotently add root project concept to path"""
+    if 'project_root' in queryobj.path.table_instances:
+        raise TypeError('Cannot combine subproject and project_root dimensions')
+
+    try:
+        parent_project_RID = kwargs['parent_project_RID']
+    except KeyError:
+        raise TypeError('Missing required parent_project_RID keyword argument in StatsQuery.dimension("subproject", **kwargs)')
+
+    if 'subproject' not in queryobj.path.table_instances:
+        entity = queryobj.path.table_instances[queryobj.entity_name]
+        pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+        subproject = queryobj.helper.builder.CFDE.project.alias('subproject')
+        pip = queryobj.helper.builder.CFDE.project_in_project.alias('pip')
+        project = queryobj.helper.builder.CFDE.project
+        # need to select directionality of association, so reduce number of joins while we're at it
+        queryobj.path = queryobj.path.link(
+            pipt,
+            on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
+                 & (entity.project == pipt.member_project_id) )
+        ).link(
+            subproject,
+            on=( (queryobj.path.pipt.leader_project_id_namespace == subproject.id_namespace)
+                 & (queryobj.path.pipt.leader_project_id == subproject.id) )
+        ).link(
+            pip,
+            on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
+                 & (queryobj.path.pipt.leader_project_id == pip.child_project_id) )
+        ).link(
+            subproject,
+            on=( (queryobj.path.pip.parent_project_id_namespace == project.id_namespace)
+                 & (queryobj.path.pip.parent_project_id == project.id) )
+        ).filter(queryobj.path.project.RID == parent_project_RID)
 
 class StatsQuery (object):
     """C2M2 statistics query generator
@@ -182,6 +219,13 @@ class StatsQuery (object):
                 lambda path: path.project.column_definitions['name'].alias('project_name'),
             ]
         ),
+        'subproject': (
+            _add_subproject_path, [
+                lambda path: path.subproject.RID.alias('project_RID'),
+                lambda path: path.subproject.id.alias('project_id'),
+                lambda path: path.subproject.column_definitions['name'].alias('project_name'),
+            ], [
+        ),
     }
 
     def __init__(self, helper):
@@ -214,10 +258,16 @@ class StatsQuery (object):
 
         return self
 
-    def dimension(self, dimension_name):
+    def dimension(self, dimension_name, **kwargs):
         """Configure a grouping dimension
 
         :param dimension_name: One of the StatsQuery.supported_dimension key strings
+        :param kwargs: Keyword arguments specific to a dimension (see further documentation)
+
+        Dimension-specific keyword arguments:
+
+        :param parent_project_RID: Use sub-projects of specified parent project RID for "subproject" dimension (required)
+
         """
         if self.path is None:
             raise TypeError('Cannot call .dimension() method on a StatsQuery instance prior to calling .entity() method.')
@@ -232,7 +282,7 @@ class StatsQuery (object):
         except KeyError:
             raise ValueError('Unsupported dimension_name "%s"' % (dimension_name,))
 
-        add_path_func(self)
+        add_path_func(self, **kwargs)
 
         return self
 
