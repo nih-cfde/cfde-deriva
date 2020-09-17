@@ -435,7 +435,7 @@ class DashboardQueryHelper (object):
 ## ugly CLI wrapping...
 def main():
     """Runs demo of catalog dashboard queries."""
-    hostname = os.getenv('DERIVA_SERVERNAME', 'cfde.derivacloud.org')
+    hostname = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     catalogid = os.getenv('DERIVA_CATALOGID', '4')
     db = DashboardQueryHelper(hostname, catalogid)
     db.run_demo()
