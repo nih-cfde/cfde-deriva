@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
+if 'history_capture' not in tag:
+    tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -67,6 +69,7 @@ class CfdeDataPackage (object):
         self.catalog = None
         self.cat_model_root = None
         self.cat_cfde_schema = None
+        self.cat_has_history_control = None
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
@@ -79,6 +82,7 @@ class CfdeDataPackage (object):
     def set_catalog(self, catalog):
         self.catalog = catalog
         self.get_model()
+        self.cat_has_history_control = catalog.get('/').json().get("features", {}).get("history_control", False)
 
     def get_model(self):
         self.cat_model_root = self.catalog.getCatalogModel()
@@ -110,6 +114,8 @@ class CfdeDataPackage (object):
                 else:
                     tdoc = ntable.prejson()
                     tdoc['schema_name'] = 'CFDE'
+                    if self.cat_has_history_control:
+                        tdoc.setdefault('annotations', dict())[tag.history_capture] = False
                     need_tables.append(tdoc)
 
             if need_tables:
@@ -134,6 +140,8 @@ class CfdeDataPackage (object):
                 doc_table = doc_schema.tables.get(table.name) if doc_schema is not None else None
                 if doc_table is not None:
                     table.annotations.update(doc_table.annotations)
+                    if self.cat_has_history_control:
+                        table.annotations[tag.history_capture] = False
                 for column in table.columns:
                     doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
                     if doc_column is not None:
