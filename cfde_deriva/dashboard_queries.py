@@ -95,57 +95,67 @@ def _add_species_path(queryobj, **kwargs):
 
 def _add_rootproject_path(queryobj, **kwargs):
     """Idempotently add root project concept to path"""
-    if 'subproject' in queryobj.path.table_instances:
-        raise TypeError('Cannot combine subproject and project_root dimensions')
-    if 'project_root' not in queryobj.path.table_instances:
-        entity = queryobj.path.table_instances[queryobj.entity_name]
-        project_root = queryobj.helper.builder.CFDE.project_root
-        pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
-        # need to select directionality of association, so reduce number of joins while we're at it
-        queryobj.path = queryobj.path.link(
-            pipt,
-            on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
-                 & (entity.project == pipt.member_project_id) )
-        ).link(
-            project_root,
-            on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
-                 & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
-        ).link(queryobj.helper.builder.CFDE.project)
+    if 'pipt' in queryobj.path.table_instances:
+        if 'project_root' not in queryobj.path.table_instances:
+            raise TypeError('Cannot combine subproject and project_root dimensions')
+        # idempotently add rootproject
+        return
+
+    entity = queryobj.path.table_instances[queryobj.entity_name]
+    project_root = queryobj.helper.builder.CFDE.project_root
+    pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+    # need to select directionality of association, so reduce number of joins while we're at it
+    queryobj.path = queryobj.path.link(
+        pipt,
+        on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
+             & (entity.project == pipt.member_project_id) )
+    ).link(
+        project_root,
+        on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
+             & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
+    ).link(
+        queryobj.helper.builder.CFDE.project
+    )
 
 def _add_subproject_path(queryobj, **kwargs):
     """Idempotently add root project concept to path"""
-    if 'project_root' in queryobj.path.table_instances:
-        raise TypeError('Cannot combine subproject and project_root dimensions')
+    if 'pipt' in queryobj.path.table_instances:
+        if 'project_root' in queryobj.path.table_instances:
+            raise TypeError('Cannot combine subproject and project_root dimensions')
+        # idempotently add sub_project
+        return
 
     try:
         parent_project_RID = kwargs['parent_project_RID']
     except KeyError:
-        raise TypeError('Missing required parent_project_RID keyword argument in StatsQuery.dimension("subproject", **kwargs)')
+        raise TypeError('Missing required parent_project_RID keyword argument in StatsQuery.dimension("subproject", **kwargs) call')
 
-    if 'subproject' not in queryobj.path.table_instances:
-        entity = queryobj.path.table_instances[queryobj.entity_name]
-        pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
-        subproject = queryobj.helper.builder.CFDE.project.alias('subproject')
-        pip = queryobj.helper.builder.CFDE.project_in_project.alias('pip')
-        project = queryobj.helper.builder.CFDE.project
-        # need to select directionality of association, so reduce number of joins while we're at it
-        queryobj.path = queryobj.path.link(
-            pipt,
-            on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
-                 & (entity.project == pipt.member_project_id) )
-        ).link(
-            subproject,
-            on=( (queryobj.path.pipt.leader_project_id_namespace == subproject.id_namespace)
-                 & (queryobj.path.pipt.leader_project_id == subproject.id) )
-        ).link(
-            pip,
-            on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
-                 & (queryobj.path.pipt.leader_project_id == pip.child_project_id) )
-        ).link(
-            subproject,
-            on=( (queryobj.path.pip.parent_project_id_namespace == project.id_namespace)
-                 & (queryobj.path.pip.parent_project_id == project.id) )
-        ).filter(queryobj.path.project.RID == parent_project_RID)
+    entity = queryobj.path.table_instances[queryobj.entity_name]
+    pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+    project = queryobj.helper.builder.CFDE.project
+    parentproj = queryobj.helper.builder.CFDE.project.alias('parentproj')
+
+    pip = queryobj.helper.builder.CFDE.project_in_project.alias('pip')
+    # need to select directionality of association, so reduce number of joins while we're at it
+    queryobj.path = queryobj.path.link(
+        pipt,
+        on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
+             & (entity.project == pipt.member_project_id) )
+    ).link(
+        pip,
+        on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
+             & (queryobj.path.pipt.leader_project_id == pip.child_project_id) )
+    ).link(
+        parentproj,
+        on=( (queryobj.path.pip.parent_project_id_namespace == parentproj.id_namespace)
+             & (queryobj.path.pip.parent_project_id == parentproj.id) )
+    ).filter(
+        queryobj.path.parentproj.RID == parent_project_RID
+    ).link(
+        project,
+        on=( (queryobj.path.pipt.leader_project_id_namespace == project.id_namespace)
+             & (queryobj.path.pipt.leader_project_id == project.id) )
+    )
 
 class StatsQuery (object):
     """C2M2 statistics query generator
@@ -221,10 +231,12 @@ class StatsQuery (object):
         ),
         'subproject': (
             _add_subproject_path, [
-                lambda path: path.subproject.RID.alias('project_RID'),
-                lambda path: path.subproject.id.alias('project_id'),
-                lambda path: path.subproject.column_definitions['name'].alias('project_name'),
+                lambda path: path.project.RID.alias('project_RID'),
             ], [
+                lambda path: path.project.id_namespace.alias('project_id_namespace'),
+                lambda path: path.project.id.alias('project_id'),
+                lambda path: path.project.column_definitions['name'].alias('project_name'),
+            ],
         ),
     }
 
@@ -312,6 +324,13 @@ class DashboardQueryHelper (object):
 
     def run_demo(self):
         """Run each example query and dump all results as JSON."""
+        projects = {
+            (row['id_namespace'], row['id']): row
+            for row in self.list_projects(use_root_projects=True)
+        }
+
+        rid_for_4DN_proj = projects[('https://data.4dnucleome.org', '4DN')]['RID']
+
         # use list() to convert each ResultSet
         # for easier JSON serialization...
         results = {
@@ -319,6 +338,9 @@ class DashboardQueryHelper (object):
             #'list_root_projects': list(self.list_projects(use_root_projects=True)),
             #'list_datatypes': list(self.list_datatypes()),
             #'list_formats': list(self.list_formats()),
+
+            'root_projects': list(self.list_projects(use_root_projects=True)),
+            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_4DN_proj).fetch()),
 
             'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
             'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
@@ -349,24 +371,56 @@ class DashboardQueryHelper (object):
             'subject_stats_assaytype_project': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('project_root').fetch()),
             'subject_stats_datatype_species': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('species').fetch()),
             'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
+
         }
         print(json.dumps(results, indent=2))
 
-    def list_projects(self, use_root_projects=False, path_func=(lambda builder, path: path), proj_func=(lambda path: path.entities())):
+    def list_projects(self, use_root_projects=False, parent_project_RID=None):
         """Return list of projects AKA funded activities
 
         :param use_root_projects: Only consider root projects (default False)
-        :param path_func: Function to allow path chaining (default no-change)
-        :param proj_func: Function to project set from path (default get .entities())
+        :param parent_project_RID: Only consider children of specified project (default None)
         """
+        children = self.builder.CFDE.project.alias("children")
+        pip1 = self.builder.CFDE.project_in_project.alias('pip1')
+        project = self.builder.CFDE.project
+        path = children.path
+        path = path.link(
+            pip1,
+            on=( (path.children.id_namespace == pip1.child_project_id_namespace)
+                 & (path.children.id == pip1.child_project_id) )
+        ).link(
+            project,
+            on=( (pip1.parent_project_id_namespace == project.id_namespace)
+                 & (pip1.parent_project_id == project.id) ),
+            join_type='right'
+        )
+
         if use_root_projects:
-            path = (
-                self.builder.CFDE.project_root
-                .link(self.builder.CFDE.project)
-            )
-        else:
-            path = self.builder.CFDE.project
-        return proj_func(path_func(self.builder, path)).fetch()
+            path = path.link(self.builder.CFDE.project_root)
+        elif parent_project_RID is not None:
+            pip2 = self.builder.CFDE.project_in_project.alias('pip2')
+            parent = self.builder.CFDE.project.alias("parent")
+            path = path.link(
+                pip2,
+                on=( (path.project.id_namespace == pip2.child_project_id_namespace)
+                     & (path.project.id == pip2.child_project_id) )
+            ).link(
+                parent,
+                on=( (path.pip2.parent_project_id_namespace == parent.id_namespace)
+                     & (path.pip2.parent_project_id == parent.id) )
+            ).filter(path.parent.RID == parent_project_RID)
+
+        return path.groupby(
+            path.project.RID,
+        ).attributes(
+            path.project.id_namespace,
+            path.project.id,
+            path.project.column_definitions['name'],
+            path.project.abbreviation,
+            path.project.description,
+            CntD(path.children.RID).alias('num_subprojects'),
+        )
 
     def list_datatypes(self):
         """Return list of data_type terms
