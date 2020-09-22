@@ -8,8 +8,8 @@ The `table-schema/` folder contains various model-related artifacts
 used to build CFDE catalogs.
 
 The main datapackage schema product
-[`c2m2-level1-portal.json`](table-schema/c2m2-level1-portal.json) is a
-copy of the C2M2 Level 1 model definitions augmented with various
+[`c2m2-level1-portal-model.json`](table-schema/c2m2-level1-portal-model.json)
+is a copy of the C2M2 Level 1 model definitions augmented with various
 embedded display hints to customize the CFDE portal UI built with
 Chaise. This uses the FrictionlessIO Table Schema format with
 extensions to embed additional deriva-related concepts.
