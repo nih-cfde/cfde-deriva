@@ -94,12 +94,12 @@ help interpret the grouped statistics:
     - `ncbi_taxonomy`.`name` returned as `species_name`
 - `project_root`: a subset of the DCC submitted `project` table records as transitively attributed by the base entity of the `StatsQuery` and the `project_in_project` relationship
     - `project`.`id_namespace` returned as `project_id_namespace`
-    - `project`.`id` returned as `project_id`
+    - `project`.`local_id` returned as `project_local_id`
     - `project`.`name` returned as `project_name`
     - `project`.`RID` returned as `project_RID`, an internal, surrogate key for projects
 - `subproject`: a subset of the DCC submitted `project` table records as transitively attributed by the base entity of the `StatsQuery` and the `project_in_project` relationship
     - `project`.`id_namespace` returned as `project_id_namespace`
-    - `project`.`id` returned as `project_id`
+    - `project`.`local_id` returned as `project_local_id`
     - `project`.`name` returned as `project_name`
     - `project`.`RID` returned as `project_RID`, an internal, surrogate key for projects
 
@@ -133,12 +133,12 @@ reaching a project in the corresponding subset of the C2M2 project
 table, e.g. a top-level project for `project_root` or a child project
 of the dimension's parent project for `subproject`.
 
-Also, projects have a compound key (`id_namespace`, `id`). To simplify
-some system integration tasks, we expose an additional surrogate key
-(`RID`) which to refer to a specific project in the catalog. These
-surrogate keys are less deterministic, and so may vary from catalog
-instance to catalog instance, even if the same project
-(`id_namespace`, `id`) entity was submitted to each one.
+Also, projects have a compound key (`id_namespace`, `local_id`). To
+simplify some system integration tasks, we expose an additional
+surrogate key (`RID`) which to refer to a specific project in the
+catalog. These surrogate keys are less deterministic, and so may vary
+from catalog instance to catalog instance, even if the same project
+(`id_namespace`, `local_id`) entity was submitted to each one.
 
 ### Implicit query joining
 
@@ -166,7 +166,7 @@ additional association tables are joined for more complex
 relationships in C2M2:
 
 - `anatomy`: `anatomy` joins to `biosample`
-- `assay_type`: `assay_type` joins to `biosample`
+- `assay_type`: `assay_type` joins to `file`
 - `data_type`: `data_type` joins to `file`
 - `species`: `ncbi_taxonomy` joins to `subject_role_taxonomy` which joins to `subject`
 - `project_root`: `project` joins to `project_root` which joins to `project_in_project_transitive` which joins to base entity

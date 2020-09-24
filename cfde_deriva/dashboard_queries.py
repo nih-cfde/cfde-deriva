@@ -79,7 +79,7 @@ def _add_anatomy_path(queryobj, **kwargs):
 def _add_assaytype_path(queryobj, **kwargs):
     """Idempotently add assay_type to path"""
     if 'assay_type' not in queryobj.path.table_instances:
-        _add_biosample_path(queryobj)
+        _add_file_path(queryobj)
         queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.assay_type)
 
 def _add_species_path(queryobj, **kwargs):
@@ -108,11 +108,11 @@ def _add_rootproject_path(queryobj, **kwargs):
     queryobj.path = queryobj.path.link(
         pipt,
         on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
-             & (entity.project == pipt.member_project_id) )
+             & (entity.project_local_id == pipt.member_project_local_id) )
     ).link(
         project_root,
         on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
-             & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
+             & (queryobj.path.pipt.leader_project_local_id == project_root.project_local_id) )
     ).link(
         queryobj.helper.builder.CFDE.project
     )
@@ -140,21 +140,21 @@ def _add_subproject_path(queryobj, **kwargs):
     queryobj.path = queryobj.path.link(
         pipt,
         on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
-             & (entity.project == pipt.member_project_id) )
+             & (entity.project_local_id == pipt.member_project_local_id) )
     ).link(
         pip,
         on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
-             & (queryobj.path.pipt.leader_project_id == pip.child_project_id) )
+             & (queryobj.path.pipt.leader_project_local_id == pip.child_project_local_id) )
     ).link(
         parentproj,
         on=( (queryobj.path.pip.parent_project_id_namespace == parentproj.id_namespace)
-             & (queryobj.path.pip.parent_project_id == parentproj.id) )
+             & (queryobj.path.pip.parent_project_local_id == parentproj.local_id) )
     ).filter(
         queryobj.path.parentproj.RID == parent_project_RID
     ).link(
         project,
         on=( (queryobj.path.pipt.leader_project_id_namespace == project.id_namespace)
-             & (queryobj.path.pipt.leader_project_id == project.id) )
+             & (queryobj.path.pipt.leader_project_local_id == project.local_id) )
     )
 
 class StatsQuery (object):
@@ -225,7 +225,7 @@ class StatsQuery (object):
                 lambda path: path.project.RID.alias('project_RID'),
             ], [
                 lambda path: path.project.id_namespace.alias('project_id_namespace'),
-                lambda path: path.project.id.alias('project_id'),
+                lambda path: path.project.local_id.alias('project_local_id'),
                 lambda path: path.project.column_definitions['name'].alias('project_name'),
             ]
         ),
@@ -234,7 +234,7 @@ class StatsQuery (object):
                 lambda path: path.project.RID.alias('project_RID'),
             ], [
                 lambda path: path.project.id_namespace.alias('project_id_namespace'),
-                lambda path: path.project.id.alias('project_id'),
+                lambda path: path.project.local_id.alias('project_local_id'),
                 lambda path: path.project.column_definitions['name'].alias('project_name'),
             ],
         ),
@@ -325,7 +325,7 @@ class DashboardQueryHelper (object):
     def run_demo(self):
         """Run each example query and dump all results as JSON."""
         projects = {
-            (row['id_namespace'], row['id']): row
+            (row['id_namespace'], row['local_id']): row
             for row in self.list_projects(use_root_projects=True)
         }
 
@@ -388,11 +388,11 @@ class DashboardQueryHelper (object):
         path = path.link(
             pip1,
             on=( (path.children.id_namespace == pip1.child_project_id_namespace)
-                 & (path.children.id == pip1.child_project_id) )
+                 & (path.children.local_id == pip1.child_project_local_id) )
         ).link(
             project,
             on=( (pip1.parent_project_id_namespace == project.id_namespace)
-                 & (pip1.parent_project_id == project.id) ),
+                 & (pip1.parent_project_local_id == project.local_id) ),
             join_type='right'
         )
 
@@ -404,18 +404,18 @@ class DashboardQueryHelper (object):
             path = path.link(
                 pip2,
                 on=( (path.project.id_namespace == pip2.child_project_id_namespace)
-                     & (path.project.id == pip2.child_project_id) )
+                     & (path.project.local_id == pip2.child_project_local_id) )
             ).link(
                 parent,
                 on=( (path.pip2.parent_project_id_namespace == parent.id_namespace)
-                     & (path.pip2.parent_project_id == parent.id) )
+                     & (path.pip2.parent_project_local_id == parent.local_id) )
             ).filter(path.parent.RID == parent_project_RID)
 
         return path.groupby(
             path.project.RID,
         ).attributes(
             path.project.id_namespace,
-            path.project.id,
+            path.project.local_id,
             path.project.column_definitions['name'],
             path.project.abbreviation,
             path.project.description,
