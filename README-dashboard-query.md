@@ -29,6 +29,32 @@ to understand that in practical use, clients may wish to target other
 catalogs to retrieve statistics about specific prepared sets of C2M2
 content.
 
+### Method to list projects and sub-project counts
+
+To enable incremental, hierarchical drill-down of the project
+hierarchy, the `DashboardQueryHelper.list_projects()` method supports
+several query modes which return basic information from the C2M2
+`project` table:
+
+1. `list_projects()` by default lists all known projects
+2. `list_projects(use_root_projects=True)` lists only top-level projects (aka DCCs)
+3. `list_projects(parent_project_RID=rid)` lists children of a given parent project
+
+In all cases, an iterable of project-specific records is returned with
+the following per-record information:
+
+- `RID`: the surrogate key for this project in the C2M2 catalog instance
+- `num_subprojects`: a count of the number of known sub-projects 
+
+Additionally, the following C2M2 `project` table columns are also
+returned per record:
+
+- `id_namespace`
+- `local_id`
+- `name`
+- `abbreviation`
+- `description`
+
 ## StatsQuery
 
 The `StatsQuery` class encapsulates an interface to build
