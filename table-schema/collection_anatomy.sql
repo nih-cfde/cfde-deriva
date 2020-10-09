@@ -5,7 +5,7 @@ INSERT INTO collection_anatomy (
 )
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
-  cg.leader_collection_id AS collection_local_id,
+  cg.leader_collection_local_id AS collection_local_id,
   fa.anatomy
 FROM collection_in_collection_transitive cg
 JOIN file_in_collection fic
@@ -17,7 +17,7 @@ UNION
 
 SELECT DISTINCT
   cg.leader_collection_id_namespace AS collection_id_namespace,
-  cg.leader_collection_id AS collection_local_id,
+  cg.leader_collection_local_id AS collection_local_id,
   b.anatomy
 FROM collection_in_collection_transitive cg
 JOIN biosample_in_collection bic

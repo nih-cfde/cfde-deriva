@@ -6,10 +6,12 @@ INSERT INTO collection_assay_type (
 SELECT
   cg.leader_collection_id_namespace AS collection_id_namespace,
   cg.leader_collection_local_id AS collection_local_id,
-  fic.assay_type
+  f.assay_type
 FROM collection_in_collection_transitive cg
 JOIN file_in_collection fic
   ON (cg.member_collection_id_namespace = fic.collection_id_namespace AND cg.member_collection_local_id = fic.collection_local_id)
+JOIN file f ON (fic.file_id_namespace = f.id_namespace AND fic.file_local_id = f.local_id)
+WHERE f.assay_type IS NOT NULL
 
 UNION
 

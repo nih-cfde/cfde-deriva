@@ -166,7 +166,7 @@
                      "resource": "assay_type",
                      "fields": "id"
                   }
-               },
+               }
             ]
          },
          "deriva": {
@@ -825,7 +825,6 @@
          "profile": "tabular-data-resource",
          "name": "primary_dcc_contact",
          "title": "Primary DCC Contact",
-         "path": "primary_dcc_contact.tsv",
          "description": "One primary contact person for the Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
          "schema": {
             "fields": [
@@ -2502,7 +2501,7 @@
             ],
             "foreignKeys": [
                {
-                  "fields": [ "project_id_namespace", "project_id" ],
+                  "fields": [ "project_id_namespace", "project_local_id" ],
                   "constraint_name": "project_root_project_fkey",
                   "reference": {
                      "title": "Project",
