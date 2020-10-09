@@ -42,25 +42,25 @@ class CfdeDataPackage (object):
         # USC/ISI ISRD roles
         "isrd_staff": "https://auth.globus.org/176baec4-ed26-11e5-8e88-22000ab4b42b",
         'isrd_testers':    "https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d",
-        # demo.derivacloud.org roles
-        "demo_admin": "https://auth.globus.org/5a773142-e2ed-11e8-a017-0e8017bdda58",
-        "demo_creator": "https://auth.globus.org/bc286232-a82c-11e9-8157-0ed6cb1f08e0",
-        "demo_writer": "https://auth.globus.org/caa11064-e2ed-11e8-9d6d-0a7c1eab007a",
-        "demo_curator": "https://auth.globus.org/a5cfa412-e2ed-11e8-a768-0e368f3075e8",
-        "demo_reader": "https://auth.globus.org/b9100ea4-e2ed-11e8-8b39-0e368f3075e8",
+        # CFDE roles
+        "cfde_portal_admin": "https://auth.globus.org/5f742b05-9210-11e9-aa27-0e4b2da78b7a",
+        "cfde_portal_curator": "https://auth.globus.org/b5ff40d0-9210-11e9-aa1a-0a294aef5614",
+        "cfde_portal_writer": "https://auth.globus.org/e8d6b111-9210-11e9-aa1a-0a294aef5614",
+        "cfde_portal_creator": "https://auth.globus.org/f4c5c479-a8bf-11e9-a6e2-0a075bc69d14",
+        "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
     })
-    #writers = [grp.demo_curator, grp.demo_writer]
     writers = []
+    readers = [grp.cfde_portal_reader, "*"]
     catalog_acls = {
-        "owner": [grp.demo_admin],
+        "owner": [grp.cfde_portal_admin],
         "insert": writers,
         "update": writers,
         "delete": writers,
-        "select": [grp.demo_reader, grp.isrd_testers, grp.isrd_staff, "*"],
+        "select": readers,
         "enumerate": ["*"],
     }
     ermrestclient_acls = {
-        "select": ["*"],
+        "select": readers,
     }
 
     def __init__(self, filename):
