@@ -329,7 +329,7 @@ class DashboardQueryHelper (object):
             for row in self.list_projects(use_root_projects=True)
         }
 
-        rid_for_4DN_proj = projects[('https://data.4dnucleome.org', '4DN')]['RID']
+        rid_for_parent_proj = projects[('cfde_id_namespace:2', '3a51534abc6e1a5ee6d9cc86c4007b56')]['RID']
 
         # use list() to convert each ResultSet
         # for easier JSON serialization...
@@ -340,7 +340,7 @@ class DashboardQueryHelper (object):
             #'list_formats': list(self.list_formats()),
 
             'root_projects': list(self.list_projects(use_root_projects=True)),
-            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_4DN_proj).fetch()),
+            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_parent_proj).fetch()),
 
             'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
             'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
