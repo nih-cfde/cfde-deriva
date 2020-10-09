@@ -10,7 +10,7 @@
 # instance preparation prior to ingestion into a central CFDE database.
 
 # Creation date: 2020-05-17
-# Lastmod date unless I forgot to change it: 2020-05-29
+# Lastmod date unless I forgot to change it: 2020-10-09
 
 # contact email: abrady@som.umaryland.edu
 
@@ -62,7 +62,7 @@ outDir = './007_HMP-specific_CV_term_usage_TSVs'
 cvFile = {
    
    'EDAM' : '%s/EDAM.version_1.21.tsv' % cvRefDir,
-   'OBI' : '%s/OBI.version_2019-08-15.obo' % cvRefDir,
+   'OBI' : '%s/OBI.version_2020-08-24.obo' % cvRefDir,
    'Uberon' : '%s/uberon.version_2019-06-27.obo' % cvRefDir
 }
 
@@ -321,7 +321,7 @@ def writeTermsUsed(  ):
 ##########################################################################################
 ##########################################################################################
 
-# Create the outpuit directory if need be.
+# Create the output directory if need be.
 
 if not os.path.isdir(outDir) and os.path.exists(outDir):
    

@@ -381,13 +381,20 @@ def populateFiles(  ):
          # We'll fill this in later after some needed transitive-association
          # tracing.
 
-         objectsToWrite['file'][currentID]['project'] = ''
+         objectsToWrite['file'][currentID]['project_local_id'] = ''
 
          #----------------------------------------------------------------------
          # We're not doing these fields yet.
 
          objectsToWrite['file'][currentID]['persistent_id'] = ''
          objectsToWrite['file'][currentID]['creation_time'] = ''
+         objectsToWrite['file'][currentID]['uncompressed_size_in_bytes'] = ''
+         objectsToWrite['file'][currentID]['mime_type'] = 'application/octet-stream'
+
+         #----------------------------------------------------------------------
+         # Assign C2M2 file.assay_type directly from HMP.nodeType:
+
+         objectsToWrite['file'][currentID]['assay_type'] = enumMap['file.assay_type'][nodeType]
 
          #----------------------------------------------------------------------
          # Compute this file's filename from stored URL data.
@@ -416,6 +423,8 @@ def populateFiles(  ):
          baseName = re.sub(r'^.*\/', r'', currentURL)
 
          objectsToWrite['file'][currentID]['filename'] = baseName
+
+         # DEBUG_ONLY: print('%s\t%s' % (nodeType, baseName), file=sys.stdout)
 
          #----------------------------------------------------------------------
          # Locate and store any available SHA256 or MD5 checksum strings.
@@ -942,7 +951,7 @@ def populateBiosamples(  ):
          # We'll fill this in later after some needed transitive-association
          # tracing.
 
-         objectsToWrite['biosample'][currentID]['project'] = ''
+         objectsToWrite['biosample'][currentID]['project_local_id'] = ''
 
          #----------------------------------------------------------------------
          # We're not doing these fields yet.
@@ -992,15 +1001,6 @@ def populateBiosamples(  ):
 
             # end if ( we have a non-null value in 'fma_body_site' )
 
-            #################################################################
-            # Metadata mapped from a fixed set of values to third-party CVs:
-
-            # biosample.assay_type
-
-            assayTypeTerm = enumMap['biosample.assay_type']['material']
-
-            objectsToWrite['biosample'][currentID]['assay_type'] = assayTypeTerm
-
          ######################################################################
          ######################## nodeType: *_prep ############################
          ######################################################################
@@ -1008,10 +1008,6 @@ def populateBiosamples(  ):
          elif ( nodeType == '16s_dna_prep' or nodeType == 'wgs_dna_prep' or nodeType == 'host_seq_prep' or nodeType == 'microb_assay_prep' or nodeType == 'host_assay_prep' ):
             
             objectsToWrite['biosample'][currentID]['anatomy'] = ''
-
-            assayTypeTerm = enumMap['biosample.assay_type']['library']
-
-            objectsToWrite['biosample'][currentID]['assay_type'] = assayTypeTerm
 
          # end if ( nodeType switch )
 
@@ -1126,7 +1122,7 @@ def populateSubjects(  ):
          # We'll fill this in later after some needed transitive-association
          # tracing.
 
-         objectsToWrite['subject'][currentID]['project'] = ''
+         objectsToWrite['subject'][currentID]['project_local_id'] = ''
 
          #----------------------------------------------------------------------
          # We're not doing these fields yet.
@@ -1573,7 +1569,7 @@ def processProjectContainment(  ):
          
          # Save the most specific parent project ID as an entity field.
 
-         objectsToWrite[targetType][objectID]['project'] = findDeepestParentProjectID(containingSets, debugFlag)
+         objectsToWrite[targetType][objectID]['project_local_id'] = findDeepestParentProjectID(containingSets, debugFlag)
 
       # end if ( valid targetType switch )
 
@@ -1629,9 +1625,9 @@ def writeTable( objectName ):
 
             first = False
 
-            if colName == 'id':
+            if colName == 'id' or colName == 'local_id':
                
-               # Special case. Will need to change this if 'id' fields are eliminated or renamed.
+               # Special case: primary key.
 
                OUT.write( currentID )
 
@@ -1691,17 +1687,17 @@ def writeProjectInProject(  ):
                
                OUT.write( idNamespace )
                
-            elif colName == 'id':
+            elif colName == 'id' or colName == 'local_id':
                
-               # Special case. Will need to change this if 'id' fields are eliminated or renamed.
+               # Special case: primary key.
 
                OUT.write( currentID )
 
-            elif colName == 'parent_project_id':
+            elif colName == 'parent_project_local_id':
                
                OUT.write( '%s' % parentID )
 
-            elif colName == 'child_project_id':
+            elif colName == 'child_project_local_id':
                
                OUT.write( '%s' % childID )
 
@@ -1901,21 +1897,6 @@ schemaLoc = '001_data_package_JSON_schema_Level_1/C2M2_Level_1.datapackage.json'
 internalCvDir = '002_internal_CV_TSVs'
 
 ##########################################################################################
-# Subdirectory containing full info for external CVs, versioned to match the current
-# data release.
-
-cvRefDir = '003_external_CVs_versioned_reference_files'
-
-# Map of CV names to reference files.
-
-cvFile = {
-   
-   'EDAM' : '%s/EDAM.version_1.21.tsv' % cvRefDir,
-   'OBI' : '%s/OBI.version_2019-08-15.obo' % cvRefDir,
-   'Uberon' : '%s/uberon.version_2019-06-27.obo' % cvRefDir
-}
-
-##########################################################################################
 # Directory containing TSVs mapping named fields to terms in
 # third-party ontologies
 
@@ -1928,7 +1909,7 @@ mapFiles = {
    
    'file.file_format' : '%s/native_keyword_to_EDAM_for_file.file_format.tsv' % mapDir,
    'file.data_type' : '%s/native_keyword_to_EDAM_for_file.data_type.tsv' % mapDir,
-   'biosample.assay_type' : '%s/native_keyword_to_OBI_for_biosample.assay_type.tsv' % mapDir,
+   'file.assay_type' : '%s/native_keyword_to_OBI_for_file.assay_type.tsv' % mapDir,
    'biosample.anatomy' : '%s/native_keyword_to_Uberon_for_biosample.anatomy.tsv' % mapDir
 }
 
@@ -2100,40 +2081,42 @@ outputColumns = {
    
    'file': [
       'id_namespace',
-      'id',
+      'local_id',
       'project_id_namespace',
-      'project',
+      'project_local_id',
       'persistent_id',
       'creation_time',
       'size_in_bytes',
+      'uncompressed_size_in_bytes',
       'sha256',
       'md5',
       'filename',
       'file_format',
-      'data_type'
+      'data_type',
+      'assay_type',
+      'mime_type'
    ],
    'biosample': [
       'id_namespace',
-      'id',
+      'local_id',
       'project_id_namespace',
-      'project',
+      'project_local_id',
       'persistent_id',
       'creation_time',
-      'assay_type',
       'anatomy'
    ],
    'subject': [
       'id_namespace',
-      'id',
+      'local_id',
       'project_id_namespace',
-      'project',
+      'project_local_id',
       'persistent_id',
       'creation_time',
       'granularity'
    ],
    'project': [
       'id_namespace',
-      'id',
+      'local_id',
       'persistent_id',
       'creation_time',
       'abbreviation',
@@ -2142,13 +2125,13 @@ outputColumns = {
    ],
    'project_in_project':  [
       'parent_project_id_namespace',
-      'parent_project_id',
+      'parent_project_local_id',
       'child_project_id_namespace',
-      'child_project_id'
+      'child_project_local_id'
    ],
    'collection': [
       'id_namespace',
-      'id',
+      'local_id',
       'persistent_id',
       'creation_time',
       'abbreviation',
@@ -2157,55 +2140,55 @@ outputColumns = {
    ],
    'collection_in_collection': [
       'superset_collection_id_namespace',
-      'superset_collection_id',
+      'superset_collection_local_id',
       'subset_collection_id_namespace',
-      'subset_collection_id'
+      'subset_collection_local_id'
    ],
    'collection_defined_by_project': [
       'collection_id_namespace',
-      'collection_id',
+      'collection_local_id',
       'project_id_namespace',
-      'project_id'
+      'project_local_id'
    ],
    'file_in_collection': [
       'file_id_namespace',
-      'file_id',
+      'file_local_id',
       'collection_id_namespace',
-      'collection_id'
+      'collection_local_id'
    ],
    'biosample_in_collection': [
       'biosample_id_namespace',
-      'biosample_id',
+      'biosample_local_id',
       'collection_id_namespace',
-      'collection_id'
+      'collection_local_id'
    ],
    'subject_in_collection': [
       'subject_id_namespace',
-      'subject_id',
+      'subject_local_id',
       'collection_id_namespace',
-      'collection_id'
+      'collection_local_id'
    ],
    'file_describes_biosample': [
       'file_id_namespace',
-      'file_id',
+      'file_local_id',
       'biosample_id_namespace',
-      'biosample_id'
+      'biosample_local_id'
    ],
    'file_describes_subject': [
       'file_id_namespace',
-      'file_id',
+      'file_local_id',
       'subject_id_namespace',
-      'subject_id'
+      'subject_local_id'
    ],
    'biosample_from_subject': [
       'biosample_id_namespace',
-      'biosample_id',
+      'biosample_local_id',
       'subject_id_namespace',
-      'subject_id'
+      'subject_local_id'
    ],
    'subject_role_taxonomy': [
       'subject_id_namespace',
-      'subject_id',
+      'subject_local_id',
       'role_id',
       'taxonomy_id'
    ]
@@ -2379,6 +2362,7 @@ progressReport("Processing project containment relationships and populating requ
 processProjectContainment()
 
 """
+#\"\"\"
 
 ##########################################################################################
 
@@ -2393,6 +2377,7 @@ createFakeDates()
 
 ##########################################################################################
 
+#\"\"\"
 """
 
 # Serialize all 'file' objects into a TSV.
