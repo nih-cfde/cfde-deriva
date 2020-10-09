@@ -2367,6 +2367,7 @@
          "profile": "tabular-data-resource",
          "name": "subject_role",
          "title": "Subject Role",
+         "path": "subject_role.tsv",
          "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a Level 1 subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
          "schema": {
             "fields": [
@@ -2401,6 +2402,7 @@
          "profile": "tabular-data-resource",
          "name": "subject_granularity",
          "title": "Subject Granularity",
+         "path": "subject_granularity.tsv",
          "description": "INTERNAL CV: The category of a Level 1 subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
          "schema": {
             "fields": [
