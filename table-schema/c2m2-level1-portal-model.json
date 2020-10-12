@@ -963,7 +963,10 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this project",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                    "indexing_preferences": {"btree": false}
+                 }
                }
             ],
             "missingValues": [ "" ],
@@ -1263,7 +1266,10 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this collection",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                    "indexing_preferences": {"btree": false}
+                 }
                }
             ],
             "missingValues": [ "" ],
