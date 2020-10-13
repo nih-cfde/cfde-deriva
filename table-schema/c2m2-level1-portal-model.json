@@ -172,7 +172,7 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
                }
             },
             "source_definitions": {
@@ -284,7 +284,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "filename",
                   {"sourcekey": "S_project"},
                   "size_in_bytes",
@@ -295,7 +295,7 @@
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "persistent_id",
                   "filename",
                   {"sourcekey": "S_project"},
@@ -449,7 +449,7 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
                }
             },
             "source_definitions": {
@@ -553,7 +553,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy"},
@@ -561,7 +561,7 @@
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "persistent_id",
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type"},
@@ -676,7 +676,7 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
                }
             },
             "source_definitions": {
@@ -783,7 +783,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_granularity"},
                   {"sourcekey": "S_taxonomy"},
@@ -791,7 +791,7 @@
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "persistent_id",
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_granularity"},
@@ -1040,14 +1040,14 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed":  [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "persistent_id",
                   "name",
                   "abbreviation",
@@ -1288,7 +1288,7 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}} {{_id}}"
+                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
                }
             },
             "source_definitions": {
@@ -1412,7 +1412,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   {"sourcekey": "S_project"},
                   "name",
                   "description",
@@ -1420,7 +1420,7 @@
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
-                  "id",
+                  "local_id",
                   "persistent_id",
                   {"sourcekey": "S_project"},
                   "name",
