@@ -14,8 +14,8 @@ DATASET
 =======
 {'error-count': 0,
  'preset': 'nested',
- 'table-count': 2,
- 'time': 45.267,
+ 'table-count': 1,
+ 'time': 44.995,
  'valid': True}
 
 TABLE [1]
@@ -24,7 +24,7 @@ TABLE [1]
  'error-count': 0,
  'format': 'inline',
  'headers': ['id_namespace',
-             'id',
+             'local_id',
              'persistent_id',
              'size_in_bytes',
              'sha256',
@@ -33,17 +33,5 @@ TABLE [1]
  'row-count': 133319,
  'schema': 'table-schema',
  'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/file.tsv',
- 'time': 45.058,
- 'valid': True}
-
-TABLE [2]
-=========
-{'datapackage': '002_HMP__C2M2_Level_0_preload__preBag_output_files/C2M2_Level_0.datapackage.json',
- 'error-count': 0,
- 'format': 'inline',
- 'headers': ['id', 'abbreviation', 'name', 'description'],
- 'row-count': 8,
- 'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/zz85_hmp_serialization/zz94_Level_0_ETL/002_HMP__C2M2_Level_0_preload__preBag_output_files/id_namespace.tsv',
- 'time': 0.012,
+ 'time': 44.803,
  'valid': True}

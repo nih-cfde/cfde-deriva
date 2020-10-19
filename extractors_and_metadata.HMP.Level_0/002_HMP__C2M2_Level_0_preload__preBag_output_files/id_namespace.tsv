@@ -1,8 +1,0 @@
-id	abbreviation	name	description
-cfde_id_namespace:0	4DN	4D Nucleome	Study of the three-dimensional organization of the nucleus in space and time (the 4th dimension)
-cfde_id_namespace:1	GTEx	Genotype-Tissue Expression	An ongoing effort to build a comprehensive public resource to study tissue-specific gene expression and regulation
-cfde_id_namespace:2	HMP	The Human Microbiome Project	Characterization of healthy and disease-associated human microbiomes using multiple 'omics technologies
-cfde_id_namespace:3	KidsFirst	The Gabriella Miller Kids First Pediatric Research Program	A large-scale data resource to help researchers uncover new insights into the biology of childhood cancer and structural birth defects
-cfde_id_namespace:4	LINCS	Library of Integrated Network-Based Cellular Signatures	A library that catalogs changes that occur when different types of cells are exposed to a variety of agents that disrupt normal cellular functions
-cfde_id_namespace:5	Metabolomics	Metabolomics	Studies of chemical reactions that occur in organisms, cells, or tissues (metabolomics) to inform basic, translational, and clinical research
-cfde_id_namespace:6	MoTrPAC	Molecular Transducers of Physical Activity in Humans	A catalogue of biomolecules affected by human exercise, biomolecular changes resulting from movement, and relationships between these changes and benefits to human health

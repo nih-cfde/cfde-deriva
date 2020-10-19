@@ -275,7 +275,7 @@ def populateFiles(  ):
          
          # 'file': [
          #    'id_namespace',
-         #    'id',
+         #    'local_id',
          #    'size_in_bytes',
          #    'sha256',
          #    'md5',
@@ -692,9 +692,9 @@ def writeTable( objectName ):
 
             first = False
 
-            if colName == 'id':
+            if colName == 'local_id':
                
-               # Special case. Will need to change this if 'id' fields are eliminated or renamed.
+               # Special case. Will need to change this if 'local_id' fields are eliminated or renamed.
 
                OUT.write( currentID )
 
@@ -720,19 +720,14 @@ def writeTable( objectName ):
 
 ##########################################################################################
 # The value of the `id_namespace` field required by C2M2 Level 0 for all file objects;
-# to be assigned by CFDE (eventually; for now, I'm making one up).
+# to be clash-cleared by CFDE (we're just making one up, here).
 
 id_namespace = 'cfde_id_namespace:2'
 
 ##########################################################################################
 # Location of the Table-Schema JSON file describing the output set.
 
-tableSchemaLoc = '000_tableschema_and_id_namespace_TSV/C2M2_Level_0.datapackage.json'
-
-##########################################################################################
-# Location of the CFDE id_namespace.tsv file that accompanies each Level 0 submission.
-
-namespaceTsvLoc = '000_tableschema_and_id_namespace_TSV/id_namespace.tsv'
+tableSchemaLoc = '000_C2M2_Level_0_JSON_Schema/C2M2_Level_0.datapackage.json'
 
 ##########################################################################################
 # Disambiguator for on-the-fly ID generation.
@@ -829,7 +824,7 @@ outputColumns = {
    
    'file': [
       'id_namespace',
-      'id',
+      'local_id',
       'persistent_id',
       'size_in_bytes',
       'sha256',
@@ -913,11 +908,9 @@ writeTable('file')
 
 # Include the Table-Schema JSON document in the output for reference.
 
-progressReport("Copying JSON tableschema and id_namespace.tsv to bdbag data store...")
+progressReport("Copying JSON tableschema to bdbag data store...")
 
 os.system('cp ' + tableSchemaLoc + ' ' + outDir)
-
-os.system('cp ' + namespaceTsvLoc + ' ' + outDir)
 
 # Make a BDBag for final delivery and rename it to remove local indexing info.
 
