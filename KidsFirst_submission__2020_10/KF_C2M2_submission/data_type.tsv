@@ -1,0 +1,8 @@
+id	name	description	synonyms
+data:3498	Sequence variations	Data on gene sequence variations resulting large-scale genotyping and DNA sequencing projects.	
+data:1916	Alignment	An alignment of molecular sequences, structures or profiles derived from them.	
+data:3494	DNA sequence	A DNA sequence.	
+data:3495	RNA sequence	An RNA sequence.	
+data:2048	Report	A human-readable collection of information including annotation on a biological entity or phenomena, computer-generated reports of analysis of primary data (e.g. sequence or structural), and metadata (data about primary data) or any other free (essentially unformatted) text, as distinct from the primary data itself.	
+data:3546	Image metadata	Any data concerning a specific biological or biomedical image.	
+data:1622	Disease report	A human-readable collection of information about a specific disease.	
