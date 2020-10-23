@@ -15,7 +15,7 @@ DATASET
 {'error-count': 31,
  'preset': 'nested',
  'table-count': 22,
- 'time': 35.897,
+ 'time': 35.371,
  'valid': False}
 
 TABLE [1]
@@ -40,8 +40,8 @@ TABLE [1]
              'mime_type'],
  'row-count': 79313,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/file.tsv',
- 'time': 35.478,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/file.tsv',
+ 'time': 34.882,
  'valid': True}
 
 TABLE [2]
@@ -58,8 +58,8 @@ TABLE [2]
              'anatomy'],
  'row-count': 17089,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/biosample.tsv',
- 'time': 11.621,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/biosample.tsv',
+ 'time': 10.923,
  'valid': True}
 
 TABLE [3]
@@ -76,8 +76,8 @@ TABLE [3]
              'granularity'],
  'row-count': 12277,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/subject.tsv',
- 'time': 9.894,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/subject.tsv',
+ 'time': 9.814,
  'valid': True}
 
 TABLE [4]
@@ -95,8 +95,8 @@ TABLE [4]
              'dcc_url'],
  'row-count': 2,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/primary_dcc_contact.tsv',
- 'time': 0.792,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/primary_dcc_contact.tsv',
+ 'time': 0.099,
  'valid': True}
 
 TABLE [5]
@@ -113,8 +113,8 @@ TABLE [5]
              'description'],
  'row-count': 17,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/project.tsv',
- 'time': 0.789,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/project.tsv',
+ 'time': 0.082,
  'valid': True}
 
 TABLE [6]
@@ -128,8 +128,8 @@ TABLE [6]
              'child_project_local_id'],
  'row-count': 16,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/project_in_project.tsv',
- 'time': 1.128,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/project_in_project.tsv',
+ 'time': 0.047,
  'valid': True}
 
 TABLE [7]
@@ -139,8 +139,8 @@ TABLE [7]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/collection.tsv',
- 'time': 0.163,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/collection.tsv',
+ 'time': 0.565,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -158,8 +158,8 @@ TABLE [8]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/collection_in_collection.tsv',
- 'time': 0.062,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/collection_in_collection.tsv',
+ 'time': 0.051,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -174,8 +174,8 @@ TABLE [9]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/collection_defined_by_project.tsv',
- 'time': 0.469,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/collection_defined_by_project.tsv',
+ 'time': 0.036,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -190,8 +190,8 @@ TABLE [10]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/file_in_collection.tsv',
- 'time': 0.397,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/file_in_collection.tsv',
+ 'time': 0.127,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -206,8 +206,8 @@ TABLE [11]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/biosample_in_collection.tsv',
- 'time': 0.018,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/biosample_in_collection.tsv',
+ 'time': 0.071,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -222,8 +222,8 @@ TABLE [12]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/subject_in_collection.tsv',
- 'time': 0.539,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/subject_in_collection.tsv',
+ 'time': 0.094,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -242,8 +242,8 @@ TABLE [13]
              'biosample_local_id'],
  'row-count': 79313,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/file_describes_biosample.tsv',
- 'time': 21.97,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/file_describes_biosample.tsv',
+ 'time': 23.288,
  'valid': True}
 
 TABLE [14]
@@ -253,8 +253,8 @@ TABLE [14]
  'format': 'inline',
  'row-count': 0,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/file_describes_subject.tsv',
- 'time': 0.158,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/file_describes_subject.tsv',
+ 'time': 0.19,
  'valid': False}
 ---------
 [-,1] [missing-header] There is a missing header in column 1
@@ -273,8 +273,8 @@ TABLE [15]
              'subject_local_id'],
  'row-count': 17084,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/biosample_from_subject.tsv',
- 'time': 8.262,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/biosample_from_subject.tsv',
+ 'time': 7.728,
  'valid': True}
 
 TABLE [16]
@@ -288,8 +288,8 @@ TABLE [16]
              'taxonomy_id'],
  'row-count': 12277,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/subject_role_taxonomy.tsv',
- 'time': 6.153,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/subject_role_taxonomy.tsv',
+ 'time': 6.279,
  'valid': True}
 
 TABLE [17]
@@ -300,8 +300,8 @@ TABLE [17]
  'headers': ['id', 'name', 'description', 'synonyms'],
  'row-count': 4,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/assay_type.tsv',
- 'time': 0.306,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/assay_type.tsv',
+ 'time': 0.026,
  'valid': True}
 
 TABLE [18]
@@ -312,8 +312,8 @@ TABLE [18]
  'headers': ['id', 'clade', 'name', 'description', 'synonyms'],
  'row-count': 2,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/ncbi_taxonomy.tsv',
- 'time': 0.084,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/ncbi_taxonomy.tsv',
+ 'time': 0.672,
  'valid': True}
 
 TABLE [19]
@@ -324,8 +324,8 @@ TABLE [19]
  'headers': ['id', 'name', 'description', 'synonyms'],
  'row-count': 15,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/anatomy.tsv',
- 'time': 0.803,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/anatomy.tsv',
+ 'time': 0.261,
  'valid': True}
 
 TABLE [20]
@@ -336,8 +336,8 @@ TABLE [20]
  'headers': ['id', 'name', 'description', 'synonyms'],
  'row-count': 12,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/file_format.tsv',
- 'time': 0.789,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/file_format.tsv',
+ 'time': 0.135,
  'valid': True}
 
 TABLE [21]
@@ -348,8 +348,8 @@ TABLE [21]
  'headers': ['id', 'name', 'description', 'synonyms'],
  'row-count': 8,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/data_type.tsv',
- 'time': 0.073,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/data_type.tsv',
+ 'time': 0.087,
  'valid': True}
 
 TABLE [22]
@@ -360,6 +360,6 @@ TABLE [22]
  'headers': ['id', 'abbreviation', 'name', 'description'],
  'row-count': 2,
  'schema': 'table-schema',
- 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/data_sandbox/2020_Oct_KidsFirst/KF_C2M2_submission/id_namespace.tsv',
- 'time': 0.382,
+ 'source': '/autofs/hmp/dacc/restore/phase3_WGS/idba-assembly/zz00_Arthur_other_HMP_expts_pls_do_not_delete/github_tmp/cfde-deriva/KidsFirst_submission__2020_10/KF_C2M2_submission/id_namespace.tsv',
+ 'time': 0.088,
  'valid': True}
