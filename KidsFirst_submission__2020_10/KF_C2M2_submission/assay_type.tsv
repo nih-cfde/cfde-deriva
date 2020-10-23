@@ -1,0 +1,4 @@
+id	name	description	synonyms
+OBI:0002117	whole genome sequencing assay	A DNA sequencing assay that intends to provide information about the sequence of an entire genome of an organism.	
+OBI:0001271	RNA-seq assay	An transcription profiling assay that determines an RNA sequence by analyzing the transcibed regions of the genome and or to quantitate transcript abundance.	
+OBI:0002118	exome sequencing assay	A DNA sequencing assay that intends to provide information about the sequence of the protein coding components of a genome (exons).	
