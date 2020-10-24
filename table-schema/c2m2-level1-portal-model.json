@@ -238,7 +238,7 @@
                      ]
                   },
                   "S_assay_type": {
-                     "comment": "Assay type for biosamples described by file.",
+                     "comment": "Assay type used to generate the file.",
                      "source": [
                         {"outbound": ["CFDE", "file_assay_type_fkey"]},
                         "id"
@@ -463,9 +463,8 @@
                   "S_assay_type": {
                      "comment": "The assay type characterizing the biosample.",
                      "source": [
-                        {"inbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
-                        {"outbound": ["CFDE", "file_describes_biosample_file_fkey"]},
-                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
+                        {"inbound": ["CFDE", "biosample_assay_type_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_assay_type_assay_type_fkey"]},
                         "RID"
                      ]
                   },
@@ -1114,10 +1113,10 @@
                      ]
                   },
                   {
-                     "comment": "The assay type of a biosample attributed to the project.",
+                     "comment": "The assay type of a file attributed to the project.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_project_fkey"]},
-                        {"outbound": ["CFDE", "biosample_assay_type_fkey"]},
+                        {"inbound": ["CFDE", "file_project_fkey"]},
+                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
                         "RID"
                      ]
                   },
@@ -2582,7 +2581,68 @@
          },
          "derivation_sql_path": "file_subject_granularity.sql"
       },
-      
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "biosample_assay_type",
+         "title": "biosample_assay_type",
+         "description": "Collapsed association of file-assay-types for biosamples described by file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "biosample_id_namespace",
+                  "description": "Identifier namespace for this biosample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "biosample_local_id",
+                  "description": "The ID of this biosample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "A CFDE CV term categorizing described biosample assay-type",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "biosample_id_namespace",
+               "biosample_local_id",
+               "assay_type"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "constraint_name": "biosample_assay_type_biosample_fkey",
+                  "reference": {
+                     "title": "Characterized Biosample",
+                     "resource": "biosample",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "biosample_assay_type_assay_type_fkey",
+                  "reference": {
+                     "title": "Assay Type",
+                     "resource": "assay_type",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "biosample_assay_type.sql"
+      },
+
       {
          "profile": "tabular-data-resource",
          "name": "file_subject_role_taxonomy",
