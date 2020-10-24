@@ -146,7 +146,7 @@ class CfdeDataPackage (object):
                     doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
                     if doc_column is not None:
                         column.annotations.update(doc_column.annotations)
-                if table.is_association():
+                if True or table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             print('Dropping %s' % fkey.uri_path)
