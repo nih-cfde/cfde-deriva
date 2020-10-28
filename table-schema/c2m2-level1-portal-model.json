@@ -2645,6 +2645,67 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "subject_species",
+         "title": "subject_species",
+         "description": "Collapsed association of subject-species, simplifying subject-role-taxonomy association",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_local_id",
+                  "description": "The ID of this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "species",
+                  "description": "A CFDE CV term categorizing described subject species, drawn from NCBI Taxonomy",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject_id_namespace",
+               "subject_local_id",
+               "species"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "constraint_name": "subject_species_subject_fkey",
+                  "reference": {
+                     "title": "Characterized Subject",
+                     "resource": "subject",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "species",
+                  "constraint_name": "subject_species_species_fkey",
+                  "reference": {
+                     "title": "Species",
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "subject_species.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "file_subject_role_taxonomy",
          "title": "file_subject_role_taxonomy",
          "description": "Collapsed association of subject-role-taxonomies for subjects described by file",

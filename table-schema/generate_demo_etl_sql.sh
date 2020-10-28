@@ -12,6 +12,7 @@ DELETE FROM collection_biosample_creation_time;
 DELETE FROM collection_in_collection_transitive;
 DELETE FROM collection_subject_granularity;
 DELETE FROM collection_subject_role_taxonomy;
+DELETE FROM subject_species;
 DELETE FROM biosample_assay_type;
 DELETE FROM file_anatomy;
 DELETE FROM file_biosample_creation_time;
@@ -40,4 +41,5 @@ done
 
 cat <<EOF
 COMMIT;
+ANALYZE;
 EOF
