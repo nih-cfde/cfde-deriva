@@ -3337,6 +3337,199 @@
             ]
          },
          "derivation_sql_path": "collection_anatomy.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "level1_stats",
+         "title": "level1_stats",
+         "description": "Basic statistics roll-up of Level 1 core entities by metadata combination",
+         "schema": {
+            "fields": [
+               {
+                  "name": "root_project_id_namespace",
+                  "description": "Identifier namespace for attributed root project (DCC)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "root_project_local_id",
+                  "description": "The ID of attributed root project (DCC)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for attributed project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of attributed project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type_id",
+                  "description": "A CFDE CV term for generated file assay types",
+                  "type": "string"
+               },
+               {
+                  "name": "data_type_id",
+                  "description": "A CFDE CV term for generated file data types",
+                  "type": "string"
+               },
+               {
+                  "name": "file_format_id",
+                  "description": "A CFDE CV term for generated file format types",
+                  "type": "string"
+               },
+               {
+                  "name": "anatomy_id",
+                  "description": "A CFDE CV term for anatomical sources of collected biosamples",
+                  "type": "string"
+               },
+               {
+                  "name": "granularity_id",
+                  "description": "A CFDE CV term for granularity of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "role_id",
+                  "description": "A CFDE CV term for the role of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "taxonomy_id",
+                  "description": "A CFDE CV term for the taxon of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_bytes",
+                  "description": "The total size in bytes of files related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects related to this combination of metadata terms",
+                  "type": "integer"
+               }
+            ],
+            "primaryKey": [
+               "project_id_namespace",
+               "project_local_id",
+               "assay_type_id",
+               "data_type_id",
+               "file_format_id",
+               "anatomy_id",
+               "granularity_id",
+               "role_id",
+               "taxonomy_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "root_project_id_namespace", "root_project_local_id" ],
+                  "constraint_name": "level1_stats_root_project_fkey",
+                  "reference": {
+                     "title": "Attributed Root Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "level1_stats_project_fkey",
+                  "reference": {
+                     "title": "Attributed Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "assay_type_id",
+                  "constraint_name": "level1_stats_assay_type_fkey",
+                  "reference": {
+                     "title": "Assay Type",
+                     "resource": "assay_type",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "data_type_id",
+                  "constraint_name": "level1_stats_data_type_fkey",
+                  "reference": {
+                     "title": "Data Type",
+                     "resource": "data_type",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "file_format_id",
+                  "constraint_name": "level1_stats_file_format_fkey",
+                  "reference": {
+                     "title": "File Format",
+                     "resource": "file_format",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "anatomy_id",
+                  "constraint_name": "level1_stats_anatomy_fkey",
+                  "reference": {
+                     "title": "Anatomy",
+                     "resource": "anatomy",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "granularity_id",
+                  "constraint_name": "level1_stats_granularity_fkey",
+                  "reference": {
+                     "title": "Subject Granularity",
+                     "resource": "subject_granularity",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "role_id",
+                  "constraint_name": "level1_stats_role_fkey",
+                  "reference": {
+                     "title": "Subject Role",
+                     "resource": "subject_role",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "taxonomy_id",
+                  "constraint_name": "level1_stats_taxonomy_fkey",
+                  "reference": {
+                     "title": "Subject Taxonomy",
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "level1_stats.sql"
       }
 
    ]

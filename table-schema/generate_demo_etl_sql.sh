@@ -6,6 +6,7 @@ BEGIN;
 SET search_path = "CFDE";
 
 -- delete in case we have previous ETL results?
+DELETE FROM level1_stats;
 DELETE FROM collection_anatomy;
 DELETE FROM collection_assay_type;
 DELETE FROM collection_biosample_creation_time;
