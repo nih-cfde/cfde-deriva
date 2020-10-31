@@ -69,26 +69,11 @@ def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
     if 'species' in queryobj.path.table_instances:
         return
     species = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species')
-    subject_role = queryobj.helper.builder.CFDE.subject_role
     queryobj.path = queryobj.path.link(
         species,
-        on=( queryobj.path.level1_stats.taxonomy_id == species.id ),
+        on=( queryobj.path.level1_stats.species_id == species.id ),
         join_type= 'left' if show_nulls else ''
     )
-    queryobj.path = queryobj.path.link(
-        subject_role,
-        on=( queryobj.path.level1_stats.role_id == subject_role.id ),
-        join_type= 'left' if show_nulls else ''
-    )
-    if show_nulls:
-        queryobj.path = queryobj.path.filter(
-            ((subject_role.name == 'single organism') & (species.clade == 'species'))
-            | ((subject_role.id == None) & (species.id == None))
-        )
-    else:
-        queryobj.path = queryobj.path.filter(
-            ((subject_role.name == 'single organism') & (species.clade == 'species'))
-        )
 
 def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""

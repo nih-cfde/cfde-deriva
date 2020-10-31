@@ -3404,13 +3404,8 @@
                   "type": "string"
                },
                {
-                  "name": "role_id",
-                  "description": "A CFDE CV term for the role of described subjects",
-                  "type": "string"
-               },
-               {
-                  "name": "taxonomy_id",
-                  "description": "A CFDE CV term for the taxon of described subjects",
+                  "name": "species_id",
+                  "description": "A CFDE CV term for single organism subject species, a subset of subject taxonomy concepts",
                   "type": "string"
                },
                {
@@ -3442,8 +3437,7 @@
                "file_format_id",
                "anatomy_id",
                "granularity_id",
-               "role_id",
-               "taxonomy_id"
+               "species_id"
             ],
             "foreignKeys": [
                {
@@ -3510,19 +3504,10 @@
                   }
                },
                {
-                  "fields": "role_id",
-                  "constraint_name": "level1_stats_role_fkey",
+                  "fields": "species_id",
+                  "constraint_name": "level1_stats_species_fkey",
                   "reference": {
-                     "title": "Subject Role",
-                     "resource": "subject_role",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "taxonomy_id",
-                  "constraint_name": "level1_stats_taxonomy_fkey",
-                  "reference": {
-                     "title": "Subject Taxonomy",
+                     "title": "Subject Species",
                      "resource": "ncbi_taxonomy",
                      "fields": "id"
                   }
