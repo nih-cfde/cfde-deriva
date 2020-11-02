@@ -3589,7 +3589,21 @@
                         "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}"
                      }
                   }
-               ]
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ]}
             }
          },
          "derivation_sql_path": "level1_stats.sql"
