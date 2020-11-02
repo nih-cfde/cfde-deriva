@@ -3342,8 +3342,8 @@
       {
          "profile": "tabular-data-resource",
          "name": "level1_stats",
-         "title": "level1_stats",
-         "description": "Basic statistics roll-up of Level 1 core entities by metadata combination",
+         "title": "Level 1 Statistics",
+         "description": "Basic statistical roll-up of Level 1 core entities by metadata combination.",
          "schema": {
             "fields": [
                {
@@ -3513,6 +3513,84 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{_project_id_namespace}}{{_project_local_id}} {{assay_type_id}} {{data_type_id}} {{file_format_id}} {{anatomy_id}} {{granularity_id}} {{species_id}}"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_root_project": {
+                     "comment": "A root project (DCC) to which a set of C2M2 entities is implicitly attributed.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_root_project_fkey"]}, "RID"]
+                  },
+                  "S_project": {
+                     "comment": "A particular project to which a set of C2M2 entities is explicitly attributed.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_project_fkey"]}, "RID"]
+                  },
+                  "S_assay_type": {
+                     "comment": "An assay-type CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_assay_type_fkey"]}, "RID"]
+                  },
+                  "S_data_type": {
+                     "comment": "A data-type  CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_data_type_fkey"]}, "RID"]
+                  },
+                  "S_file_format": {
+                     "comment": "A file-format  CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_file_format_fkey"]}, "RID"]
+                  },
+                  "S_anatomy": {
+                     "comment": "An anatomy CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_anatomy_fkey"]}, "RID"]
+                  },
+                  "S_granularity": {
+                     "comment": "A subject granularity CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_granularity_fkey"]}, "RID"]
+                  },
+                  "S_species": {
+                     "comment": "A single-organism subject species CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_species_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ],
+               "compact": [
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {
+                     "markdown_name": "Counts",
+                     "source": "num_files",
+                     "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
+                     "display": {
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}"
+                     }
+                  }
+               ]
+            }
          },
          "derivation_sql_path": "level1_stats.sql"
       }
