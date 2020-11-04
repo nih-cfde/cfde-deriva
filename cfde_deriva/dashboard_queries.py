@@ -12,103 +12,121 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 ######
 # utility functions to idempotently build up the path in a StatsQuery object
 #
-# based on minimal subset of this possible core-entity query path:
+# uses level1_stats data cube, which is based on this core-entity query path:
 #
 #   file -- file-describes-biosample -- biosample -- biosample-from-subject -- subject
 #
-# attaching vocabulary tables as needed to access terms:
+# summarized into groups based on metadata combinations
 #
-#   file -- data_type
+#   file -- assay_type, data_type, file_format
 #   biosample -- anatomy
-#   biosample -- assay_type
-#   subject -- subject_role_taxonomy -- ncbi_taxonomy (species)
-#   [stats entity] -- project_in_project_transitive -- project -- project_root
+#   subject -- subject_role_taxonomy -- ncbi_taxonomy, subject_role, subject_granularity
+#   [stats entity] -- project
+#   [stats entity] -- root project
 #
-# when core path is extended, grouped dimension terms are correlated
-# by shared table instances for all intermediate tables, i.e.
+# with each group containing num_files, num_bytes, num_biosamples, num_subjects.
 #
-#    anatomy X assay_type  come from same biosample
-#    anatomy X species consider a biosample and its matching subject
+# to retrieve stats, we choose our own dimensional grouping (as a subset of the
+# available grouping dimensions) and sum those existing metrics to collapse
+# results into our more coarse-grained groups.
+#
+# the subproject dimension joins extra structure to the project concept of the data cube.
+#
+# also, we join the vocab tables to get human-readable names for the dimensional concepts
 #
 
-def _add_file_path(queryobj):
-    """Idempotently add file to path and set it as path context"""
-    if 'file' not in queryobj.path.table_instances:
-        _add_biosample_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file_describes_biosample)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file)
-    else:
-        queryobj.path.context = queryobj.path.file
+def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'anatomy' in queryobj.path.table_instances:
+        return
+    anatomy = queryobj.helper.builder.CFDE.anatomy
+    queryobj.path = queryobj.path.link(
+        anatomy,
+        on=( queryobj.path.level1_stats.anatomy_id == anatomy.id ),
+        join_type= 'left' if show_nulls else ''
+    )
 
-def _add_biosample_path(queryobj):
-    """Idempotently add biosample to path and set it as path context"""
-    if 'biosample' not in queryobj.path.table_instances:
-        if 'file' in queryobj.path.table_instances:
-            queryobj.path.context = queryobj.path.file
-            queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.file_describes_biosample)
-        elif 'subject' in queryobj.path.table_instances:
-            queryobj.path.context = queryobj.path.subject
-            queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample_from_subject)
-        else:
-            raise NotImplementedError('prerequisites not met for _add_biosample_path')
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample)
-    else:
-        queryobj.path.context = queryobj.path.biosample
+def _add_assaytype_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'assay_type' in queryobj.path.table_instances:
+        return
+    assay_type = queryobj.helper.builder.CFDE.assay_type
+    queryobj.path = queryobj.path.link(
+        assay_type,
+        on=( queryobj.path.level1_stats.assay_type_id == assay_type.id ),
+        join_type= 'left' if show_nulls else ''
+    )
 
-def _add_subject_path(queryobj):
-    """Idempotently add subject to path and set it as path context"""
-    if 'subject' not in queryobj.path.table_instances:
-        _add_biosample_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.biosample_from_subject)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject)
-    else:
-        queryobj.path.context = queryobj.path.subject
+def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'data_type' in queryobj.path.table_instances:
+        return
+    data_type = queryobj.helper.builder.CFDE.data_type
+    queryobj.path = queryobj.path.link(
+        data_type,
+        on=( queryobj.path.level1_stats.data_type_id == data_type.id ),
+        join_type= 'left' if show_nulls else ''
+    )
 
-def _add_datatype_path(queryobj):
-    """Idempotently add data_type to path"""
-    if 'data_type' not in queryobj.path.table_instances:
-        _add_file_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.data_type)
+def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'species' in queryobj.path.table_instances:
+        return
+    species = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species')
+    queryobj.path = queryobj.path.link(
+        species,
+        on=( queryobj.path.level1_stats.species_id == species.id ),
+        join_type= 'left' if show_nulls else ''
+    )
 
-def _add_anatomy_path(queryobj):
-    """Idempotently add anatomy to path"""
-    if 'anatomy' not in queryobj.path.table_instances:
-        _add_biosample_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.anatomy)
-
-def _add_assaytype_path(queryobj):
-    """Idempotently add assay_type to path"""
-    if 'assay_type' not in queryobj.path.table_instances:
-        _add_biosample_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.assay_type)
-
-def _add_species_path(queryobj):
-    """Idempotently add species concept to path"""
-    if 'species' not in queryobj.path.table_instances:
-        _add_subject_path(queryobj)
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject_role_taxonomy.alias('srt'))
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.subject_role.alias('subrole'))
-        queryobj.path = queryobj.path.filter(queryobj.path.subrole.column_definitions['name'] == 'single organism')
-        queryobj.path.context = queryobj.path.srt
-        queryobj.path = queryobj.path.link(queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('species'))
-        queryobj.path = queryobj.path.filter(queryobj.path.species.clade == 'species')
-
-def _add_rootproject_path(queryobj):
+def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""
-    if 'project_root' not in queryobj.path.table_instances:
-        entity = queryobj.path.table_instances[queryobj.entity_name]
-        project_root = queryobj.helper.builder.CFDE.project_root
-        pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
-        # need to select directionality of association, so reduce number of joins while we're at it
-        queryobj.path = queryobj.path.link(
-            pipt,
-            on=( (entity.project_id_namespace == pipt.member_project_id_namespace)
-                 & (entity.project == pipt.member_project_id) )
-        ).link(
-            project_root,
-            on=( (queryobj.path.pipt.leader_project_id_namespace == project_root.project_id_namespace)
-                 & (queryobj.path.pipt.leader_project_id == project_root.project_id) )
-        ).link(queryobj.helper.builder.CFDE.project)
+    # ignore show_nulls since project is always attributed
+    if 'subproject' in queryobj.path.table_instances:
+        raise TypeError('Cannot combine subproject and project_root dimensions')
+
+    if 'root_project' in queryobj.path.table_instances:
+        return
+
+    root_project = queryobj.helper.builder.CFDE.project.alias('root_project')
+    queryobj.path = queryobj.path.link(
+        root_project,
+        on=( (queryobj.path.level1_stats.root_project_id_namespace == root_project.id_namespace)
+             & (queryobj.path.level1_stats.root_project_local_id == root_project.local_id) )
+    )
+
+def _add_subproject_leaf(queryobj, show_nulls=False, **kwargs):
+    """Idempotently add root project concept to path"""
+    # ignore show_nulls since project is always attributed
+    try:
+        parent_project_RID = kwargs['parent_project_RID']
+    except KeyError:
+        raise TypeError('Missing required parent_project_RID keyword argument in StatsQuery.dimension("subproject", **kwargs) call')
+
+    if 'root_project' in queryobj.path.table_instances:
+        raise TypeError('Cannot combine subproject and project_root dimensions')
+
+    level1_stats = queryobj.path.level1_stats
+    pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
+    pip = queryobj.helper.builder.CFDE.project_in_project.alias('pip')
+    subproject = queryobj.helper.builder.CFDE.project.alias('subproject')
+    parentproj = queryobj.helper.builder.CFDE.project.alias('parentproj')
+
+    queryobj.path = queryobj.path.link(
+        pipt,
+        on=( (level1_stats.project_id_namespace == pipt.member_project_id_namespace)
+             & (level1_stats.project_local_id == pipt.member_project_local_id) )
+    ).link(
+        pip,
+        on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
+             & (queryobj.path.pipt.leader_project_local_id == pip.child_project_local_id) )
+    ).link(
+        parentproj,
+        on=( (queryobj.path.pip.parent_project_id_namespace == parentproj.id_namespace)
+             & (queryobj.path.pip.parent_project_local_id == parentproj.local_id) )
+    ).filter(
+        queryobj.path.parentproj.RID == parent_project_RID
+    ).link(
+        subproject,
+        on=( (queryobj.path.pipt.leader_project_id_namespace == subproject.id_namespace)
+             & (queryobj.path.pipt.leader_project_local_id == subproject.local_id) )
+    )
 
 class StatsQuery (object):
     """C2M2 statistics query generator
@@ -126,61 +144,67 @@ class StatsQuery (object):
     Exactly one entity MUST be configured. Zero or more dimensions MAY
     be configured.
 
-    Beware, overly complex queries (with too many dimensions) may
-    timeout due to query cost.
-
     """
 
     # define supported keys, mapped to implementation bits...
     supported_entities = {
         'file': [
-            lambda path: CntD(path.file.RID).alias('num_files'),
-            lambda path: Sum(path.file.size_in_bytes).alias('num_bytes'),
+            lambda path: Sum(path.level1_stats.num_files).alias('num_files'),
+            lambda path: Sum(path.level1_stats.num_bytes).alias('num_bytes'),
         ],
         'biosample': [
-            lambda path: CntD(path.biosample.RID).alias('num_biosamples'),
+            lambda path: Sum(path.level1_stats.num_biosamples).alias('num_biosamples'),
         ],
         'subject': [
-            lambda path: CntD(path.subject.RID).alias('num_subjects'),
+            lambda path: Sum(path.level1_stats.num_subjects).alias('num_subjects'),
         ],
     }
     supported_dimensions = {
         'anatomy': (
-            _add_anatomy_path, [
-                lambda path: path.anatomy.id.alias('anatomy_id'),
+            _add_anatomy_leaf, [
+                lambda path: path.level1_stats.anatomy_id,
             ], [
                 lambda path: path.anatomy.column_definitions['name'].alias('anatomy_name'),
             ]
         ),
         'assay_type': (
-            _add_assaytype_path, [
-                lambda path: path.assay_type.id.alias('assay_type_id'),
+            _add_assaytype_leaf, [
+                lambda path: path.level1_stats.assay_type_id,
             ], [
                 lambda path: path.assay_type.column_definitions['name'].alias('assay_type_name'),
             ]
         ),
         'data_type': (
-            _add_datatype_path, [
-                lambda path: path.data_type.id.alias('data_type_id'),
+            _add_datatype_leaf, [
+                lambda path: path.level1_stats.data_type_id,
             ], [
                 lambda path: path.data_type.column_definitions['name'].alias('data_type_name'),
             ]
         ),
         'species': (
-            _add_species_path, [
+            _add_species_leaf, [
                 lambda path: path.species.id.alias('species_id'),
             ], [
                 lambda path: path.species.column_definitions['name'].alias('species_name'),
             ]
         ),
         'project_root': (
-            _add_rootproject_path, [
-                lambda path: path.project.RID.alias('project_RID'),
+            _add_rootproject_leaf, [
+                lambda path: path.root_project.RID.alias('project_RID'),
             ], [
-                lambda path: path.project.id_namespace.alias('project_id_namespace'),
-                lambda path: path.project.id.alias('project_id'),
-                lambda path: path.project.column_definitions['name'].alias('project_name'),
+                lambda path: path.root_project.id_namespace.alias('project_id_namespace'),
+                lambda path: path.root_project.local_id.alias('project_local_id'),
+                lambda path: path.root_project.column_definitions['name'].alias('project_name'),
             ]
+        ),
+        'subproject': (
+            _add_subproject_leaf, [
+                lambda path: path.subproject.RID.alias('project_RID'),
+            ], [
+                lambda path: path.subproject.id_namespace.alias('project_id_namespace'),
+                lambda path: path.subproject.local_id.alias('project_local_id'),
+                lambda path: path.subproject.column_definitions['name'].alias('project_name'),
+            ],
         ),
     }
 
@@ -210,14 +234,21 @@ class StatsQuery (object):
         except KeyError:
             raise ValueError('Unsupported entity_name "%s"' % (entity_name,))
 
-        self.path = self.helper.builder.CFDE.tables[entity_name].path
+        self.path = self.helper.builder.CFDE.level1_stats.path
 
         return self
 
-    def dimension(self, dimension_name):
+    def dimension(self, dimension_name, show_nulls=True, **kwargs):
         """Configure a grouping dimension
 
         :param dimension_name: One of the StatsQuery.supported_dimension key strings
+        :param show_nulls: Allow null in dimensional outputs when True (default True)
+        :param kwargs: Keyword arguments specific to a dimension (see further documentation)
+
+        Dimension-specific keyword arguments:
+
+        :param parent_project_RID: Use sub-projects of specified parent project RID for "subproject" dimension (required)
+
         """
         if self.path is None:
             raise TypeError('Cannot call .dimension() method on a StatsQuery instance prior to calling .entity() method.')
@@ -232,7 +263,7 @@ class StatsQuery (object):
         except KeyError:
             raise ValueError('Unsupported dimension_name "%s"' % (dimension_name,))
 
-        add_path_func(self)
+        add_path_func(self, show_nulls=show_nulls, **kwargs)
 
         return self
 
@@ -262,6 +293,13 @@ class DashboardQueryHelper (object):
 
     def run_demo(self):
         """Run each example query and dump all results as JSON."""
+        projects = {
+            (row['id_namespace'], row['local_id']): row
+            for row in self.list_projects(use_root_projects=True)
+        }
+
+        rid_for_parent_proj = projects[('cfde_id_namespace:2', '3a51534abc6e1a5ee6d9cc86c4007b56')]['RID']
+
         # use list() to convert each ResultSet
         # for easier JSON serialization...
         results = {
@@ -269,6 +307,9 @@ class DashboardQueryHelper (object):
             #'list_root_projects': list(self.list_projects(use_root_projects=True)),
             #'list_datatypes': list(self.list_datatypes()),
             #'list_formats': list(self.list_formats()),
+
+            'root_projects': list(self.list_projects(use_root_projects=True)),
+            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_parent_proj).fetch()),
 
             'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
             'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
@@ -299,24 +340,56 @@ class DashboardQueryHelper (object):
             'subject_stats_assaytype_project': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('project_root').fetch()),
             'subject_stats_datatype_species': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('species').fetch()),
             'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
+
         }
         print(json.dumps(results, indent=2))
 
-    def list_projects(self, use_root_projects=False, path_func=(lambda builder, path: path), proj_func=(lambda path: path.entities())):
+    def list_projects(self, use_root_projects=False, parent_project_RID=None):
         """Return list of projects AKA funded activities
 
         :param use_root_projects: Only consider root projects (default False)
-        :param path_func: Function to allow path chaining (default no-change)
-        :param proj_func: Function to project set from path (default get .entities())
+        :param parent_project_RID: Only consider children of specified project (default None)
         """
+        children = self.builder.CFDE.project.alias("children")
+        pip1 = self.builder.CFDE.project_in_project.alias('pip1')
+        project = self.builder.CFDE.project
+        path = children.path
+        path = path.link(
+            pip1,
+            on=( (path.children.id_namespace == pip1.child_project_id_namespace)
+                 & (path.children.local_id == pip1.child_project_local_id) )
+        ).link(
+            project,
+            on=( (pip1.parent_project_id_namespace == project.id_namespace)
+                 & (pip1.parent_project_local_id == project.local_id) ),
+            join_type='right'
+        )
+
         if use_root_projects:
-            path = (
-                self.builder.CFDE.project_root
-                .link(self.builder.CFDE.project)
-            )
-        else:
-            path = self.builder.CFDE.project
-        return proj_func(path_func(self.builder, path)).fetch()
+            path = path.link(self.builder.CFDE.project_root)
+        elif parent_project_RID is not None:
+            pip2 = self.builder.CFDE.project_in_project.alias('pip2')
+            parent = self.builder.CFDE.project.alias("parent")
+            path = path.link(
+                pip2,
+                on=( (path.project.id_namespace == pip2.child_project_id_namespace)
+                     & (path.project.local_id == pip2.child_project_local_id) )
+            ).link(
+                parent,
+                on=( (path.pip2.parent_project_id_namespace == parent.id_namespace)
+                     & (path.pip2.parent_project_local_id == parent.local_id) )
+            ).filter(path.parent.RID == parent_project_RID)
+
+        return path.groupby(
+            path.project.RID,
+        ).attributes(
+            path.project.id_namespace,
+            path.project.local_id,
+            path.project.column_definitions['name'],
+            path.project.abbreviation,
+            path.project.description,
+            CntD(path.children.RID).alias('num_subprojects'),
+        )
 
     def list_datatypes(self):
         """Return list of data_type terms
@@ -331,7 +404,7 @@ class DashboardQueryHelper (object):
 ## ugly CLI wrapping...
 def main():
     """Runs demo of catalog dashboard queries."""
-    hostname = os.getenv('DERIVA_SERVERNAME', 'cfde.derivacloud.org')
+    hostname = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     catalogid = os.getenv('DERIVA_CATALOGID', '4')
     db = DashboardQueryHelper(hostname, catalogid)
     db.run_demo()

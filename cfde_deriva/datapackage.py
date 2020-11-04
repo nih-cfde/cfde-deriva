@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
+if 'history_capture' not in tag:
+    tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -40,25 +42,25 @@ class CfdeDataPackage (object):
         # USC/ISI ISRD roles
         "isrd_staff": "https://auth.globus.org/176baec4-ed26-11e5-8e88-22000ab4b42b",
         'isrd_testers':    "https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d",
-        # demo.derivacloud.org roles
-        "demo_admin": "https://auth.globus.org/5a773142-e2ed-11e8-a017-0e8017bdda58",
-        "demo_creator": "https://auth.globus.org/bc286232-a82c-11e9-8157-0ed6cb1f08e0",
-        "demo_writer": "https://auth.globus.org/caa11064-e2ed-11e8-9d6d-0a7c1eab007a",
-        "demo_curator": "https://auth.globus.org/a5cfa412-e2ed-11e8-a768-0e368f3075e8",
-        "demo_reader": "https://auth.globus.org/b9100ea4-e2ed-11e8-8b39-0e368f3075e8",
+        # CFDE roles
+        "cfde_portal_admin": "https://auth.globus.org/5f742b05-9210-11e9-aa27-0e4b2da78b7a",
+        "cfde_portal_curator": "https://auth.globus.org/b5ff40d0-9210-11e9-aa1a-0a294aef5614",
+        "cfde_portal_writer": "https://auth.globus.org/e8d6b111-9210-11e9-aa1a-0a294aef5614",
+        "cfde_portal_creator": "https://auth.globus.org/f4c5c479-a8bf-11e9-a6e2-0a075bc69d14",
+        "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
     })
-    #writers = [grp.demo_curator, grp.demo_writer]
     writers = []
+    readers = [grp.cfde_portal_reader, "*"]
     catalog_acls = {
-        "owner": [grp.demo_admin],
+        "owner": [grp.cfde_portal_admin],
         "insert": writers,
         "update": writers,
         "delete": writers,
-        "select": [grp.demo_reader, grp.isrd_testers, grp.isrd_staff, "*"],
+        "select": readers,
         "enumerate": ["*"],
     }
     ermrestclient_acls = {
-        "select": ["*"],
+        "select": readers,
     }
 
     def __init__(self, filename):
@@ -67,6 +69,7 @@ class CfdeDataPackage (object):
         self.catalog = None
         self.cat_model_root = None
         self.cat_cfde_schema = None
+        self.cat_has_history_control = None
 
         with open(self.filename, 'r') as f:
             self.model_doc = tableschema.make_model(json.load(f))
@@ -79,6 +82,7 @@ class CfdeDataPackage (object):
     def set_catalog(self, catalog):
         self.catalog = catalog
         self.get_model()
+        self.cat_has_history_control = catalog.get('/').json().get("features", {}).get("history_control", False)
 
     def get_model(self):
         self.cat_model_root = self.catalog.getCatalogModel()
@@ -110,6 +114,8 @@ class CfdeDataPackage (object):
                 else:
                     tdoc = ntable.prejson()
                     tdoc['schema_name'] = 'CFDE'
+                    if self.cat_has_history_control:
+                        tdoc.setdefault('annotations', dict())[tag.history_capture] = False
                     need_tables.append(tdoc)
 
             if need_tables:
@@ -134,11 +140,13 @@ class CfdeDataPackage (object):
                 doc_table = doc_schema.tables.get(table.name) if doc_schema is not None else None
                 if doc_table is not None:
                     table.annotations.update(doc_table.annotations)
+                    if self.cat_has_history_control:
+                        table.annotations[tag.history_capture] = False
                 for column in table.columns:
                     doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
                     if doc_column is not None:
                         column.annotations.update(doc_column.annotations)
-                if table.is_association():
+                if True or table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             print('Dropping %s' % fkey.uri_path)
