@@ -168,7 +168,7 @@ class CfdeDataPackage (object):
             "navbarMenu": {
                 "children": [
                     {
-                        "name": "Browse",
+                        "name": "Browse All Data",
                         "children": [
                             { "name": "Collection", "url": "/chaise/recordset/#%s/CFDE:collection" % self.catalog._catalog_id },
                             { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
@@ -190,8 +190,12 @@ class CfdeDataPackage (object):
                             { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
                         ]
                     },
+                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
+                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
+                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
+                    { "name": "|" },
                     { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Documentation", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" }
+                    { "name": "Data Review", "url": "/dcc_review.html" }
                 ]
             }
         }
@@ -200,7 +204,7 @@ class CfdeDataPackage (object):
             if key not in parent:
                 parent[key] = dict()
             parent[key].update(d)
-        
+
         # have Chaise display underscores in model element names as whitespace
         _update(
             self.cat_cfde_schema.display,
@@ -264,7 +268,7 @@ class CfdeDataPackage (object):
                     nfkey = ntable.fkey_by_column_map({
                         ntable.column_definitions[fk_col.name]: npktable.column_definitions[pk_col.name]
                         for fk_col, pk_col in fkey.column_map.items()
-                    }) 
+                    })
                     fkey.foreign_key.update(nfkey.foreign_key)
                 except KeyError:
                     continue
@@ -416,7 +420,7 @@ def main(args):
 
     Setting a non-empty DERIVA_CATALOGID causes reconfiguration of an
     existing catalog's presentation tweaks. It does not load data.
-    
+
     """
     # this is the deriva server where we will create a catalog
     servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
