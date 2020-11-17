@@ -1,6 +1,0 @@
-GTEx_field_value	GTEx_value_description	OBI_term_ID	OBI_term_name
-RNASEQ	RNA sequencing	OBI_0000880	RNA extract
-WES	Whole-exome sequencing	OBI_0000880	RNA extract
-WGS	Whole-genome sequencing	OBI_0001051	DNA extract
-OMNI	OMNI SNP-detection microarray	OBI_0001051	DNA extract
-EXCLUDE	Excluded from downstream analysis due to QC failures; representing as generic nucleic acid extract	OBI_0001010	nucleic acid extract

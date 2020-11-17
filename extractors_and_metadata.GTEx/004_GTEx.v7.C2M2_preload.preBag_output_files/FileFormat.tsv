@@ -1,3 +1,0 @@
-id	url	name	description	synonyms
-http://edamontology.org/format_1930	http://edamontology.org/format_1930	FASTQ	FASTQ short read format ignoring quality scores.	FASTAQ|fq
-http://edamontology.org/format_3462	http://edamontology.org/format_3462	CRAM	Reference-based compression of alignment format	

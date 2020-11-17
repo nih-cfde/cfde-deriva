@@ -1,4 +1,0 @@
-id	url	name	description	synonyms
-http://purl.obolibrary.org/obo/OBI_0000880	http://purl.obolibrary.org/obo/OBI_0000880	RNA extract	an extract which is the output of an extraction process in which RNA molecules are isolated from a specimen.	
-http://purl.obolibrary.org/obo/OBI_0001010	http://purl.obolibrary.org/obo/OBI_0001010	nucleic acid extract	An extract that is the output of an extraction process in which nucleic acid molecules are isolated from a specimen.	
-http://purl.obolibrary.org/obo/OBI_0001051	http://purl.obolibrary.org/obo/OBI_0001051	DNA extract	The output of an extraction process in which DNA molecules are purified in order to exclude DNA from organellas.	
