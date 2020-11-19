@@ -1,14 +1,26 @@
 
 from setuptools import setup
+import re
+import io
+
+__version__ = re.search(
+    r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+    io.open('cfde_deriva/__init__.py', encoding='utf_8_sig').read()
+    ).group(1)
 
 setup(
     name='cfde_deriva',
     description='CFDE Deriva Integration Utilities',
-    version='0.4',
+    version=__version__,
+    zip_safe=False, # make it easier to find JSON, TSV, SQL data
     packages=[
         'cfde_deriva',
+        'cfde_deriva.configs',
+        'cfde_deriva.configs.portal',
     ],
-    package_data={},
+    package_data={
+        'cfde_deriva.configs.portal': ['*.json', '*.tsv', '*.sql'],
+    },
     scripts=[],
     requires=['deriva'],
     install_requires=['deriva>=1.0'],
