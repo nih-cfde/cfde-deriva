@@ -1,15 +1,18 @@
 #!/usr/bin/python3
 
 import os
+import io
 import sys
 import json
 import csv
 import logging
+import pkgutil
 
 from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted, tag
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
 
 from . import tableschema
+from .configs import portal
 
 """
 Basic C2M2 catalog sketch
@@ -29,6 +32,12 @@ logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
+
+# some special singleton strings...
+class _WrappedStr (str):
+    pass
+
+portal_schema_json = 'c2m2-level1-portal-model.json'
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -63,18 +72,27 @@ class CfdeDataPackage (object):
         "select": readers,
     }
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.dirname = os.path.dirname(self.filename)
+    def __init__(self, package_filename):
+        """Construct CfdeDataPackage from given package definition filename.
+
+        Special singletons in this module select built-in data:
+          - portal_schema_json
+        """
+        self.package_filename = package_filename
         self.catalog = None
         self.cat_model_root = None
         self.cat_cfde_schema = None
         self.cat_has_history_control = None
 
-        with open(self.filename, 'r') as f:
-            self.model_doc = tableschema.make_model(json.load(f))
-            self.doc_model_root = Model(None, self.model_doc)
-            self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
+        if package_filename is portal_schema_json:
+            package_def = json.loads(pkgutil.get_data(portal.__name__, package_filename).decode())
+        else:
+            with open(self.package_filename, 'r') as f:
+                package_def = json.load(f)
+
+        self.model_doc = tableschema.make_model(package_def)
+        self.doc_model_root = Model(None, self.model_doc)
+        self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
         if set(self.model_doc['schemas']) != {'CFDE'}:
             raise NotImplementedError('Unexpected schema set in data package: %s' % (self.model_doc['schemas'],))
@@ -353,8 +371,13 @@ class CfdeDataPackage (object):
             table = self.cat_model_root.table("CFDE", tname)
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
             if "path" in resource:
-                fname = "%s/%s" % (self.dirname, resource["path"])
-                with open(fname, "r") as f:
+                def open_package():
+                    if self.package_filename is portal_schema_json:
+                        return io.StringIO(pkgutil.get_data(portal.__name__, resource["path"]).decode())
+                    else:
+                        fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
+                        return open(fname, 'r')
+                with open_package() as f:
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
@@ -375,7 +398,7 @@ class CfdeDataPackage (object):
                                     logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
                             except Exception as e:
                                 logger.error("Table %s data load FAILED from "
-                                             "%s: %s" % (table.name, fname, e))
+                                             "%s: %s" % (table.name, self.package_filename, e))
                                 raise
                             else:
                                 batch.clear()
@@ -389,9 +412,9 @@ class CfdeDataPackage (object):
                                 logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
                         except Exception as e:
                             logger.error("Table %s data load FAILED from "
-                                         "%s: %s" % (table.name, fname, e))
+                                         "%s: %s" % (table.name, self.package_filename, e))
                             raise
-                    logger.info("All data for table %s loaded from %s." % (table.name, fname))
+                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
 
 
 def main(args):
@@ -400,8 +423,11 @@ def main(args):
     Examples:
 
     python3 -m cfde_deriva.datapackage \
-     ./table-schema/cfde-core-model.json \
+     PORTAL_SCHEMA \
      /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
+
+    The special name PORTAL_SCHEMA selects the builtin C2M2 portal
+    schema embedded as package data in cfde_deriva.
 
     When multiple files are specified, they are loaded in the order given.
     Earlier files take precedence in configuring the catalog model, while
@@ -442,7 +468,10 @@ def main(args):
     # pre-load all JSON files and convert to models
     # in order to abort early on basic usage errors
     datapackages = [
-        CfdeDataPackage(fname)
+        CfdeDataPackage(
+            # map magic filenames to internal singletons
+            {'PORTAL_SCHEMA': portal_schema_json}.get(fname, fname)
+        )
         for fname in args
     ]
 
@@ -457,7 +486,7 @@ def main(args):
             for dp in datapackages:
                 dp.set_catalog(newcat)
                 dp.provision()
-                print("Model deployed for %s." % (dp.filename,))
+                print("Model deployed for %s." % (dp.package_filename,))
 
             ## customize catalog policy/presentation (only need to do once)
             datapackages[0].apply_custom_config()
