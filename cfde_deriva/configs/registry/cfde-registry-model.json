@@ -1,0 +1,838 @@
+{
+   "profile": "tabular-data-package",
+   "name": "cfde_submission_registry",
+   "title": "A customized CFDE-CC submission registry with Chaise display directives",
+   "resources": [
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc",
+         "title": "Onboarded DCC",
+         "description": "Each onboarded DCC who may submit datapackages to the CFDE-CC.",
+         "path": "dcc.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this DCC, issued by the CFDE-CC."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_name",
+                  "description": "A short, human-readable, label for this DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this DCC",
+                  "type": "string"
+               },
+               {
+                  "name": "contact_email",
+                  "description": "Email address of this DCC contact",
+                  "type": "string",
+                  "format": "email",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "contact_name",
+                  "description": "Name of this DCC contact",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_url",
+                  "description": "URL of the front page of the website for this DCC",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "id_namespace",
+         "title": "ID Namespace",
+         "description": "Each identifier namespace registered with the CFDE-CC for use with datapackage submissions.",
+         "path": "id_namespace.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "abbreviation",
+                  "description": "A very short display label for this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^[a-zA-Z0-9_]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "group",
+         "title": "Registered Group",
+         "description": "Each group registered for use with the CFDE-CC.",
+         "path": "group.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this group, as known by the DERIVA authentication system."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable label for this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this group",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "group_role",
+         "title": "Group Role Term",
+         "path": "group_role.tsv",
+         "description": "Coded vocabulary for a group's role within the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this role concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this role concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this role concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "id_namespace_role",
+         "title": "ID Namespace Role Term",
+         "path": "id_namespace_role.tsv",
+         "description": "Coded vocabulary for a namespace's role within the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this role concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this role concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this role concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_status",
+         "title": "Datapackage Status Term",
+         "path": "datapackage_status.tsv",
+         "description": "Coded vocabulary for datapackage automated lifecycle states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "release_status",
+         "title": "Release Status Term",
+         "path": "release_status.tsv",
+         "description": "Coded vocabulary for release lifecycle states known by the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_approval_status",
+         "title": "Datapackage Status Approval Term",
+         "path": "datapackage_approval_status.tsv",
+         "description": "Coded vocabulary for datapackage approval-decision states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_table_status",
+         "title": "Datapackage Tabular Resource Status Term",
+         "path": "datapackage_table_status.tsv",
+         "description": "Coded vocabulary for datapackage tabular file lifecycle states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage",
+         "title": "Submitted Datapackage",
+         "description": "Each submitted datapackage currently tracked by the CFDE-CC.",
+         "path": "datapackage.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this datapackage issued by the CFDE-CC for internal use."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "submitting_dcc",
+                  "description": "The identifier for the DCC submitting this datapackage."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "submitting_user_profile",
+                  "description": "The brief client identity for the originating user (visible to registry users).",
+                  "type": "json",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "submitting_user_context",
+                  "description": "The full client authentication context for the originating user (for internal use).",
+                  "type": "json",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+               {
+                  "name": "submission_time",
+                  "description": "A timestamp for when the datapackage was submitted to the CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "datapackage_url",
+                  "description": "URL of this datapackage in CFDE-CC controlled storage.",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the datapackage within the submission pipeline.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }               
+               },
+               {
+                  "name": "dcc_approval_status",
+                  "description": "A coded value for the post-review DCC approval of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "cfde_approval_status",
+                  "description": "A coded value for the post-review CFDE-CC approval of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "decision_time",
+                  "description": "A timestamp for when the datapackage reached a final decision status from the DCC and CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any"
+               },
+               {
+                  "name": "review_ermrest_url",
+                  "description": "URL of ermrest catalog to review this datapackage.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "review_browse_url",
+                  "description": "URL of review HTML UI for this datapackage.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "review_summary_url",
+                  "description": "URL of review HTML summary page for this datapackage.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ],
+            "foreignKeys": [
+               {
+                  "fields": ["submitting_dcc"],
+                  "constraint_name": "datapackage_submitting_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["submitting_user"],
+                  "constraint_name": "datapackage_submitting_user_fkey",
+                  "reference": {
+                     "resourceSchema": "public",
+                     "resource": "ERMrest_Client",
+                     "fields": "ID"
+                  }
+               },
+               {
+                  "fields": ["status"],
+                  "constraint_name": "datapackage_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["dcc_approval_status"],
+                  "constraint_name": "datapackage_dcc_approval_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_approval_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["cfde_approval_status"],
+                  "constraint_name": "datapackage_cfde_approval_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_approval_status",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_table",
+         "title": "Submitted Datapackage Tabular Resource",
+         "description": "Constituent submitted datapackage currently tracked by the CFDE-CC.",
+         "path": "datapackage_table.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The identifier for the datapackage as issued by the CFDE-CC."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "position",
+                  "description": "The integer index (0-based) of the tabular resource within the datapackage",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+               {
+                  "name": "table_name",
+                  "description": "The reported table name for this tabular resource."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the datapackage tabular file within the submission pipeline.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }               
+               },
+               {
+                  "name": "num_rows",
+                  "description": "The number of rows found in this tabular input",
+                  "type": "integer"
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "datapackage", "position" ],
+            "foreignKeys": [
+               {
+                  "fields": ["status"],
+                  "constraint_name": "datapackage_table_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_table_status",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "release",
+         "title": "CFDE Release",
+         "description": "Each defined release known by the submission system.",
+         "path": "release.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this release issued by the CFDE-CC for internal use."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the release within the submission pipeline.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }               
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "release_time",
+                  "description": "A timestamp for when the release was completed by the CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any"
+               },
+               {
+                  "name": "ermrest_url",
+                  "description": "URL of ermrest catalog with the release content.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "browse_url",
+                  "description": "URL of HTML browsing UI for this release.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "summary_url",
+                  "description": "URL of HTML summary page for this release.",
+                  "type": "string",
+                  "format": "uri"
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string"
+               }
+            ],
+            "primaryKey": ["id"]
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_group_role",
+         "title": "DCC Group Role",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) a group (a Globus Group registered for use with the submission system), (2) a group role (a coded value for the purpose of a group within the submission system)",
+         "path": "dcc_group_role.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "group",
+                  "description": "Identifier for one group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "role",
+                  "description": "Concept identifier for the role assigned to this group with respect to this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "group", "role" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_group_role_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "group",
+                  "constraint_name": "dcc_group_role_group_fkey",
+                  "reference": {
+                     "resource": "group",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "role",
+                  "constraint_name": "dcc_group_role_role_fkey",
+                  "reference": {
+                     "resource": "group_role",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_id_namespace_role",
+         "title": "DCC Namespace Role",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) an identifier namespace, (2) a namespace role (a coded value for how the namespace is related to the DCC)",
+         "path": "dcc_id_namespace_role.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "id_namespace",
+                  "description": "Identifier for one identifier namespace.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "role",
+                  "description": "Concept identifier for the role assigned to this namespace with respect to this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "id_namespace", "role" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_id_namespace_role_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "group",
+                  "constraint_name": "dcc_id_namespace_role_namespace_fkey",
+                  "reference": {
+                     "resource": "group",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "role",
+                  "constraint_name": "dcc_id_namespace_role_role_fkey",
+                  "reference": {
+                     "resource": "id_namespace_role",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_release_datapackage",
+         "title": "DCC Release Datapackage",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) a planned release, (2) a submitted datapackage constituent of the release.",
+         "path": "dcc_release_datapackage.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "release",
+                  "description": "Identifier for one release.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "datapackage",
+                  "description": "Identifier for one datapackage submitted by this DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "release", "datapackage" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_release_datapackage_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "release",
+                  "constraint_name": "dcc_release_datapackage_release_fkey",
+                  "reference": {
+                     "resource": "release",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "dcc_release_datapackage_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         }
+      }
+
+   ]
+}
