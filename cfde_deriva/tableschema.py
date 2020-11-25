@@ -111,6 +111,7 @@ def make_fkey(tname, fkdef):
     fkcols = fkdef.pop("fields")
     fkcols = [fkcols] if isinstance(fkcols, str) else fkcols
     reference = fkdef.pop("reference")
+    pkschema = reference.pop("resourceSchema", schema_name)
     pktable = reference.pop("resource")
     pktable = tname if pktable == "" else pktable
     to_name = reference.pop("title", None)
@@ -129,7 +130,7 @@ def make_fkey(tname, fkdef):
         annotations[tag.foreign_key] = {"to_name": to_name}
     return ForeignKey.define(
         fkcols,
-        schema_name,
+        pkschema,
         pktable,
         pkcols,
         constraint_names=[[ schema_name, constraint_name ]],
