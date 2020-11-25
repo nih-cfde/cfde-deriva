@@ -1,0 +1,8 @@
+id	webauthn_id	name	description
+7977181e-f82f-11ea-b43a-0efde36f5027	https://auth.globus.org/7977181e-f82f-11ea-b43a-0efde36f5027	NIH CFDE GTEx Reviewers	
+1863c500-f831-11ea-b43d-0efde36f5027	https://auth.globus.org/1863c500-f831-11ea-b43d-0efde36f5027	NIH CFDE Kids First Reviewers	
+4e335e29-f831-11ea-b43e-0efde36f5027	https://auth.globus.org/4e335e29-f831-11ea-b43e-0efde36f5027	NIH CFDE HMP Reviewers	
+8a32410e-f831-11ea-880f-0ac4e6b272c3	https://auth.globus.org/8a32410e-f831-11ea-880f-0ac4e6b272c3	NIH CFDE MoTrPAC Reviewers	
+f423d7d8-f831-11ea-a93a-0a738d2d09bf	https://auth.globus.org/f423d7d8-f831-11ea-a93a-0a738d2d09bf	NIH CFDE Metabolomics Reviewers	
+2b14318d-f832-11ea-880f-0ac4e6b272c3	https://auth.globus.org/2b14318d-f832-11ea-880f-0ac4e6b272c3	NIH CFDE LINCS Reviewers	
+642533ba-f832-11ea-880f-0ac4e6b272c3	https://auth.globus.org/642533ba-f832-11ea-880f-0ac4e6b272c3	NIH CFDE 4DN Reviewers	

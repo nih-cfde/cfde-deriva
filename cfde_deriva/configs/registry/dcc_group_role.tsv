@@ -1,0 +1,8 @@
+dcc	group	role
+cfde_registry_dcc:gtex	7977181e-f82f-11ea-b43a-0efde36f5027	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:kidsfirst	1863c500-f831-11ea-b43d-0efde36f5027	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:hmp	4e335e29-f831-11ea-b43e-0efde36f5027	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:motrpac	8a32410e-f831-11ea-880f-0ac4e6b272c3	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:metabolomics	f423d7d8-f831-11ea-a93a-0a738d2d09bf	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:lincs	2b14318d-f832-11ea-880f-0ac4e6b272c3	cfde_registry_grp_role:reviewer
+cfde_registry_dcc:4dn	642533ba-f832-11ea-880f-0ac4e6b272c3	cfde_registry_grp_role:reviewer

@@ -59,7 +59,7 @@ class CfdeDataPackage (object):
         "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
     })
     writers = []
-    readers = [grp.cfde_portal_reader, "*"]
+    readers = [grp.cfde_portal_reader,]
     catalog_acls = {
         "owner": [grp.cfde_portal_admin],
         "insert": writers,

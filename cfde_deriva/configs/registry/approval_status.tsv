@@ -1,0 +1,5 @@
+id	name	description
+cfde_registry_decision:pending	pending	An approval decision is due, pending content review.
+cfde_registry_decision:approved	approved	Content has been approved by the reviewer.
+cfde_registry_decision:approved-hold	approved but held	Content has been approved but further processing should be delayed.
+cfde_registry_decision:rejected	rejected	Content has been rejected by the reviewer.

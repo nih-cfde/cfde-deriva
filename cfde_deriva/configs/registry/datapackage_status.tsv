@@ -1,0 +1,11 @@
+id	name	description
+cfde_registry_dp_status:submitted	submitted	Initial state after datapackage submission from client.
+cfde_registry_dp_status:bag-valid	bag valid	BDBag validity check has succeeded, other processing is pending.
+cfde_registry_dp_status:bag-error	bag error	BDBag validity check has failed, submission cannot be processed.
+cfde_registry_dp_status:check-valid	check valid	Content pre-checks have succeeded, other processing is pending.
+cfde_registry_dp_status:check-error	check error	Content pre-checks have failed, submission cannot be processed.
+cfde_registry_dp_status:content-ready	content ready	Submission is loaded and ready for human review.
+cfde_registry_dp_status:content-error	content error	Content loading has failed, submission cannot be processed.
+cfde_registry_dp_status:rejected	rejected	Submission has been rejected by human reviewers and should not be included in subsequent releases.
+cfde_registry_dp_status:release-pending	release pending	Submission has been approved and should be included in subsequent releases until obsoleted.
+cfde_registry_dp_status:obsoleted	obsoleted	Submission has been obsoleted by a more recently approved submission from the same DCC.

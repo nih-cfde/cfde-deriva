@@ -1,0 +1,2 @@
+id	status	description	cfde_approval_status	release_time	ermrest_url	browse_url	summary_url	diagnostics
+cfde_registry:0-0001	cfde_registry_rel_status:public-release	Epic 1 release	cfde_registry_decision:approved	2020-11-06 01:06:53.406086+00	https://app.nih-cfde.org/ermrest/catalog/1	https://app.nih-cfde.org/chaise/recordset/#1/CFDE:collection	

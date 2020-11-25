@@ -14,7 +14,7 @@
             "fields": [
                {
                   "name": "id",
-                  "description": "The identifier for this DCC, issued by the CFDE-CC."
+                  "description": "The identifier for this DCC, issued by the CFDE-CC.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -116,7 +116,15 @@
             "fields": [
                {
                   "name": "id",
-                  "description": "The identifier for this group, as known by the DERIVA authentication system."
+                  "description": "The identifier for this group, as known by the Globus Groups system.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "webauthn_id",
+                  "description": "The identifier for this group, as known by the DERIVA webauthn authentication system.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -287,10 +295,10 @@
       
       {
          "profile": "tabular-data-resource",
-         "name": "datapackage_approval_status",
-         "title": "Datapackage Status Approval Term",
-         "path": "datapackage_approval_status.tsv",
-         "description": "Coded vocabulary for datapackage approval-decision states known by the datapackage submission system.",
+         "name": "approval_status",
+         "title": "Approval Status Term",
+         "path": "approval_status.tsv",
+         "description": "Coded vocabulary for approval-decision states known by the datapackage submission system.",
          "schema": {
             "fields": [
                {
@@ -367,7 +375,7 @@
             "fields": [
                {
                   "name": "id",
-                  "description": "The identifier for this datapackage issued by the CFDE-CC for internal use."
+                  "description": "The identifier for this datapackage issued by the CFDE-CC for internal use.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -375,28 +383,20 @@
                },
                {
                   "name": "submitting_dcc",
-                  "description": "The identifier for the DCC submitting this datapackage."
+                  "description": "The identifier for the DCC submitting this datapackage.",
                   "type": "string",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "submitting_user_profile",
-                  "description": "The brief client identity for the originating user (visible to registry users).",
-                  "type": "json",
+                  "name": "submitting_user",
+                  "description": "The DERIVA webauthn user identity for the originating user.",
+                  "type": "string",
                   "constraints": {
                      "required": true
                   }
                },
-               {
-                  "name": "submitting_user_context",
-                  "description": "The full client authentication context for the originating user (for internal use).",
-                  "type": "json",
-                  "constraints": {
-                     "required": true
-                  }
-               }
                {
                   "name": "submission_time",
                   "description": "A timestamp for when the datapackage was submitted to the CFDE-CC.",
@@ -500,7 +500,7 @@
                   "fields": ["dcc_approval_status"],
                   "constraint_name": "datapackage_dcc_approval_status_fkey",
                   "reference": {
-                     "resource": "datapackage_approval_status",
+                     "resource": "approval_status",
                      "fields": "id"
                   }
                },
@@ -508,7 +508,7 @@
                   "fields": ["cfde_approval_status"],
                   "constraint_name": "datapackage_cfde_approval_status_fkey",
                   "reference": {
-                     "resource": "datapackage_approval_status",
+                     "resource": "approval_status",
                      "fields": "id"
                   }
                }
@@ -526,7 +526,7 @@
             "fields": [
                {
                   "name": "datapackage",
-                  "description": "The identifier for the datapackage as issued by the CFDE-CC."
+                  "description": "The identifier for the datapackage as issued by the CFDE-CC.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -539,10 +539,10 @@
                   "constraints": {
                      "required": true
                   }
-               }
+               },
                {
                   "name": "table_name",
-                  "description": "The reported table name for this tabular resource."
+                  "description": "The reported table name for this tabular resource.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -571,7 +571,7 @@
             "primaryKey": [ "datapackage", "position" ],
             "foreignKeys": [
                {
-                  "fields": ["status"],
+                  "fields": "status",
                   "constraint_name": "datapackage_table_status_fkey",
                   "reference": {
                      "resource": "datapackage_table_status",
@@ -592,7 +592,7 @@
             "fields": [
                {
                   "name": "id",
-                  "description": "The identifier for this release issued by the CFDE-CC for internal use."
+                  "description": "The identifier for this release issued by the CFDE-CC for internal use.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -609,6 +609,11 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "cfde_approval_status",
+                  "description": "A coded value for the post-review CFDE-CC approval of this release.",
                   "type": "string"
                },
                {
@@ -641,7 +646,25 @@
                   "type": "string"
                }
             ],
-            "primaryKey": ["id"]
+            "primaryKey": ["id"],
+            "foreignKeys": [
+               {
+                  "fields": "status",
+                  "constraint_name": "release_status_fkey",
+                  "reference": {
+                     "resource": "release_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["cfde_approval_status"],
+                  "constraint_name": "release_cfde_approval_status_fkey",
+                  "reference": {
+                     "resource": "approval_status",
+                     "fields": "id"
+                  }
+               }
+            ]
          }
       },
       

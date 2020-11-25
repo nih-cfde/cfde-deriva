@@ -1,0 +1,5 @@
+id	name	description
+cfde_registry_grp_role:admin	administrator	Able to perform all functions on behalf of DCC.
+cfde_registry_grp_role:submitter	data submitter	Able to submit C2M2 datapackages and view submissions or submission status on behalf of the DCC.
+cfde_registry_grp_role:review-decider	review decider	Able to view submissions and submission status, as well as enter review approval decisions on behalf of the DCC.
+cfde_registry_grp_role:reviewer	reviewer	Able to view submissions prepared for review.

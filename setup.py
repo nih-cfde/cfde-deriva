@@ -17,9 +17,11 @@ setup(
         'cfde_deriva',
         'cfde_deriva.configs',
         'cfde_deriva.configs.portal',
+        'cfde_deriva.configs.registry',
     ],
     package_data={
         'cfde_deriva.configs.portal': ['*.json', '*.tsv', '*.sql'],
+        'cfde_deriva.configs.registry': ['*.json', '*.tsv'],
     },
     scripts=[],
     requires=['deriva'],
