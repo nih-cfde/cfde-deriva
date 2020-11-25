@@ -22,10 +22,12 @@
                },
                {
                   "name": "dcc_name",
+                  "title": "DCC Name",
                   "description": "A short, human-readable, label for this DCC",
                   "type": "string",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
                },
                {
@@ -52,16 +54,98 @@
                },
                {
                   "name": "dcc_url",
+                  "title": "DCC URL",
                   "description": "URL of the front page of the website for this DCC",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_dcc_url}}]({{_dcc_url}})"
+                        }
+                     }
                   }
                }
             ],
             "missingValues": [ "" ],
             "primaryKey": [ "id" ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "[{{dcc_name}}]({{dcc_url}})"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_datapackages": {
+                     "markdown_name": "Submitted Datapackages",
+                     "source": [{"inbound": ["CFDE", "datapackage_submitting_dcc_fkey"]}, "RID"]
+                  },
+                  "S_releases": {
+                     "markdown_name": "Releases",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_group_roles": {
+                     "markdown_name": "Groups",
+                     "source": [{"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_id_namespaces": {
+                     "markdown_name": "ID Namespaces",
+                     "source": [{"inbound": ["CFDE", "dcc_id_namespace_role_dcc_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_datapackages"},
+                  {"sourcekey": "S_releases"},
+                  {"sourcekey": "S_group_roles"},
+                  {"sourcekey": "S_id_namespaces"}
+               ]
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "dcc_name",
+                  "dcc_url",
+                  "contact_name",
+                  "contact_email",
+                  "description"
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "DCC",
+                     "comment": "The identify of the DCC onboarded with the CFDE-CC.",
+                     "display": {
+                        "markdown_pattern": "{{dcc_name}}\n[{{_dcc_url}}]({{_dcc_url}})\n{{id}}\n"
+                     }
+                  },
+                  {
+                     "markdown_name": "Contact",
+                     "comment": "The primary contact of the DCC.",
+                     "display": {
+                        "markdown_pattern": "{{contact_name}}\n{{contact_email}}\n"
+                     }
+                  },
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "dcc_name"},
+                  {"source": "contact_name"},
+                  {"source": "contact_email"}
+               ]}
+            }
          }
       },
 
@@ -93,7 +177,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "unique": true
+                  }
                },
                {
                   "name": "description",
@@ -103,6 +190,28 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{name}}\n{{id}}\n"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc_roles": {
+                     "markdown_name": "DCC Using Namespace",
+                     "source": [{"inbound": ["CFDE", "dcc_id_namespace_role_namespace_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_dcc_roles"}
+               ]
+            }
          }
       },
 
@@ -146,6 +255,13 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": [ "id" ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "[{{name}}](https://app.globus.org/groups/{{_id}}/about)"
+               }
+            }
          }
       },
 
@@ -383,6 +499,7 @@
                },
                {
                   "name": "submitting_dcc",
+                  "title": "Submitting DCC",
                   "description": "The identifier for the DCC submitting this datapackage.",
                   "type": "string",
                   "constraints": {
@@ -408,11 +525,19 @@
                },
                {
                   "name": "datapackage_url",
+                  "title": "Datapackage URL",
                   "description": "URL of this datapackage in CFDE-CC controlled storage.",
                   "type": "string",
                   "format": "uri",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_datapackage_url}}]({{_datapackage_url}})"
+                        }
+                     }
                   }
                },
                {
@@ -430,11 +555,13 @@
                },
                {
                   "name": "dcc_approval_status",
+                  "title": "DCC Approval Status",
                   "description": "A coded value for the post-review DCC approval of this datapackage.",
                   "type": "string"
                },
                {
                   "name": "cfde_approval_status",
+                  "title": "CFDE Approval Status",
                   "description": "A coded value for the post-review CFDE-CC approval of this datapackage.",
                   "type": "string"
                },
@@ -446,21 +573,45 @@
                },
                {
                   "name": "review_ermrest_url",
+                  "title": "EMRrest API URL",
                   "description": "URL of ermrest catalog to review this datapackage.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_ermrest_url}}]({{_review_ermrest_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "review_browse_url",
+                  "title": "Browse URL",
                   "description": "URL of review HTML UI for this datapackage.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_browse_url}}]({{_review_browse_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "review_summary_url",
+                  "title": "Summary URL",
                   "description": "URL of review HTML summary page for this datapackage.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_summary_url}}]({{_review_summary_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "diagnostics",
@@ -513,6 +664,81 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "submission_time", "descending": true}]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_submission": {
+                     "markdown_name": "Submission",
+                     "comment": "Identifying information for submission.",
+                     "source": "submission_time",
+                     "display": {
+                        "markdown_pattern": "- {{submission_time}}\n- {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}}\n{{#_description}}- {{description}}\n{{/_description}}"
+                     }
+                  },
+                  "S_status_extra": {
+                     "markdown_name": "Status Summary",
+                     "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
+                     "comment": "The status of the datapackage in the submission system.",
+                     "display": {
+                        "markdown_pattern": "- {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}\n{{#$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}- DCC {{rowName}}\n{{/$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}{{#$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}- CFDE {{rowName}}\n{{/$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}{{#diagnostics}}\n- Error: {{diagnostics}}\n{{/diagnostics}}"
+                     }
+                  },
+                  "S_dcc_approval_status": {
+                     "source": [{"outbound": ["CFDE", "datapackage_dcc_approval_status_fkey"]}, "RID"]
+                  },
+                  "S_urls_brief": {
+                     "markdown_name": "Links",
+                     "comment": "Links to content related to this submission.",
+                     "source": "datapackage_url",
+                     "display": {
+                        "markdown_pattern": "{{#_review_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_review_browse_url}}{{#_review_summary_url}}- Summary: [{{.}}]({{.}})\n{{/_review_summary_url}}"
+                     }
+                  },
+                  "S_urls": {
+                     "markdown_name": "Links",
+                     "comment": "Links to content related to this submission.",
+                     "source": "datapackage_url",
+                     "display": {
+                        "markdown_pattern": "- Package: [{{_datapackage_url}}]({{_datapackage_url}})\n{{#_review_ermrest_url}}- ERMrest: [{{.}}]({{.}})\n{{/_review_ermrest_url}}{{#_review_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_review_browse_url}}{{#_review_summary_url}}- Summary: [{{.}}]({{.}})\n{{/_review_summary_url}}"
+                     }
+                  },
+                  "S_releases": {
+                     "markdown_name": "Releases",
+                     "comment": "Releases with this datapackage as a constituent part.",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_datapackage_tables": {
+                     "markdown_name": "Submitted Tables",
+                     "comment": "Tabular data resources included in this submission.",
+                     "source": [{"inbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_releases"},
+                  {"sourcekey": "S_datapackage_tables"}
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_submission"},
+                  {"sourcekey": "S_status_extra"},
+                  {"sourcekey": "S_urls_brief"}
+               ]
+            }
          }
       },
       
@@ -587,6 +813,38 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "*": {
+                  "row_order": ["datapackage", "position"]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_datapackage": {
+                     "source": [{"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
+                  },
+                  "S_status_extra": {
+                     "markdown_name": "Status",
+                     "comment": "The status of this tabular resource in the submision system.",
+                     "source": [{"outbound": ["CFDE", "datapackage_table_status_fkey"]}, "RID"],
+                     "display": {
+                        "markdown_pattern": "{{$fkeys.CFDE.datapackage_table_status_fkey.rowName}}{{#_diagnostics}}\n{{diagnostics}}\n{{/_diagnostics}}"
+                     }
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_datapackage"},
+                  {"source": "table_name"},
+                  {"sourcekey": "S_status_extra"},
+                  {"source": "num_rows"}
+               ]
+            }
          }
       },
 
@@ -621,6 +879,7 @@
                },
                {
                   "name": "cfde_approval_status",
+                  "title": "CFDE Approval Status",
                   "description": "A coded value for the post-review CFDE-CC approval of this release.",
                   "type": "string"
                },
@@ -632,21 +891,45 @@
                },
                {
                   "name": "ermrest_url",
+                  "title": "ERMrest URL",
                   "description": "URL of ermrest catalog with the release content.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_ermrest_url}}]({{_ermrest_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "browse_url",
+                  "title": "Browse URL",
                   "description": "URL of HTML browsing UI for this release.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_browse_url}}]({{_browse_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "summary_url",
+                  "title": "Summary URL",
                   "description": "URL of HTML summary page for this release.",
                   "type": "string",
-                  "format": "uri"
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_summary_url}}]({{_summary_url}})"
+                        }
+                     }
+                  }
                },
                {
                   "name": "diagnostics",
@@ -673,6 +956,85 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "release_time", "descending": true}]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_release_extra": {
+                     "source": "id",
+                     "display": {
+                        "markdown_pattern": "{{id}}\n{{description}}\n"
+                     }
+                  },
+                  "S_status_extra": {
+                     "source": "status",
+                     "comment": "Status of this release in the submission system.",
+                     "display": {
+                        "markdown_pattern": "{{$fkeys.CFDE.release_status_fkey.rowName}}{{#$fkeys.CFDE.release_cfde_approval_status_fkey}}\n{{rowName}}{{/$fkeys.CFDE.release_cfde_approval_status_fkey}}{{#_diagnostics}}\n{{diagnostics}}\n{{/_diagnostics}}"
+                     }
+                  },
+                  "S_urls": {
+                     "markdown_name": "Links",
+                     "comments": "Links to content relevant to this release.",
+                     "source": "ermrest_url",
+                     "display": {
+                        "markdown_pattern": "{{#_ermrest_url}}- ERMrest: [{{.}}]({{.}})\n{{/_ermrest_url}}{{#_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_browse_url}}{{#_summary_url}}- Summary: [{{.}}]({{.}}){{/_summary_url}}"
+                     }
+                  },
+                  "S_status": {
+                     "source": [{"outbound": ["CFDE", "release_status_fkey"]}, "RID"]
+                  },
+                  "S_cfde_approval_status": {
+                     "source": [{"outbound": ["CFDE", "release_cfde_approval_status_fkey"]}, "RID"]
+                  },
+                  "S_dccs": {
+                     "markdown_name": "Contributing DCC",
+                     "comment": "DCC's submission is a constituent part of this release",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_dcc_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_datapackages": {
+                     "markdown_name": "Datapackage",
+                     "comment": "Datapackage is a constituent part of this release",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        "RID"
+                     ]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_datapackages"}
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_release_extra"},
+                  {"source": "release_time"},
+                  {"sourcekey": "S_status_extra"},
+                  {"sourcekey": "S_urls"}
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_status"},
+                  {"sourcekey": "S_cfde_approval_status"},
+                  {"source": "release_time"},
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_datapackages"}
+               ]}
+            }
          }
       },
       
@@ -736,6 +1098,30 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_group": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_group_fkey"]}, "RID"]
+                  },
+                  "S_role": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_role_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_group"},
+                  {"sourcekey": "S_role"}
+               ]
+            }
          }
       },
 
@@ -778,6 +1164,7 @@
                   "fields": "dcc",
                   "constraint_name": "dcc_id_namespace_role_dcc_fkey",
                   "reference": {
+                     "title": "DCC",
                      "resource": "dcc",
                      "fields": [ "id" ]
                   }
@@ -786,6 +1173,7 @@
                   "fields": "id_namespace",
                   "constraint_name": "dcc_id_namespace_role_namespace_fkey",
                   "reference": {
+                     "title": "ID Namespace",
                      "resource": "id_namespace",
                      "fields": [ "id" ]
                   }
@@ -794,11 +1182,36 @@
                   "fields": "role",
                   "constraint_name": "dcc_id_namespace_role_role_fkey",
                   "reference": {
+                     "title": "Role",
                      "resource": "id_namespace_role",
                      "fields": [ "id" ]
                   }
                }
             ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_id_namespace": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_namespace_fkey"]}, "RID"]
+                  },
+                  "S_role": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_role_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_id_namespace"},
+                  {"sourcekey": "S_role"}
+               ]
+            }
          }
       },
 
@@ -812,6 +1225,7 @@
             "fields": [
                {
                   "name": "dcc",
+                  "title": "DCC",
                   "description": "Identifier for one DCC.",
                   "type": "string",
                   "constraints": {
@@ -862,8 +1276,81 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_dcc_fkey"]}, "RID"]
+                  },
+                  "S_release": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]}, "RID"]
+                  },
+                  "S_datapackage": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_release"},
+                  {"sourcekey": "S_datapackage"}
+               ]
+            }
          }
       }
 
-   ]
+   ],
+   "deriva": {
+      "chaise_config": {
+         "SystemColumnsDisplayCompact": [],
+         "SystemColumnsDisplayDetailed": [],
+         "navbarMenu": {
+            "children": [
+               {
+                  "name": "Browse All Data",
+                  "children": [
+                     { "name": "Collection", "url": "/chaise/recordset/#1/CFDE:collection" },
+                     { "name": "File", "url": "/chaise/recordset/#1/CFDE:file" },
+                     { "name": "Biosample", "url": "/chaise/recordset/#1/CFDE:biosample" },
+                     { "name": "Subject", "url": "/chaise/recordset/#1/CFDE:subject" },
+                     { "name": "Project", "url": "/chaise/recordset/#1/CFDE:project" },
+                     {
+                        "name": "Vocabulary",
+                        "children": [
+                           { "name": "Anatomy", "url": "/chaise/recordset/#1/CFDE:anatomy" },
+                           { "name": "Assay Type", "url": "/chaise/recordset/#1/CFDE:assay_type" },
+                           { "name": "Data Type", "url": "/chaise/recordset/#1/CFDE:data_type" },
+                           { "name": "File Format", "url": "/chaise/recordset/#1/CFDE:file_format" },
+                           { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#1/CFDE:ncbi_taxonomy" },
+                           { "name": "Subject Granularity", "url": "/chaise/recordset/#1/CFDE:subject_granularity" },
+                           { "name": "Subject Role", "url": "/chaise/recordset/#1/CFDE:subject_role" }
+                        ]
+                     },
+                     { "name": "ID Namespace", "url": "/chaise/recordset/#1/CFDE:id_namespace" }
+                  ]
+               },
+               { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
+               { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
+               { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
+               { "name": "|" },
+               { "name": "Dashboard", "url": "/dashboard.html" },
+               { "name": "Data Review", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
+               {
+                  "name": "Registry",
+                  "children": [
+                     { "name": "Datapackages", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
+                     { "name": "Releases", "url":  "/chaise/recordset/#registry/CFDE:release" },
+                     { "name": "DCCs", "url":  "/chaise/recordset/#registry/CFDE:dcc" },
+                     { "name": "Groups", "url":  "/chaise/recordset/#registry/CFDE:group" },
+                     { "name": "ID Namespaces", "url": "/chaise/recordset/#registry/CFDE:datapackage" }
+                  ]
+               }
+            ]
+         }
+      }
+   }
 }
