@@ -221,7 +221,14 @@ def make_table(tdef):
     )
 
 def make_model(tableschema):
-    resources = tableschema['resources']
+    resources = tableschema.pop('resources')
+    annotations = {
+        schema_tag: tableschema
+    }
+    pre_annotations = tableschema.get("deriva", {})
+    for k, t in tag.items():
+        if k in pre_annotations:
+            annotations[t] = pre_annotations.pop(k)
     return {
         "schemas": {
             schema_name: {
@@ -231,7 +238,8 @@ def make_model(tableschema):
                     for tdef in resources
                 }
             }
-        }
+        },
+        "annotations": annotations,
     }
 
 def main():
