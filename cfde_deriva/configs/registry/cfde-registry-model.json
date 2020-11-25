@@ -571,6 +571,14 @@
             "primaryKey": [ "datapackage", "position" ],
             "foreignKeys": [
                {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_table_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  }
+               },
+               {
                   "fields": "status",
                   "constraint_name": "datapackage_table_status_fkey",
                   "reference": {
@@ -775,10 +783,10 @@
                   }
                },
                {
-                  "fields": "group",
+                  "fields": "id_namespace",
                   "constraint_name": "dcc_id_namespace_role_namespace_fkey",
                   "reference": {
-                     "resource": "group",
+                     "resource": "id_namespace",
                      "fields": [ "id" ]
                   }
                },
