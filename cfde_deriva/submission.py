@@ -73,6 +73,7 @@ class Submission (object):
         self.unpack_datapackage(self.download_filename, self.content_path)
         self.bdbag_validate(self.content_path)
         self.datapackage_model_check(self.content_path)
+        self.datapackage_validate(self.content_path)
         self.prepare_sqlite(self.content_path, self.sqlite_filename)
         self.prepare_sqlite_derived_tables(self.sqlite_filename)
         catalog = self.create_review_catalog(self.datapackage_id)
@@ -148,13 +149,24 @@ class Submission (object):
         pass
 
     @classmethod
+    def datapackage_validate(cls, content_path):
+        """Perform datapackage validation.
+
+        This validation considers the TSV content of the datapackage
+        to be sure it conforms to its own JSON datapackage
+        specification.
+
+        """
+        pass
+
+    @classmethod
     def datapackage_model_check(cls, content_path):
         """Perform datapackage model validation for submission content.
 
-        This validation compares the embedded model a (frictionlessio
-        table schema) against the expectations of the CFDE project for
-        C2M2 datapackages, i.e. ensuring that the package does not
-        introduce any undesired deviations in the mode definition.
+        This validation compares the JSON datapackage specification
+        against the expectations of the CFDE project for C2M2
+        datapackages, i.e. ensuring that the package does not
+        introduce any undesired deviations in the model definition.
 
         """
         pass
