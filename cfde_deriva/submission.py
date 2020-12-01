@@ -1,4 +1,7 @@
 
+from . import exception
+from .registry import Registry, WebauthnUser, WebauthnAttributes
+
 class Submission (object):
     """Processing support for C2M2 datapackage submissions.
 
@@ -8,52 +11,67 @@ class Submission (object):
     in the registry as other processing methods are invoked.
 
     Typical call-sequence from automated ingest pipeline:
-    
-      submission = Submission(registry, id, dcc_id, archive_url)
-      submission.ingest()
 
-    The ingest() process will perform the entire lifecycle.
+      from cfde_deriva.submission import Submission, Registry, \
+        ErmrestUser, ErmrestAttributes
+
+      registry = Registry('https', 'server.nih-cfde.org')
+
+      # gather request context
+      dcc_id = ...
+      user = WebauthnUser.from_globus(
+        globus_user_uuid,
+        display_name,
+        full_name,
+        email,
+        [
+           WebauthnAttribute.from_globus(
+             group_uuid,
+             display_name
+           )
+           for group_uuid, display_name in ...
+        ]
+      )
+
+      # early pre-flight check of submission context
+      # (raises exceptions for early abort cases)
+      registry.validate_dcc_id(dcc_id, user)
+
+      # other ingest system prep, like archiving submitted data
+      archive_url = ...
+
+      submission = Submission(registry, id, dcc_id, archive_url)
+      # register and perform ingest processing of archived data
+      # should register (if pre-flight worked above)
+      # raises exceptions for aysnc failure (should update registry before that)
+      submission.ingest()
 
     """
 
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
     
-    def __init__(self, registry, id, dcc_id, archive_url):
+    def __init__(self, registry, id, dcc_id, archive_url, submitting_user):
         """Represent a stateful processing flow for a C2M2 submission.
 
         :param registry: A Registry binding object.
         :param id: The unique identifier for the submission, i.e. UUID.
         :param dcc_id: The submitting DCC, using a registry dcc.id key value.
         :param archive_url: The stable URL where the submission BDBag can be found.
+        :param submitting_user: A WebauthnUser instance representing submitting user.
 
         The new instance is a binding for a submission which may or
         may not yet exist in the registry. The constructor WILL NOT
         cause state changes to the registry.
 
         """
+        registry.validate_dcc_id(dcc_id, submitting_user)
         self.registry = registry
         self.datapackage_id = id
-        self.dcc_id = dcc_id
+        self.submitting_dcc_id = dcc_id
         self.archive_url = archive_url
-
-    @classmethod
-    def from_registry(cls, registry, id):
-        """Re-instantiate a Submission using metadata from an existing registry entry.
-
-        :param registry: A Registry binding object.
-        :param id: The unique identifier for the submission, i.e. UUID.
-    
-        This alternate construction method supports restart of an
-        existing submission already known by the registry.  The
-        `dcc_id` and `archive_url` parameters will be recovered from
-        the registry metadata.
-
-        """
-        entry = registry.get_datapackage(id)
-        dcc_id = entry.submitting_dcc
-        archive_url = entry.datapackage_url
-        return cls(registry, id, dcc_id, archive_url)
+        self.review_catalog = None
+        self.submitting_user = submitting_user
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -66,7 +84,17 @@ class Submission (object):
         5. Create and register (empty) C2M2 review catalog
         6. Load datapackage content into review catalog
         7. Update registry with success/failure status
+
+        Raises RegistrationError and aborts if step (1) failed.
         
+        May raise other exceptions during remaining processing:
+
+          - 
+
+        in these cases, the registry should be updated with error
+        status prior to the exception being raised, unless an
+        operational error prevents that action as well.
+
         """
         # TBD: add registry side-effects
         self.retrieve_datapackage(self.archive_url, self.download_filename)
@@ -76,9 +104,10 @@ class Submission (object):
         self.datapackage_validate(self.content_path)
         self.prepare_sqlite(self.content_path, self.sqlite_filename)
         self.prepare_sqlite_derived_tables(self.sqlite_filename)
-        catalog = self.create_review_catalog(self.datapackage_id)
-        self.upload_datapackage_content(catalog, self.content_path)
-        self.upload_derived_content(catalog, self.sqlite_filename)
+        if self.review_catalog is None:
+            self.review_catalog = self.create_review_catalog(self.datapackage_id)
+        self.upload_datapackage_content(self.review_catalog, self.content_path)
+        self.upload_derived_content(self.review_catalog, self.sqlite_filename)
 
     ## mapping of submission ID to local processing resource names
     
@@ -119,7 +148,7 @@ class Submission (object):
         return '%s/databases/%s.sqlite3' % (cls.content_path_root, id)
 
     ## utility functions to help with various processing and validation tasks
-    
+
     @classmethod
     def retrieve_datapackage(cls, archive_url, download_filename):
         """Idempotently stage datapackage content from archive_url into download_filename.
