@@ -1,5 +1,6 @@
 
 from deriva.core import ErmrestCatalog, get_credential
+from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
 
@@ -7,7 +8,7 @@ from . import exception
 
 def _attrdict_from_strings(*strings):
     new = AttrDict()
-    for prefix, term in [ s.split(':') for s in strings ]:
+    for prefix, term in [ s.replace('-', '_').split(':') for s in strings ]:
         if prefix not in new:
             new[prefix] = AttrDict()
         if term not in new[prefix]:
@@ -20,6 +21,17 @@ terms = _attrdict_from_strings(
     'cfde_registry_grp_role:submitter',
     'cfde_registry_grp_role:review-decider',
     'cfde_registry_grp_role:reviewer',
+    'cfde_registry_dp_status:submitted',
+    'cfde_registry_dp_status:ops-error',
+    'cfde_registry_dp_status:bag-valid',
+    'cfde_registry_dp_status:bag-error',
+    'cfde_registry_dp_status:check-valid',
+    'cfde_registry_dp_status:check-error',
+    'cfde_registry_dp_status:content-ready',
+    'cfde_registry_dp_status:content-error',
+    'cfde_registry_dp_status:rejected',
+    'cfde_registry_dp_status:release-pending',
+    'cfde_registry_dp_status:obsoleted',
 )
 
 class WebauthnAttribute (object):
@@ -210,6 +222,40 @@ class Registry (object):
         )
         # kind of redundant, but make sure we round-trip this w/ server-applied defaults?
         return self.get_datapackage(id)
+
+    def update_status(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_symmary_url=nochange):
+        """Idempotently update datapackage metadata in registry.
+
+        :param id: The datapackage.id of the existing record to update
+        :param status: The new datapackage.status value (default nochange)
+        :param diagnostics: The new datapackage.diagnostics value (default nochange)
+        :param review_ermrest_url: The new datapackage.review_ermrest_url value (default nochange)
+        :param review_browse_url: The new datapackage.review_browse_url value (default nochange)
+        :param review_summary_url: The new datapackage.review_summary_url value (default nochange)
+
+        The special `nochange` singleton value used as default for
+        optional arguments represents the desire to keep whatever
+        current value exists for that field in the registry.
+
+        """
+        if not isinstance(id, str):
+            raise TypeError('expected id of type str, not %s' % (type(id),))
+        existing = self.get_datapackage(id)
+        changes = {
+            k: v
+            for k, v in {
+                    'status': status,
+                    'diagnostics': diagnostics,
+            }.items()
+            if v is not nochange and v != existing[k]
+        }
+        if not changes:
+            return
+        changes['id'] = id
+        self._catalog.put(
+            '/attributegroup/CFDE:datapackage/id;%s' % (','.join(changes.keys()),),
+            json=[changes]
+        )
 
     def get_dcc(self, dcc_id=None):
         """Get one or all DCC records from the registry.

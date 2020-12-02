@@ -1,5 +1,6 @@
 id	name	description
 cfde_registry_dp_status:submitted	submitted	Initial state after datapackage submission from client.
+cfde_registry_dp_status:ops-error	ops error	An unexpected operational error has disrupted processing.
 cfde_registry_dp_status:bag-valid	bag valid	BDBag validity check has succeeded, other processing is pending.
 cfde_registry_dp_status:bag-error	bag error	BDBag validity check has failed, submission cannot be processed.
 cfde_registry_dp_status:check-valid	check valid	Content pre-checks have succeeded, other processing is pending.

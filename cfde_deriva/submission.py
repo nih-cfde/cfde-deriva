@@ -7,7 +7,7 @@ import csv
 import pkgutil
 
 from . import exception
-from .registry import Registry, WebauthnUser, WebauthnAttributes
+from .registry import Registry, WebauthnUser, WebauthnAttributes, nochange
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -106,6 +106,7 @@ class Submission (object):
         operational error prevents that action as well.
 
         """
+        # idempotently get into registry
         try:
             dp = self.registry.register_datapackage(
                 self.datapackage_id,
@@ -114,22 +115,84 @@ class Submission (object):
                 self.archive_url,
             )
         except Exception as e:
-            logger.debug('Got exception %s when registering datapackage' % e)
+            logger.debug('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
             raise exception.RegistrationError(e)
 
-        
-        
-        self.retrieve_datapackage(self.archive_url, self.download_filename)
-        self.unpack_datapackage(self.download_filename, self.content_path)
-        self.bdbag_validate(self.content_path)
-        self.datapackage_model_check(self.content_path)
-        self.datapackage_validate(self.content_path)
-        self.prepare_sqlite(self.content_path, self.sqlite_filename)
-        self.prepare_sqlite_derived_tables(self.sqlite_filename)
-        if self.review_catalog is None:
-            self.review_catalog = self.create_review_catalog(self.datapackage_id)
-        self.upload_datapackage_content(self.review_catalog, self.content_path)
-        self.upload_derived_content(self.review_catalog, self.sqlite_filename)
+        # shortcut if already in terminal state
+        if dp['status'] in {
+                term.cfde_registry_dp_status.content_ready,
+                term.cfde_registry_dp_status.rejected,
+                term.cfde_registry_dp_status.release_pending,
+                term.cfde_registry_dp_status.obsoleted,
+        }:
+            logger.debug('Skiping ingest for datapackage %s with existing terminal status %s.' % (
+                self.datapackage_id,
+                dp['status'],
+            ))
+            return
+
+        # general sequence (with many idempotent steps)
+        try:
+            # streamline handling of error reporting...
+            # next_error_state anticipates how to categorize exceptions
+            # based on what we are trying to do during sequence
+            failed = False
+            diagnostics = 'An unknown operational error has occured.'
+            failed_exc = None
+
+            next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.retrieve_datapackage(self.archive_url, self.download_filename)
+            self.unpack_datapackage(self.download_filename, self.content_path)
+
+            next_error_state = terms.cfde_registry_dp_status.bag_error
+            self.bdbag_validate(self.content_path)
+
+            next_error_state = terms.cfde_registry_dp_status.check_error
+            self.datapackage_model_check(self.content_path)
+            self.datapackage_validate(self.content_path)
+
+            next_error_state = terms.cfde_registry_dp_status.content_error
+            self.prepare_sqlite(self.content_path, self.sqlite_filename)
+
+            next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.prepare_sqlite_derived_tables(self.sqlite_filename)
+            if self.review_catalog is None:
+                self.review_catalog = self.create_review_catalog(self.datapackage_id)
+
+            next_error_state = terms.cfde_registry_dp_status.content_error
+            self.upload_datapackage_content(self.review_catalog, self.content_path)
+
+            next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.upload_derived_content(self.review_catalog, self.sqlite_filename)
+        except exception.CfdeError as e:
+            # assume we can expose CfdeError text content
+            failed, failed_exc, diagnostics = True, e, str(e)
+            raise
+        except Exception as e:
+            # don't assume we can expose unexpected error content
+            failed, failed_exc = True, e
+            raise
+        finally:
+            # record whatever we've discovered above
+            if failed:
+                status, diagnostics = next_error_state, diagnostics
+                logger.debug(
+                    'Got exception %s in ingest sequence with next_error_state=%s for datapackage %s' \
+                    % (failed_exc, next_error_state, self.datapackage_id,)
+                )
+            else:
+                status, diagnostics = term.cfde_registry_dp_status.content_ready, nochange
+                logger.debug(
+                    'Finished ingest processing for datapackage %s' % (self.datapackage_id,)
+                )
+            logger.debug(
+                'Updating datapackage %s status=%s diagnostics=%s...' % (
+                    status,
+                    '(nochange)' if diagnostics is nochange else diagnostics
+                )
+            )
+            self.registry.update_status(self.datapackage_id, status=status, diagnostics=diagnostics)
+            logger.debug('Datapackage %s status successfully updated.' % (self.datapackage_id,))
 
     ## mapping of submission ID to local processing resource names
     
