@@ -16,7 +16,10 @@ def _attrdict_from_strings(*strings):
 
 # structured access to controlled terms we will use in this code...
 terms = _attrdict_from_strings(
+    'cfde_registry_grp_role:admin',
     'cfde_registry_grp_role:submitter',
+    'cfde_registry_grp_role:review-decider',
+    'cfde_registry_grp_role:reviewer',
 )
 
 class WebauthnAttribute (object):
@@ -155,6 +158,58 @@ class Registry (object):
         if id is not None:
             path = path.filter(path.table_instances[table_name].id == id)
         return list( path.entities().fetch() )
+
+    def get_datapackage(self, id):
+        """Get datapackage by submission id or raise exception.
+        
+        :param id: The datapackage.id key for the submission in the registry
+
+        Raises DatapackageUnknown if record is not found.
+        """
+        rows = self._get_entity('datapackage', id)
+        if len(rows) < 1:
+            raise exception.DatapackageUnknown('Datapackage "%s" not found in registry.' % (id,))
+        return rows[0]
+
+    def register_datapackage(self, id, dcc_id, submitting_user, archive_url):
+        """Idempotently register new submission in registry.
+
+        """
+        try:
+            return self.get_datapackage(id)
+        except exception.DatapackageUnknown:
+            pass
+
+        # poke the submitting user into the registry's user-tracking table in case they don't exist
+        # this acts as controlled domain table for submitting_user fkeys
+        self._catalog.post('/entity/public:ERMrest_Client?onconflict=skip', json=[{
+            'ID': submitting_user.webauthn_id,
+            'Display_Name': submitting_user.display_name,
+            'Full_Name': submitting_user.full_name,
+            'Email': submitting_user.email,
+            'Client_Object': {
+                'id': submitting_user.webauthn_id,
+                'display_name': submitting_user.display_name,
+            }
+        }])
+
+        newrow = {
+            "id": id,
+            "submitting_dcc": dcc_id,
+            "submitting_user": submitting_user.webauthn_id,
+            "datapackage_url": archive_url,
+        }
+        defaults = [
+            cname
+            for cname in self._builder.CFDE.datapackage.column_definitions.keys()
+            if cname not in newrow
+        ]
+        self._catalog.post(
+            '/entity/CFDE:datapackage?defaults=%s' % (','.join(defaults),),
+            json=[newrow]
+        )
+        # kind of redundant, but make sure we round-trip this w/ server-applied defaults?
+        return self.get_datapackage(id)
 
     def get_dcc(self, dcc_id=None):
         """Get one or all DCC records from the registry.

@@ -1,6 +1,16 @@
 
+import os
+import sys
+import logging
+import json
+import csv
+import pkgutil
+
 from . import exception
 from .registry import Registry, WebauthnUser, WebauthnAttributes
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class Submission (object):
     """Processing support for C2M2 datapackage submissions.
@@ -40,7 +50,7 @@ class Submission (object):
       # other ingest system prep, like archiving submitted data
       archive_url = ...
 
-      submission = Submission(registry, id, dcc_id, archive_url)
+      submission = Submission(registry, id, dcc_id, archive_url, submitting_user)
       # register and perform ingest processing of archived data
       # should register (if pre-flight worked above)
       # raises exceptions for aysnc failure (should update registry before that)
@@ -96,7 +106,19 @@ class Submission (object):
         operational error prevents that action as well.
 
         """
-        # TBD: add registry side-effects
+        try:
+            dp = self.registry.register_datapackage(
+                self.datapackage_id,
+                self.submitting_dcc_id,
+                self.submitting_user,
+                self.archive_url,
+            )
+        except Exception as e:
+            logger.debug('Got exception %s when registering datapackage' % e)
+            raise exception.RegistrationError(e)
+
+        
+        
         self.retrieve_datapackage(self.archive_url, self.download_filename)
         self.unpack_datapackage(self.download_filename, self.content_path)
         self.bdbag_validate(self.content_path)
@@ -241,3 +263,53 @@ class Submission (object):
     def upload_derived_content(cls, catalog, sqlite_filename):
         """Idempotently upload prepared review content in sqlite db into review catalog."""
         pass
+
+
+def main(dcc_id, archive_url):
+    """Ugly test-harness for data submission library.
+
+    Usage: python3 -m cfde_deriva.submission 'dcc_id' 'archive_url'
+
+    Runs submission functions using default DERIVA credentials for
+    server both for registry operations and as "submitting user" in
+    CFDE parlance.
+
+    Set environment variable DERIVA_SERVERNAME to choose registry host.
+
+    """
+    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+
+    servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
+    registry = Registry('https', servername)
+
+    # find our authenticated user info for this test harness
+    # action provider would derive this from Globus?
+    credential = get_credential(servername)
+    server = DerivaServer('https', servername, credential)
+    user_session = server.get('/authn/session').json()
+    submitting_user = WebauthnUser(
+        user_session['client']['id'],
+        user_session['client']['display_name'],
+        user_session['client'].get('full_name'),
+        user_session['client'].get('email'),
+        [
+            WebauthnAttribute(attr['id'], attr['display_name'])
+            for attr in user_session['attributes']
+        ]
+    )
+
+    # arguments dcc_id and archive_url would come from action provider
+    # and it would also have a different way to obtain a submission ID
+    submission_id = uuid.uuid3(uuid.NAMESPACE_URL, archive_url)
+
+    # pre-flight check like action provider might want to do?
+    # this is optional, implicitly happening again in Submission(...)
+    registry.validate_dcc_id(dcc_id, submitting_user)
+
+    # run the actual submission work if we get this far
+    submission = Submission(registry, submission_id, dcc_id, archive_url, submitting_user)
+    submission.ingest()
+
+if __name__ == '__main__':
+    exit(main(sys.argv[1:]))
+

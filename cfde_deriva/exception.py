@@ -15,3 +15,7 @@ class RegistrationError (CfdeError):
     """The submission was not entered into the registry."""
     pass
 
+class DatapackageUnknown (CfdeError):
+    """The submission is not known by the registry."""
+    pass
+
