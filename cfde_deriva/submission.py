@@ -5,6 +5,9 @@ import logging
 import json
 import csv
 import pkgutil
+import sqlite3
+from bdbag import bdbag_api
+from bdbag.bdbagit import BagError, BagValidationError
 
 from . import exception
 from .registry import Registry, WebauthnUser, WebauthnAttributes, nochange
@@ -61,9 +64,10 @@ class Submission (object):
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
     
-    def __init__(self, registry, id, dcc_id, archive_url, submitting_user):
+    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user):
         """Represent a stateful processing flow for a C2M2 submission.
 
+        :param server: A DerivaServer binding object where review catalogs are created.
         :param registry: A Registry binding object.
         :param id: The unique identifier for the submission, i.e. UUID.
         :param dcc_id: The submitting DCC, using a registry dcc.id key value.
@@ -74,14 +78,24 @@ class Submission (object):
         may not yet exist in the registry. The constructor WILL NOT
         cause state changes to the registry.
 
+        Raises UnknownDccId if dcc_id is not known by registry.
+        Raises Forbidden if submitting_user is not known as a submitter for DCC by registry.
+        Raises non-CfdeError exceptions for operational errors.
         """
         registry.validate_dcc_id(dcc_id, submitting_user)
+        self.server = server
         self.registry = registry
         self.datapackage_id = id
         self.submitting_dcc_id = dcc_id
         self.archive_url = archive_url
         self.review_catalog = None
         self.submitting_user = submitting_user
+
+        # check filesystem config early to abort ASAP on errors
+        # TBD: check permissions for safe service config?
+        os.makedirs(os.dirname(self.download_filename), exist_ok=True)
+        os.makedirs(os.dirname(self.sqlite_filename), exist_ok=True)
+        os.makedirs(self.content_path, exist_ok=True)
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -96,14 +110,16 @@ class Submission (object):
         7. Update registry with success/failure status
 
         Raises RegistrationError and aborts if step (1) failed.
-        
-        May raise other exceptions during remaining processing:
+        ...
+        Raises non-CfdeError exceptions for operational errors.
 
-          - 
-
-        in these cases, the registry should be updated with error
-        status prior to the exception being raised, unless an
-        operational error prevents that action as well.
+        In error cases other than RegistrationError, the registry will
+        be updated with error status prior to the exception being
+        raised, unless an operational error prevents that action as
+        well.  Errors derived from CfdeError will be reflected in the
+        datapackage.diagnostics field of the registry, while other
+        operational errors will only be reflected in the logger
+        output.
 
         """
         # idempotently get into registry
@@ -115,7 +131,7 @@ class Submission (object):
                 self.archive_url,
             )
         except Exception as e:
-            logger.debug('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
+            logger.error('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
             raise exception.RegistrationError(e)
 
         # shortcut if already in terminal state
@@ -151,16 +167,14 @@ class Submission (object):
             self.datapackage_model_check(self.content_path)
             self.datapackage_validate(self.content_path)
 
-            next_error_state = terms.cfde_registry_dp_status.content_error
-            self.prepare_sqlite(self.content_path, self.sqlite_filename)
-
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.prepare_sqlite_derived_tables(self.sqlite_filename)
             if self.review_catalog is None:
-                self.review_catalog = self.create_review_catalog(self.datapackage_id)
+                self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
+            self.prepare_sqlite_derived_tables(self.sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.upload_datapackage_content(self.review_catalog, self.content_path)
+            self.prepare_sqlite(self.content_path, self.sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.upload_derived_content(self.review_catalog, self.sqlite_filename)
@@ -176,7 +190,7 @@ class Submission (object):
             # record whatever we've discovered above
             if failed:
                 status, diagnostics = next_error_state, diagnostics
-                logger.debug(
+                logger.error(
                     'Got exception %s in ingest sequence with next_error_state=%s for datapackage %s' \
                     % (failed_exc, next_error_state, self.datapackage_id,)
                 )
@@ -191,7 +205,7 @@ class Submission (object):
                     '(nochange)' if diagnostics is nochange else diagnostics
                 )
             )
-            self.registry.update_status(self.datapackage_id, status=status, diagnostics=diagnostics)
+            self.registry.update_datapackage(self.datapackage_id, status=status, diagnostics=diagnostics)
             logger.debug('Datapackage %s status successfully updated.' % (self.datapackage_id,))
 
     ## mapping of submission ID to local processing resource names
@@ -238,29 +252,106 @@ class Submission (object):
     def retrieve_datapackage(cls, archive_url, download_filename):
         """Idempotently stage datapackage content from archive_url into download_filename.
 
-        Use a temporary download name and rename after successful
+        Uses a temporary download name and renames after successful
         download, so we can assume a file present at this name is
         already downloaded.
-
         """
-        pass
+        if os.path.isfile(download_filename):
+            return
+
+        f, tmp_name  = None, None
+        try:
+            # use a temporary download file in same dir
+            f, tmp_name = tempfile.mkstemp(
+                suffix='.downloading',
+                prefix=os.path.basename(download_filename) + '_',
+                dir=os.path.dirname(download_filename),
+                text=False,
+            )
+            logger.debug('Downloading %s to temporary download file "%s"' % (
+                archive_url,
+                tmp_name,
+            ))
+
+            # TBD: replace with appropriate globus-authenticated download
+            r = requests.get(archive_url, stream=True)
+            r.raise_for_status()
+            for chunk in r.iter_content(chunk_size=128*1024):
+                f.write(chunk)
+            f.close()
+            logger.debug('Finished downloading to "%s"' % (tmp_name,))
+            f = None
+
+            # rename completed download to canonical name
+            os.rename(tmp_name, download_filename)
+            tmp_name = None
+        finally:
+            if f is not None:
+                f.close()
+            if tmp_name is not None:
+                os.remove(tmp_name)
 
     @classmethod
     def unpack_datapackage(cls, download_filename, content_path):
         """Idempotently unpack download_filename (a BDBag) into content_path (bag contents dir).
 
-        Use a temporary unpack name and rename after successful
+        Uses a temporary unpack name and renames after successful
         unpack, so we can assume a contents dir already present at
         this name is already completely unpacked.
-
         """
-        pass
+        if os.path.isdir(content_path):
+            return
+
+        tmp_name = None
+        try:
+            # use temporary unpack dir in same parent dir
+            tmp_name = tempfile.mkdtemp(
+                suffix='.unpacking',
+                prefix=os.path.basename(content_path) + '_',
+                dir=os.path.dirname(content_path),
+            )
+            logger.debug('Extracting "%s" in temporary unpack dir "%s"' % (
+                download_filename,
+                tmp_name,
+            ))
+
+            # unpack ourselves so we can control output names vs. extract_bag()
+            if zipfile.is_zipfile(download_filename):
+                with open(download_filename, 'rb') as bag_file:
+                    with zipfile.ZipFile(bag_file) as decoder:
+                        decoder.extractall(tmp_name)
+            elif tarfile.is_tarfile(download_filename):
+                with tarfile.open(download_filename) as decoder:
+                    decoder.extractall(tmp_name)
+            else:
+                raise exception.InvalidDatapackage('Unknown or unsupported bag archive format')
+
+            logger.debug('Finished extracting to "%s"' % (tmp_name,))
+            os.rename(tmp_name, content_path)
+            tmp_name = None
+        finally:
+            if tmp_name is not None:
+                shutil.rmtree(tmp_name)
 
     @classmethod
     def bdbag_validate(cls, content_path):
         """Perform BDBag validation of unpacked bag contents."""
-        # or is this implicit part of unpack_datapackage?
-        pass
+        try:
+            logger.debug('Validating unpacked bag at "%s"' % (content_path,))
+            bdbag_api.validate_bag(content_path)
+        except (BagError, BagValidationError) as e:
+            logger.debug('Validation failed for bag "%s" with error "%s"' % (content_path, e,))
+            raise exception.InvalidDatapackage(e)
+
+    @classmethod
+    def datapackage_name_from_path(cls, content_path):
+        """Find datapackage name by globbing ./data/*.json under content_path."""
+        candidates = glob('%s/data/*.json' % content_path)
+        if len(candidates) < 1:
+            raise exceptions.FilenameError('Could not locate datapackage *.json file.')
+        elif len(candidates) > 1:
+            raise exceptions.FilenameError('Found too many (%d) potential datapackage *.json choices.' % (len(candidates),))
+        return candidates[0]
 
     @classmethod
     def datapackage_validate(cls, content_path):
@@ -269,9 +360,20 @@ class Submission (object):
         This validation considers the TSV content of the datapackage
         to be sure it conforms to its own JSON datapackage
         specification.
-
         """
-        pass
+        packagefile = cls.datapackage_name_from_path(content_path)
+        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True)
+        if report.stats['errors'] > 0:
+            if report.errors:
+                message = report.errors[0].message
+            else:
+                message = report.flatten(['message'])[0][0]
+            raise exceptions.InvalidDatapackage(
+                'Found %d errors in datapackage "%s". First error: %s' % (
+                    report.stats['errors'],
+                    os.basename(packagefile),
+                    message,
+            ))
 
     @classmethod
     def datapackage_model_check(cls, content_path):
@@ -283,11 +385,15 @@ class Submission (object):
         introduce any undesired deviations in the model definition.
 
         """
-        pass
+        canon_dp = CfdeDatapackage(portal_schema_json)
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDatapackage(packagefile)
+        canon_dp.validate_model_subset(submitted_dp)
 
     @classmethod
     def prepare_sqlite(cls, content_path, sqlite_filename):
         """Idempotently prepare sqlite database containing submission content."""
+        conn = sqlite3.connect(sqlite_filename)
         pass
 
     @classmethod
@@ -301,7 +407,7 @@ class Submission (object):
         pass
 
     @classmethod
-    def create_review_catalog(cls, id):
+    def create_review_catalog(cls, server, registry, id):
         """Create and an empty review catalog for given submission id, returning deriva.ErmrestCatalog binding object.
 
         The resulting catalog will be properly provisioned with C2M2
@@ -314,13 +420,38 @@ class Submission (object):
         datapackage to augment the core C2M2 portal model.
 
         """
-        # TBD: use annotation to embed submission ID into catalog, for error recovery/cleanup tasks?
-        return catalog_object
+        # handle idempotence...
+        metadata = registry.get_datapackage(id)
+        catalog_url = metadata["review_ermrest_url"]
+        if catalog_url:
+            m = re.match('%s/ermrest/catalog/(?P<catalog>[^/]+)/?' % server.get_server_uri(), catalog_url)
+            if m:
+                catalog = server.connect_ermrest(m.groupdict['catalog'])
+            else:
+                raise ValueError('Unexpected review_ermrest_url %s does not look like a catalog on server %s' % (catalog_url, server.get_server_uri(),))
+        else:
+            # register ASAP after creating, to narrow gap for orphaned catalogs...
+            catalog = server.create_ermrest_catalog()
+            registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
+
+        # this stuff is idempotent... repeat in case this failed previously?
+        canon_dp = CfdeDatapackage(portal_schema_json)
+        canon_dp.set_catalog(catalog)
+        canon_dp.provision() # get the model deployed
+        canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
+        # TBD: set custom ACLs appropriate for review scenario
+        # TBD: annotate with submission ID for easier ops/inventory purposes?
+        canon_dp.apply_custom_config() # get the chaise hints deloyed
+        return catalog
 
     @classmethod
     def upload_datapackage_content(cls, catalog, content_path):
         """Idempotently upload submission content from datapackage into review catalog."""
-        pass
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDatapackage(packagefile)
+        submitted_dp.set_catalog(catalog)
+        # TBD: idempotence here means we cannot validate whether there are duplicates?
+        submitted_dp.load_data_files(onconflict='skip')
 
     @classmethod
     def upload_derived_content(cls, catalog, sqlite_filename):

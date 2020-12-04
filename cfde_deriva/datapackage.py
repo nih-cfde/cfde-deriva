@@ -106,6 +106,105 @@ class CfdeDataPackage (object):
         self.cat_model_root = self.catalog.getCatalogModel()
         self.cat_cfde_schema = self.cat_model_root.schemas.get('CFDE')
 
+    def _compare_model_docs(self, candidate, absent_table_ok=True, absent_column_ok=True, extra_table_ok=False, extra_column_ok=False, extra_fkey_ok=False):
+        """General-purpose model comparison to serve validation functions.
+
+        :param candidate: A CfdeDatapackage instance being evaluated with self as baseline.
+        :param absent_table_ok: Whether candidate is allowed to omit tables.
+        :param absent_column_ok: Whether candidate is allowed to omit non-critical columns.
+        :param extra_table_ok: Whether candidate is allowed to include tables.
+        :param extra_column_ok: Whether candidate is allowed to include non-critical columns.
+        :param extra_fkey_ok: Whether candidate is allowed to include foreign keys on extra, non-critical columns.
+
+        For model comparisons, a non-critical column is one which is
+        allowed to contain NULL values.
+
+        Raises IncompatibleDatapackageModel if candidate fails validation tests.
+
+        """
+        baseline_tnames = set(self.doc_cfde_schema.tables.keys())
+        if self.package_filename is portal_schema_json:
+            # we have extra vocab tables not in the offical C2M2 schema
+            # where it uses enumeration!
+            baseline_tnames.difference_update({
+                'subject_granularity',
+                'subject_role',
+            })
+        candidate_tnames = set(candidate.doc_cfde_schema.tables.keys())
+
+        missing_tnames = baseline_tnames.difference(candidate_tnames)
+        extra_tnames = candidate_tnames.difference(baseline_tnames)
+        if missing_tnames and not absent_table_ok:
+            raise IncompatibleDatapackageModel(
+                'Missing resources: %s' % (','.join(missing_tnames),)
+            )
+        if extra_tnames and not extra_table_ok:
+            raise IncompatibleDatapackageModel(
+                'Extra resources: %s' % (','.join(extra_tnames),)
+            )
+
+        for tname in baseline_tnames.intersection(candidate_tnames):
+            baseline_table = self.doc_cfde_schema.tables[tname]
+            candidate_table = candidate.doc_cfde_schema.tables[tname]
+            baseline_cnames = set(baseline_table.columns.elements.keys())
+            candidate_cnames = set(candidate_table.columns.elements.keys())
+            missing_cnames = baseline_cnames.difference(candidate_cnames)
+            extra_cnames = candidate_cnames.difference(baseline_cnames)
+            missing_nonnull_cnames = [ cname for cname in missing_cnames if not baseline_table.columns[cname].nullok ]
+            extra_nonnull_cnames = [ cname for cname in extra_cnames if not candidate_table.columns[cname].nullok ]
+            if missing_cnames and not absent_column_ok:
+                raise IncompatibleDatapackageModel(
+                    'Missing columns in resource %s: %s' % (tname, ','.join(missing_cnames),)
+                )
+            if missing_nonnull_cnames:
+                raise IncompatibleDatapackageModel(
+                    'Missing non-nullable columns in resource %s: %s' % (tname, ','.join(missing_nonnull_cnames),)
+                )
+            if extra_cnames and not extra_column_ok:
+                raise IncompatibleDatapackageModel(
+                    'Extra columns in resource %s: %s' % (tname, ','.join(extra_cnames),)
+                )
+            if extra_nonnull_cnames:
+                raise IncompatibleDatapackageModel(
+                    'Extra non-nullable columns in resource %s: %s' % (tname, ','.join(extra_nonnull_cnames),)
+                )
+
+            # TBD: should this be a method in deriva-py ermrest_model.Type class?
+            def type_equal(t1, t2):
+                if t1.typename != t2.typename:
+                    return False
+                if t1.is_domain != t2.is_domain or t1.is_array != t2.is_array:
+                    return False
+                if t1.is_domain or t1.is_array:
+                    return type_equal(t1.base_type, t2.base_type)
+                return True
+
+            for cname in baseline_cnames.intersect(candidate_cnames):
+                baseline_col = baseline_table.columns[cname]
+                candidate_col = candidate_table.columns[cname]
+                if not type_equal(baseline_col.type, candidate_col.type):
+                    raise IncompatibleDatapackageModel(
+                        'Type mismatch for resource %s column %s' % (tname, cname)
+                    )
+                if not baseline_col.nullok and candidate_col.nullok:
+                    # candidate can be more strict but not more relaxed?
+                    raise IncompatibleDatapackageModel(
+                        'Inconsistent nullability for resource %s column %s' % (tname, cname)
+                    )
+
+            # TBD: do any constraint comparisons here?
+            #
+            # for now, defer such constraint checks to DB load time...
+
+    def validate_model_subset(self, subset):
+        """Check that subset's model is a compatible subset of self.
+
+        :param subset: A CfdeDatapackage instance which should be a subset of self.
+
+        Raises IncompatibleDatapackageModel if supplied datapackage is not a compliant subset.
+        """
+        self._compare_model_docs(subset)
+
     def provision(self):
         if 'CFDE' not in self.cat_model_root.schemas:
             # blindly load the whole model on an apparently empty catalog

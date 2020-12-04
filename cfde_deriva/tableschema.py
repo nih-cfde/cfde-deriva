@@ -222,6 +222,10 @@ def make_table(tdef):
 
 def make_model(tableschema):
     resources = tableschema.pop('resources')
+    rnames = {}
+    for r in resources:
+        if r["name"] in rnames:
+            raise ValueError('Resource name "%s" appears more than once' % (r["name"],))
     annotations = {
         schema_tag: tableschema
     }

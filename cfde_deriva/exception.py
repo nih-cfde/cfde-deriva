@@ -19,3 +19,15 @@ class DatapackageUnknown (CfdeError):
     """The submission is not known by the registry."""
     pass
 
+class FilenameError (CfdeError):
+    """The submission violates C2M2 file naming requirements."""
+    pass
+
+class InvalidDatapackage (CfdeError):
+    """The datapackage fails to validate."""
+    pass
+
+class IncompatibleDatapackageModel (CfdeError):
+    """The datapackage is incompatible with CFDE requirements."""
+    pass
+

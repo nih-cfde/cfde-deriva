@@ -43,7 +43,6 @@ class WebauthnAttribute (object):
 
         :param attr_id: The webauthn attribute URI
         :param display_name: The display name of this attribute
-
         """
         if not attr_id.startswith('https://'):
             raise ValueError('"%s" is not a webauthn attribute URI' % attr_id)
@@ -76,7 +75,6 @@ class WebauthnUser (object):
         :param full_name: The full name of this client
         :param email: The email address of this client
         :param attributes: A list of verified WebauthnAttribute instances for this client
-
         """
         if not client_id.startswith('https://'):
             raise ValueError('"%s" is not a webauthn client URI' % attr_id)
@@ -107,7 +105,6 @@ class WebauthnUser (object):
 
         The attributes can be individually constructed from globus
         group info using the WebauthnAttribute.from_globus(...) constructor.
-
         """
         client_id = 'https://auth.globus.org/%s' % (globus_user_id,)
         return cls(client_id, display_name, full_name, email, attributes)
@@ -141,7 +138,6 @@ class Registry (object):
         Note: this binding operates as an authenticated client
         identity and may expose different capabilities depending on
         the client's role within the organization.
-
         """
         if credentials is None:
             credentials = get_credential(servername)
@@ -155,7 +151,7 @@ class Registry (object):
         :param submitting_user: The WebauthnUser representation of the authenticated submission user.
 
         Raises UnknownDccId for invalid DCC identifiers.
-        Raises 
+        Raises Forbidden if submitting_user is not a submitter for the named DCC.
         """
         rows = self.get_dcc(dcc_id)
         if len(rows) < 1:
@@ -165,6 +161,8 @@ class Registry (object):
     def _get_entity(self, table_name, id=None):
         """Get one or all entity records from a registry table.
 
+        :param table_name: The registry table to access.
+        :param id: A key to retrieve one row (default None retrieves all)
         """
         path = self._builder.CFDE.tables[table_name]
         if id is not None:
@@ -186,6 +184,12 @@ class Registry (object):
     def register_datapackage(self, id, dcc_id, submitting_user, archive_url):
         """Idempotently register new submission in registry.
 
+        :param id: The datapackage.id for the new record
+        :param dcc_id: The datapackage.submitting_dcc for the new record
+        :param submitting_user: The datapackage.submitting_user for the new record
+        :param archive_url: The datapackage.datapackage_url for the new record
+
+        May raise non-CfdeError exceptions on operational errors.
         """
         try:
             return self.get_datapackage(id)
@@ -223,7 +227,7 @@ class Registry (object):
         # kind of redundant, but make sure we round-trip this w/ server-applied defaults?
         return self.get_datapackage(id)
 
-    def update_status(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_symmary_url=nochange):
+    def update_datapackage(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_symmary_url=nochange):
         """Idempotently update datapackage metadata in registry.
 
         :param id: The datapackage.id of the existing record to update
@@ -237,6 +241,7 @@ class Registry (object):
         optional arguments represents the desire to keep whatever
         current value exists for that field in the registry.
 
+        May raise non-CfdeError exceptions on operational errors.
         """
         if not isinstance(id, str):
             raise TypeError('expected id of type str, not %s' % (type(id),))
@@ -265,7 +270,6 @@ class Registry (object):
         Returns a list of dict-like records representing rows of the
         registry dcc table, optionally restricted to a specific dcc.id
         key.
-
         """
         return self._get_entity('dcc', dcc_id)
 
@@ -277,7 +281,6 @@ class Registry (object):
         Returns a list of dict-like records representing rows of the
         registry group table, optionally restricted to a specific group.id
         key.
-
         """
         return self._get_entity('group', group_id)
 
@@ -289,7 +292,6 @@ class Registry (object):
         Returns a list of dict-like records representing rows of the
         registry group_role table, optionally restricted to a specific
         group_role.id key.
-
         """
         return self._get_entity('group_role', role_id)
 
@@ -302,7 +304,6 @@ class Registry (object):
         Returns a list of dict-like records associating a DCC id, a
         role ID, and a list of group IDs suitable as an ACL for that
         particular dcc-role combination.
-
         """
         # find range of possible values
         dccs = {
@@ -340,8 +341,14 @@ class Registry (object):
         ]
 
     def get_dcc_acl(self, dcc_id, role_id):
-        """Get groups for one DCC role as a webauthn-style ACL.
+        """Get groups for one DCC X group_role as a webauthn-style ACL.
 
+        :param dcc_id: A dcc.id key known by the registry.
+        :param role_id: A group_role.id key known by the registry.
+
+        Returns a list of webauthn ID strings as an access control
+        list suitable for intersection tests with
+        WebauthnUser.acl_authz_test().
         """
         return [
             grp['webauthn_id']
