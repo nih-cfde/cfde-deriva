@@ -179,7 +179,7 @@ class CfdeDataPackage (object):
                     return type_equal(t1.base_type, t2.base_type)
                 return True
 
-            for cname in baseline_cnames.intersect(candidate_cnames):
+            for cname in baseline_cnames.intersection(candidate_cnames):
                 baseline_col = baseline_table.columns[cname]
                 candidate_col = candidate_table.columns[cname]
                 if not type_equal(baseline_col.type, candidate_col.type):
@@ -468,7 +468,7 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
-    def load_data_files(self, onconflict='abort'):
+    def load_data_files(self, onconflict='abort', table_done_callback=None):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
             # we are doing a clean load of data in fkey dependency order
@@ -519,6 +519,8 @@ class CfdeDataPackage (object):
                                          "%s: %s" % (table.name, self.package_filename, e))
                             raise
                     logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+                    if table_done_callback:
+                        table_done_callback(table.name, resource["path"])
 
 
 def main(args):

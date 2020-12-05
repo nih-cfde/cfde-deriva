@@ -769,10 +769,7 @@
                {
                   "name": "table_name",
                   "description": "The reported table name for this tabular resource.",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
+                  "type": "string"
                },
                {
                   "name": "status",

@@ -24,7 +24,7 @@ class FilenameError (CfdeError):
     pass
 
 class InvalidDatapackage (CfdeError):
-    """The datapackage fails to validate."""
+    """The datapackage fails to validate for CFDE purposes."""
     pass
 
 class IncompatibleDatapackageModel (CfdeError):

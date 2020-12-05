@@ -1,16 +1,28 @@
 
 import os
+import os.path
 import sys
+import re
+import shutil
+import zipfile
+import tarfile
 import logging
 import json
 import csv
+import uuid
 import pkgutil
+import tempfile
 import sqlite3
+import requests
+from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
+import frictionless
+from deriva.core import DerivaServer, get_credential
 
 from . import exception
-from .registry import Registry, WebauthnUser, WebauthnAttributes, nochange
+from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
+from .datapackage import CfdeDataPackage, portal_schema_json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -93,9 +105,9 @@ class Submission (object):
 
         # check filesystem config early to abort ASAP on errors
         # TBD: check permissions for safe service config?
-        os.makedirs(os.dirname(self.download_filename), exist_ok=True)
-        os.makedirs(os.dirname(self.sqlite_filename), exist_ok=True)
-        os.makedirs(self.content_path, exist_ok=True)
+        os.makedirs(os.path.dirname(self.download_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.content_path), exist_ok=True)
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -134,38 +146,98 @@ class Submission (object):
             logger.error('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
             raise exception.RegistrationError(e)
 
-        # shortcut if already in terminal state
-        if dp['status'] in {
-                term.cfde_registry_dp_status.content_ready,
-                term.cfde_registry_dp_status.rejected,
-                term.cfde_registry_dp_status.release_pending,
-                term.cfde_registry_dp_status.obsoleted,
-        }:
-            logger.debug('Skiping ingest for datapackage %s with existing terminal status %s.' % (
-                self.datapackage_id,
-                dp['status'],
-            ))
-            return
-
         # general sequence (with many idempotent steps)
+        failed = False
+        diagnostics = 'An unknown operational error has occured.'
+        failed_exc = None
+        # streamline handling of error reporting...
+        # next_error_state anticipates how to categorize exceptions
+        # based on what we are trying to do during sequence
+        next_error_state = terms.cfde_registry_dp_status.ops_error
         try:
-            # streamline handling of error reporting...
-            # next_error_state anticipates how to categorize exceptions
-            # based on what we are trying to do during sequence
-            failed = False
-            diagnostics = 'An unknown operational error has occured.'
-            failed_exc = None
 
-            next_error_state = terms.cfde_registry_dp_status.ops_error
+            # shortcut if already in terminal state
+            if dp['status'] in {
+                    terms.cfde_registry_dp_status.content_ready,
+                    terms.cfde_registry_dp_status.rejected,
+                    terms.cfde_registry_dp_status.release_pending,
+                    terms.cfde_registry_dp_status.obsoleted,
+            }:
+                logger.debug('Skiping ingest for datapackage %s with existing terminal status %s.' % (
+                    self.datapackage_id,
+                    dp['status'],
+                ))
+                return
+
             self.retrieve_datapackage(self.archive_url, self.download_filename)
             self.unpack_datapackage(self.download_filename, self.content_path)
 
             next_error_state = terms.cfde_registry_dp_status.bag_error
             self.bdbag_validate(self.content_path)
 
+            def dpt_prepare(packagefile):
+                """Prepare lookup tools for packagefile"""
+                with open(packagefile, 'r') as f:
+                    packagedoc = json.load(f)
+                resources = packagedoc.get('resources', [])
+                rname_to_pos = dict()
+                rpath_to_pos = dict()
+                for pos in range(len(resources)):
+                    rname_to_pos[resources[pos].get("name")] = pos
+                    rpath_to_pos[resources[pos].get("path")] = pos
+                return (
+                    { k: v for k, v in rname_to_pos.items() if k is not None },
+                    { k: v for k, v in rpath_to_pos.items() if k is not None },
+                    resources,
+                )
+
+            def dpt_register(content_path, packagefile):
+                """Register resources in frictionless schema"""
+                self.rname_to_pos, self.rpath_to_pos, self.resources = dpt_prepare(packagefile)
+                for pos in range(len(self.resources)):
+                    # this could be a null or repeated name, which we'll reject later...
+                    self.registry.register_datapackage_table(self.datapackage_id, pos, self.resources[pos].get("name"))
+
+            def dpt_update1(content_path, packagefile, report):
+                """Update status of resources from frictionless report"""
+                ppath = os.path.dirname(os.path.abspath(packagefile))
+                # don't assume 1:1 correspondance of report.tables to resources list
+                for pos in range(len(report.tables)):
+                    # strip path where package resides
+                    offset = len(ppath) + (0 if ppath.endswith('/') else 1)
+                    tpath = os.path.abspath(report.tables[pos].path)[offset:]
+                    if tpath in self.rpath_to_pos:
+                        if report.tables[pos].errors:
+                            status = terms.cfde_registry_dpt_status.check_error
+                            diagnostics = 'Tabular resource found %d errors. First error: %s' % (
+                                len(report.tables[pos].errors),
+                                report.tables[pos].errors[0].message
+                            )
+                        else:
+                            status = nochange
+                            diagnostics = nochange
+                        num_rows = report.tables[pos].stats.get('rows', nochange)
+                        self.registry.update_datapackage_table(
+                            self.datapackage_id,
+                            self.rpath_to_pos[tpath],
+                            status= status,
+                            num_rows= num_rows,
+                            diagnostics= diagnostics
+                        )
+                    else:
+                        logger.debug('Could not map table path %s (%s) to resources %s' % (report.tables[pos].path, tpath, rname_to_pos.keys()))
+
+            def dpt_update2(name, path):
+                """Update status of resource following content upload"""
+                self.registry.update_datapackage_table(
+                    self.datapackage_id,
+                    self.rname_to_pos[name],
+                    status= terms.cfde_registry_dpt_status.content_ready
+                )
+
             next_error_state = terms.cfde_registry_dp_status.check_error
-            self.datapackage_model_check(self.content_path)
-            self.datapackage_validate(self.content_path)
+            self.datapackage_model_check(self.content_path, pre_process=dpt_register)
+            self.datapackage_validate(self.content_path, post_process=dpt_update1)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             if self.review_catalog is None:
@@ -173,7 +245,7 @@ class Submission (object):
             self.prepare_sqlite_derived_tables(self.sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.upload_datapackage_content(self.review_catalog, self.content_path)
+            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
             self.prepare_sqlite(self.content_path, self.sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
@@ -195,12 +267,13 @@ class Submission (object):
                     % (failed_exc, next_error_state, self.datapackage_id,)
                 )
             else:
-                status, diagnostics = term.cfde_registry_dp_status.content_ready, nochange
+                status, diagnostics = terms.cfde_registry_dp_status.content_ready, nochange
                 logger.debug(
                     'Finished ingest processing for datapackage %s' % (self.datapackage_id,)
                 )
             logger.debug(
                 'Updating datapackage %s status=%s diagnostics=%s...' % (
+                    self.datapackage_id,
                     status,
                     '(nochange)' if diagnostics is nochange else diagnostics
                 )
@@ -220,7 +293,7 @@ class Submission (object):
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/downloads/%s' % (cls.content_path_root, id)
+        return '%s/downloads/%s' % (self.content_path_root, self.datapackage_id)
 
     @property
     def content_path(self):
@@ -232,7 +305,7 @@ class Submission (object):
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/unpacked/%s' % (cls.content_path_root, id)
+        return '%s/unpacked/%s' % (self.content_path_root, self.datapackage_id)
 
     @property
     def sqlite_filename(self):
@@ -244,7 +317,7 @@ class Submission (object):
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/databases/%s.sqlite3' % (cls.content_path_root, id)
+        return '%s/databases/%s.sqlite3' % (self.content_path_root, self.datapackage_id)
 
     ## utility functions to help with various processing and validation tasks
 
@@ -259,10 +332,10 @@ class Submission (object):
         if os.path.isfile(download_filename):
             return
 
-        f, tmp_name  = None, None
+        fd, tmp_name  = None, None
         try:
             # use a temporary download file in same dir
-            f, tmp_name = tempfile.mkstemp(
+            fd, tmp_name = tempfile.mkstemp(
                 suffix='.downloading',
                 prefix=os.path.basename(download_filename) + '_',
                 dir=os.path.dirname(download_filename),
@@ -277,17 +350,17 @@ class Submission (object):
             r = requests.get(archive_url, stream=True)
             r.raise_for_status()
             for chunk in r.iter_content(chunk_size=128*1024):
-                f.write(chunk)
-            f.close()
+                os.write(fd, chunk)
+            os.close(fd)
             logger.debug('Finished downloading to "%s"' % (tmp_name,))
-            f = None
+            fd = None
 
             # rename completed download to canonical name
             os.rename(tmp_name, download_filename)
             tmp_name = None
         finally:
-            if f is not None:
-                f.close()
+            if fd is not None:
+                os.close(fd)
             if tmp_name is not None:
                 os.remove(tmp_name)
 
@@ -327,8 +400,15 @@ class Submission (object):
                 raise exception.InvalidDatapackage('Unknown or unsupported bag archive format')
 
             logger.debug('Finished extracting to "%s"' % (tmp_name,))
-            os.rename(tmp_name, content_path)
-            tmp_name = None
+
+            children = glob('%s/*' % tmp_name)
+            if len(children) < 1:
+                raise exception.InvalidDatapackage('Did not find expected top-level folder in bag archive')
+            elif len(children) > 1:
+                raise exception.InvalidDatapackage('Found too many top-level folders in back archive')
+
+            os.rename(children[0], content_path)
+            logger.debug('Renamed output "%s" to final "%s"' % (children[0], content_path))
         finally:
             if tmp_name is not None:
                 shutil.rmtree(tmp_name)
@@ -354,29 +434,7 @@ class Submission (object):
         return candidates[0]
 
     @classmethod
-    def datapackage_validate(cls, content_path):
-        """Perform datapackage validation.
-
-        This validation considers the TSV content of the datapackage
-        to be sure it conforms to its own JSON datapackage
-        specification.
-        """
-        packagefile = cls.datapackage_name_from_path(content_path)
-        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True)
-        if report.stats['errors'] > 0:
-            if report.errors:
-                message = report.errors[0].message
-            else:
-                message = report.flatten(['message'])[0][0]
-            raise exceptions.InvalidDatapackage(
-                'Found %d errors in datapackage "%s". First error: %s' % (
-                    report.stats['errors'],
-                    os.basename(packagefile),
-                    message,
-            ))
-
-    @classmethod
-    def datapackage_model_check(cls, content_path):
+    def datapackage_model_check(cls, content_path, pre_process=None):
         """Perform datapackage model validation for submission content.
 
         This validation compares the JSON datapackage specification
@@ -385,16 +443,43 @@ class Submission (object):
         introduce any undesired deviations in the model definition.
 
         """
-        canon_dp = CfdeDatapackage(portal_schema_json)
+        canon_dp = CfdeDataPackage(portal_schema_json)
         packagefile = cls.datapackage_name_from_path(content_path)
-        submitted_dp = CfdeDatapackage(packagefile)
+        if pre_process:
+            pre_process(content_path, packagefile)
+        submitted_dp = CfdeDataPackage(packagefile)
         canon_dp.validate_model_subset(submitted_dp)
+
+    @classmethod
+    def datapackage_validate(cls, content_path, post_process=None):
+        """Perform datapackage validation.
+
+        This validation considers the TSV content of the datapackage
+        to be sure it conforms to its own JSON datapackage
+        specification.
+        """
+        packagefile = cls.datapackage_name_from_path(content_path)
+        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True)
+        if post_process:
+            post_process(content_path, packagefile, report)
+        if report.stats['errors'] > 0:
+            if report.errors:
+                message = report.errors[0].message
+            else:
+                message = report.flatten(['message'])[0][0]
+            raise exceptions.InvalidDatapackage(
+                'Found %d errors in datapackage "%s". First error: %s' % (
+                    report.stats['errors'],
+                    os.path.basename(packagefile),
+                    message,
+            ))
 
     @classmethod
     def prepare_sqlite(cls, content_path, sqlite_filename):
         """Idempotently prepare sqlite database containing submission content."""
-        conn = sqlite3.connect(sqlite_filename)
-        pass
+        with sqlite3.connect(sqlite_filename) as conn:
+            # do idempotent load here?
+            pass
 
     @classmethod
     def prepare_sqlite_derived_tables(cls, sqlite_filename):
@@ -426,7 +511,7 @@ class Submission (object):
         if catalog_url:
             m = re.match('%s/ermrest/catalog/(?P<catalog>[^/]+)/?' % server.get_server_uri(), catalog_url)
             if m:
-                catalog = server.connect_ermrest(m.groupdict['catalog'])
+                catalog = server.connect_ermrest(m.groupdict()['catalog'])
             else:
                 raise ValueError('Unexpected review_ermrest_url %s does not look like a catalog on server %s' % (catalog_url, server.get_server_uri(),))
         else:
@@ -435,7 +520,7 @@ class Submission (object):
             registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
 
         # this stuff is idempotent... repeat in case this failed previously?
-        canon_dp = CfdeDatapackage(portal_schema_json)
+        canon_dp = CfdeDataPackage(portal_schema_json)
         canon_dp.set_catalog(catalog)
         canon_dp.provision() # get the model deployed
         canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
@@ -445,13 +530,14 @@ class Submission (object):
         return catalog
 
     @classmethod
-    def upload_datapackage_content(cls, catalog, content_path):
+    def upload_datapackage_content(cls, catalog, content_path, table_done_callback=None):
         """Idempotently upload submission content from datapackage into review catalog."""
         packagefile = cls.datapackage_name_from_path(content_path)
-        submitted_dp = CfdeDatapackage(packagefile)
+        submitted_dp = CfdeDataPackage(packagefile)
         submitted_dp.set_catalog(catalog)
-        # TBD: idempotence here means we cannot validate whether there are duplicates?
-        submitted_dp.load_data_files(onconflict='skip')
+        # TBD: pass through our registry knowledge of tables already in content-ready status?
+        # TBD: restartable onconflict=skip here means we cannot validate whether there are duplicates?
+        submitted_dp.load_data_files(onconflict='skip', table_done_callback=table_done_callback)
 
     @classmethod
     def upload_derived_content(cls, catalog, sqlite_filename):
@@ -474,11 +560,11 @@ def main(dcc_id, archive_url):
     logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
-    registry = Registry('https', servername)
 
     # find our authenticated user info for this test harness
     # action provider would derive this from Globus?
     credential = get_credential(servername)
+    registry = Registry('https', servername, credentials=credential)
     server = DerivaServer('https', servername, credential)
     user_session = server.get('/authn/session').json()
     submitting_user = WebauthnUser(
@@ -487,23 +573,23 @@ def main(dcc_id, archive_url):
         user_session['client'].get('full_name'),
         user_session['client'].get('email'),
         [
-            WebauthnAttribute(attr['id'], attr['display_name'])
+            WebauthnAttribute(attr['id'], attr.get('display_name', 'unknown'))
             for attr in user_session['attributes']
         ]
     )
 
     # arguments dcc_id and archive_url would come from action provider
     # and it would also have a different way to obtain a submission ID
-    submission_id = uuid.uuid3(uuid.NAMESPACE_URL, archive_url)
+    submission_id = str(uuid.uuid3(uuid.NAMESPACE_URL, archive_url))
 
     # pre-flight check like action provider might want to do?
     # this is optional, implicitly happening again in Submission(...)
     registry.validate_dcc_id(dcc_id, submitting_user)
 
     # run the actual submission work if we get this far
-    submission = Submission(registry, submission_id, dcc_id, archive_url, submitting_user)
+    submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user)
     submission.ingest()
 
 if __name__ == '__main__':
-    exit(main(sys.argv[1:]))
+    exit(main(*sys.argv[1:]))
 

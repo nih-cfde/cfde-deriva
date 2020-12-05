@@ -1,4 +1,5 @@
 
+import datetime
 from deriva.core import ErmrestCatalog, get_credential
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
@@ -8,11 +9,11 @@ from . import exception
 
 def _attrdict_from_strings(*strings):
     new = AttrDict()
-    for prefix, term in [ s.replace('-', '_').split(':') for s in strings ]:
+    for prefix, term in [ s.split(':') for s in strings ]:
         if prefix not in new:
-            new[prefix] = AttrDict()
-        if term not in new[prefix]:
-            new[prefix][term] = '%s:%s' % (prefix, term)
+            new[prefix.replace('-', '_')] = AttrDict()
+        if term.replace('-', '_') not in new[prefix.replace('-', '_')]:
+            new[prefix.replace('-', '_')][term.replace('-', '_')] = '%s:%s' % (prefix, term)
     return new
 
 # structured access to controlled terms we will use in this code...
@@ -32,6 +33,12 @@ terms = _attrdict_from_strings(
     'cfde_registry_dp_status:rejected',
     'cfde_registry_dp_status:release-pending',
     'cfde_registry_dp_status:obsoleted',
+    'cfde_registry_dpt_status:enumerated',
+    'cfde_registry_dpt_status:name-error',
+    'cfde_registry_dpt_status:data-absent',
+    'cfde_registry_dpt_status:check-error',
+    'cfde_registry_dpt_status:content-ready',
+    'cfde_registry_dpt_status:content-error',
 )
 
 class WebauthnAttribute (object):
@@ -141,7 +148,7 @@ class Registry (object):
         """
         if credentials is None:
             credentials = get_credential(servername)
-        self._catalog = ErmrestCatalog(scheme, servername, catalog)
+        self._catalog = ErmrestCatalog(scheme, servername, catalog, credentials)
         self._builder = self._catalog.getPathBuilder()
 
     def validate_dcc_id(self, dcc_id, submitting_user):
@@ -164,9 +171,9 @@ class Registry (object):
         :param table_name: The registry table to access.
         :param id: A key to retrieve one row (default None retrieves all)
         """
-        path = self._builder.CFDE.tables[table_name]
+        path = self._builder.CFDE.tables[table_name].path
         if id is not None:
-            path = path.filter(path.table_instances[table_name].id == id)
+            path = path.filter(path.table_instances[table_name].column_definitions['id'] == id)
         return list( path.entities().fetch() )
 
     def get_datapackage(self, id):
@@ -179,6 +186,22 @@ class Registry (object):
         rows = self._get_entity('datapackage', id)
         if len(rows) < 1:
             raise exception.DatapackageUnknown('Datapackage "%s" not found in registry.' % (id,))
+        return rows[0]
+
+    def get_datapackage_table(self, datapackage, position):
+        """Get datapackage by submission id or raise exception.
+
+        :param datapackage: The datapackage.id key for the submission in the registry
+        :param position: The 0-based index of the table in the datapackage's list of resources
+
+        Raises IndexError if record is not found.
+        """
+        path = self._builder.CFDE.datapackage_table.path
+        path = path.filter(path.datapackage_table.datapackage == datapackage)
+        path = path.filter(path.datapackage_table.position == position)
+        rows = list( path.entities().fetch() )
+        if len(rows) < 1:
+            raise IndexError('Datapackage table ("%s", %d) not found in registry.' % (datapackage, position))
         return rows[0]
 
     def register_datapackage(self, id, dcc_id, submitting_user, archive_url):
@@ -214,6 +237,9 @@ class Registry (object):
             "submitting_dcc": dcc_id,
             "submitting_user": submitting_user.webauthn_id,
             "datapackage_url": archive_url,
+            # we need to supply these unless catalog starts giving default values for us
+            "submission_time": datetime.datetime.utcnow().isoformat(),
+            "status": terms.cfde_registry_dp_status.submitted,
         }
         defaults = [
             cname
@@ -227,7 +253,33 @@ class Registry (object):
         # kind of redundant, but make sure we round-trip this w/ server-applied defaults?
         return self.get_datapackage(id)
 
-    def update_datapackage(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_symmary_url=nochange):
+    def register_datapackage_table(self, datapackage, position, table_name):
+        """Idempotently register new datapackage table in registry.
+
+        :param datapackage: The datapackage.id for the containing datapackage
+        :param position: The integer position of this table in the datapackage's list of resources
+        :param table_name: The "name" field of the tabular resource
+
+        """
+        newrow = {
+            'datapackage': datapackage,
+            'position': position,
+            'table_name': table_name,
+            'status': terms.cfde_registry_dpt_status.enumerated,
+            'num_rows': None,
+            'diagnostics': None,
+        }
+
+        rows = self._catalog.post(
+            '/entity/CFDE:datapackage_table?onconflict=skip',
+            json=[newrow]
+        ).json()
+
+        if len(rows) == 0:
+            # row exits
+            self.update_datapackage_table(datapackage, position, status=terms.cfde_registry_dpt_status.enumerated)
+
+    def update_datapackage(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_summary_url=nochange):
         """Idempotently update datapackage metadata in registry.
 
         :param id: The datapackage.id of the existing record to update
@@ -251,6 +303,9 @@ class Registry (object):
             for k, v in {
                     'status': status,
                     'diagnostics': diagnostics,
+                    'review_ermrest_url': review_ermrest_url,
+                    'review_browse_url': review_browse_url,
+                    'review_summary_url': review_summary_url,
             }.items()
             if v is not nochange and v != existing[k]
         }
@@ -258,7 +313,44 @@ class Registry (object):
             return
         changes['id'] = id
         self._catalog.put(
-            '/attributegroup/CFDE:datapackage/id;%s' % (','.join(changes.keys()),),
+            '/attributegroup/CFDE:datapackage/id;%s' % (','.join([ c for c in changes.keys() if c != 'id']),),
+            json=[changes]
+        )
+
+    def update_datapackage_table(self, datapackage, position, status=nochange, num_rows=nochange, diagnostics=nochange):
+        """Idempotently update datapackage_table metadata in registry.
+
+        :param datapackage: The datapackage_table.datapackage key value
+        :param position: The datapackage_table.position key value
+        :param status: The new datapackage_table.status value (default nochange)
+        :param num_rows: The new datapackage_table.num_rows value (default nochange)
+        :Param diagnostics: The new datapackage_table.diagnostics value (default nochange)
+
+        """
+        if not isinstance(datapackage, str):
+            raise TypeError('expected datapackage of type str, not %s' % (type(datapackage),))
+        if not isinstance(position, int):
+            raise TypeError('expected id of type int, not %s' % (type(position),))
+        existing = self.get_datapackage_table(datapackage, position)
+        changes = {
+            k: v
+            for k, v in {
+                    'status': status,
+                    'num_rows': num_rows,
+                    'diagnostics': diagnostics,
+            }.items()
+            if v is not nochange and v != existing[k]
+        }
+        if not changes:
+            return
+        changes.update({
+            'datapackage': datapackage,
+            'position': position,
+        })
+        self._catalog.put(
+            '/attributegroup/CFDE:datapackage_table/datapackage,position;%s' % (
+                ','.join([ c for c in changes.keys() if c not in {'datapackage', 'position'} ]),
+            ),
             json=[changes]
         )
 
@@ -316,7 +408,7 @@ class Registry (object):
         }
 
         # find mapped groups (an inner join)
-        path = self._builder.CFDE.dcc_group_role.link(self._builder.CFDE.group)
+        path = self._builder.CFDE.dcc_group_role.path.link(self._builder.CFDE.group)
         if role_id is not None:
             path = path.filter(path.dcc_group_role.role == role_id)
         if dcc_id is not None:
@@ -333,7 +425,7 @@ class Registry (object):
         return [
             (
                 dcc_roles[(dcc_id, role_id)] \
-                if (_id, role_id) in dcc_roles \
+                if (dcc_id, role_id) in dcc_roles \
                 else {"dcc": dcc_id, "role": role_id, "groups": []}
             )
             for dcc_id in dccs
@@ -355,7 +447,7 @@ class Registry (object):
             for grp in self.get_groups_by_dcc_role(role_id, dcc_id)[0]['groups']
         ]
 
-    def enforce_submission(self, dcc_id, submitting_user):
+    def enforce_dcc_submission(self, dcc_id, submitting_user):
         """Verify that submitting_user is authorized to submit datapackages for dcc_id.
 
         :param dcc_id: The dcc.id key of the DCC in the registry
