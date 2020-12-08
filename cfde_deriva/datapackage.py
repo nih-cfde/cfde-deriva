@@ -613,32 +613,45 @@ class CfdeDataPackage (object):
         Caller should manage transactions if desired.
         """
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
-            sql = self.table_sqlite_ddl(self.doc_cfde_schema.tables[tname])
-            conn.execute(sql)
+            for sql in self.table_sqlite_ddl(self.doc_cfde_schema.tables[tname]):
+                conn.execute(sql)
 
     def table_sqlite_ddl(self, table):
-        """Output SQLite DDL for table"""
-        cdefs = [
+        """Yield SQLite DDL for table
+
+        May yield multiple statements, each of which must be executed in order.
+        """
+        parts = [
             self.column_sqlite_ddl(col)
             for col in table.column_definitions
             # ignore ermrest system columns
             if col.name not in {'RCT', 'RCB', 'RMT', 'RMB'}
         ]
-        fkeys = [
+        parts.extend([
+            self.key_sqlite_ddl(key)
+            for key in table.keys
+            if len(key.unique_columns) > 1
+        ])
+        parts.extend([
             self.fkey_sqlite_ddl(fkey)
             for fkey in table.foreign_keys
             # drop cross-schema fkeys and those using system columns
             if fkey.pk_table.schema is table.schema \
             and all([ col.name not in {'RCT', 'RCB', 'RMT', 'RMB'} for col in fkey.foreign_key_columns ])
-        ]
-        return ("""
+        ])
+        yield ("""
 CREATE TABLE IF NOT EXISTS %(tname)s (
   %(list)s
 );
 """ % {
     'tname': sql_identifier(table.name),
-    'list': ',\n'.join(cdefs + fkeys),
+    'list': ',\n'.join(parts),
 })
+        for fkey in table.foreign_keys:
+            # drop cross-schema fkeys and those using system columns
+            if fkey.pk_table.schema is table.schema \
+               and all([ col.name not in {'RCT', 'RCB', 'RMT', 'RMB'} for col in fkey.foreign_key_columns ]):
+                yield self.fkey_index_sqlite_ddl(fkey)
 
     def column_sqlite_ddl(self, col):
         """Output SQLite DDL for column (as part of CREATE TABLE statement)"""
@@ -664,6 +677,12 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'float8': 'real',
         }[typeobj.typename]
 
+    def key_sqlite_ddl(self, key):
+        """Output SQLite DDL for key (as part of CREATE TABLE statement)"""
+        return "UNIQUE (%(cols)s)" % {
+            'cols': ', '.join([ sql_identifier(c.name) for c in key.columns ]),
+        }
+
     def fkey_sqlite_ddl(self, fkey):
         """Output SQLite DDL for fkey (as part of CREATE TABLE statment)"""
         items = list(fkey.column_map.items())
@@ -671,6 +690,25 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'totable': sql_identifier(fkey.pk_table.name),
             'fromcols': ', '.join([ sql_identifier(e[0].name) for e in items ]),
             'tocols': ', '.join([ sql_identifier(e[1].name) for e in items ]),
+        }
+
+    def fkey_index_sqlite_ddl(self, fkey):
+        """Output SQLite DDL for index covering fkey columns (to complement CREATE TABLE statement)"""
+        # figure out canonical ordering to match key constraint
+        key = fkey.pk_table.key_by_columns(fkey.referenced_columns)
+        refcol_ranks = {
+            refcol: key.unique_columns.index(refcol)
+            for refcol in fkey.referenced_columns
+        }
+        fkcol_ranks = []
+        for fkcol, pkcol in fkey.column_map.items():
+            fkcol_ranks.append( (fkcol, refcol_ranks[pkcol]) )
+        fkcol_ranks.sort(key=lambda e: (e[1], e[0].name))
+        cols = [ col for col, rank in fkcol_ranks ]
+        return "CREATE INDEX IF NOT EXISTS %(idxname)s ON %(tname)s (%(cols)s);" % {
+            'idxname': sql_identifier('%s_idx' % fkey.name[1]),
+            'tname': sql_identifier(fkey.table.name),
+            'cols': ', '.join([ sql_identifier(c.name) for c in cols ]),
         }
 
 def main(args):
