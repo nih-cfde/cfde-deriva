@@ -242,13 +242,13 @@ class Submission (object):
             next_error_state = terms.cfde_registry_dp_status.ops_error
             if self.review_catalog is None:
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
-            self.prepare_sqlite_derived_tables(self.sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
             self.prepare_sqlite(self.content_path, self.sqlite_filename)
+            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.prepare_sqlite_derived_tables(self.sqlite_filename)
             self.upload_derived_content(self.review_catalog, self.sqlite_filename)
         except exception.CfdeError as e:
             # assume we can expose CfdeError text content
@@ -477,9 +477,16 @@ class Submission (object):
     @classmethod
     def prepare_sqlite(cls, content_path, sqlite_filename):
         """Idempotently prepare sqlite database containing submission content."""
+        canon_dp = CfdeDataPackage(portal_schema_json)
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
-            # do idempotent load here?
-            pass
+            logger.debug('Idempotently provisioning schema in %s' % (sqlite_filename,))
+            canon_dp.provision_sqlite(conn)
+            logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
+            canon_dp.sqlite_import_data_files(conn, onconflict='skip')
+            submitted_dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
     def prepare_sqlite_derived_tables(cls, sqlite_filename):
@@ -489,7 +496,11 @@ class Submission (object):
         each time it is invoked.
 
         """
-        pass
+        canon_dp = CfdeDataPackage(portal_schema_json)
+        # this with block produces a transaction in sqlite3
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Building derived tables in %s' % (sqlite_filename,))
+            canon_dp.sqlite_do_etl(conn)
 
     @classmethod
     def create_review_catalog(cls, server, registry, id):

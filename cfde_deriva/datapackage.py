@@ -39,6 +39,12 @@ class _WrappedStr (str):
 
 portal_schema_json = 'c2m2-level1-portal-model.json'
 
+def sql_identifier(s):
+    return '"%s"' % (s.replace('"', '""'),)
+
+def sql_literal(s):
+    return "'%s'" % (s.replace("'", "''"),)
+
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
     resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
@@ -84,11 +90,15 @@ class CfdeDataPackage (object):
         self.cat_cfde_schema = None
         self.cat_has_history_control = None
 
+        # load 2 copies... first is mutated during translation
         if package_filename is portal_schema_json:
             package_def = json.loads(pkgutil.get_data(portal.__name__, package_filename).decode())
+            self.package_def = json.loads(pkgutil.get_data(portal.__name__, package_filename).decode())
         else:
             with open(self.package_filename, 'r') as f:
                 package_def = json.load(f)
+            with open(self.package_filename, 'r') as f:
+                self.package_def = json.load(f)
 
         self.model_doc = tableschema.make_model(package_def)
         self.doc_model_root = Model(None, self.model_doc)
@@ -454,7 +464,9 @@ class CfdeDataPackage (object):
 
         return row2dict
 
-    def data_tnames_topo_sorted(self):
+    def data_tnames_topo_sorted(self, source_schema=None):
+        if source_schema is None:
+            source_schema = self.cat_cfde_schema
         def target_tname(fkey):
             return fkey.referenced_columns[0].table.name
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
@@ -464,7 +476,7 @@ class CfdeDataPackage (object):
                 for fkey in table.foreign_keys
                 if target_tname(fkey) != table.name and target_tname(fkey) in tables_doc
             ]
-            for table in self.cat_cfde_schema.tables.values()
+            for table in source_schema.tables.values()
             if table.name in tables_doc
         })
 
@@ -522,6 +534,144 @@ class CfdeDataPackage (object):
                     if table_done_callback:
                         table_done_callback(table.name, resource["path"])
 
+    def sqlite_import_data_files(self, conn, onconflict='abort'):
+        tables_doc = self.model_doc['schemas']['CFDE']['tables']
+        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+            # we are doing a clean load of data in fkey dependency order
+            table = self.doc_cfde_schema.tables[tname]
+            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+            if "path" in resource:
+                def open_package():
+                    if self.package_filename is portal_schema_json:
+                        return io.StringIO(pkgutil.get_data(portal.__name__, resource["path"]).decode())
+                    else:
+                        fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
+                        return open(fname, 'r')
+                with open_package() as f:
+                    # translate TSV to python dicts
+                    reader = csv.reader(f, delimiter="\t")
+                    header = next(reader)
+                    missing = set(table.annotations[self.schema_tag].get("missingValues", []))
+                    for cname in header:
+                        if cname not in table.column_definitions.elements:
+                            raise ValueError("header column %s not found in table %s" % (cname, table.name))
+                    batch_size = 10000  # TODO: Should this be configurable?
+                    # Largest known CFDE ingest has file with >5m rows
+                    batch = []
+                    def insert_batch():
+                        sql = "INSERT INTO %(table)s (%(cols)s) VALUES %(values)s %(upsert)s" % {
+                            'table': sql_identifier(table.name),
+                            'cols': ', '.join([ sql_identifier(c) for c in header ]),
+                            'values': ', '.join([
+                                '(%s)' % (', '.join([ 'NULL' if x in missing else sql_literal(x) for x in row ]))
+                                for row in batch
+                            ]),
+                            'upsert': 'ON CONFLICT DO NOTHING' if onconflict == 'skip' else '',
+                        }
+                        conn.execute(sql)
+                        logger.debug("Batch of rows for %s loaded" % table.name)
+
+                    for raw_row in reader:
+                        # Collect full batch, then insert at once
+                        batch.append(raw_row)
+                        if len(batch) >= batch_size:
+                            try:
+                                insert_batch()
+                            except Exception as e:
+                                logger.error("Table %s data load FAILED from "
+                                             "%s: %s" % (table.name, self.package_filename, e))
+                                raise
+                            else:
+                                batch.clear()
+                    # After reader exhausted, ingest final batch
+                    if len(batch) > 0:
+                        try:
+                            insert_batch()
+                        except Exception as e:
+                            logger.error("Table %s data load FAILED from "
+                                         "%s: %s" % (table.name, self.package_filename, e))
+                            raise
+                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+
+    def sqlite_do_etl(self, conn):
+        """Do ETL described in our customized datapackage"""
+        if not self.package_filename is portal_schema_json:
+            raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
+        for resource in self.package_def['resources']:
+            if 'derivation_sql_path' in resource:
+                sql = pkgutil.get_data(portal.__name__, resource['derivation_sql_path']).decode()
+                conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
+                conn.execute(sql)
+
+    def provision_sqlite(self, conn):
+        """Provision this datapackage schema into provided SQLite db
+
+        :param conn: Connection to an already opened SQLite db.
+
+        Trivial idempotence... use CREATE TABLE IF NOT EXISTS
+
+        Caller should manage transactions if desired.
+        """
+        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+            sql = self.table_sqlite_ddl(self.doc_cfde_schema.tables[tname])
+            conn.execute(sql)
+
+    def table_sqlite_ddl(self, table):
+        """Output SQLite DDL for table"""
+        cdefs = [
+            self.column_sqlite_ddl(col)
+            for col in table.column_definitions
+            # ignore ermrest system columns
+            if col.name not in {'RCT', 'RCB', 'RMT', 'RMB'}
+        ]
+        fkeys = [
+            self.fkey_sqlite_ddl(fkey)
+            for fkey in table.foreign_keys
+            # drop cross-schema fkeys and those using system columns
+            if fkey.pk_table.schema is table.schema \
+            and all([ col.name not in {'RCT', 'RCB', 'RMT', 'RMB'} for col in fkey.foreign_key_columns ])
+        ]
+        return ("""
+CREATE TABLE IF NOT EXISTS %(tname)s (
+  %(list)s
+);
+""" % {
+    'tname': sql_identifier(table.name),
+    'list': ',\n'.join(cdefs + fkeys),
+})
+
+    def column_sqlite_ddl(self, col):
+        """Output SQLite DDL for column (as part of CREATE TABLE statement)"""
+        if col.name == 'RID':
+            # special mapping to help with our ETL scripts...
+            return '"RID" INTEGER PRIMARY KEY AUTOINCREMENT'
+        parts = [ sql_identifier(col.name), self.type_sqlite_ddl(col.type) ]
+        if not col.nullok:
+            parts.append('NOT NULL')
+        key = col.table.key_by_columns({col}, raise_nomatch=False)
+        if key is not None:
+            parts.append('UNIQUE')
+        return ' '.join(parts)
+
+    def type_sqlite_ddl(self, typeobj):
+        """Output SQLite type-name for type"""
+        # raise KeyError if we encounter an unmapped type!
+        return {
+            'text': 'text',
+            'timestamptz': 'datetime',
+            'date': 'date',
+            'int8': 'int8',
+            'float8': 'real',
+        }[typeobj.typename]
+
+    def fkey_sqlite_ddl(self, fkey):
+        """Output SQLite DDL for fkey (as part of CREATE TABLE statment)"""
+        items = list(fkey.column_map.items())
+        return "FOREIGN KEY (%(fromcols)s) REFERENCES %(totable)s (%(tocols)s)" % {
+            'totable': sql_identifier(fkey.pk_table.name),
+            'fromcols': ', '.join([ sql_identifier(e[0].name) for e in items ]),
+            'tocols': ', '.join([ sql_identifier(e[1].name) for e in items ]),
+        }
 
 def main(args):
     """Basic C2M2 catalog setup
