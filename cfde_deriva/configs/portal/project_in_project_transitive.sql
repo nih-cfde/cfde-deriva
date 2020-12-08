@@ -1,9 +1,3 @@
-INSERT INTO project_in_project_transitive (
-  leader_project_id_namespace,
-  leader_project_local_id,
-  member_project_id_namespace,
-  member_project_local_id
-)
 WITH RECURSIVE t AS (
 
   SELECT
@@ -23,6 +17,12 @@ WITH RECURSIVE t AS (
   FROM project_in_project a
   JOIN t ON (a.parent_project_id_namespace = t.member_project_id_namespace AND a.parent_project_local_id = t.member_project_local_id)
 
+)
+INSERT INTO project_in_project_transitive (
+  leader_project_id_namespace,
+  leader_project_local_id,
+  member_project_id_namespace,
+  member_project_local_id
 )
 SELECT 
   leader_project_id_namespace,

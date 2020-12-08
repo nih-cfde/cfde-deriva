@@ -1,9 +1,3 @@
-INSERT INTO collection_in_collection_transitive (
-    leader_collection_id_namespace,
-    leader_collection_local_id,
-    member_collection_id_namespace,
-    member_collection_local_id
-)
 WITH RECURSIVE t AS (
 
   SELECT
@@ -23,6 +17,12 @@ WITH RECURSIVE t AS (
   FROM collection_in_collection a
   JOIN t ON (a.superset_collection_id_namespace = t.member_collection_id_namespace AND a.superset_collection_local_id = t.member_collection_local_id)
 
+)
+INSERT INTO collection_in_collection_transitive (
+    leader_collection_id_namespace,
+    leader_collection_local_id,
+    member_collection_id_namespace,
+    member_collection_local_id
 )
 SELECT 
   leader_collection_id_namespace,
