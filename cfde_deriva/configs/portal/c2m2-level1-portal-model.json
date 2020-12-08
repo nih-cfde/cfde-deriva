@@ -3196,7 +3196,10 @@
                   "name": "biosample_creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
                   "type": "datetime",
-                  "format": "any"
+                  "format": "any",
+                  "constraints": {
+                     "required": true
+                  }
                }
             ],
             "primaryKey": [
@@ -3248,6 +3251,9 @@
                   "type": "string",
                   "constraints": {
                      "pattern": "^OBI:[0-9]+$"
+                  },
+                  "constraints": {
+                     "required": true
                   }
                }
             ],
@@ -3308,6 +3314,9 @@
                   "type": "string",
                   "constraints": {
                      "pattern": "^UBERON:[0-9]+$"
+                  },
+                  "constraints": {
+                     "required": true
                   }
                }
             ],
