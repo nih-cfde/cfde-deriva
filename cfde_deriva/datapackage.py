@@ -43,7 +43,12 @@ def sql_identifier(s):
     return '"%s"' % (s.replace('"', '""'),)
 
 def sql_literal(s):
-    return "'%s'" % (s.replace("'", "''"),)
+    if isinstance(s, str):
+        return "'%s'" % (s.replace("'", "''"),)
+    elif isinstance(s, (int, float)):
+        return s
+    else:
+        raise TypeError('Unexpected type %s in sql_literal(%r)' % (type(s), s))
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -51,6 +56,8 @@ class CfdeDataPackage (object):
     # the translation leaves extranneous table-schema stuff under this annotation
     # (i.e. stuff that perhaps wasn't translated to deriva equivalents)
     schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
+
+    batch_size = 10000 # how may rows we'll send to ermrest
 
     # some useful group IDs to use later in ACLs...
     grp = AttrDict({
@@ -498,14 +505,13 @@ class CfdeDataPackage (object):
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
                     entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
-                    batch_size = 10000  # TODO: Should this be configurable?
                     # Batch catalog ingests; too-large ingests will hang and fail
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
                     for raw_row in reader:
                         # Collect full batch, then post at once
                         batch.append(row2dict(raw_row))
-                        if len(batch) >= batch_size:
+                        if len(batch) >= self.batch_size:
                             try:
                                 r = self.catalog.post(entity_url, json=batch)
                                 logger.debug("Batch of rows for %s loaded" % table.name)
@@ -555,7 +561,6 @@ class CfdeDataPackage (object):
                     for cname in header:
                         if cname not in table.column_definitions.elements:
                             raise ValueError("header column %s not found in table %s" % (cname, table.name))
-                    batch_size = 10000  # TODO: Should this be configurable?
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
                     def insert_batch():
@@ -574,7 +579,7 @@ class CfdeDataPackage (object):
                     for raw_row in reader:
                         # Collect full batch, then insert at once
                         batch.append(raw_row)
-                        if len(batch) >= batch_size:
+                        if len(batch) >= self.batch_size:
                             try:
                                 insert_batch()
                             except Exception as e:
@@ -592,6 +597,52 @@ class CfdeDataPackage (object):
                                          "%s: %s" % (table.name, self.package_filename, e))
                             raise
                     logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+
+    def load_sqlite_etl_tables(self, conn, onconflict='abort'):
+        if not self.package_filename is portal_schema_json:
+            raise ValueError('load_sqlite_etl_tables() is only valid for built-in datapackages')
+        for resource in self.package_def['resources']:
+            if 'derivation_sql_path' not in resource:
+                continue
+            # we are copying sqlite table content to catalog under same table name
+            table = self.cat_cfde_schema.tables[resource['name']]
+            entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
+            cols = [ col for col in table.columns if col.name not in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'} ]
+            colnames = [ col.name for col in cols ]
+            cur = conn.cursor()
+            position = None
+
+            def get_batch(cur):
+                nonlocal position
+                sql = 'SELECT %(cols)s FROM %(table)s %(where)s ORDER BY "RID" ASC LIMIT %(batchsize)s' % {
+                    'cols': ', '.join([ "RID" ] + [ sql_identifier(cname) for cname in colnames ]),
+                    'table': sql_identifier(table.name),
+                    'where': '' if position is None else ('WHERE "RID" > %s' % sql_literal(position)),
+                    'batchsize': '%d' % self.batch_size,
+                }
+                cur.execute(sql)
+                batch = list(cur)
+                if batch:
+                    position = batch[-1][0]
+                return batch
+
+            def get_batches(cur):
+                batch = get_batch(cur)
+                while batch:
+                    yield batch
+                    batch = get_batch(cur)
+
+            for batch in get_batches(cur):
+                batch = [
+                    dict(zip( colnames, row[1:]))
+                    for row in batch
+                ]
+                r = self.catalog.post(entity_url, json=batch)
+                logger.debug("Batch of rows for %s loaded" % table.name)
+                skipped = len(batch) - len(r.json())
+                if skipped:
+                    logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
+            logger.info("All data for table %s loaded." % (table.name,))
 
     def sqlite_do_etl(self, conn):
         """Do ETL described in our customized datapackage"""

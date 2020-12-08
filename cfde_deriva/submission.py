@@ -163,7 +163,7 @@ class Submission (object):
                     terms.cfde_registry_dp_status.release_pending,
                     terms.cfde_registry_dp_status.obsoleted,
             }:
-                logger.debug('Skiping ingest for datapackage %s with existing terminal status %s.' % (
+                logger.debug('Skipping ingest for datapackage %s with existing terminal status %s.' % (
                     self.datapackage_id,
                     dp['status'],
                 ))
@@ -268,7 +268,7 @@ class Submission (object):
                     % (failed_exc, next_error_state, self.datapackage_id,)
                 )
             else:
-                status, diagnostics = terms.cfde_registry_dp_status.content_ready, nochange
+                status, diagnostics = terms.cfde_registry_dp_status.content_ready, None
                 logger.debug(
                     'Finished ingest processing for datapackage %s' % (self.datapackage_id,)
                 )
@@ -563,8 +563,11 @@ class Submission (object):
     @classmethod
     def upload_derived_content(cls, catalog, sqlite_filename):
         """Idempotently upload prepared review content in sqlite db into review catalog."""
-        pass
-
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Idempotently uploading derived ETL data from %s' % (sqlite_filename,))
+            canon_dp = CfdeDataPackage(portal_schema_json)
+            canon_dp.set_catalog(catalog)
+            canon_dp.load_sqlite_etl_tables(conn, onconflict='skip')
 
 def main(dcc_id, archive_url):
     """Ugly test-harness for data submission library.
