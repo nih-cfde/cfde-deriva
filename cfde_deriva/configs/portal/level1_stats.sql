@@ -38,22 +38,24 @@ WITH fstats AS (
     JOIN project_root pr
       ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
           AND pipt.leader_project_local_id = pr.project_local_id)
-    LEFT JOIN file_describes_biosample fdb
-      ON (    f.id_namespace = fdb.file_id_namespace
+    LEFT JOIN (
+      file_describes_biosample fdb
+      JOIN biosample b
+        ON (    fdb.biosample_id_namespace = b.id_namespace
+            AND fdb.biosample_local_id = b.local_id)
+      LEFT JOIN (
+        biosample_from_subject bfs
+        JOIN subject s
+          ON (    bfs.subject_id_namespace = s.id_namespace
+              AND bfs.subject_local_id = s.local_id)
+        LEFT JOIN subject_species ss
+          ON (    s.id_namespace = ss.subject_id_namespace
+              AND s.local_id = ss.subject_local_id)
+      ) ON (    bfs.biosample_id_namespace = b.id_namespace
+            AND bfs.biosample_local_id = b.local_id)
+    ) ON (    f.id_namespace = fdb.file_id_namespace
           AND f.local_id = fdb.file_local_id)
-    LEFT JOIN biosample b
-      ON (    fdb.biosample_id_namespace = b.id_namespace
-          AND fdb.biosample_local_id = b.local_id)
-    LEFT JOIN biosample_from_subject bfs
-      ON (    bfs.biosample_id_namespace = b.id_namespace
-          AND bfs.biosample_local_id = b.local_id)
-    LEFT JOIN subject s
-      ON (    bfs.subject_id_namespace = s.id_namespace
-          AND bfs.subject_local_id = s.local_id)
-    LEFT JOIN subject_species ss
-      ON (    s.id_namespace = ss.subject_id_namespace
-          AND s.local_id = ss.subject_local_id)
-    ) s
+  ) s
   GROUP BY
     root_project_id_namespace,
     root_project_local_id,
@@ -87,21 +89,23 @@ WITH fstats AS (
   JOIN project_root pr
     ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
         AND pipt.leader_project_local_id = pr.project_local_id)
-  LEFT JOIN biosample_from_subject bfs
-    ON (    bfs.biosample_id_namespace = b.id_namespace
+  LEFT JOIN (
+    biosample_from_subject bfs
+    JOIN subject s
+      ON (    bfs.subject_id_namespace = s.id_namespace
+          AND bfs.subject_local_id = s.local_id)
+    LEFT JOIN subject_species ss
+      ON (    s.id_namespace = ss.subject_id_namespace
+          AND s.local_id = ss.subject_local_id)
+  ) ON (    bfs.biosample_id_namespace = b.id_namespace
         AND bfs.biosample_local_id = b.local_id)
-  LEFT JOIN subject s
-    ON (    bfs.subject_id_namespace = s.id_namespace
-        AND bfs.subject_local_id = s.local_id)
-  LEFT JOIN subject_species ss
-    ON (    s.id_namespace = ss.subject_id_namespace
-        AND s.local_id = ss.subject_local_id)
-  LEFT JOIN file_describes_biosample fdb
-      ON (    fdb.biosample_id_namespace = b.id_namespace
-        AND fdb.biosample_local_id = b.local_id)
-  LEFT JOIN file f
-    ON (    f.id_namespace = fdb.file_id_namespace
-        AND f.local_id = fdb.file_local_id)
+  LEFT JOIN (
+    file_describes_biosample fdb
+    JOIN file f
+      ON (    f.id_namespace = fdb.file_id_namespace
+          AND f.local_id = fdb.file_local_id)
+  ) ON (    fdb.biosample_id_namespace = b.id_namespace
+    AND fdb.biosample_local_id = b.local_id)
   GROUP BY
     pr.project_id_namespace,
     pr.project_local_id,
@@ -138,18 +142,20 @@ WITH fstats AS (
   LEFT JOIN subject_species ss
     ON (    s.id_namespace = ss.subject_id_namespace
         AND s.local_id = ss.subject_local_id)
-  LEFT JOIN biosample_from_subject bfs
-    ON (    bfs.subject_id_namespace = s.id_namespace
+  LEFT JOIN (
+    biosample_from_subject bfs
+    JOIN biosample b
+      ON (    bfs.biosample_id_namespace = b.id_namespace
+          AND bfs.biosample_local_id = b.local_id)
+    LEFT JOIN (
+      file_describes_biosample fdb
+      JOIN file f
+        ON (    f.id_namespace = fdb.file_id_namespace
+            AND f.local_id = fdb.file_local_id)
+    ) ON (    fdb.biosample_id_namespace = b.id_namespace
+          AND fdb.biosample_local_id = b.local_id)
+  ) ON (    bfs.subject_id_namespace = s.id_namespace
         AND bfs.subject_local_id = s.local_id)
-  LEFT JOIN biosample b
-    ON (    bfs.biosample_id_namespace = b.id_namespace
-        AND bfs.biosample_local_id = b.local_id)
-  LEFT JOIN file_describes_biosample fdb
-    ON (    fdb.biosample_id_namespace = b.id_namespace
-        AND fdb.biosample_local_id = b.local_id)
-  LEFT JOIN file f
-    ON (    f.id_namespace = fdb.file_id_namespace
-        AND f.local_id = fdb.file_local_id)
   GROUP BY
     pr.project_id_namespace,
     pr.project_local_id,
