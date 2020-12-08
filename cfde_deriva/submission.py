@@ -240,11 +240,12 @@ class Submission (object):
             self.datapackage_validate(self.content_path, post_process=dpt_update1)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.provision_sqlite(self.content_path, self.sqlite_filename)
             if self.review_catalog is None:
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.prepare_sqlite(self.content_path, self.sqlite_filename)
+            self.load_sqlite(self.content_path, self.sqlite_filename)
             self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
@@ -475,17 +476,23 @@ class Submission (object):
             ))
 
     @classmethod
-    def prepare_sqlite(cls, content_path, sqlite_filename):
-        """Idempotently prepare sqlite database containing submission content."""
+    def provision_sqlite(cls, content_path, sqlite_filename):
+        """Idempotently prepare sqlite database containing portal model and base vocab."""
         canon_dp = CfdeDataPackage(portal_schema_json)
-        packagefile = cls.datapackage_name_from_path(content_path)
-        submitted_dp = CfdeDataPackage(packagefile)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently provisioning schema in %s' % (sqlite_filename,))
             canon_dp.provision_sqlite(conn)
-            logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
             canon_dp.sqlite_import_data_files(conn, onconflict='skip')
+
+    @classmethod
+    def load_sqlite(cls, content_path, sqlite_filename):
+        """Idempotently insert submission content."""
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        # this with block produces a transaction in sqlite3
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
