@@ -173,7 +173,12 @@ class Submission (object):
             self.unpack_datapackage(self.download_filename, self.content_path)
 
             next_error_state = terms.cfde_registry_dp_status.bag_error
-            self.bdbag_validate(self.content_path)
+            if dp['status'] not in {
+                    terms.cfde_registry_dp_status.bag_valid,
+                    terms.cfde_registry_dp_status.check_valid,
+            }:
+                self.bdbag_validate(self.content_path)
+                self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.bag_valid)
 
             def dpt_prepare(packagefile):
                 """Prepare lookup tools for packagefile"""
@@ -235,9 +240,12 @@ class Submission (object):
                     status= terms.cfde_registry_dpt_status.content_ready
                 )
 
-            next_error_state = terms.cfde_registry_dp_status.check_error
-            self.datapackage_model_check(self.content_path, pre_process=dpt_register)
-            self.datapackage_validate(self.content_path, post_process=dpt_update1)
+            if dp['status'] not in {
+                    terms.cfde_registry_dp_status.check_valid,
+            }:
+                next_error_state = terms.cfde_registry_dp_status.check_error
+                self.datapackage_model_check(self.content_path, pre_process=dpt_register)
+                self.datapackage_validate(self.content_path, post_process=dpt_update1)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.provision_sqlite(self.content_path, self.sqlite_filename)
@@ -246,11 +254,18 @@ class Submission (object):
 
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.load_sqlite(self.content_path, self.sqlite_filename)
+            self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
             self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.prepare_sqlite_derived_tables(self.sqlite_filename)
             self.upload_derived_content(self.review_catalog, self.sqlite_filename)
+
+            review_browse_url = '%s/chaise/recordset/#%s/CFDE:collection' % (
+                self.review_catalog._base_server_uri,
+                self.review_catalog.catalog_id,
+            )
+            self.registry.update_datapackage(self.datapackage_id, review_browse_url=review_browse_url)
         except exception.CfdeError as e:
             # assume we can expose CfdeError text content
             failed, failed_exc, diagnostics = True, e, str(e)
@@ -513,6 +528,15 @@ class Submission (object):
             canon_dp.sqlite_do_etl(conn)
 
     @classmethod
+    def extract_catalog_id(cls, server, catalog_url):
+        m = re.match('%s/ermrest/catalog/(?P<catalog>[^/]+)/?' % server.get_server_uri(), catalog_url)
+        if m:
+            catalogid = m.groupdict()['catalog']
+        else:
+            raise ValueError('Unexpected review_ermrest_url %s does not look like a catalog on server %s' % (catalog_url, server.get_server_uri(),))
+        return catalogid
+
+    @classmethod
     def create_review_catalog(cls, server, registry, id):
         """Create and an empty review catalog for given submission id, returning deriva.ErmrestCatalog binding object.
 
@@ -530,11 +554,7 @@ class Submission (object):
         metadata = registry.get_datapackage(id)
         catalog_url = metadata["review_ermrest_url"]
         if catalog_url:
-            m = re.match('%s/ermrest/catalog/(?P<catalog>[^/]+)/?' % server.get_server_uri(), catalog_url)
-            if m:
-                catalog = server.connect_ermrest(m.groupdict()['catalog'])
-            else:
-                raise ValueError('Unexpected review_ermrest_url %s does not look like a catalog on server %s' % (catalog_url, server.get_server_uri(),))
+            catalog = server.connect_ermrest(cls.extract_catalog_id(server, catalog_url))
         else:
             # register ASAP after creating, to narrow gap for orphaned catalogs...
             catalog = server.create_ermrest_catalog()
