@@ -9,6 +9,8 @@ has several useful modules:
 
 - [`cfde_deriva.tableschema`](cfde_deriva/tableschema.py) Translation utilities to convert the table-schema JSON document into deriva catalog schema definitions.
 - [`cfde_deriva.datapackage`](cfde_deriva/datapackage.py) Client-side data utilities to prepare a CFDE C2M2 catalog and load it with content from a C2M2 datapackage (e.g. a bdbag containing the table-schema JSON file and associated TSV files with actual metadata content).
+- [`cfde_deriva.registry`](cfde_deriva/registry.py) Client-side library to manipulate a CFDE submission registry.
+- [`cfde_deriva.submission`](cfde_deriva/submission.py) Middleware library for submission pipeline, wrapping preceding libraries with ingest processing logic.
 - [`cfde_deriva.dashboard_queries`](cfde_deriva/dashboard_queries.py) Client-side query utilities to extract summary information from a CFDE C2M2 catalog. See additional [documentation for the dashboard-query APIs](README-dashboard-query.md).
 - `cfde_deriva.configs` CFDE-maintained configuration data used with the preceding code.
 
@@ -44,4 +46,10 @@ C2M2 catalogs which support the portal UI.
 Various `.sql` files document derived table content we compute from
 DCC datapackage content. These derived tables are used by the CFDE
 portal UI implementation to assist with presentation.
+
+### Registry configuration
+
+The `cfde_deriva.configs.registry` sub-package includes configuration
+data related to building a CFDE submission registry, which tracks C2M2
+datapackages submitted by participating DCCs.
 
