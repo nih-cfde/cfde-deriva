@@ -194,8 +194,30 @@ class CfdeDataPackage (object):
                     { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
                     { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
                     { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Data Review", "url": "/dcc_review.html" }
+                    { "name": "Dashboard", "url": "/dashboard.html", "acls": {
+                        "enable": [
+                            "https://auth.globus.org/7977181e-f82f-11ea-b43a-0efde36f5027",
+                            "https://auth.globus.org/1863c500-f831-11ea-b43d-0efde36f5027",
+                            "https://auth.globus.org/4e335e29-f831-11ea-b43e-0efde36f5027",
+                            "https://auth.globus.org/8a32410e-f831-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/f423d7d8-f831-11ea-a93a-0a738d2d09bf",
+                            "https://auth.globus.org/2b14318d-f832-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/642533ba-f832-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/176baec4-ed26-11e5-8e88-22000ab4b42b"
+                        ]} 
+                    },
+                    { "name": "Data Review", "url": "/dcc_review.html", "acls": {
+                        "enable": [
+                            "https://auth.globus.org/7977181e-f82f-11ea-b43a-0efde36f5027",
+                            "https://auth.globus.org/1863c500-f831-11ea-b43d-0efde36f5027",
+                            "https://auth.globus.org/4e335e29-f831-11ea-b43e-0efde36f5027",
+                            "https://auth.globus.org/8a32410e-f831-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/f423d7d8-f831-11ea-a93a-0a738d2d09bf",
+                            "https://auth.globus.org/2b14318d-f832-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/642533ba-f832-11ea-880f-0ac4e6b272c3",
+                            "https://auth.globus.org/176baec4-ed26-11e5-8e88-22000ab4b42b"
+                        ]}
+                    }
                 ]
             }
         }
