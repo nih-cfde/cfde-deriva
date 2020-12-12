@@ -7,12 +7,197 @@ import sys
 import json
 import hashlib
 import base64
-from deriva.core import tag
+from deriva.core import tag, AttrDict
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
 if 'source_definitions' not in tag:
     # monkey-patch this newer annotation key until it appears in deriva-py
     tag['source_definitions'] = 'tag:isrd.isi.edu,2019:source-definitions'
+
+# some useful authentication IDs to use in preparing ACLs...
+authn_id = AttrDict({
+    # CFDE roles
+    "cfde_portal_admin": "https://auth.globus.org/5f742b05-9210-11e9-aa27-0e4b2da78b7a",
+    "cfde_portal_curator": "https://auth.globus.org/b5ff40d0-9210-11e9-aa1a-0a294aef5614",
+    "cfde_portal_writer": "https://auth.globus.org/e8d6b111-9210-11e9-aa1a-0a294aef5614",
+    "cfde_portal_creator": "https://auth.globus.org/f4c5c479-a8bf-11e9-a6e2-0a075bc69d14",
+    "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
+    "cfde_infrastructure_ops": "https://auth.globus.org/7116589f-3a72-11eb-86d2-0aa357bce76b",
+    "cfde_submission_pipeline": "TBD: pipeline agent",
+})
+
+
+def acls_union(*sources):
+    """Produce union of aclsets"""
+    acls = {}
+    for aclset in sources:
+        for aclname, acl in aclset.items():
+            existing = set(acls.setdefault(aclname, []))
+            # remap built-in authn IDs as a convenience
+            additional = { authn_id.get(attr, attr) for attr in acl }
+            acls[aclname].extend(additional.difference(existing))
+    return acls
+
+def aclbindings_merge(*sources):
+    """Produce merge of source acl bindings"""
+    bindings = {}
+    for bindings in sources:
+        for bname, binding in bindings.items():
+            if isinstance(binding, dict):
+                binding = dict(binding)
+                if 'scope_acl' in binding:
+                    binding['scope_acl'] = [ authn_id.get(attr, attr) for attr in binding['scope_acl'] ]
+            bindings[bname] = binding
+    return bindings
+
+def multiplexed_acls_union(*sources):
+    """Produce union of multiplexed aclsets"""
+    keys = set.union(*[ set(src.keys()) for src in sources ])
+    return {
+        key: acls_union(*[ src.get(key, {}) for src in sources ])
+        for key in keys
+    }
+
+def multiplexed_aclbindings_merge(*sources):
+    """Produce merge of multiplexed acl bindings"""
+    keys = set.union(*[ set(src.keys()) for src in sources ])
+    return {
+        key: aclbindings_merge(*[ src.get(key, {}) for src in sources ])
+        for key in keys
+    }
+
+class CatalogConfigurator (object):
+
+    # our baseline policy for everything we operate in CFDE
+    catalog_acls = {
+        # temporarily keep portal admin as owner, until ops upgrade is complete
+        "owner": [ authn_id.cfde_infrastructure_ops, authn_id.cfde_portal_admin ],
+        "enumerate": [ "*" ],
+    }
+    schema_acls = {
+        "CFDE": { "select": [ authn_id.cfde_portal_admin ] },
+        "public": { "select": [] },
+    }
+    schema_table_acls = {}
+    schema_table_aclbindings = {}
+    schema_table_column_acls = {}
+    schema_table_column_aclbindings = {}
+
+    def __init__(self, catalog=None):
+        """Construct a configurator
+        """
+        self.catalog = None
+        self.set_catalog(catalog)
+
+    def set_catalog(self, catalog):
+        if self.catalog == catalog:
+            return
+        self.catalog = catalog
+        # copy our class-level ACLs which we might mutate!
+        self.catalog_acls = acls_union(self.catalog_acls)
+        # be careful with owner ACL
+        # ermrest will not allow us to drop our ownership!
+        session = catalog.get_authn_session().json()
+        my_attr_ids = { a['id'] for a in session['attributes'] }
+        planned_owner = set(self.catalog_acls['owner'])
+        existing_owner = set(catalog.get('/acl').json()['owner'])
+        if not planned_owner.intersection(my_attr_ids):
+            # our designed config won't be allowed, so augment it
+            # copy our class-level config before mutating!
+            self.catalog_acls = dict(self.catalog_acls)
+            self.catalog_acls['owner'] = list(self.catalog_acls['owner'])
+            self.catalog_acls['owner'].extend(
+                # use whatever portion of existing owner ACL would match current client
+                existing_owner.intesection(my_attr_ids)
+            )
+
+    def apply_to_model(self, model):
+        model.acls.update(self.catalog_acls)
+        for sname, acls in self.schema_acls.items():
+            if sname in model.schemas:
+                model.schemas[sname].acls.clear()
+                model.schemas[sname].acls.update(acls)
+        for stname, acls in self.schema_table_acls.items():
+            sname, tname = stname
+            if sname in model.schemas:
+                if tname in model.schemas[sname].tables:
+                    model.schemas[sname].tables[tname].acls.clear()
+                    model.schemas[sname].tables[tname].acls.update(acls)
+
+class ReleaseConfigurator (CatalogConfigurator):
+
+    # release catalogs allow public read-access on entire CFDE schema
+    schema_acls = multiplexed_acls_union(
+        CatalogConfigurator.schema_acls,
+        {
+            "CFDE": { "select": ["*"] },
+        }
+    )
+
+    def __init__(self, catalog=None):
+        super(ReleaseConfigurator, self).__init__(catalog)
+
+class ReviewConfigurator (CatalogConfigurator):
+
+    # review catalogs allow CFDE-CC roles to read entire CFDE schema
+    schema_acls = multiplexed_acls_union(
+        CatalogConfigurator.schema_acls,
+        {
+            "CFDE": { "select": [ authn_id.cfde_portal_curator ] },
+        }
+    )
+
+    def __init__(self, dcc_read_groups=[], catalog=None):
+        super(ReviewConfigurator, self).__init__(catalog)
+        # review catalogs allow DCC-specific read-access on entire CFDE schema
+        self.schema_acls = multiplexed_acls_union(
+            self.schema_acls,
+            {
+                "CFDE": { "select": dcc_read_groups },
+            }
+        )
+
+class RegistryConfigurator (CatalogConfigurator):
+
+    schema_acls = multiplexed_acls_union(
+        CatalogConfigurator.schema_acls,
+        {
+            # portal admin can adjust most registry content by hand
+            # portal curator can see most registry content
+            'CFDE': {
+                'insert': [ authn_id.cfde_portal_admin ],
+                'update': [ authn_id.cfde_portal_admin ],
+                'delete': [ authn_id.cfde_portal_admin ],
+                'select': [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+            }
+        }
+    )
+
+    # make client table visible for provenance presentation...
+    schema_table_acls = multiplexed_acls_union(
+        CatalogConfigurator.schema_table_acls,
+        {
+            ('public', 'ERMrest_Client'): { "select": [ "*" ] },
+        }
+    )
+
+    # ... but hide sensitive client table cols
+    schema_table_column_acls = multiplexed_acls_union(
+        CatalogConfigurator.schema_table_acls,
+        {
+            ('public', 'ERMrest_Client', 'Email'): {
+                "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+                "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+            },
+            ('public', 'ERMrest_Client', 'Client_Object'): {
+                "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+                "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+            },
+        }
+    )
+
+    def __init__(self, catalog=None):
+        super(RegistryConfigurator, self).__init__(catalog)
 
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
@@ -37,7 +222,7 @@ def make_type(type, format):
         return builtin_types["text[]"]
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
-def make_column(cdef):
+def make_column(tname, cdef, configurator):
     cdef = dict(cdef)
     constraints = cdef.get("constraints", {})
     cdef_name = cdef.pop("name")
@@ -53,6 +238,14 @@ def make_column(cdef):
     for k, t in tag.items():
         if k in pre_annotations:
             annotations[t] = pre_annotations.pop(k)
+    acls = acls_union(
+        configurator.schema_table_column_acls.get( (schema_name, tname, cdef_name), {} ),
+        pre_annotations.pop('acls', {})
+    )
+    acl_bindings = aclbindings_merge(
+        configurator.schema_table_column_aclbindings.get( (schema_name, tname, cdef_name), {} ),
+        pre_annotations.pop('acl_bindings', {})
+    )
     return Column.define(
         cdef_name,
         make_type(
@@ -61,7 +254,9 @@ def make_column(cdef):
         ),
         nullok=nullok,
         comment=description,
-        annotations=annotations
+        annotations=annotations,
+        acls=acls,
+        acl_bindings=acl_bindings,
     )
 
 def make_id(*components):
@@ -137,7 +332,7 @@ def make_fkey(tname, fkdef):
         annotations=annotations
     )
 
-def make_table(tdef):
+def make_table(tdef, configurator, trusted=False, history_capture=False):
     provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
     tname = tdef["name"]
     if provide_system:
@@ -202,12 +397,22 @@ def make_table(tdef):
         annotations[tag.display] = {"name": title}
     pre_annotations = tdef_resource.get("deriva", {})
     for k, t in tag.items():
-        if k in pre_annotations:
+        if k == 'history_capture':
+            history_capture = pre_annotations.get('history_capture', history_capture) if trusted else history_capture
+        elif k in pre_annotations and trusted:
             annotations[t] = pre_annotations.pop(k)
+    acls = acls_union(
+        configurator.schema_table_acls.get( (schema_name, tname), {} ),
+        pre_annotations.pop('acls', {})
+    )
+    acl_bindings = aclbindings_merge(
+        configurator.schema_table_aclbindings.get( (schema_name, tname), {} ),
+        pre_annotations.pop('acl_bindings', {})
+    )
     return Table.define(
         tname,
         column_defs=system_columns + [
-            make_column(cdef)
+            make_column(tname, cdef, configurator)
             for cdef in tdef_fields
         ],
         key_defs=system_keys + keys,
@@ -218,32 +423,40 @@ def make_table(tdef):
         comment=tcomment,
         provide_system=False,
         annotations=annotations,
+        acls=acls,
+        acl_bindings=acl_bindings,
     )
 
-def make_model(tableschema):
+def make_model(tableschema, configurator, trusted=False):
     resources = tableschema.pop('resources')
     rnames = {}
     for r in resources:
         if r["name"] in rnames:
             raise ValueError('Resource name "%s" appears more than once' % (r["name"],))
-    annotations = {
-        schema_tag: tableschema
-    }
     pre_annotations = tableschema.get("deriva", {})
+    history_capture = pre_annotations.get('history_capture', False) if trusted else False
+    annotations = {
+        schema_tag: tableschema,
+    }
     for k, t in tag.items():
-        if k in pre_annotations:
+        if k == 'history_capture':
+            # we handled this above, don't blindly copy it
+            continue
+        if k in pre_annotations and trusted:
             annotations[t] = pre_annotations.pop(k)
     return {
         "schemas": {
             schema_name: {
                 "schema_name": schema_name,
                 "tables": {
-                    tdef["name"]: make_table(tdef)
+                    tdef["name"]: make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
                     for tdef in resources
-                }
+                },
+                "acls": configurator.schema_acls.get(schema_name, {}),
             }
         },
         "annotations": annotations,
+        "acls": configurator.catalog_acls,
     }
 
 def main():
@@ -255,9 +468,13 @@ def main():
     The output JSON is suitable for POST to an /ermrest/catalog/N/schema
     resource on a fresh, empty catalog.
 
-    Example:
+    Arguments:  [ { 'registry' | 'review' | 'release' } [ 'trusted' ] ]
 
-    python3 -m cfde_deriva.tableschema < table-schema/cfde-core-model.json
+    Examples:
+
+    python3 -m cfde_deriva.tableschema release trusted < configs/portal/c2m2-level1-portal-model.json
+    python3 -m cfde_deriva.tableschema review < configs/portal/c2m2-level1-portal-model.json
+    python3 -m cfde_deriva.tableschema registry trusted < configs/registry/cfde-registry-model.json
 
     Optionally:
 
@@ -265,7 +482,21 @@ def main():
     system columns RID,RCT,RCB,RMT,RMB for each table.
 
 """
-    json.dump(make_model(json.load(sys.stdin)), sys.stdout, indent=2)
+    if len(sys.argv) < 2:
+        raise ValueError('missing required catalog-type argument: registry | review | release')
+
+    configurator = {
+        'release': ReleaseConfigurator,
+        'review': ReviewConfigurator,
+        'registry': RegistryConfigurator,
+    }[sys.argv[1]]()
+
+    if len(sys.argv) > 2:
+        trusted = sys.argv[2].lower() == 'trusted'
+    else:
+        trusted = False
+
+    json.dump(make_model(json.load(sys.stdin), configurator, trusted), sys.stdout, indent=2)
     return 0
 
 if __name__ == '__main__':

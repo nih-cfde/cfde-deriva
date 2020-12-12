@@ -74,6 +74,9 @@
             "primaryKey": [ "id" ]
          },
          "deriva": {
+            "acls": {
+               "select": ["*"]
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "[{{dcc_name}}]({{dcc_url}})"
@@ -192,6 +195,9 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "acls": {
+               "select": ["*"]
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{name}}\n{{id}}\n"
@@ -257,6 +263,9 @@
             "primaryKey": [ "id" ]
          },
          "deriva": {
+            "acls": {
+               "select": ["*"]
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "[{{name}}](https://app.globus.org/groups/{{_id}}/about)"
@@ -298,6 +307,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -334,6 +348,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -370,6 +389,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -406,6 +430,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -442,6 +471,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -478,6 +512,11 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": ["*"]
+            }
          }
       },
       
@@ -495,6 +534,15 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
                   }
                },
                {
@@ -504,6 +552,15 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
                   }
                },
                {
@@ -512,6 +569,15 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
                   }
                },
                {
@@ -521,6 +587,15 @@
                   "format": "any",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
                   }
                },
                {
@@ -533,6 +608,13 @@
                      "required": true
                   },
                   "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
                      "column_display": {
                         "*": {
                            "markdown_pattern": "[{{_datapackage_url}}]({{_datapackage_url}})"
@@ -543,7 +625,11 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this datapackage.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {},
+                     "acl_bindings": {}
+                  }
                },
                {
                   "name": "status",
@@ -551,25 +637,58 @@
                   "type": "string",
                   "constraints": {
                      "required": true
-                  }               
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
                },
                {
                   "name": "dcc_approval_status",
                   "title": "DCC Approval Status",
                   "description": "A coded value for the post-review DCC approval of this datapackage.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {}
+                  }
                },
                {
                   "name": "cfde_approval_status",
                   "title": "CFDE Approval Status",
                   "description": "A coded value for the post-review CFDE-CC approval of this datapackage.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
                },
                {
                   "name": "decision_time",
                   "description": "A timestamp for when the datapackage reached a final decision status from the DCC and CFDE-CC.",
                   "type": "datetime",
-                  "format": "any"
+                  "format": "any",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
                },
                {
                   "name": "review_ermrest_url",
@@ -578,6 +697,13 @@
                   "type": "string",
                   "format": "uri",
                   "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
                      "column_display": {
                         "*": {
                            "markdown_pattern": "[{{_review_ermrest_url}}]({{_review_ermrest_url}})"
@@ -592,6 +718,13 @@
                   "type": "string",
                   "format": "uri",
                   "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
                      "column_display": {
                         "*": {
                            "markdown_pattern": "[{{_review_browse_url}}]({{_review_browse_url}})"
@@ -606,6 +739,13 @@
                   "type": "string",
                   "format": "uri",
                   "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
                      "column_display": {
                         "*": {
                            "markdown_pattern": "[{{_review_summary_url}}]({{_review_summary_url}})"
@@ -616,7 +756,16 @@
                {
                   "name": "diagnostics",
                   "description": "Diagnostic error information to augment coded status values.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -666,6 +815,47 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "insert": [ "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_submission_pipleine", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "dcc_group_decider": {
+                  "types": ["update"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:review-decider"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "dcc_group_admin": {
+                  "types": ["delete", "update"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:admin"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            },
             "table_display": {
                "*": {
                   "row_order": [{"column": "submission_time", "descending": true}]
@@ -756,6 +946,11 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -764,12 +959,22 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "table_name",
                   "description": "The reported table name for this tabular resource.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "status",
@@ -777,17 +982,32 @@
                   "type": "string",
                   "constraints": {
                      "required": true
-                  }               
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     }
+                  }
                },
                {
                   "name": "num_rows",
                   "description": "The number of rows found in this tabular input",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     }
+                  }
                },
                {
                   "name": "diagnostics",
                   "description": "Diagnostic error information to augment coded status values.",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_submission_pipeline" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -812,6 +1032,24 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "insert": [ "cfde_pipeline_agent" ],
+               "update": [ "cfde_portal_admin", "cfde_pipeline_agent" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            },
             "table_display": {
                "*": {
                   "row_order": ["datapackage", "position"]
@@ -1097,6 +1335,9 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "select": ["*"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -1302,6 +1543,7 @@
 
    ],
    "deriva": {
+      "history_capture": true,
       "chaise_config": {
          "SystemColumnsDisplayCompact": [],
          "SystemColumnsDisplayDetailed": [],

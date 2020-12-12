@@ -7,12 +7,13 @@ import json
 import csv
 import logging
 import pkgutil
+from collections import UserString
 
-from deriva.core import DerivaServer, get_credential, urlquote, AttrDict, topo_sorted, tag
+from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
 
 from . import tableschema
-from .configs import portal
+from .configs import portal, registry
 
 """
 Basic C2M2 catalog sketch
@@ -34,10 +35,39 @@ if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
 # some special singleton strings...
-class _WrappedStr (str):
-    pass
+class _PackageDataName (object):
+    def __init__(self, package, filename):
+        self.package = package
+        self.filename = filename
 
-portal_schema_json = 'c2m2-level1-portal-model.json'
+    def __str__(self):
+        return self.filename
+
+    def get_data(self, key=None):
+        """Get named content as raw buffer
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        if key is None:
+            key = self.filename
+        return pkgutil.get_data(self.package.__name__, key)
+
+    def get_data_str(self, key=None):
+        """Get named content as unicode decoded str
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        return self.get_data(key).decode()
+
+    def get_data_stringio(self, key=None):
+        """Get named content as unicode decoded StringIO buffer object
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        return io.StringIO(self.get_data_str(key))
+
+portal_schema_json = _PackageDataName(portal, 'c2m2-level1-portal-model.json')
+registry_schema_json = _PackageDataName(registry, 'cfde-registry-model.json')
 
 def sql_identifier(s):
     return '"%s"' % (s.replace('"', '""'),)
@@ -59,38 +89,22 @@ class CfdeDataPackage (object):
 
     batch_size = 10000 # how may rows we'll send to ermrest
 
-    # some useful group IDs to use later in ACLs...
-    grp = AttrDict({
-        # USC/ISI ISRD roles
-        "isrd_staff": "https://auth.globus.org/176baec4-ed26-11e5-8e88-22000ab4b42b",
-        'isrd_testers':    "https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d",
-        # CFDE roles
-        "cfde_portal_admin": "https://auth.globus.org/5f742b05-9210-11e9-aa27-0e4b2da78b7a",
-        "cfde_portal_curator": "https://auth.globus.org/b5ff40d0-9210-11e9-aa1a-0a294aef5614",
-        "cfde_portal_writer": "https://auth.globus.org/e8d6b111-9210-11e9-aa1a-0a294aef5614",
-        "cfde_portal_creator": "https://auth.globus.org/f4c5c479-a8bf-11e9-a6e2-0a075bc69d14",
-        "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
-    })
-    writers = []
-    readers = [grp.cfde_portal_reader,]
-    catalog_acls = {
-        "owner": [grp.cfde_portal_admin],
-        "insert": writers,
-        "update": writers,
-        "delete": writers,
-        "select": readers,
-        "enumerate": ["*"],
-    }
-    ermrestclient_acls = {
-        "select": readers,
-    }
-
-    def __init__(self, package_filename):
+    def __init__(self, package_filename, configurator=None):
         """Construct CfdeDataPackage from given package definition filename.
 
         Special singletons in this module select built-in data:
           - portal_schema_json
+          - registry_schema_json
         """
+        if not isinstance(package_filename, (str, _PackageDataName)):
+            raise TypeError('package_filename must be a str filepath or built-in package data name')
+        if not isinstance(configurator, (tableschema.CatalogConfigurator, type(None))):
+            raise TypeError('configurator must be an instance of tableschema.CatalogConfigurator or None')
+
+        if configurator is None:
+            self.configurator = tableschema.ReviewConfigurator()
+        else:
+            self.configurator = configurator
         self.package_filename = package_filename
         self.catalog = None
         self.cat_model_root = None
@@ -98,24 +112,25 @@ class CfdeDataPackage (object):
         self.cat_has_history_control = None
 
         # load 2 copies... first is mutated during translation
-        if package_filename is portal_schema_json:
-            package_def = json.loads(pkgutil.get_data(portal.__name__, package_filename).decode())
-            self.package_def = json.loads(pkgutil.get_data(portal.__name__, package_filename).decode())
+        if isinstance(package_filename, _PackageDataName):
+            package_def = json.loads(package_filename.get_data_str())
+            self.package_def = json.loads(package_filename.get_data_str())
         else:
             with open(self.package_filename, 'r') as f:
                 package_def = json.load(f)
             with open(self.package_filename, 'r') as f:
                 self.package_def = json.load(f)
 
-        self.model_doc = tableschema.make_model(package_def)
+        self.model_doc = tableschema.make_model(package_def, configurator=self.configurator, trusted=isinstance(self.package_filename, _PackageDataName))
         self.doc_model_root = Model(None, self.model_doc)
         self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
         if set(self.model_doc['schemas']) != {'CFDE'}:
-            raise NotImplementedError('Unexpected schema set in data package: %s' % (self.model_doc['schemas'],))
+            raise ValueError('Unexpected schema set in data package: %s' % (set(self.model_doc['schemas']),))
 
     def set_catalog(self, catalog):
         self.catalog = catalog
+        self.configurator.set_catalog(catalog)
         self.get_model()
         self.cat_has_history_control = catalog.get('/').json().get("features", {}).get("history_control", False)
 
@@ -248,8 +263,6 @@ class CfdeDataPackage (object):
                 else:
                     tdoc = ntable.prejson()
                     tdoc['schema_name'] = 'CFDE'
-                    if self.cat_has_history_control:
-                        tdoc.setdefault('annotations', dict())[tag.history_capture] = False
                     need_tables.append(tdoc)
 
             if need_tables:
@@ -275,8 +288,6 @@ class CfdeDataPackage (object):
                 doc_table = doc_schema.tables.get(table.name) if doc_schema is not None else None
                 if doc_table is not None:
                     table.annotations.update(doc_table.annotations)
-                    if self.cat_has_history_control:
-                        table.annotations[tag.history_capture] = False
                 for column in table.columns:
                     doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
                     if doc_column is not None:
@@ -287,13 +298,8 @@ class CfdeDataPackage (object):
                             print('Dropping %s' % fkey.uri_path)
                             fkey.drop()
 
-        # keep original catalog ownership
-        # since ERMrest will prevent a client from discarding ownership rights
-        acls = dict(self.catalog_acls)
-        acls['owner'] = list(set(acls['owner']).union(self.cat_model_root.acls['owner']))
-        self.cat_model_root.acls.update(acls)
-        self.cat_model_root.table('public', 'ERMrest_Client').acls.update(self.ermrestclient_acls)
-        self.cat_model_root.table('public', 'ERMrest_Group').acls.update(self.ermrestclient_acls)
+        # get appropriate policies for this catalog scenario
+        self.configurator.apply_to_model(self.cat_model_root)
 
         # set custom chaise configuration values for this catalog
         if tag.chaise_config not in self.cat_model_root.annotations:
@@ -380,33 +386,6 @@ class CfdeDataPackage (object):
             'row_name',
             {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
         )
-
-        def find_fkey(from_tname, from_cnames):
-            """Find sole fkey constraint governing column names in named "from" table.
-
-            Raises ValueError if column names set is governed by more
-            than one constraint.
-
-            """
-            from_table = self.cat_model_root.table("CFDE", from_tname)
-            if isinstance(from_cnames, str):
-                from_cnames = [from_cnames]
-            fkeys = list(from_table.fkeys_by_columns(from_cnames))
-            if len(fkeys) > 1:
-                raise ValueError('found multiple fkeys for %s %s' % (from_table, from_cnames))
-            return fkeys[0]
-
-        def assoc_source(markdown_name, assoc_table, left_columns, right_columns):
-            """Build facet/pseudo column document structure to walk named association.
-            """
-            return {
-                "source": [
-                    {"inbound": find_fkey(assoc_table, left_columns).names[0]},
-                    {"outbound": find_fkey(assoc_table, right_columns).names[0]},
-                    "RID"
-                ],
-                "markdown_name": markdown_name,
-            }
 
         ## apply the above ACL and annotation changes to server
         self.cat_model_root.apply()
@@ -495,8 +474,8 @@ class CfdeDataPackage (object):
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
             if "path" in resource:
                 def open_package():
-                    if self.package_filename is portal_schema_json:
-                        return io.StringIO(pkgutil.get_data(portal.__name__, resource["path"]).decode())
+                    if isinstance(self.package_filename, _PackageDataName):
+                        return self.package_filename.get_data_stringio(resource["path"])
                     else:
                         fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
                         return open(fname, 'r')
@@ -548,8 +527,8 @@ class CfdeDataPackage (object):
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
             if "path" in resource:
                 def open_package():
-                    if self.package_filename is portal_schema_json:
-                        return io.StringIO(pkgutil.get_data(portal.__name__, resource["path"]).decode())
+                    if isinstance(self.package_filename, _PackageDataName):
+                        return self.package_filename.get_data_stringio(resource["path"])
                     else:
                         fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
                         return open(fname, 'r')
@@ -600,7 +579,7 @@ class CfdeDataPackage (object):
 
     def load_sqlite_etl_tables(self, conn, onconflict='abort'):
         if not self.package_filename is portal_schema_json:
-            raise ValueError('load_sqlite_etl_tables() is only valid for built-in datapackages')
+            raise ValueError('load_sqlite_etl_tables() is only valid for built-in portal datapackage')
         for resource in self.package_def['resources']:
             if 'derivation_sql_path' not in resource:
                 continue
@@ -650,7 +629,7 @@ class CfdeDataPackage (object):
             raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
         for resource in self.package_def['resources']:
             if 'derivation_sql_path' in resource:
-                sql = pkgutil.get_data(portal.__name__, resource['derivation_sql_path']).decode()
+                sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
                 conn.execute(sql)
 
@@ -771,8 +750,9 @@ def main(args):
      PORTAL_SCHEMA \
      /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
 
-    The special name PORTAL_SCHEMA selects the builtin C2M2 portal
-    schema embedded as package data in cfde_deriva.
+    The special names PORTAL_SCHEMA and REGISTRY_SCHEMA select the
+    builtin C2M2 portal or CFDE registry schema embedded as package
+    data in cfde_deriva, respectively.
 
     When multiple files are specified, they are loaded in the order given.
     Earlier files take precedence in configuring the catalog model, while
@@ -784,17 +764,19 @@ def main(args):
 
     Environment variable parameters (with defaults):
 
-    DERIVA_SERVERNAME=demo.derivacloud.org
+    DERIVA_SERVERNAME=app-dev.nih-cfde.org
     DERIVA_CATALOGID=
     DERIVA_ONCONFLICT=abort
     DERIVA_INCREMENTAL_LOAD=false
+    CFDE_CATALOG_TYPE=review
 
     Setting a non-empty DERIVA_CATALOGID causes reconfiguration of an
-    existing catalog's presentation tweaks. It does not load data.
+    existing catalog's presentation tweaks. It does not load data
+    unless combined with DERIVA_INCREMENTAL_LOAD=true.
 
     """
     # this is the deriva server where we will create a catalog
-    servername = os.getenv('DERIVA_SERVERNAME', 'demo.derivacloud.org')
+    servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
 
     # this is an existing catalog we just want to re-configure!
     catid = os.getenv('DERIVA_CATALOGID')
@@ -806,6 +788,12 @@ def main(args):
     onconflict = os.getenv('DERIVA_ONCONFLICT', 'abort')
     incremental_load = os.getenv('DERIVA_INCREMENTAL_LOAD', 'false').lower() == 'true'
 
+    configurator_class = {
+        'review': tableschema.ReviewConfigurator,
+        'release': tableschema.ReleaseConfigurator,
+        'registry': tableschema.RegistryConfigurator,
+    }[os.getenv('CFDE_CATALOG_TYPE', 'review')]
+
     # ugly quasi CLI...
     if len(args) < 1:
         raise ValueError('At least one data package JSON filename required as argument')
@@ -815,7 +803,11 @@ def main(args):
     datapackages = [
         CfdeDataPackage(
             # map magic filenames to internal singletons
-            {'PORTAL_SCHEMA': portal_schema_json}.get(fname, fname)
+            {
+                'PORTAL_SCHEMA': portal_schema_json,
+                'REGISTRY_SCHEMA': registry_schema_json,
+            }.get(fname, fname),
+            configurator_class()
         )
         for fname in args
     ]

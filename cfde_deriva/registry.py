@@ -1,11 +1,14 @@
 
+import sys
 import datetime
-from deriva.core import ErmrestCatalog, get_credential
+from deriva.core import DerivaServer, ErmrestCatalog, get_credential
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
 
 from . import exception
+from .tableschema import RegistryConfigurator
+from .datapackage import CfdeDataPackage, registry_schema_json
 
 def _attrdict_from_strings(*strings):
     new = AttrDict()
@@ -459,3 +462,47 @@ class Registry (object):
             self.get_dcc_acl(dcc_id, terms.cfde_registry_grp_role.submitter),
             'Submission to DCC %s is forbidden' % (dcc_id,)
         )
+
+def main(servername, subcommand='reconfigure', catalog_id=None):
+    """Perform registry maintenance.
+
+    :param servername: The DERIVA server where the registry should reside.
+    :param subcommand: A named sub-command of this utility.
+    :param catalog_id: The existing catalog ID, if any.
+
+    Subcommands:
+
+    - 'provision': Build a new registry catalog and report its ID (ignores catalog_id)
+    - 'reconfigure': Re-configure existing registry (requires catalog_id)
+    - 'delete': Delete an existing (test) registry
+
+    """
+    credentials = get_credential(servername)
+    server = DerivaServer('https', servername, credentials)
+
+    if subcommand == 'provision':
+        catalog = server.create_ermrest_catalog()
+        print('Created new catalog %s' % catalog.catalog_id)
+    elif subcommand in { 'reconfigure', 'delete' }:
+        catalog = server.connect_ermrest(catalog_id)
+        print('Connected to existing catalog %s' % catalog.catalog_id)
+    else:
+        raise ValueError('unknown subcommand %s' % subcommand)
+
+    dp = CfdeDataPackage(registry_schema_json, RegistryConfigurator(catalog))
+    dp.set_catalog(catalog)
+
+    if subcommand == 'provision':
+        dp.provision()
+        dp.load_data_files()
+        dp.apply_custom_config()
+    elif subcommand == 'reconfigure':
+        dp.apply_custom_config()
+    elif subcommand == 'delete':
+        catalog.delete_ermrest_catalog(really=True)
+        print('Deleted existing catalog %s' % catalog.catalog_id)
+
+    return 0
+
+if __name__ == '__main__':
+    exit(main(*sys.argv[1:]))

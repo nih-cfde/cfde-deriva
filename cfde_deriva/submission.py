@@ -20,7 +20,7 @@ from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
 from deriva.core import DerivaServer, get_credential
 
-from . import exception
+from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
 from .datapackage import CfdeDataPackage, portal_schema_json
 
@@ -552,6 +552,14 @@ class Submission (object):
         """
         # handle idempotence...
         metadata = registry.get_datapackage(id)
+        dcc_read_acl = list(set.union(*[
+            set(registry.get_dcc_acl(metadata['submitting_dcc'], role))
+            for role in {
+                    terms.cfde_registry_grp_role.admin,
+                    terms.cfde_registry_grp_role.reviewer,
+                    terms.cfde_registry_grp_role.review_decider,
+            }
+        ]))
         catalog_url = metadata["review_ermrest_url"]
         if catalog_url:
             catalog = server.connect_ermrest(cls.extract_catalog_id(server, catalog_url))
@@ -561,7 +569,7 @@ class Submission (object):
             registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
 
         # this stuff is idempotent... repeat in case this failed previously?
-        canon_dp = CfdeDataPackage(portal_schema_json)
+        canon_dp = CfdeDataPackage(portal_schema_json, tableschema.ReviewConfigurator(dcc_read_acl, catalog=catalog))
         canon_dp.set_catalog(catalog)
         canon_dp.provision() # get the model deployed
         canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
