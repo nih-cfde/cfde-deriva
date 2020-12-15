@@ -994,7 +994,9 @@
                   "reference": {
                      "resource": "datapackage",
                      "fields": "id"
-                  }
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
                },
                {
                   "fields": "status",

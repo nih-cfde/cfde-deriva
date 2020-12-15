@@ -319,6 +319,19 @@ def make_fkey(tname, fkdef):
         constraint_name = make_id(tname, fkcols, 'fkey')
     if len(constraint_name.encode('utf8')) > 63:
         raise ValueError('Constraint name "%s" too long in %r' % (constraint_name, fkdef))
+    def get_action(clause):
+        try:
+            return {
+                'cascade': 'CASCADE',
+                'set null': 'SET NULL',
+                'set default': 'SET DEFAULT',
+                'restrict': 'RESTRICT',
+                'no action': 'NO ACTION',
+            }[fkdef.pop(clause, 'no action').lower()]
+        except KeyError as e:
+            raise ValueError('unknown action "%s" for foreign key %s %s clause' % (e, constraint_name, clause))
+    on_delete = get_action('on_delete')
+    on_update = get_action('on_update')
     annotations = {
         schema_tag: fkdef,
     }
@@ -330,6 +343,8 @@ def make_fkey(tname, fkdef):
         pktable,
         pkcols,
         constraint_names=[[ schema_name, constraint_name ]],
+        on_delete=on_delete,
+        on_update=on_update,
         annotations=annotations
     )
 
