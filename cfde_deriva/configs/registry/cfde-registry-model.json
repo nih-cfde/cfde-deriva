@@ -74,9 +74,6 @@
             "primaryKey": [ "id" ]
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "[{{dcc_name}}]({{dcc_url}})"
@@ -195,9 +192,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{name}}\n{{id}}\n"
@@ -263,9 +257,6 @@
             "primaryKey": [ "id" ]
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "[{{name}}](https://app.globus.org/groups/{{_id}}/about)"
@@ -309,9 +300,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -350,9 +338,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -391,9 +376,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -432,9 +414,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -473,9 +452,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -514,9 +490,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            }
          }
       },
       
@@ -609,7 +582,7 @@
                   },
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": []
                      },
                      "acl_bindings": {
                         "dcc_group_decider": false,
@@ -682,7 +655,7 @@
                   "format": "any",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      },
                      "acl_bindings": {
                         "dcc_group_decider": false,
@@ -698,7 +671,7 @@
                   "format": "uri",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      },
                      "acl_bindings": {
                         "dcc_group_decider": false,
@@ -719,7 +692,7 @@
                   "format": "uri",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      },
                      "acl_bindings": {
                         "dcc_group_decider": false,
@@ -740,7 +713,7 @@
                   "format": "uri",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      },
                      "acl_bindings": {
                         "dcc_group_decider": false,
@@ -816,8 +789,10 @@
          },
          "deriva": {
             "acls": {
-               "insert": [ "cfde_submission_pipeline" ],
-               "update": [ "cfde_portal_admin", "cfde_submission_pipleine", "cfde_portal_curator" ]
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin" ]
             },
             "acl_bindings": {
                "dcc_group_any": {
@@ -985,7 +960,7 @@
                   },
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      }
                   }
                },
@@ -995,7 +970,7 @@
                   "type": "integer",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      }
                   }
                },
@@ -1005,7 +980,7 @@
                   "type": "string",
                   "deriva": {
                      "acls": {
-                        "update": [ "cfde_submission_pipeline" ]
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
                      }
                   }
                }
@@ -1033,8 +1008,10 @@
          },
          "deriva": {
             "acls": {
-               "insert": [ "cfde_pipeline_agent" ],
-               "update": [ "cfde_portal_admin", "cfde_pipeline_agent" ]
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin" ]
             },
             "acl_bindings": {
                "dcc_group_any": {
@@ -1048,6 +1025,17 @@
                   ],
                   "projection_type": "acl",
                   "scope_acl": ["*"]
+               },
+               "dcc_group_admin": {
+                  "types": ["delete"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:admin"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ]
                }
             },
             "table_display": {
@@ -1335,9 +1323,6 @@
             ]
          },
          "deriva": {
-            "acls": {
-               "select": ["*"]
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,

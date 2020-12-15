@@ -463,7 +463,7 @@ class Registry (object):
             'Submission to DCC %s is forbidden' % (dcc_id,)
         )
 
-def main(servername, subcommand='reconfigure', catalog_id=None):
+def main(servername, subcommand, catalog_id=None):
     """Perform registry maintenance.
 
     :param servername: The DERIVA server where the registry should reside.
@@ -484,6 +484,8 @@ def main(servername, subcommand='reconfigure', catalog_id=None):
         catalog = server.create_ermrest_catalog()
         print('Created new catalog %s' % catalog.catalog_id)
     elif subcommand in { 'reconfigure', 'delete' }:
+        if catalog_id is None:
+            raise TypeError('missing 1 required positional argument: catalog_id')
         catalog = server.connect_ermrest(catalog_id)
         print('Connected to existing catalog %s' % catalog.catalog_id)
     else:

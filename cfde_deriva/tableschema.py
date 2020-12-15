@@ -22,8 +22,9 @@ authn_id = AttrDict({
     "cfde_portal_writer": "https://auth.globus.org/e8d6b111-9210-11e9-aa1a-0a294aef5614",
     "cfde_portal_creator": "https://auth.globus.org/f4c5c479-a8bf-11e9-a6e2-0a075bc69d14",
     "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
+    "cfde_portal_reviewer": "TBD: read-only reviewers of unreleased submissions",
     "cfde_infrastructure_ops": "https://auth.globus.org/7116589f-3a72-11eb-86d2-0aa357bce76b",
-    "cfde_submission_pipeline": "TBD: pipeline agent",
+    "cfde_submission_pipeline": "TBD: action provider? 21017803-059f-4a9b-b64c-051ab7c1d05d",
 })
 
 
@@ -165,10 +166,10 @@ class RegistryConfigurator (CatalogConfigurator):
             # portal admin can adjust most registry content by hand
             # portal curator can see most registry content
             'CFDE': {
+                'select': [ "*" ],
                 'insert': [ authn_id.cfde_portal_admin ],
                 'update': [ authn_id.cfde_portal_admin ],
-                'delete': [ authn_id.cfde_portal_admin ],
-                'select': [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+                'delete': [ authn_id.cfde_portal_admin ]
             }
         }
     )
@@ -190,8 +191,8 @@ class RegistryConfigurator (CatalogConfigurator):
                 "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
             },
             ('public', 'ERMrest_Client', 'Client_Object'): {
-                "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
-                "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
+                "select": [],
+                "enumerate": [],
             },
         }
     )
