@@ -1,13 +1,14 @@
 
 import sys
 import datetime
+import json
 from deriva.core import DerivaServer, ErmrestCatalog, get_credential
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
 
 from . import exception
-from .tableschema import RegistryConfigurator
+from .tableschema import RegistryConfigurator, authn_id
 from .datapackage import CfdeDataPackage, registry_schema_json
 
 def _attrdict_from_strings(*strings):
@@ -43,6 +44,12 @@ terms = _attrdict_from_strings(
     'cfde_registry_dpt_status:content-ready',
     'cfde_registry_dpt_status:content-error',
 )
+
+ermrest_creators_acl = [
+    authn_id.cfde_infrastructure_ops,
+    authn_id.cfde_portal_admin,
+    authn_id.cfde_submission_pipeline,
+]
 
 class WebauthnAttribute (object):
     """Represents authenticated attribute (i.e. group membership) of a user.
@@ -475,11 +482,15 @@ def main(servername, subcommand, catalog_id=None):
     - 'provision': Build a new registry catalog and report its ID (ignores catalog_id)
     - 'reconfigure': Re-configure existing registry (requires catalog_id)
     - 'delete': Delete an existing (test) registry
+    - 'creators-acl': Print ermrest creators ACL
 
     """
     credentials = get_credential(servername)
     server = DerivaServer('https', servername, credentials)
 
+    if subcommand == 'creators-acl':
+        print(json.dumps(ermrest_creators_acl, indent=2))
+        return 0
     if subcommand == 'provision':
         catalog = server.create_ermrest_catalog()
         print('Created new catalog %s' % catalog.catalog_id)
@@ -495,6 +506,19 @@ def main(servername, subcommand, catalog_id=None):
     dp.set_catalog(catalog)
 
     if subcommand == 'provision':
+        # HACK: need to pre-populate ERMrest client w/ identities used in test data for submitting_user
+        catalog.post(
+            '/entity/public:ERMrest_Client?onconflict=skip',
+            json=[
+                {
+                    'ID': 'https://auth.globus.org/ad02dee8-d274-11e5-b4a0-8752ee3cf7eb',
+                    'Display_Name': 'karlcz@globusid.org',
+                    'Full_Name': 'Karl Czajkowski',
+                    'Email': 'karlcz@isi.edu',
+                    'Client_Object': {},
+                }
+            ]
+        ).raise_for_status()
         dp.provision()
         dp.load_data_files()
         dp.apply_custom_config()
