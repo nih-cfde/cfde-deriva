@@ -24,9 +24,9 @@ authn_id = AttrDict({
     "cfde_portal_reader": "https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516",
     "cfde_portal_reviewer": "TBD: read-only reviewers of unreleased submissions",
     "cfde_infrastructure_ops": "https://auth.globus.org/7116589f-3a72-11eb-86d2-0aa357bce76b",
-    "cfde_submission_pipeline": "TBD: action provider? 21017803-059f-4a9b-b64c-051ab7c1d05d",
+    "cfde_submission_pipeline": "https://auth.globus.org/1fd07875-3f06-11eb-8761-0ece49b2bd8d",
+    "cfde_action_provider": "https://auth.globus.org/21017803-059f-4a9b-b64c-051ab7c1d05d",
 })
-
 
 def acls_union(*sources):
     """Produce union of aclsets"""
@@ -72,7 +72,13 @@ class CatalogConfigurator (object):
     # our baseline policy for everything we operate in CFDE
     catalog_acls = {
         # temporarily keep portal admin as owner, until ops upgrade is complete
-        "owner": [ authn_id.cfde_infrastructure_ops, authn_id.cfde_portal_admin ],
+        "owner": [ authn_id.cfde_infrastructure_ops ],
+        "create": [],
+        "select": [],
+        "write": [],
+        "insert": [],
+        "update": [],
+        "delete": [],
         "enumerate": [ "*" ],
     }
     schema_acls = {
