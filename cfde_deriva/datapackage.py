@@ -281,25 +281,39 @@ class CfdeDataPackage (object):
     def apply_custom_config(self):
         self.get_model()
 
+        # get appropriate policies for this catalog scenario
+        self.configurator.apply_to_model(self.doc_model_root)
+
         self.cat_model_root.annotations.update(self.doc_model_root.annotations)
         for schema in self.cat_model_root.schemas.values():
             doc_schema = self.doc_model_root.schemas.get(schema.name)
+            if doc_schema is None:
+                continue
+            schema.acls.clear()
+            schema.acls.update(doc_schema.acls)
             for table in schema.tables.values():
-                doc_table = doc_schema.tables.get(table.name) if doc_schema is not None else None
-                if doc_table is not None:
-                    table.annotations.update(doc_table.annotations)
+                doc_table = doc_schema.tables.get(table.name)
+                if doc_table is None:
+                    continue
+                table.annotations.update(doc_table.annotations)
+                table.acls.clear()
+                table.acl_bindings.clear()
+                table.acls.update(doc_table.acls)
+                table.acl_bindings.update(doc_table.acl_bindings)
                 for column in table.columns:
-                    doc_column = doc_table.columns.elements.get(column.name) if doc_table is not None else None
-                    if doc_column is not None:
-                        column.annotations.update(doc_column.annotations)
+                    doc_column = doc_table.columns.elements.get(column.name)
+                    if doc_column is None:
+                        continue
+                    column.annotations.update(doc_column.annotations)
+                    column.acls.clear()
+                    column.acl_bindings.clear()
+                    column.acls.update(doc_column.acls)
+                    column.acl_bindings.update(doc_column.acl_bindings)
                 if True or table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             print('Dropping %s' % fkey.uri_path)
                             fkey.drop()
-
-        # get appropriate policies for this catalog scenario
-        self.configurator.apply_to_model(self.cat_model_root)
 
         # set custom chaise configuration values for this catalog
         if tag.chaise_config not in self.cat_model_root.annotations:
