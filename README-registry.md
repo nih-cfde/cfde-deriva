@@ -112,9 +112,10 @@ This table summarizes these in more detail:
 | registry `CFDE`.`datapackage_table`.`num_rows` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or automation |
 | registry `CFDE`.`datapackage_table`.`diagnostics` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or automation |
 | registry `CFDE`.`datapackage_table` | select | DCC group | client belongs to any group role with `submitting_dcc` | table ACL-binding | DCC members can see DCC's submissions |
-| registry `public`.`ERMrest_Client` | select | public | N/A | table ACL |
-| registry `public`.`ERMrest_Client`.`Email` | select | CFDE admin/curator | N/A | column ACL |
-| registry `public`.`ERMrest_Client`.`Client_Object` | select | none | N/A | column ACL |
+| registry `public`.`ERMrest_Client` | select | public | N/A | table ACL | Anyone who can view a submission should also see the display name of the submitting user |
+| registry `public`.`ERMrest_Client` | insert | CFDE-CC admin/automation | N/A | table ACL | Submission can discover new submitting users before they visit registry themselves |
+| registry `public`.`ERMrest_Client`.`Email` | select | CFDE admin/curator | N/A | column ACL | Not everyone needs to know a submitting user's email |
+| registry `public`.`ERMrest_Client`.`Client_Object` | select | none | N/A | column ACL | No part of the registry or submission needs this at present |
 
 The table-level ACLs override the schema-wide defaults and make
 certain tables more restrictive.  Likewise, the column-level ACLs
