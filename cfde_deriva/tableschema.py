@@ -118,18 +118,51 @@ class CatalogConfigurator (object):
                 existing_owner.intesection(my_attr_ids)
             )
 
-    def apply_to_model(self, model):
-        model.acls.update(self.catalog_acls)
+    def apply_acls_to_obj(self, obj, acls, replace):
+        newacls = acls if replace else acls_union(obj.acls, acls)
+        obj.acls.clear()
+        obj.acls.update(newacls)
+
+    def apply_aclbindings_to_obj(self, obj, bindings, replace):
+        newbinds = bindings if replace else aclbiindings_merge(obj.acl_bindings, bindings)
+        obj.acl_bindings.clear()
+        obj.acl_bindings.update(newbinds)
+
+    def apply_to_model(self, model, replace=True):
+        self.apply_acls_to_obj(model, self.catalog_acls, replace=True)
         for sname, acls in self.schema_acls.items():
-            if sname in model.schemas:
-                model.schemas[sname].acls.clear()
-                model.schemas[sname].acls.update(acls)
+            try:
+                self.apply_acls_to_obj(model.schemas[sname], acls, replace=True)
+            except KeyError:
+                pass
+
         for stname, acls in self.schema_table_acls.items():
             sname, tname = stname
-            if sname in model.schemas:
-                if tname in model.schemas[sname].tables:
-                    model.schemas[sname].tables[tname].acls.clear()
-                    model.schemas[sname].tables[tname].acls.update(acls)
+            try:
+                self.apply_acls_to_obj(model.schemas[sname].tables[tname], acls, replace=replace)
+            except KeyError:
+                pass
+
+        for stname, binds in self.schema_table_aclbindings.items():
+            sname, tname = stname
+            try:
+                self.apply_aclbindings_to_obj(model.schemas[sname].tables[tname], binds, replace=replace)
+            except KeyError:
+                pass
+
+        for stcname, acls in self.schema_table_column_acls.items():
+            sname, tname, cname = stcname
+            try:
+                self.apply_acls_to_obj(model.schemas[sname].tables[tname].columns[cname], acls, replace=replace)
+            except KeyError:
+                pass
+
+        for stcname, binds in self.schema_table_column_aclbindings.items():
+            sname, tname, cname = stcname
+            try:
+                self.apply_aclbindings_to_obj(model.schemas[sname].tables[tname].columns[cname], binds, replace=replace)
+            except KeyError:
+                pass
 
 class ReleaseConfigurator (CatalogConfigurator):
 
@@ -186,7 +219,7 @@ class RegistryConfigurator (CatalogConfigurator):
         {
             ('public', 'ERMrest_Client'): {
                 "select": [ "*" ],
-                "insert": [  authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
+                "insert": [ authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
             },
         }
     )

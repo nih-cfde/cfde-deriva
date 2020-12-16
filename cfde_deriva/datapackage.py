@@ -282,6 +282,7 @@ class CfdeDataPackage (object):
         self.get_model()
 
         # get appropriate policies for this catalog scenario
+        self.configurator.apply_to_model(self.cat_model_root)
         self.configurator.apply_to_model(self.doc_model_root)
 
         self.cat_model_root.annotations.update(self.doc_model_root.annotations)
