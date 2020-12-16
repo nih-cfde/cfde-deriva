@@ -116,6 +116,8 @@ This table summarizes these in more detail:
 | registry `public`.`ERMrest_Client` | insert | CFDE-CC admin/automation | N/A | table ACL | Submission can discover new submitting users before they visit registry themselves |
 | registry `public`.`ERMrest_Client`.`Email` | select | CFDE admin/curator | N/A | column ACL | Not everyone needs to know a submitting user's email |
 | registry `public`.`ERMrest_Client`.`Client_Object` | select | none | N/A | column ACL | No part of the registry or submission needs this at present |
+| review catalog | owner | CFDE-CC ops/automation | N/A | catalog ACL | Automation needs to own since it creates catalog, ops should own everything |
+| review `CFDE`.* | select | CFDE-CC admin/curator + DCC admin/reviewer/decider | N/A | schema ACL | DCC groups chosen for submitting DCC |
 
 The table-level ACLs override the schema-wide defaults and make
 certain tables more restrictive.  Likewise, the column-level ACLs
@@ -167,3 +169,9 @@ Notes:
    policies. The automation identity is the one recording the
    submission in the registry.
 
+4. The review catalog ACLs and `CFDE` schema ACLs are configured for
+   each submission, based on the submission's `submitting_dcc` and the
+   groups known by the registry (with appropriate DCC group roles) _at
+   the time of submission ingest_. This is primarily to adjust read
+   privileges on review content.  The infrastructure ownership aspects
+   do not vary per DCC.
