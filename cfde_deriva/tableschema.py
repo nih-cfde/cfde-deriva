@@ -71,7 +71,6 @@ class CatalogConfigurator (object):
 
     # our baseline policy for everything we operate in CFDE
     catalog_acls = {
-        # temporarily keep portal admin as owner, until ops upgrade is complete
         "owner": [ authn_id.cfde_infrastructure_ops ],
         "create": [],
         "select": [],
@@ -178,6 +177,14 @@ class ReleaseConfigurator (CatalogConfigurator):
         super(ReleaseConfigurator, self).__init__(catalog)
 
 class ReviewConfigurator (CatalogConfigurator):
+
+    # set consistent ownership for automation
+    catalog_acls = acls_union(
+        CatalogConfigurator.catalog_acls,
+        {
+            "owner": [ authn_id.cfde_infrastructure_ops, authn_id.cfde_submission_pipeline ],
+        }
+    )
 
     # review catalogs allow CFDE-CC roles to read entire CFDE schema
     schema_acls = multiplexed_acls_union(
