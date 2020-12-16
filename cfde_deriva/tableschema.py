@@ -184,7 +184,10 @@ class RegistryConfigurator (CatalogConfigurator):
     schema_table_acls = multiplexed_acls_union(
         CatalogConfigurator.schema_table_acls,
         {
-            ('public', 'ERMrest_Client'): { "select": [ "*" ] },
+            ('public', 'ERMrest_Client'): {
+                "select": [ "*" ],
+                "insert": [  authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
+            },
         }
     )
 
