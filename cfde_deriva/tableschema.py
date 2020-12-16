@@ -115,7 +115,7 @@ class CatalogConfigurator (object):
             self.catalog_acls['owner'] = list(self.catalog_acls['owner'])
             self.catalog_acls['owner'].extend(
                 # use whatever portion of existing owner ACL would match current client
-                existing_owner.intesection(my_attr_ids)
+                existing_owner.intersection(my_attr_ids)
             )
 
     def apply_acls_to_obj(self, obj, acls, replace):
