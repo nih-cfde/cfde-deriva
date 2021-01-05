@@ -845,7 +845,7 @@
                      "comment": "Identifying information for submission.",
                      "source": "submission_time",
                      "display": {
-                        "markdown_pattern": "- {{submission_time}}\n- {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}}\n{{#_description}}- {{description}}\n{{/_description}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submitted | {{submission_time}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n| Submission | [{{id}}]({{{_datapackage_url}}})) |\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
                      }
                   },
                   "S_status_extra": {
@@ -853,7 +853,7 @@
                      "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
                      "comment": "The status of the datapackage in the submission system.",
                      "display": {
-                        "markdown_pattern": "- {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}\n{{#$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}- DCC {{rowName}}\n{{/$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}{{#$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}- CFDE {{rowName}}\n{{/$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}{{#diagnostics}}\n- Error: {{diagnostics}}\n{{/diagnostics}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n{{#$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}| DCC Approval | {{rowName}} |\n{{/$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}{{#$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}| CFDE Approval | {{rowName}} |\n{{/$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}{{#_review_browse_url}}| Review | [{{.}}]({{.}}) |\n{{/_review_browse_url}}{{#_review_summary_url}}| Summary | [{{.}}]({{.}}) |\n{{/_review_summary_url}}"
                      }
                   },
                   "S_dcc_approval_status": {
@@ -900,8 +900,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_submission"},
-                  {"sourcekey": "S_status_extra"},
-                  {"sourcekey": "S_urls_brief"}
+                  {"sourcekey": "S_status_extra"}
                ]
             }
          }
@@ -1534,6 +1533,7 @@
       "chaise_config": {
          "SystemColumnsDisplayCompact": [],
          "SystemColumnsDisplayDetailed": [],
+         "maxRecordsetRowHeight": 300,
          "navbarMenu": {
             "children": [
                {
