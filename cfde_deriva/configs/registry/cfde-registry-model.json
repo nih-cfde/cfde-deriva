@@ -901,7 +901,30 @@
                "compact": [
                   {"sourcekey": "S_submission"},
                   {"sourcekey": "S_status_extra"}
-               ]
+               ],
+               "filter": {"and": [
+                  {
+                     "markdown_name": "Submtting DCC",
+                     "source": [{"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Submitting User",
+                     "source": [{"outbound": ["CFDE", "datapackage_submitting_user_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Status",
+                     "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "DCC Approval",
+                     "source": [{"outbound": ["CFDE", "datapackage_dcc_approval_status_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "CFDE Approval",
+                     "source": [{"outbound": ["CFDE", "datapackage_cfde_approval_status_fkey"]}, "RID"]
+                  },
+                  {"source": "submission_time"}
+               ]}
             }
          }
       },
