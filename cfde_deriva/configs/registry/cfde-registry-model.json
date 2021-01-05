@@ -790,9 +790,9 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
-               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "insert": [ "cfde_submission_pipeline" ],
                "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
-               "delete": [ "cfde_portal_admin" ]
+               "delete": [  ]
             },
             "acl_bindings": {
                "dcc_group_any": {
@@ -819,7 +819,7 @@
                   "scope_acl": ["*"]
                },
                "dcc_group_admin": {
-                  "types": ["delete", "update"],
+                  "types": ["update"],
                   "projection": [
                      {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
                      {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
@@ -1011,9 +1011,9 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
-               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "insert": [ "cfde_submission_pipeline" ],
                "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
-               "delete": [ "cfde_portal_admin" ]
+               "delete": [  ]
             },
             "acl_bindings": {
                "dcc_group_any": {
@@ -1029,7 +1029,7 @@
                   "scope_acl": ["*"]
                },
                "dcc_group_admin": {
-                  "types": ["delete"],
+                  "types": ["select"],
                   "projection": [
                      {"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]},
                      {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},

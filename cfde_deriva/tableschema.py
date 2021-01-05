@@ -220,10 +220,10 @@ class RegistryConfigurator (CatalogConfigurator):
         }
     )
 
-    # make client table visible for provenance presentation...
     schema_table_acls = multiplexed_acls_union(
         CatalogConfigurator.schema_table_acls,
         {
+            # make client table visible for provenance presentation...
             ('public', 'ERMrest_Client'): {
                 "select": [ "*" ],
                 "insert": [ authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
@@ -231,10 +231,10 @@ class RegistryConfigurator (CatalogConfigurator):
         }
     )
 
-    # ... but hide sensitive client table cols
     schema_table_column_acls = multiplexed_acls_union(
         CatalogConfigurator.schema_table_acls,
         {
+            # ... but hide sensitive client table cols
             ('public', 'ERMrest_Client', 'Email'): {
                 "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
                 "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
