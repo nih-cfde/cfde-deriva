@@ -76,7 +76,7 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "[{{dcc_name}}]({{dcc_url}})"
+                  "row_markdown_pattern": "{{dcc_name}}"
                }
             },
             "source_definitions": {
@@ -259,8 +259,27 @@
          "deriva": {
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "[{{name}}](https://app.globus.org/groups/{{_id}}/about)"
+                  "row_markdown_pattern": "{{name}}"
                }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "webauthn_id",
+                  "name",
+                  {
+                     "markdown_name": "Globus Group Page",
+                     "display": {
+                        "markdown_pattern": "[{{name}} page at Globus](https://app.globus.org/groups/{{_id}}/about)"
+                     }
+                  },
+                  "description"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
             }
          }
       },
