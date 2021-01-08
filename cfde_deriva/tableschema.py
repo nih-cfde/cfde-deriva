@@ -376,12 +376,12 @@ class RegistryConfigurator (CatalogConfigurator):
         del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
 
         # fixup incorrectly generated "Browse All Data" links
-        def fixup(entries):
+        def fixup(*entries):
             for entry in entries:
                 if 'url' in entry:
                     entry['url'] = entry['url'].replace('#registry/', '#1/')
                 elif 'children' in entry:
-                    fixup(entry['children'])
+                    fixup(*entry['children'])
 
         fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][0])
 

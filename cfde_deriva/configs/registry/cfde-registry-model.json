@@ -864,7 +864,7 @@
                      "comment": "Identifying information for submission.",
                      "source": "submission_time",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Submitted | {{submission_time}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n| Submission | [{{id}}]({{{_datapackage_url}}})) |\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submitted | {{submission_time}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n| Submission | [{{id}}]({{{_datapackage_url}}}) |\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
                      }
                   },
                   "S_status_extra": {
