@@ -316,33 +316,6 @@ class CfdeDataPackage (object):
                             print('Dropping %s' % fkey.uri_path)
                             fkey.drop()
 
-        # set custom chaise configuration values for this catalog
-        if tag.chaise_config not in self.cat_model_root.annotations:
-            self._set_default_chaise_config()
-
-        def _update(parent, key, d):
-            if key not in parent:
-                parent[key] = dict()
-            parent[key].update(d)
-
-        # have Chaise display underscores in model element names as whitespace
-        _update(
-            self.cat_cfde_schema.display,
-            "name_style",
-            {
-                "underline_space": True,
-                "title_case": True,
-            }
-        )
-        # turn off clutter of many links in tabular views
-        _update(
-            self.cat_cfde_schema.display,
-            "show_foreign_key_link",
-            {
-                "compact": False
-            }
-        )
-
         def compact_visible_columns(table):
             """Emulate Chaise heuristics while hiding system metadata"""
             # hacks for CFDE:
@@ -395,56 +368,9 @@ class CfdeDataPackage (object):
             #table.visible_columns = {'compact': compact_visible_columns(table)}
             #table.visible_foreign_keys = {'*': visible_foreign_keys(table)}
 
-        # prettier display of built-in ERMrest_Client table entries
-        _update(
-            self.cat_model_root.table('public', 'ERMrest_Client').table_display,
-            'row_name',
-            {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
-        )
-
         ## apply the above ACL and annotation changes to server
         self.cat_model_root.apply()
         self.get_model()
-
-    def _set_default_chaise_config(self):
-        self.cat_model_root.annotations[tag.chaise_config] = {
-            #"navbarBrandText": "CFDE Data Browser",
-            "SystemColumnsDisplayCompact": [],
-            "SystemColumnsDisplayDetailed": [],
-            "navbarMenu": {
-                "children": [
-                    {
-                        "name": "Browse All Data",
-                        "children": [
-                            { "name": "Collection", "url": "/chaise/recordset/#%s/CFDE:collection" % self.catalog._catalog_id },
-                            { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
-                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
-                            { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
-                            { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
-                            {
-                                "name": "Vocabulary",
-                                "children": [
-                                    { "name": "Anatomy", "url": "/chaise/recordset/#%s/CFDE:anatomy" % self.catalog._catalog_id },
-                                    { "name": "Assay Type", "url": "/chaise/recordset/#%s/CFDE:assay_type" % self.catalog._catalog_id },
-                                    { "name": "Data Type", "url": "/chaise/recordset/#%s/CFDE:data_type" % self.catalog._catalog_id },
-                                    { "name": "File Format", "url": "/chaise/recordset/#%s/CFDE:file_format" % self.catalog._catalog_id },
-                                    { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#%s/CFDE:ncbi_taxonomy" % self.catalog._catalog_id },
-                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#%s/CFDE:subject_granularity" % self.catalog._catalog_id },
-                                    { "name": "Subject Role", "url": "/chaise/recordset/#%s/CFDE:subject_role" % self.catalog._catalog_id },
-                                ]
-                            },
-                            { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
-                        ]
-                    },
-                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
-                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
-                    { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Data Review", "url": "/dcc_review.html" }
-                ]
-            }
-        }
 
     @classmethod
     def make_row2dict(cls, table, header):

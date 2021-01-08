@@ -96,7 +96,7 @@ class CatalogConfigurator (object):
         self.set_catalog(catalog)
 
     def set_catalog(self, catalog):
-        if self.catalog == catalog:
+        if self.catalog is catalog:
             return
         self.catalog = catalog
         # copy our class-level ACLs which we might mutate!
@@ -127,7 +127,83 @@ class CatalogConfigurator (object):
         obj.acl_bindings.clear()
         obj.acl_bindings.update(newbinds)
 
+    def apply_chaise_config(self, model):
+        model.annotations[tag.chaise_config] = {
+            #"navbarBrandText": "CFDE Data Browser",
+            "SystemColumnsDisplayCompact": [],
+            "SystemColumnsDisplayDetailed": [],
+            "navbarMenu": {
+                "children": [
+                    {
+                        "name": "Browse All Data",
+                        "children": [
+                            { "name": "Collection", "url": "/chaise/recordset/#%s/CFDE:collection" % self.catalog._catalog_id },
+                            { "name": "File", "url": "/chaise/recordset/#%s/CFDE:file" % self.catalog._catalog_id },
+                            { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
+                            { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
+                            { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
+                            {
+                                "name": "Vocabulary",
+                                "children": [
+                                    { "name": "Anatomy", "url": "/chaise/recordset/#%s/CFDE:anatomy" % self.catalog._catalog_id },
+                                    { "name": "Assay Type", "url": "/chaise/recordset/#%s/CFDE:assay_type" % self.catalog._catalog_id },
+                                    { "name": "Data Type", "url": "/chaise/recordset/#%s/CFDE:data_type" % self.catalog._catalog_id },
+                                    { "name": "File Format", "url": "/chaise/recordset/#%s/CFDE:file_format" % self.catalog._catalog_id },
+                                    { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#%s/CFDE:ncbi_taxonomy" % self.catalog._catalog_id },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#%s/CFDE:subject_granularity" % self.catalog._catalog_id },
+                                    { "name": "Subject Role", "url": "/chaise/recordset/#%s/CFDE:subject_role" % self.catalog._catalog_id },
+                                ]
+                            },
+                            { "name": "ID Namespace", "url": "/chaise/recordset/#%s/CFDE:id_namespace" % self.catalog._catalog_id },
+                        ]
+                    },
+                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
+                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
+                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
+                    { "name": "|" },
+                    { "name": "Dashboard", "url": "/dashboard.html" },
+                    { "name": "Data Review", "url": "/dcc_review.html" }
+                ]
+            }
+        }
+
     def apply_to_model(self, model, replace=True):
+        # set custom chaise configuration values
+        if replace or tag.chaise_config not in model.annotations:
+            self.apply_chaise_config(model)
+
+        def _update(parent, key, d):
+            if key not in parent:
+                parent[key] = dict()
+            parent[key].update(d)
+
+        # have Chaise display underscores in model element names as whitespace
+        _update(
+            model.schemas['CFDE'].display,
+            "name_style",
+            {
+                "underline_space": True,
+                "title_case": True,
+            }
+        )
+        # turn off clutter of many links in tabular views
+        _update(
+            model.schemas['CFDE'].display,
+            "show_foreign_key_link",
+            {
+                "compact": False
+            }
+        )
+
+        # prettier display of built-in ERMrest_Client table entries
+        if 'public' in model.schemas \
+           and 'ERMrest_Client' in model.schemas['public'].tables:
+            _update(
+                model.table('public', 'ERMrest_Client').table_display,
+                'row_name',
+                {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
+            )
+
         self.apply_acls_to_obj(model, self.catalog_acls, replace=True)
         for sname, acls in self.schema_acls.items():
             try:
@@ -194,8 +270,10 @@ class ReviewConfigurator (CatalogConfigurator):
         }
     )
 
-    def __init__(self, dcc_read_groups=[], catalog=None):
+    def __init__(self, dcc_read_groups=[], catalog=None, registry=None, submission_id=None):
         super(ReviewConfigurator, self).__init__(catalog)
+        self.registry = registry
+        self.submission_id = submission_id
         # review catalogs allow DCC-specific read-access on entire CFDE schema
         self.schema_acls = multiplexed_acls_union(
             self.schema_acls,
@@ -203,6 +281,43 @@ class ReviewConfigurator (CatalogConfigurator):
                 "CFDE": { "select": dcc_read_groups },
             }
         )
+
+    def apply_chaise_config(self, model):
+        """Apply custom chaise config for review content by adjusting the standard config"""
+        super(ReviewConfigurator, self).apply_chaise_config(model)
+
+        # trim off standard navbar content we want to replace
+        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
+        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
+
+        # add custom navbar info
+        datapackage = self.registry.get_datapackage(self.submission_id)
+        dcc = self.registry.get_dcc(datapackage['submitting_dcc'])[0]
+
+        def registry_record_page(tname, rid=None):
+            url = self.registry._catalog.get_server_uri()
+            url= url.replace('/ermrest/catalog/', '/chaise/record/#')
+            if url[-1] != '/':
+                url += '/'
+            url += 'CFDE:%s' % (tname,)
+            if rid is not None:
+                url += '/RID=%s' % (rid,)
+            return url
+
+        model.annotations[tag.chaise_config]['navbarMenu']['children'][0]["name"] = "Review Data"
+        model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
+            "name": "In-Review Submission",
+            "children": [
+                {
+                    "name": "Submission %s" % datapackage['id'],
+                    "url": registry_record_page('datapackage', datapackage['RID']),
+                },
+                {
+                    "name": dcc["dcc_name"],
+                    "url": registry_record_page('dcc', dcc['RID']),
+                },
+            ]
+        })
 
 class RegistryConfigurator (CatalogConfigurator):
 
@@ -248,6 +363,49 @@ class RegistryConfigurator (CatalogConfigurator):
 
     def __init__(self, catalog=None):
         super(RegistryConfigurator, self).__init__(catalog)
+
+    def apply_chaise_config(self, model):
+        """Apply custom chaise config for registry by adjusting the standard config"""
+        super(RegistryConfigurator, self).apply_chaise_config(model)
+
+        # custom config for submission listings
+        model.annotations[tag.chaise_config]['maxRecordsetRowHeight'] = 350
+
+        # trim off standard navbar content we want to replace
+        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
+        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
+
+        # fixup incorrectly generated "Browse All Data" links
+        def fixup(entries):
+            for entry in entries:
+                if 'url' in entry:
+                    entry['url'] = entry['url'].replace('#registry/', '#1/')
+                elif 'children' in entry:
+                    fixup(entry['children'])
+
+        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][0])
+
+        model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
+            "name": "Submission System",
+            "children": [
+                { "name": "Releases", "url": "/chaise/recordset/#registry/CFDE:release" },
+                { "name": "Submitted datapackages", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
+                { "name": "Enrolled DCCs", "url": "/chaise/recordset/#registry/CFDE:dcc" },
+                { "name": "Enrolled groups", "url": "/chaise/recordset/#registry/CFDE:group" },
+                #{ "name": "Enrolled namespaces", "url": "/chaise/recordset/#registry/CFDE:id_namespace" },
+                {
+                    "name": "Vocabulary",
+                    "children": [
+                        { "name": "Release status", "url": "/chaise/recordset/#registry/CFDE:release_status" },
+                        { "name": "Datapackage status", "url": "/chaise/recordset/#registry/CFDE:datapackage_status" },
+                        { "name": "Table status", "url": "/chaise/recordset/#registry/CFDE:datapackage_table_status" },
+                        { "name": "Approval status", "url": "/chaise/recordset/#registry/CFDE:approval_status" },
+                        { "name": "Group role", "url": "/chaise/recordset/#registry/CFDE:group_role" },
+                        #{ "name": "Namespace role", "url": "/chaise/recordset/#registry/CFDE:id_namespace_role" },
+                    ]
+                },
+            ]
+        })
 
 schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 resource_tag = 'tag:isrd.isi.edu,2019:table-resource'

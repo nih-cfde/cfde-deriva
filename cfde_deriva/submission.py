@@ -552,6 +552,29 @@ class Submission (object):
         """
         # handle idempotence...
         metadata = registry.get_datapackage(id)
+        catalog_url = metadata["review_ermrest_url"]
+        if catalog_url:
+            catalog = server.connect_ermrest(cls.extract_catalog_id(server, catalog_url))
+        else:
+            # register ASAP after creating, to narrow gap for orphaned catalogs...
+            catalog = server.create_ermrest_catalog()
+            registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
+        # perform other catalog setup idempotently
+        cls.configure_review_catalog(registry, catalog, id, provsion=True)
+
+    @classmethod
+    def configure_review_catalog(cls, registry, catalog, id, provision=False):
+        """Configure review catalog
+
+        Configure (or reconfigure) a review catalog.
+
+        :param registry: The Registry instance for the submission system
+        :param catalog: The ErmrestCatalog for the existing review catalog
+        :param id: The submission id of the submission providing the review content
+        :param provision: Perform model provisioning if True (default False, only reconfigure policies/presentation)
+
+        """
+        metadata = registry.get_datapackage(id)
         dcc_read_acl = list(set.union(*[
             set(registry.get_dcc_acl(metadata['submitting_dcc'], role))
             for role in {
@@ -560,20 +583,11 @@ class Submission (object):
                     terms.cfde_registry_grp_role.review_decider,
             }
         ]))
-        catalog_url = metadata["review_ermrest_url"]
-        if catalog_url:
-            catalog = server.connect_ermrest(cls.extract_catalog_id(server, catalog_url))
-        else:
-            # register ASAP after creating, to narrow gap for orphaned catalogs...
-            catalog = server.create_ermrest_catalog()
-            registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
-
-        # this stuff is idempotent... repeat in case this failed previously?
-        canon_dp = CfdeDataPackage(portal_schema_json, tableschema.ReviewConfigurator(dcc_read_acl, catalog=catalog))
+        canon_dp = CfdeDataPackage(portal_schema_json, tableschema.ReviewConfigurator(dcc_read_acl, catalog=catalog, registry=registry, submission_id=id))
         canon_dp.set_catalog(catalog)
-        canon_dp.provision() # get the model deployed
-        canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
-        # TBD: set custom ACLs appropriate for review scenario
+        if provision:
+            canon_dp.provision() # get the model deployed
+            canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
         # TBD: annotate with submission ID for easier ops/inventory purposes?
         canon_dp.apply_custom_config() # get the chaise hints deloyed
         return catalog
@@ -597,14 +611,19 @@ class Submission (object):
             canon_dp.set_catalog(catalog)
             canon_dp.load_sqlite_etl_tables(conn, onconflict='skip')
 
-def main(dcc_id, archive_url):
+def main(subcommand, *args):
     """Ugly test-harness for data submission library.
 
-    Usage: python3 -m cfde_deriva.submission 'dcc_id' 'archive_url'
+    Usage: python3 -m cfde_deriva.submission <sub-command> ...
 
-    Runs submission functions using default DERIVA credentials for
-    server both for registry operations and as "submitting user" in
-    CFDE parlance.
+    Sub-commands:
+    - 'submit' <dcc_id> <archive_url>
+       - Test harness for submission pipeline ingest flow
+    - 'reconfigure' <submission_id>
+       - Revise policy/resentation config on existing review catalog
+
+    This client uses default DERIVA credentials for server both for
+    registry operations and as "submitting user" in CFDE parlance.
 
     Set environment variable DERIVA_SERVERNAME to choose registry host.
 
@@ -630,17 +649,32 @@ def main(dcc_id, archive_url):
         ]
     )
 
-    # arguments dcc_id and archive_url would come from action provider
-    # and it would also have a different way to obtain a submission ID
-    submission_id = str(uuid.uuid3(uuid.NAMESPACE_URL, archive_url))
+    if subcommand == 'submit':
+        # arguments dcc_id and archive_url would come from action provider
+        # and it would also have a different way to obtain a submission ID
+        if len(args) != 2:
+            raise TypeError('"submit" requires exactly two positional arguments: dcc_id, archive_url')
+        dcc_id, archive_url = args
+        submission_id = str(uuid.uuid3(uuid.NAMESPACE_URL, archive_url))
 
-    # pre-flight check like action provider might want to do?
-    # this is optional, implicitly happening again in Submission(...)
-    registry.validate_dcc_id(dcc_id, submitting_user)
+        # pre-flight check like action provider might want to do?
+        # this is optional, implicitly happening again in Submission(...)
+        registry.validate_dcc_id(dcc_id, submitting_user)
 
-    # run the actual submission work if we get this far
-    submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user)
-    submission.ingest()
+        # run the actual submission work if we get this far
+        submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user)
+        submission.ingest()
+    elif subcommand == 'reconfigure':
+        if len(args) == 1:
+            submission_id = args[0]
+        else:
+            raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
+
+        md = registry.get_datapackage(submission_id)
+        catalog = server.connect_ermrest(Submission.extract_catalog_id(server, md['review_ermrest_url']))
+        Submission.configure_review_catalog(registry, catalog, md['id'], provision=False)
+    else:
+        raise ValueError('unknown sub-command "%s"' % subcommand)
 
 if __name__ == '__main__':
     exit(main(*sys.argv[1:]))

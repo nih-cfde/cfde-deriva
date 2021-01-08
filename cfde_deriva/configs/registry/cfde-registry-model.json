@@ -1571,54 +1571,6 @@
 
    ],
    "deriva": {
-      "history_capture": true,
-      "chaise_config": {
-         "SystemColumnsDisplayCompact": [],
-         "SystemColumnsDisplayDetailed": [],
-         "maxRecordsetRowHeight": 300,
-         "navbarMenu": {
-            "children": [
-               {
-                  "name": "Browse All Data",
-                  "children": [
-                     { "name": "Collection", "url": "/chaise/recordset/#1/CFDE:collection" },
-                     { "name": "File", "url": "/chaise/recordset/#1/CFDE:file" },
-                     { "name": "Biosample", "url": "/chaise/recordset/#1/CFDE:biosample" },
-                     { "name": "Subject", "url": "/chaise/recordset/#1/CFDE:subject" },
-                     { "name": "Project", "url": "/chaise/recordset/#1/CFDE:project" },
-                     {
-                        "name": "Vocabulary",
-                        "children": [
-                           { "name": "Anatomy", "url": "/chaise/recordset/#1/CFDE:anatomy" },
-                           { "name": "Assay Type", "url": "/chaise/recordset/#1/CFDE:assay_type" },
-                           { "name": "Data Type", "url": "/chaise/recordset/#1/CFDE:data_type" },
-                           { "name": "File Format", "url": "/chaise/recordset/#1/CFDE:file_format" },
-                           { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#1/CFDE:ncbi_taxonomy" },
-                           { "name": "Subject Granularity", "url": "/chaise/recordset/#1/CFDE:subject_granularity" },
-                           { "name": "Subject Role", "url": "/chaise/recordset/#1/CFDE:subject_role" }
-                        ]
-                     },
-                     { "name": "ID Namespace", "url": "/chaise/recordset/#1/CFDE:id_namespace" }
-                  ]
-               },
-               { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
-               { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-               { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
-               { "name": "|" },
-               { "name": "Dashboard", "url": "/dashboard.html" },
-               { "name": "Data Review", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
-               {
-                  "name": "Registry",
-                  "children": [
-                     { "name": "Datapackages", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
-                     { "name": "Releases", "url":  "/chaise/recordset/#registry/CFDE:release" },
-                     { "name": "DCCs", "url":  "/chaise/recordset/#registry/CFDE:dcc" },
-                     { "name": "Groups", "url":  "/chaise/recordset/#registry/CFDE:group" },
-                     { "name": "ID Namespaces", "url": "/chaise/recordset/#registry/CFDE:datapackage" }
-                  ]
-               }
-            ]
-         }
-      }
+      "history_capture": true
    }
 }
