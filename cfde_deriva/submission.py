@@ -560,7 +560,7 @@ class Submission (object):
             catalog = server.create_ermrest_catalog()
             registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
         # perform other catalog setup idempotently
-        cls.configure_review_catalog(registry, catalog, id, provsion=True)
+        cls.configure_review_catalog(registry, catalog, id, provision=True)
 
     @classmethod
     def configure_review_catalog(cls, registry, catalog, id, provision=False):
