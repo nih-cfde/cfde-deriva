@@ -356,7 +356,7 @@ class RegistryConfigurator (CatalogConfigurator):
             },
             ('public', 'ERMrest_Client', 'Client_Object'): {
                 "select": [],
-                "enumerate": [],
+                "enumerate": [ authn_id.cfde_submission_pipeline ],
             },
         }
     )
