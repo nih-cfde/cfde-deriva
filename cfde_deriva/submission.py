@@ -561,6 +561,7 @@ class Submission (object):
             registry.update_datapackage(id, review_ermrest_url=catalog.get_server_uri())
         # perform other catalog setup idempotently
         cls.configure_review_catalog(registry, catalog, id, provision=True)
+        return catalog
 
     @classmethod
     def configure_review_catalog(cls, registry, catalog, id, provision=False):
