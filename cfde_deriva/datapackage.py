@@ -237,7 +237,7 @@ class CfdeDataPackage (object):
         """
         self._compare_model_docs(subset)
 
-    def provision(self):
+    def provision(self, alter=False):
         if 'CFDE' not in self.cat_model_root.schemas:
             # blindly load the whole model on an apparently empty catalog
             self.catalog.post('/schema', json=self.model_doc).raise_for_status()
@@ -246,15 +246,53 @@ class CfdeDataPackage (object):
             # adding missing tables and missing columns
             need_tables = []
             need_columns = []
-            hazard_fkeys = {}
+            alter_columns = []
             for ntable in self.doc_cfde_schema.tables.values():
                 table = self.cat_cfde_schema.tables.get(ntable.name)
                 if table is not None:
                     for ncolumn in ntable.column_definitions:
                         column = table.column_definitions.elements.get(ncolumn.name)
-                        if column is not None:
-                            # TODO: check existing columns for compatibility?
+                        if ncolumn.name in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'}:
+                            # consider schema upgrades except on system columns...
                             pass
+                        elif column is not None:
+                            change = {}
+                            if ncolumn.nullok != column.nullok:
+                                if alter:
+                                    change['nullok'] = ncolumn.nullok
+                                elif column.nullok:
+                                    # existing column can accept this data
+                                    pass
+                                else:
+                                    raise ValueError('Incompatible nullok settings for %s.%s' % (table.name, column.name))
+                            def defeq(d1, d2):
+                                if d1 is None:
+                                    if d2 is not None:
+                                        return False
+                                return d1 == d2
+                            if not defeq(ncolumn.default, column.default):
+                                if alter:
+                                    change['default'] = ncolumn.default
+                                else:
+                                    # no compatibility model for defaults?
+                                    pass
+                            def typeeq(t1, t2):
+                                if t1.typename != t2.typename:
+                                    return False
+                                if t1.is_domain != t2.is_domain:
+                                    return False
+                                if t1.is_array != t2.is_array:
+                                    return False
+                                if t1.is_domain or t1.is_array:
+                                    return typeeq(t1.base_type, t2.base_type)
+                                return True
+                            if not typeeq(ncolumn.type, column.type):
+                                if alter:
+                                    change['type'] = ncolumn.type
+                                else:
+                                    raise ValueError('Mismatched type settings for %s.%s' % (table.name, column.name))
+                            if change:
+                                alter_columns.append((column, change))
                         else:
                             cdoc = ncolumn.prejson()
                             cdoc.update({'table_name': table.name, 'nullok': True})
@@ -275,6 +313,11 @@ class CfdeDataPackage (object):
                     json=cdoc
                 ).raise_for_status()
                 logger.debug("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
+
+            for pair in alter_columns:
+                column, cdoc = pair
+                column.alter(**cdoc)
+                logger.debug("Altered column %s.%s %s" % (column.table.name, column.name, cdoc))
 
         self.get_model()
 

@@ -480,6 +480,7 @@ def main(servername, subcommand, catalog_id=None):
     Subcommands:
 
     - 'provision': Build a new registry catalog and report its ID (ignores catalog_id)
+    - 'reprovision': Adjust existing registry model (required catalog_id)
     - 'reconfigure': Re-configure existing registry (requires catalog_id)
     - 'delete': Delete an existing (test) registry
     - 'creators-acl': Print ermrest creators ACL
@@ -494,7 +495,7 @@ def main(servername, subcommand, catalog_id=None):
     if subcommand == 'provision':
         catalog = server.create_ermrest_catalog()
         print('Created new catalog %s' % catalog.catalog_id)
-    elif subcommand in { 'reconfigure', 'delete' }:
+    elif subcommand in { 'reconfigure', 'delete', 'reprovision' }:
         if catalog_id is None:
             raise TypeError('missing 1 required positional argument: catalog_id')
         catalog = server.connect_ermrest(catalog_id)
@@ -521,6 +522,9 @@ def main(servername, subcommand, catalog_id=None):
         ).raise_for_status()
         dp.provision()
         dp.load_data_files()
+        dp.apply_custom_config()
+    elif subcommand == 'reprovision':
+        dp.provision(alter=True)
         dp.apply_custom_config()
     elif subcommand == 'reconfigure':
         dp.apply_custom_config()

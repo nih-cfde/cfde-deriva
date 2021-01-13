@@ -627,6 +627,7 @@
                   "name": "status",
                   "description": "A coded value for the current lifecycle status of the datapackage within the submission pipeline.",
                   "type": "string",
+                  "default": "cfde_registry_dp_status:submitted",
                   "constraints": {
                      "required": true
                   },
@@ -645,6 +646,10 @@
                   "title": "DCC Approval Status",
                   "description": "A coded value for the post-review DCC approval of this datapackage.",
                   "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin" ]
@@ -657,6 +662,10 @@
                   "title": "CFDE Approval Status",
                   "description": "A coded value for the post-review CFDE-CC approval of this datapackage.",
                   "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
@@ -996,6 +1005,7 @@
                   "name": "status",
                   "description": "A coded value for the current lifecycle status of the datapackage tabular file within the submission pipeline.",
                   "type": "string",
+                  "default": "cfde_registry_dpt_status:enumerated",
                   "constraints": {
                      "required": true
                   },
@@ -1134,6 +1144,7 @@
                   "name": "status",
                   "description": "A coded value for the current lifecycle status of the release within the submission pipeline.",
                   "type": "string",
+                  "default": "cfde_registry_rel_status:planning",
                   "constraints": {
                      "required": true
                   }               
@@ -1147,7 +1158,11 @@
                   "name": "cfde_approval_status",
                   "title": "CFDE Approval Status",
                   "description": "A coded value for the post-review CFDE-CC approval of this release.",
-                  "type": "string"
+                  "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "release_time",

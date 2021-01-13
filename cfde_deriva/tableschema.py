@@ -436,6 +436,7 @@ def make_column(tname, cdef, configurator):
     cdef_name = cdef.pop("name")
     title = cdef.get("title", None)
     nullok = not constraints.pop("required", False)
+    default = cdef.pop("default", None)
     description = cdef.pop("description", None)
     annotations = {
         schema_tag: cdef,
@@ -461,6 +462,7 @@ def make_column(tname, cdef, configurator):
             cdef.get("format", "default"),
         ),
         nullok=nullok,
+        default=default,
         comment=description,
         annotations=annotations,
         acls=acls,
