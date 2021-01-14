@@ -76,7 +76,7 @@ class Submission (object):
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
     
-    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user):
+    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user, archive_headers_map=None):
         """Represent a stateful processing flow for a C2M2 submission.
 
         :param server: A DerivaServer binding object where review catalogs are created.
@@ -85,14 +85,36 @@ class Submission (object):
         :param dcc_id: The submitting DCC, using a registry dcc.id key value.
         :param archive_url: The stable URL where the submission BDBag can be found.
         :param submitting_user: A WebauthnUser instance representing submitting user.
+        :param archive_headers_map: A map of URL patterns to additional request headers.
 
         The new instance is a binding for a submission which may or
         may not yet exist in the registry. The constructor WILL NOT
         cause state changes to the registry.
 
+        The archive_headers_map is a dict hierarchy with structure like:
+
+          {
+             "url_regexp": { "header-name": "header-content", ... }
+          }
+
+        For example:
+
+          {
+             "https://[^/]*[.]data[.]globus[.]org/.*": { "Authorization": "Bearer globus-token-here" }
+          }
+
+        The purpose is to allow the caller to specify trust policies
+        for which URLs ought to be requested with potentially
+        sensitive request headers.  For all patterns matched by
+        re.fullmatch(pattern, url), the corresponding header
+        dictionaries will be merged via dict.update() while iterating
+        over all matched rules. Supply an ordered dict if you care
+        about the order of this merge.
+
         Raises UnknownDccId if dcc_id is not known by registry.
         Raises Forbidden if submitting_user is not known as a submitter for DCC by registry.
         Raises non-CfdeError exceptions for operational errors.
+
         """
         registry.validate_dcc_id(dcc_id, submitting_user)
         self.server = server
@@ -102,6 +124,7 @@ class Submission (object):
         self.archive_url = archive_url
         self.review_catalog = None
         self.submitting_user = submitting_user
+        self.archive_headers_map = archive_headers_map
 
         # check filesystem config early to abort ASAP on errors
         # TBD: check permissions for safe service config?
@@ -169,7 +192,7 @@ class Submission (object):
                 ))
                 return
 
-            self.retrieve_datapackage(self.archive_url, self.download_filename)
+            self.retrieve_datapackage(self.archive_url, self.download_filename, self.archive_headers_map)
             self.unpack_datapackage(self.download_filename, self.content_path)
 
             next_error_state = terms.cfde_registry_dp_status.bag_error
@@ -338,7 +361,7 @@ class Submission (object):
     ## utility functions to help with various processing and validation tasks
 
     @classmethod
-    def retrieve_datapackage(cls, archive_url, download_filename):
+    def retrieve_datapackage(cls, archive_url, download_filename, archive_headers_map):
         """Idempotently stage datapackage content from archive_url into download_filename.
 
         Uses a temporary download name and renames after successful
@@ -347,6 +370,12 @@ class Submission (object):
         """
         if os.path.isfile(download_filename):
             return
+
+        headers = dict()
+        if archive_headers_map is not None:
+            for pat, hdrs in archive_headers_map.items():
+                if re.fullmatch(pat, archive_url):
+                    headers.update(hdrs)
 
         fd, tmp_name  = None, None
         try:
@@ -362,8 +391,7 @@ class Submission (object):
                 tmp_name,
             ))
 
-            # TBD: replace with appropriate globus-authenticated download
-            r = requests.get(archive_url, stream=True)
+            r = requests.get(archive_url, headers=headers, stream=True)
             r.raise_for_status()
             for chunk in r.iter_content(chunk_size=128*1024):
                 os.write(fd, chunk)
