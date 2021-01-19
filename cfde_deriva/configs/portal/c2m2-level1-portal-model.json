@@ -3356,6 +3356,14 @@
          "schema": {
             "fields": [
                {
+                  "name": "table_mask",
+                  "description": "An integer mask interpreted as a bit-field to distinguish subsets of contributing tables.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "root_project_id_namespace",
                   "description": "Identifier namespace for attributed root project (DCC)",
                   "type": "string",
@@ -3439,6 +3447,7 @@
                }
             ],
             "primaryKey": [
+               "table_mask",
                "project_id_namespace",
                "project_local_id",
                "assay_type_id",
@@ -3569,6 +3578,7 @@
             },
             "visible_columns": {
                "*": [
+                  {"source": "table_mask"},
                   {"sourcekey": "S_root_project"},
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type"},
@@ -3583,6 +3593,7 @@
                   {"source": "num_subjects"}
                ],
                "compact": [
+                  {"source": "table_mask"},
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_data_type"},
@@ -3600,6 +3611,7 @@
                   }
                ],
                "filter": {"and": [
+                  {"source": "table_mask"},
                   {"sourcekey": "S_root_project"},
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type"},

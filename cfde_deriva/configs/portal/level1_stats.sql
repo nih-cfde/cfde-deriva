@@ -5,6 +5,10 @@
 WITH fstats AS (
   -- file stats need file table rows, find optional remote metadata
   SELECT
+    (  1 -- file
+     + 2 -- biosample
+     + 4 -- subject
+    ) AS table_mask,
     root_project_id_namespace,
     root_project_local_id,
     project_id_namespace,
@@ -67,9 +71,114 @@ WITH fstats AS (
     anatomy_id,
     granularity_id,
     species_id
+
+  UNION
+
+  SELECT
+    (  1 -- file
+     + 2 -- biosample
+    ) AS table_mask,
+    root_project_id_namespace,
+    root_project_local_id,
+    project_id_namespace,
+    project_local_id,
+    COALESCE(assay_type_id, '') AS assay_type_id,
+    COALESCE(data_type_id, '') AS data_type_id,
+    COALESCE(file_format_id, '') AS file_format_id,
+    COALESCE(anatomy_id, '') AS anatomy_id,
+    '' AS granularity_id,
+    '' AS species_id,
+    count(*) AS num_files,
+    sum(num_bytes) AS num_bytes
+  FROM (
+    SELECT DISTINCT
+      pr.project_id_namespace AS root_project_id_namespace,
+      pr.project_local_id AS root_project_local_id,
+      f.project_id_namespace AS project_id_namespace,
+      f.project_local_id AS project_local_id,
+      f.assay_type assay_type_id,
+      f.data_type AS data_type_id,
+      f.file_format AS file_format_id,
+      b.anatomy AS anatomy_id,
+      f."RID" AS files_rid,
+      f.size_in_bytes AS num_bytes
+    FROM file f
+    JOIN project_in_project_transitive pipt
+      ON (    f.project_id_namespace = pipt.member_project_id_namespace
+          AND f.project_locaL_id = pipt.member_project_local_id)
+    JOIN project_root pr
+      ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+          AND pipt.leader_project_local_id = pr.project_local_id)
+    LEFT JOIN (
+      file_describes_biosample fdb
+      JOIN biosample b
+        ON (    fdb.biosample_id_namespace = b.id_namespace
+            AND fdb.biosample_local_id = b.local_id)
+    ) ON (    f.id_namespace = fdb.file_id_namespace
+          AND f.local_id = fdb.file_local_id)
+  ) s
+  GROUP BY
+    root_project_id_namespace,
+    root_project_local_id,
+    project_id_namespace,
+    project_local_id,
+    assay_type_id,
+    data_type_id,
+    file_format_id,
+    anatomy_id
+
+  UNION
+
+  SELECT
+    (  1 -- file
+    ) AS table_mask,
+    root_project_id_namespace,
+    root_project_local_id,
+    project_id_namespace,
+    project_local_id,
+    COALESCE(assay_type_id, '') AS assay_type_id,
+    COALESCE(data_type_id, '') AS data_type_id,
+    COALESCE(file_format_id, '') AS file_format_id,
+    '' AS anatomy_id,
+    '' AS granularity_id,
+    '' AS species_id,
+    count(*) AS num_files,
+    sum(num_bytes) AS num_bytes
+  FROM (
+    SELECT DISTINCT
+      pr.project_id_namespace AS root_project_id_namespace,
+      pr.project_local_id AS root_project_local_id,
+      f.project_id_namespace AS project_id_namespace,
+      f.project_local_id AS project_local_id,
+      f.assay_type assay_type_id,
+      f.data_type AS data_type_id,
+      f.file_format AS file_format_id,
+      f."RID" AS files_rid,
+      f.size_in_bytes AS num_bytes
+    FROM file f
+    JOIN project_in_project_transitive pipt
+      ON (    f.project_id_namespace = pipt.member_project_id_namespace
+          AND f.project_locaL_id = pipt.member_project_local_id)
+    JOIN project_root pr
+      ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+          AND pipt.leader_project_local_id = pr.project_local_id)
+  ) s
+  GROUP BY
+    root_project_id_namespace,
+    root_project_local_id,
+    project_id_namespace,
+    project_local_id,
+    assay_type_id,
+    data_type_id,
+    file_format_id
+
 ), bstats AS (
   -- biosample stats need biosample table rows, find optional remote metadata
   SELECT
+    (  1 -- file
+     + 2 -- biosample
+     + 4 -- subject
+    ) AS table_mask,
     pr.project_id_namespace AS root_project_id_namespace,
     pr.project_local_id AS root_project_local_id,
     b.project_id_namespace AS project_id_namespace,
@@ -80,8 +189,7 @@ WITH fstats AS (
     COALESCE(b.anatomy, '') AS anatomy_id,
     COALESCE(s.granularity, '') AS granularity_id,
     COALESCE(ss.species, '') AS species_id,
-    count(DISTINCT b."RID") AS num_biosamples,
-    sum(f.size_in_bytes) AS num_bytes
+    count(DISTINCT b."RID") AS num_biosamples
   FROM biosample b
   JOIN project_in_project_transitive pipt
     ON (    b.project_id_namespace = pipt.member_project_id_namespace
@@ -117,9 +225,87 @@ WITH fstats AS (
     b.anatomy,
     s.granularity,
     ss.species
+
+  UNION
+
+  SELECT
+    (  2 -- biosample
+     + 4 -- subject
+    ) AS table_mask,
+    pr.project_id_namespace AS root_project_id_namespace,
+    pr.project_local_id AS root_project_local_id,
+    b.project_id_namespace AS project_id_namespace,
+    b.project_local_id AS project_local_id,
+    '' AS assay_type_id,
+    '' AS data_type_id,
+    '' AS file_format_id,
+    COALESCE(b.anatomy, '') AS anatomy_id,
+    COALESCE(s.granularity, '') AS granularity_id,
+    COALESCE(ss.species, '') AS species_id,
+    count(DISTINCT b."RID") AS num_biosamples
+  FROM biosample b
+  JOIN project_in_project_transitive pipt
+    ON (    b.project_id_namespace = pipt.member_project_id_namespace
+        AND b.project_locaL_id = pipt.member_project_local_id)
+  JOIN project_root pr
+    ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+        AND pipt.leader_project_local_id = pr.project_local_id)
+  LEFT JOIN (
+    biosample_from_subject bfs
+    JOIN subject s
+      ON (    bfs.subject_id_namespace = s.id_namespace
+          AND bfs.subject_local_id = s.local_id)
+    LEFT JOIN subject_species ss
+      ON (    s.id_namespace = ss.subject_id_namespace
+          AND s.local_id = ss.subject_local_id)
+  ) ON (    bfs.biosample_id_namespace = b.id_namespace
+        AND bfs.biosample_local_id = b.local_id)
+  GROUP BY
+    pr.project_id_namespace,
+    pr.project_local_id,
+    b.project_id_namespace,
+    b.project_local_id,
+    b.anatomy,
+    s.granularity,
+    ss.species
+
+  UNION
+
+  SELECT
+    (  2 -- biosample
+    ) AS table_mask,
+    pr.project_id_namespace AS root_project_id_namespace,
+    pr.project_local_id AS root_project_local_id,
+    b.project_id_namespace AS project_id_namespace,
+    b.project_local_id AS project_local_id,
+    '' AS assay_type_id,
+    '' AS data_type_id,
+    '' AS file_format_id,
+    COALESCE(b.anatomy, '') AS anatomy_id,
+    '' AS granularity_id,
+    '' AS species_id,
+    count(DISTINCT b."RID") AS num_biosamples
+  FROM biosample b
+  JOIN project_in_project_transitive pipt
+    ON (    b.project_id_namespace = pipt.member_project_id_namespace
+        AND b.project_locaL_id = pipt.member_project_local_id)
+  JOIN project_root pr
+    ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+        AND pipt.leader_project_local_id = pr.project_local_id)
+  GROUP BY
+    pr.project_id_namespace,
+    pr.project_local_id,
+    b.project_id_namespace,
+    b.project_local_id,
+    b.anatomy
+
 ), sstats AS (
   -- subject stats need subject table rows, find optional remote metadata
   SELECT
+    (  1 -- file
+     + 2 -- biosample
+     + 4 -- subject
+    ) AS table_mask,
     pr.project_id_namespace AS root_project_id_namespace,
     pr.project_local_id AS root_project_local_id,
     s.project_id_namespace AS project_id_namespace,
@@ -130,8 +316,7 @@ WITH fstats AS (
     COALESCE(b.anatomy, '') AS anatomy_id,
     COALESCE(s.granularity, '') AS granularity_id,
     COALESCE(ss.species, '') AS species_id,
-    count(DISTINCT s."RID") AS num_subjects,
-    sum(f.size_in_bytes) AS num_bytes
+    count(DISTINCT s."RID") AS num_subjects
   FROM subject s
   JOIN project_in_project_transitive pipt
     ON (    s.project_id_namespace = pipt.member_project_id_namespace
@@ -167,8 +352,87 @@ WITH fstats AS (
     b.anatomy,
     s.granularity,
     ss.species
+ 
+  UNION
+
+  SELECT
+    (  2 -- biosample
+     + 4 -- subject
+    ) AS table_mask,
+    pr.project_id_namespace AS root_project_id_namespace,
+    pr.project_local_id AS root_project_local_id,
+    s.project_id_namespace AS project_id_namespace,
+    s.project_local_id AS project_local_id,
+    '' AS assay_type_id,
+    '' AS data_type_id,
+    '' AS file_format_id,
+    COALESCE(b.anatomy, '') AS anatomy_id,
+    COALESCE(s.granularity, '') AS granularity_id,
+    COALESCE(ss.species, '') AS species_id,
+    count(DISTINCT s."RID") AS num_subjects
+  FROM subject s
+  JOIN project_in_project_transitive pipt
+    ON (    s.project_id_namespace = pipt.member_project_id_namespace
+        AND s.project_locaL_id = pipt.member_project_local_id)
+  JOIN project_root pr
+    ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+        AND pipt.leader_project_local_id = pr.project_local_id)
+  LEFT JOIN subject_species ss
+    ON (    s.id_namespace = ss.subject_id_namespace
+        AND s.local_id = ss.subject_local_id)
+  LEFT JOIN (
+    biosample_from_subject bfs
+    JOIN biosample b
+      ON (    bfs.biosample_id_namespace = b.id_namespace
+          AND bfs.biosample_local_id = b.local_id)
+  ) ON (    bfs.subject_id_namespace = s.id_namespace
+        AND bfs.subject_local_id = s.local_id)
+  GROUP BY
+    pr.project_id_namespace,
+    pr.project_local_id,
+    s.project_id_namespace,
+    s.project_local_id,
+    b.anatomy,
+    s.granularity,
+    ss.species
+
+  UNION
+
+  SELECT
+    ( 4 -- subject
+    ) AS table_mask,
+    pr.project_id_namespace AS root_project_id_namespace,
+    pr.project_local_id AS root_project_local_id,
+    s.project_id_namespace AS project_id_namespace,
+    s.project_local_id AS project_local_id,
+    '' AS assay_type_id,
+    '' AS data_type_id,
+    '' AS file_format_id,
+    '' AS anatomy_id,
+    COALESCE(s.granularity, '') AS granularity_id,
+    COALESCE(ss.species, '') AS species_id,
+    count(DISTINCT s."RID") AS num_subjects
+  FROM subject s
+  JOIN project_in_project_transitive pipt
+    ON (    s.project_id_namespace = pipt.member_project_id_namespace
+        AND s.project_locaL_id = pipt.member_project_local_id)
+  JOIN project_root pr
+    ON (    pipt.leader_project_id_namespace = pr.project_id_namespace
+        AND pipt.leader_project_local_id = pr.project_local_id)
+  LEFT JOIN subject_species ss
+    ON (    s.id_namespace = ss.subject_id_namespace
+        AND s.local_id = ss.subject_local_id)
+  GROUP BY
+    pr.project_id_namespace,
+    pr.project_local_id,
+    s.project_id_namespace,
+    s.project_local_id,
+    s.granularity,
+    ss.species
+
 ), allcombos AS (
   SELECT
+    table_mask,
     root_project_id_namespace,
     root_project_local_id,
     project_id_namespace,
@@ -184,6 +448,7 @@ WITH fstats AS (
   UNION
 
   SELECT
+    table_mask,
     root_project_id_namespace,
     root_project_local_id,
     project_id_namespace,
@@ -199,6 +464,7 @@ WITH fstats AS (
   UNION
 
   SELECT
+    table_mask,
     root_project_id_namespace,
     root_project_local_id,
     project_id_namespace,
@@ -212,6 +478,7 @@ WITH fstats AS (
   FROM sstats
 )
 INSERT INTO level1_stats (
+  table_mask,
   root_project_id_namespace,
   root_project_local_id,
   project_id_namespace,
@@ -228,6 +495,7 @@ INSERT INTO level1_stats (
   num_subjects
 )
 SELECT
+  a.table_mask,
   a.root_project_id_namespace,
   a.root_project_local_id,
   a.project_id_namespace,
@@ -244,6 +512,7 @@ SELECT
   sstats.num_subjects
 FROM allcombos a
 LEFT JOIN fstats USING (
+  table_mask,
   project_id_namespace,
   project_local_id,
   assay_type_id,
@@ -254,6 +523,7 @@ LEFT JOIN fstats USING (
   species_id
 )
 LEFT JOIN bstats USING (
+  table_mask,
   project_id_namespace,
   project_local_id,
   assay_type_id,
@@ -264,6 +534,7 @@ LEFT JOIN bstats USING (
   species_id
 )
 LEFT JOIN sstats USING (
+  table_mask,
   project_id_namespace,
   project_local_id,
   assay_type_id,

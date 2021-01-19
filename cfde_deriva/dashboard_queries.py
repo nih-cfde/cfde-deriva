@@ -35,6 +35,10 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 # also, we join the vocab tables to get human-readable names for the dimensional concepts
 #
 
+def _add_mask_terms(queryobj, terms):
+    for term in terms:
+        queryobj.mask_parts.add(queryobj.table_mask_fields[term])
+
 def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
     if 'anatomy' in queryobj.path.table_instances:
         return
@@ -44,6 +48,7 @@ def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
         on=( queryobj.path.level1_stats.anatomy_id == anatomy.id ),
         join_type= 'left' if show_nulls else ''
     )
+    _add_mask_terms(queryobj, {'biosample',})
 
 def _add_assaytype_leaf(queryobj, show_nulls=False, **kwargs):
     if 'assay_type' in queryobj.path.table_instances:
@@ -54,6 +59,7 @@ def _add_assaytype_leaf(queryobj, show_nulls=False, **kwargs):
         on=( queryobj.path.level1_stats.assay_type_id == assay_type.id ),
         join_type= 'left' if show_nulls else ''
     )
+    _add_mask_terms(queryobj, {'file',})
 
 def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
     if 'data_type' in queryobj.path.table_instances:
@@ -64,6 +70,7 @@ def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
         on=( queryobj.path.level1_stats.data_type_id == data_type.id ),
         join_type= 'left' if show_nulls else ''
     )
+    _add_mask_term(queryobj, {'file',})
 
 def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
     if 'species' in queryobj.path.table_instances:
@@ -74,6 +81,7 @@ def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
         on=( queryobj.path.level1_stats.species_id == species.id ),
         join_type= 'left' if show_nulls else ''
     )
+    _add_mask_terms(queryobj, {'subject',})
 
 def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""
@@ -101,6 +109,9 @@ def _add_subproject_leaf(queryobj, show_nulls=False, **kwargs):
 
     if 'root_project' in queryobj.path.table_instances:
         raise TypeError('Cannot combine subproject and project_root dimensions')
+
+    if 'subproject' in queryobj.path.table_instances:
+        return
 
     level1_stats = queryobj.path.level1_stats
     pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
@@ -207,6 +218,11 @@ class StatsQuery (object):
             ],
         ),
     }
+    table_mask_fields = {
+        'file': 1,
+        'biosample': 2,
+        'subject': 4,
+    }
 
     def __init__(self, helper):
         """Construct a StatsQuery builder object
@@ -216,6 +232,8 @@ class StatsQuery (object):
         self.helper = helper
         self.entity_name = None
         self.included_dimensions = set()
+        self.mask_parts = set()
+        self.use_mask = 'table_mask' in helper.builder.CFDE.level1_stats.column_definitions
         self.path = None
         self.grpk_funcs = []
         self.attr_funcs = []
@@ -231,6 +249,7 @@ class StatsQuery (object):
         try:
             self.attr_funcs.extend(self.supported_entities[entity_name])
             self.entity_name = entity_name
+            self.mask_parts.add(self.table_mask_fields[entity_name])
         except KeyError:
             raise ValueError('Unsupported entity_name "%s"' % (entity_name,))
 
@@ -271,6 +290,10 @@ class StatsQuery (object):
         """Fetch results for configured query"""
         if self.path is None:
             raise TypeError('Cannot call .fetch() method on a StatsQuery instance prior to calling .entity() method.')
+        if self.use_mask:
+            mask = sum(self.mask_parts)
+            level1_stats = self.path.level1_stats
+            self.path = self.path.filter(level1_stats.table_mask == mask)
         if self.grpk_funcs:
             return self.path.groupby(*[
                 grpk_func(self.path)
