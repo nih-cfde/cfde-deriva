@@ -2,6 +2,7 @@
 import os
 import os.path
 import sys
+import traceback
 import re
 import shutil
 import zipfile
@@ -301,6 +302,8 @@ class Submission (object):
             # record whatever we've discovered above
             if failed:
                 status, diagnostics = next_error_state, diagnostics
+                et, ev, tb = sys.exc_info()
+                logger.debug(traceback.format_exception(et, ev, tb))
                 logger.error(
                     'Got exception %s in ingest sequence with next_error_state=%s for datapackage %s' \
                     % (failed_exc, next_error_state, self.datapackage_id,)
