@@ -13,6 +13,8 @@ from deriva.core.ermrest_model import builtin_types, Table, Column, Key, Foreign
 if 'source_definitions' not in tag:
     # monkey-patch this newer annotation key until it appears in deriva-py
     tag['source_definitions'] = 'tag:isrd.isi.edu,2019:source-definitions'
+if 'history_capture' not in tag:
+    tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
 # some useful authentication IDs to use in preparing ACLs...
 authn_id = AttrDict({
@@ -623,7 +625,7 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
     pre_annotations = tdef_resource.get("deriva", {})
     for k, t in tag.items():
         if k == 'history_capture':
-            history_capture = pre_annotations.get('history_capture', history_capture) if trusted else history_capture
+            annotations[t] = pre_annotations.pop('history_capture', history_capture) if trusted else history_capture
         elif k in pre_annotations and trusted:
             annotations[t] = pre_annotations.pop(k)
     acls = acls_union(
@@ -659,7 +661,7 @@ def make_model(tableschema, configurator, trusted=False):
         if r["name"] in rnames:
             raise ValueError('Resource name "%s" appears more than once' % (r["name"],))
     pre_annotations = tableschema.get("deriva", {})
-    history_capture = pre_annotations.get('history_capture', False) if trusted else False
+    history_capture = pre_annotations.pop('history_capture', False) if trusted else False
     annotations = {
         schema_tag: tableschema,
     }
