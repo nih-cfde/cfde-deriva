@@ -70,7 +70,7 @@ def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
         on=( queryobj.path.level1_stats.data_type_id == data_type.id ),
         join_type= 'left' if show_nulls else ''
     )
-    _add_mask_term(queryobj, {'file',})
+    _add_mask_terms(queryobj, {'file',})
 
 def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
     if 'species' in queryobj.path.table_instances:
