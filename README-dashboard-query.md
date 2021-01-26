@@ -141,13 +141,17 @@ The `project_root` dimension is the subset of project entities which
 are top-level projects, i.e. they are not listed as being a _member_
 of any other project in the C2M2 `project_in_project` association
 table. This set of top-level projects should correspond to DCCs aka
-data stewards who submitted C2M2 content to the CFDE catalog.
+data stewards who submitted C2M2 content to the CFDE
+catalog. Optionally, the set of root projects can be filtered by their
+C2M2 `project.abbreviation` (specified via optional
+`project_abbreviation` keyword argument when configuring the
+dimension).
 
 The `subproject` dimension is the subset of project entities which are
 direct children of a given parent project (specified via required
 `parent_project_RID` keyword argument when configuring the
-dimension). For example, all of the projects listed directly under
-one DCC's root-level project.
+dimension). For example, all of the projects listed directly under one
+DCC's root-level project.
 
 Unlike the other dimensions, the `project_root` and `subproject`
 dimensions have variable connectivity to the C2M2 model. Because every

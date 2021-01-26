@@ -92,12 +92,16 @@ def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
     if 'root_project' in queryobj.path.table_instances:
         return
 
+    project_abbreviation = kwargs.get('project_abbreviation')
+
     root_project = queryobj.helper.builder.CFDE.project.alias('root_project')
     queryobj.path = queryobj.path.link(
         root_project,
         on=( (queryobj.path.level1_stats.root_project_id_namespace == root_project.id_namespace)
              & (queryobj.path.level1_stats.root_project_local_id == root_project.local_id) )
     )
+    if project_abbreviation is not None:
+        queryobj.path = queryobj.path.filter(root_project.abbreviation == project_abbreviation)
 
 def _add_subproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""
@@ -267,6 +271,7 @@ class StatsQuery (object):
         Dimension-specific keyword arguments:
 
         :param parent_project_RID: Use sub-projects of specified parent project RID for "subproject" dimension (required)
+        :param project_abbreviation: Filter on project abbreviation for "project_root" dimension (optional)
 
         """
         if self.path is None:
@@ -333,6 +338,7 @@ class DashboardQueryHelper (object):
 
             'root_projects': list(self.list_projects(use_root_projects=True)),
             'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_parent_proj).fetch()),
+            'subject_stats_rootproject_hmp': list(StatsQuery(self).entity('subject').dimension('project_root', project_abbreviation='HMP').fetch()),
 
             'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
             'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
