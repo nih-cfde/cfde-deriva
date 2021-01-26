@@ -289,7 +289,15 @@ class Submission (object):
                 self.review_catalog._base_server_uri,
                 self.review_catalog.catalog_id,
             )
-            self.registry.update_datapackage(self.datapackage_id, review_browse_url=review_browse_url)
+            review_summary_url = '%s/dcc_review.html?catalogId=%s' % (
+                self.review_catalog._base_server_uri,
+                self.review_catalog.catalog_id,
+            )
+            self.registry.update_datapackage(
+                self.datapackage_id,
+                review_browse_url=review_browse_url,
+                review_summary_url=review_summary_url,
+            )
         except exception.CfdeError as e:
             # assume we can expose CfdeError text content
             failed, failed_exc, diagnostics = True, e, str(e)
