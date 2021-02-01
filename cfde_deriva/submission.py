@@ -285,7 +285,7 @@ class Submission (object):
             self.prepare_sqlite_derived_tables(self.sqlite_filename)
             self.upload_derived_content(self.review_catalog, self.sqlite_filename)
 
-            review_browse_url = '%s/chaise/recordset/#%s/CFDE:collection' % (
+            review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
                 self.review_catalog.catalog_id,
             )
