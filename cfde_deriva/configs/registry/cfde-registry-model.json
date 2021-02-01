@@ -873,7 +873,7 @@
                      "comment": "Identifying information for submission.",
                      "source": "submission_time",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Submitted | {{submission_time}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n| Submission | [{{id}}]({{{_datapackage_url}}}) |\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission | {{submission_time}} (ID {{id}}) |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
                      }
                   },
                   "S_status_extra": {
@@ -881,7 +881,7 @@
                      "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
                      "comment": "The status of the datapackage in the submission system.",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n{{#$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}| DCC Approval | {{rowName}} |\n{{/$fkeys.CFDE.datapackage_dcc_approval_status_fkey}}{{#$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}| CFDE Approval | {{rowName}} |\n{{/$fkeys.CFDE.datapackage_cfde_approval_status_fkey}}{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}{{#_review_browse_url}}| Review | [{{.}}]({{.}}) |\n{{/_review_browse_url}}{{#_review_summary_url}}| Summary | [{{.}}]({{.}}) |\n{{/_review_summary_url}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} by DCC, {{$fkeys.CFDE.datapackage_cfde_approval_status_fkey.rowName}} by CFDE-CC |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Review Content | {{#_review_browse_url}}[Browse Data]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[Summary Charts]({{.}}), {{/_review_summary_url}} [Raw Data]({{{_datapackage_url}}})|\n"
                      }
                   },
                   "S_dcc_approval_status": {
