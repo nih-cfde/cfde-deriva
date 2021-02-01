@@ -456,18 +456,68 @@ class CfdeDataPackage (object):
             # we are doing a clean load of data in fkey dependency order
             table = self.cat_model_root.table("CFDE", tname)
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-            if "path" in resource:
-                def open_package():
-                    if isinstance(self.package_filename, _PackageDataName):
-                        return self.package_filename.get_data_stringio(resource["path"])
+
+            def open_package():
+                if isinstance(self.package_filename, _PackageDataName):
+                    return self.package_filename.get_data_stringio(resource["path"])
+                else:
+                    fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
+                    return open(fname, 'r')
+
+            def get_upload_func(onconflict):
+                if onconflict == 'update':
+                    # assume all rows exist, just update non-key fields
+                    cnames = {
+                        c.name
+                        for c in table.columns
+                        if c.name not in {'RID','RCT','RMT','RCB','RMB'}
+                    }
+                    key_cnames = set()
+                    for key in table.keys:
+                        key_cnames.update({
+                            c.name
+                            for c in key.unique_columns
+                            if c.name not in {'RID','RCT','RMT','RCB','RMB'}
+                        })
+                    nonkey_cnames = cnames.difference(key_cnames)
+                    url = "/attributegroup/CFDE:%s/%s;%s" % (
+                        urlquote(table.name),
+                        ",".join([ urlquote(cname) for cname in key_cnames ]),
+                        ",".join([ urlquote(cname) for cname in nonkey_cnames ]),
+                    )
+                    if not key_cnames:
+                        raise ValueError('Cannot perform update on table %s which lacks non-RID keys' % tname)
+                    if not nonkey_cnames:
+                        logger.info("Table %s has no update function since all columns are keys" % tname)
+                        http_req = None
                     else:
-                        fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
-                        return open(fname, 'r')
+                        http_req = lambda batch: self.catalog.put(url, json=batch)
+                else:
+                    url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
+                    http_req = lambda batch: self.catalog.post(url, json=batch)
+                def upload_batch(batch):
+                    try:
+                        r = http_req(batch)
+                        logger.debug("Batch of rows for %s loaded onconflict=%s" % (table.name, onconflict))
+                        skipped = len(batch) - len(r.json())
+                        if skipped and onconflict == 'skip':
+                            logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
+                    except Exception as e:
+                        logger.error("Table %s data load FAILED from "
+                                     "%s: %s" % (table.name, self.package_filename, e))
+                    else:
+                        batch.clear()
+                #
+                return upload_batch if http_req else None
+
+            def upload_content(onconflict):
                 with open_package() as f:
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
                     row2dict = self.make_row2dict(table, next(reader))
-                    entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
+                    upload_batch = get_upload_func(onconflict)
+                    if upload_batch is None:
+                        return
                     # Batch catalog ingests; too-large ingests will hang and fail
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
@@ -475,33 +525,20 @@ class CfdeDataPackage (object):
                         # Collect full batch, then post at once
                         batch.append(row2dict(raw_row))
                         if len(batch) >= self.batch_size:
-                            try:
-                                r = self.catalog.post(entity_url, json=batch)
-                                logger.debug("Batch of rows for %s loaded" % table.name)
-                                skipped = len(batch) - len(r.json())
-                                if skipped:
-                                    logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-                            except Exception as e:
-                                logger.error("Table %s data load FAILED from "
-                                             "%s: %s" % (table.name, self.package_filename, e))
-                                raise
-                            else:
-                                batch.clear()
+                            upload_batch(batch)
                     # After reader exhausted, ingest final batch
                     if len(batch) > 0:
-                        try:
-                            r = self.catalog.post(entity_url, json=batch)
-                            logger.debug("Batch of rows for %s loaded" % table.name)
-                            skipped = len(batch) - len(r.json())
-                            if skipped:
-                                logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-                        except Exception as e:
-                            logger.error("Table %s data load FAILED from "
-                                         "%s: %s" % (table.name, self.package_filename, e))
-                            raise
-                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
-                    if table_done_callback:
-                        table_done_callback(table.name, resource["path"])
+                        upload_batch(batch)
+
+            if "path" in resource:
+                if onconflict == 'update':
+                    upload_content('skip')     # first pass creates missing records, skipping existing keys
+                    upload_content('update')   # second pass revises non-key fields
+                else:
+                    upload_content(onconflict) # abort or skip in a single pass
+                logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+                if table_done_callback:
+                    table_done_callback(table.name, resource["path"])
 
     def sqlite_import_data_files(self, conn, onconflict='abort'):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']

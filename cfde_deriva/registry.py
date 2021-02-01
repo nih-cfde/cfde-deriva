@@ -525,7 +525,7 @@ def main(servername, subcommand, catalog_id=None):
         dp.apply_custom_config()
     elif subcommand == 'reprovision':
         dp.provision(alter=True)
-        dp.load_data_files(onconflict='skip')
+        dp.load_data_files(onconflict='update')
         dp.apply_custom_config()
     elif subcommand == 'reconfigure':
         dp.apply_custom_config()
