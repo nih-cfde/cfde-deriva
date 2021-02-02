@@ -311,6 +311,10 @@ class ReviewConfigurator (CatalogConfigurator):
             "name": "In-Review Submission",
             "children": [
                 {
+                    "name": "Content Summary Charts",
+                    "url": datapackage["review_summary_url"],
+                },
+                {
                     "name": "Submission %s" % datapackage['id'],
                     "url": registry_record_page('datapackage', datapackage['RID']),
                 },
