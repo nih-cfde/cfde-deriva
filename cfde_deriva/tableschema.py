@@ -176,7 +176,7 @@ class CatalogConfigurator (object):
                             authn_id.cfde_action_provider
                         ]}
                     },
-                    { "name": "Data Review", "url": "/dcc_review.html", "acls": {
+                    { "name": "Data Review", "url": "/chaise/recordset/#registry/CFDE:datapackage", "acls": {
                         "enable": [
                             authn_id.cfde_portal_admin,
                             authn_id.cfde_portal_curator,
@@ -334,6 +334,10 @@ class ReviewConfigurator (CatalogConfigurator):
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "In-Review Submission",
             "children": [
+                {
+                    "name": "Content Summary Charts",
+                    "url": datapackage["review_summary_url"],
+                },
                 {
                     "name": "Submission %s" % datapackage['id'],
                     "url": registry_record_page('datapackage', datapackage['RID']),

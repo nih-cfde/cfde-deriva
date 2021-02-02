@@ -225,7 +225,7 @@
             "fields": [
                {
                   "name": "id",
-                  "description": "The identifier for this group, as known by the Globus Groups system.",
+                  "description": "The Globus Groups system's bare UUID for this group.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -233,8 +233,9 @@
                },
                {
                   "name": "webauthn_id",
-                  "description": "The identifier for this group, as known by the DERIVA webauthn authentication system.",
+                  "description": "The DERIVA authentication system's identifier for the group, e.g. https://auth.globus.org/UUID-VALUE-HERE.",
                   "type": "string",
+                  "default": "https://auth.globus.org/",
                   "constraints": {
                      "required": true
                   }
