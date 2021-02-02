@@ -163,8 +163,32 @@ class CatalogConfigurator (object):
                     { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
                     { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
                     { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Data Review", "url": "/dcc_review.html" }
+                    { "name": "Dashboard", "url": "/dashboard.html", "acls": {
+                        "enable": [
+                            authn_id.cfde_portal_admin,
+                            authn_id.cfde_portal_curator,
+                            authn_id.cfde_portal_writer,
+                            authn_id.cfde_portal_creator,
+                            authn_id.cfde_portal_reader,
+                            authn_id.cfde_portal_reviewer,
+                            authn_id.cfde_infrastructure_ops,
+                            authn_id.cfde_submission_pipeline,
+                            authn_id.cfde_action_provider
+                        ]}
+                    },
+                    { "name": "Data Review", "url": "/dcc_review.html", "acls": {
+                        "enable": [
+                            authn_id.cfde_portal_admin,
+                            authn_id.cfde_portal_curator,
+                            authn_id.cfde_portal_writer,
+                            authn_id.cfde_portal_creator,
+                            authn_id.cfde_portal_reader,
+                            authn_id.cfde_portal_reviewer,
+                            authn_id.cfde_infrastructure_ops,
+                            authn_id.cfde_submission_pipeline,
+                            authn_id.cfde_action_provider
+                        ]}
+                        }
                 ]
             }
         }
