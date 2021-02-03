@@ -394,7 +394,8 @@ class ReviewConfigurator (CatalogConfigurator):
             "children": [
                 {
                     "name": "Content Summary Charts",
-                    "url": datapackage["review_summary_url"],
+                    # we need to fake this since we configure before the review_summary_url is populated
+                    "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
                 },
                 {
                     "name": "Submission %s" % datapackage['id'],
