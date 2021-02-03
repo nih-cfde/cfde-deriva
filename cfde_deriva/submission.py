@@ -614,17 +614,8 @@ class Submission (object):
         :param provision: Perform model provisioning if True (default False, only reconfigure policies/presentation)
 
         """
-        metadata = registry.get_datapackage(id)
-        dcc_read_acl = list(set.union(*[
-            set(registry.get_dcc_acl(metadata['submitting_dcc'], role))
-            for role in {
-                    terms.cfde_registry_grp_role.admin,
-                    terms.cfde_registry_grp_role.reviewer,
-                    terms.cfde_registry_grp_role.review_decider,
-            }
-        ]))
-        canon_dp = CfdeDataPackage(portal_schema_json, tableschema.ReviewConfigurator(dcc_read_acl, catalog=catalog, registry=registry, submission_id=id))
-        canon_dp.set_catalog(catalog)
+        canon_dp = CfdeDataPackage(portal_schema_json, tableschema.ReviewConfigurator(catalog=catalog, registry=registry, submission_id=id))
+        canon_dp.set_catalog(catalog, registry)
         if provision:
             canon_dp.provision() # get the model deployed
             canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed

@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 
 import os
 import io
@@ -128,9 +127,9 @@ class CfdeDataPackage (object):
         if set(self.model_doc['schemas']) != {'CFDE'}:
             raise ValueError('Unexpected schema set in data package: %s' % (set(self.model_doc['schemas']),))
 
-    def set_catalog(self, catalog):
+    def set_catalog(self, catalog, registry=None):
         self.catalog = catalog
-        self.configurator.set_catalog(catalog)
+        self.configurator.set_catalog(catalog, registry)
         self.get_model()
         self.cat_has_history_control = catalog.get('/').json().get("features", {}).get("history_control", False)
 
@@ -761,121 +760,3 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'tname': sql_identifier(fkey.table.name),
             'cols': ', '.join([ sql_identifier(c.name) for c in cols ]),
         }
-
-def main(args):
-    """Basic C2M2 catalog setup
-
-    Examples:
-
-    python3 -m cfde_deriva.datapackage \
-     PORTAL_SCHEMA \
-     /path/to/GTEx.v7.C2M2_preload.bdbag/data/GTEx_C2M2_instance.json
-
-    The special names PORTAL_SCHEMA and REGISTRY_SCHEMA select the
-    builtin C2M2 portal or CFDE registry schema embedded as package
-    data in cfde_deriva, respectively.
-
-    When multiple files are specified, they are loaded in the order given.
-    Earlier files take precedence in configuring the catalog model, while
-    later files can merely augment it.
-
-    When the JSON includes "path" attributes for the resources, the data
-    files (TSV assumed) are loaded for each resource after the schema is
-    provisioned.
-
-    Environment variable parameters (with defaults):
-
-    DERIVA_SERVERNAME=app-dev.nih-cfde.org
-    DERIVA_CATALOGID=
-    DERIVA_ONCONFLICT=abort
-    DERIVA_INCREMENTAL_LOAD=false
-    CFDE_CATALOG_TYPE=review
-
-    Setting a non-empty DERIVA_CATALOGID causes reconfiguration of an
-    existing catalog's presentation tweaks. It does not load data
-    unless combined with DERIVA_INCREMENTAL_LOAD=true.
-
-    """
-    # this is the deriva server where we will create a catalog
-    servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
-
-    # this is an existing catalog we just want to re-configure!
-    catid = os.getenv('DERIVA_CATALOGID')
-
-    ## bind to server
-    credentials = get_credential(servername)
-    server = DerivaServer('https', servername, credentials)
-
-    onconflict = os.getenv('DERIVA_ONCONFLICT', 'abort')
-    incremental_load = os.getenv('DERIVA_INCREMENTAL_LOAD', 'false').lower() == 'true'
-
-    configurator_class = {
-        'review': tableschema.ReviewConfigurator,
-        'release': tableschema.ReleaseConfigurator,
-        'registry': tableschema.RegistryConfigurator,
-    }[os.getenv('CFDE_CATALOG_TYPE', 'review')]
-
-    # ugly quasi CLI...
-    if len(args) < 1:
-        raise ValueError('At least one data package JSON filename required as argument')
-
-    # pre-load all JSON files and convert to models
-    # in order to abort early on basic usage errors
-    datapackages = [
-        CfdeDataPackage(
-            # map magic filenames to internal singletons
-            {
-                'PORTAL_SCHEMA': portal_schema_json,
-                'REGISTRY_SCHEMA': registry_schema_json,
-            }.get(fname, fname),
-            configurator_class()
-        )
-        for fname in args
-    ]
-
-    if catid is None:
-        ## create catalog
-        newcat = server.create_ermrest_catalog()
-        print('New catalog has catalog_id=%s' % newcat.catalog_id)
-        print("Don't forget to delete it if you are done with it!")
-
-        try:
-            ## deploy model(s)
-            for dp in datapackages:
-                dp.set_catalog(newcat)
-                dp.provision()
-                print("Model deployed for %s." % (dp.package_filename,))
-
-            ## customize catalog policy/presentation (only need to do once)
-            datapackages[0].apply_custom_config()
-            print("Policies and presentation configured.")
-
-            ## load some sample data?
-            for dp in datapackages:
-                dp.load_data_files(onconflict=onconflict)
-
-            print("All data packages loaded.")
-        except Exception as e:
-            print('Provisioning failed: %s.\nDeleting catalog...' % e)
-            newcat.delete_ermrest_catalog(really=True)
-            raise
-
-        print("Try visiting 'https://%s/chaise/recordset/#%s/CFDE:collection'" % (
-            servername,
-            newcat.catalog_id,
-        ))
-    else:
-        ## work with existing catalog
-        oldcat = server.connect_ermrest(catid)
-        if incremental_load:
-            for dp in datapackages:
-                dp.set_catalog(oldcat)
-                dp.provision()
-                dp.load_data_files(onconflict=onconflict)
-        ## reconfigure
-        datapackages[0].set_catalog(oldcat)
-        datapackages[0].apply_custom_config()
-        print('Policies and presentation configured for %s.' % (oldcat._server_uri,))
-
-if __name__ == '__main__':
-    exit(main(sys.argv[1:]))

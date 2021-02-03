@@ -8,42 +8,8 @@ from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
 
 from . import exception
-from .tableschema import RegistryConfigurator, authn_id
+from .tableschema import RegistryConfigurator, authn_id, terms
 from .datapackage import CfdeDataPackage, registry_schema_json
-
-def _attrdict_from_strings(*strings):
-    new = AttrDict()
-    for prefix, term in [ s.split(':') for s in strings ]:
-        if prefix not in new:
-            new[prefix.replace('-', '_')] = AttrDict()
-        if term.replace('-', '_') not in new[prefix.replace('-', '_')]:
-            new[prefix.replace('-', '_')][term.replace('-', '_')] = '%s:%s' % (prefix, term)
-    return new
-
-# structured access to controlled terms we will use in this code...
-terms = _attrdict_from_strings(
-    'cfde_registry_grp_role:admin',
-    'cfde_registry_grp_role:submitter',
-    'cfde_registry_grp_role:review-decider',
-    'cfde_registry_grp_role:reviewer',
-    'cfde_registry_dp_status:submitted',
-    'cfde_registry_dp_status:ops-error',
-    'cfde_registry_dp_status:bag-valid',
-    'cfde_registry_dp_status:bag-error',
-    'cfde_registry_dp_status:check-valid',
-    'cfde_registry_dp_status:check-error',
-    'cfde_registry_dp_status:content-ready',
-    'cfde_registry_dp_status:content-error',
-    'cfde_registry_dp_status:rejected',
-    'cfde_registry_dp_status:release-pending',
-    'cfde_registry_dp_status:obsoleted',
-    'cfde_registry_dpt_status:enumerated',
-    'cfde_registry_dpt_status:name-error',
-    'cfde_registry_dpt_status:data-absent',
-    'cfde_registry_dpt_status:check-error',
-    'cfde_registry_dpt_status:content-ready',
-    'cfde_registry_dpt_status:content-error',
-)
 
 ermrest_creators_acl = [
     authn_id.cfde_infrastructure_ops,
@@ -504,7 +470,8 @@ def main(servername, subcommand, catalog_id=None):
         raise ValueError('unknown subcommand %s' % subcommand)
 
     dp = CfdeDataPackage(registry_schema_json, RegistryConfigurator(catalog))
-    dp.set_catalog(catalog)
+    registry = Registry('https', servername, catalog.catalog_id, credentials)
+    dp.set_catalog(catalog, registry)
 
     if subcommand == 'provision':
         # HACK: need to pre-populate ERMrest client w/ identities used in test data for submitting_user
@@ -522,6 +489,9 @@ def main(servername, subcommand, catalog_id=None):
         ).raise_for_status()
         dp.provision()
         dp.load_data_files()
+        # reconnect registry after provisioning
+        registry = Registry('https', servername, catalog.catalog_id, credentials)
+        dp.set_catalog(catalog, registry)
         dp.apply_custom_config()
     elif subcommand == 'reprovision':
         dp.provision(alter=True)

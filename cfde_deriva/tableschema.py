@@ -30,6 +30,47 @@ authn_id = AttrDict({
     "cfde_action_provider": "https://auth.globus.org/21017803-059f-4a9b-b64c-051ab7c1d05d",
 })
 
+cfde_portal_viewers = {
+    authn_id.cfde_portal_admin,
+    authn_id.cfde_portal_curator,
+    authn_id.cfde_portal_writer,
+    authn_id.cfde_portal_reviewer,
+}
+
+def _attrdict_from_strings(*strings):
+    new = AttrDict()
+    for prefix, term in [ s.split(':') for s in strings ]:
+        if prefix not in new:
+            new[prefix.replace('-', '_')] = AttrDict()
+        if term.replace('-', '_') not in new[prefix.replace('-', '_')]:
+            new[prefix.replace('-', '_')][term.replace('-', '_')] = '%s:%s' % (prefix, term)
+    return new
+
+# structured access to controlled terms we will use in this code...
+terms = _attrdict_from_strings(
+    'cfde_registry_grp_role:admin',
+    'cfde_registry_grp_role:submitter',
+    'cfde_registry_grp_role:review-decider',
+    'cfde_registry_grp_role:reviewer',
+    'cfde_registry_dp_status:submitted',
+    'cfde_registry_dp_status:ops-error',
+    'cfde_registry_dp_status:bag-valid',
+    'cfde_registry_dp_status:bag-error',
+    'cfde_registry_dp_status:check-valid',
+    'cfde_registry_dp_status:check-error',
+    'cfde_registry_dp_status:content-ready',
+    'cfde_registry_dp_status:content-error',
+    'cfde_registry_dp_status:rejected',
+    'cfde_registry_dp_status:release-pending',
+    'cfde_registry_dp_status:obsoleted',
+    'cfde_registry_dpt_status:enumerated',
+    'cfde_registry_dpt_status:name-error',
+    'cfde_registry_dpt_status:data-absent',
+    'cfde_registry_dpt_status:check-error',
+    'cfde_registry_dpt_status:content-ready',
+    'cfde_registry_dpt_status:content-error',
+)
+
 def acls_union(*sources):
     """Produce union of aclsets"""
     acls = {}
@@ -91,16 +132,18 @@ class CatalogConfigurator (object):
     schema_table_column_acls = {}
     schema_table_column_aclbindings = {}
 
-    def __init__(self, catalog=None):
+    def __init__(self, catalog=None, registry=None):
         """Construct a configurator
         """
         self.catalog = None
-        self.set_catalog(catalog)
+        self.registry = None
+        self.set_catalog(catalog, registry)
 
-    def set_catalog(self, catalog):
-        if self.catalog is catalog:
+    def set_catalog(self, catalog, registry=None):
+        if self.catalog is catalog and self.registry is registry:
             return
         self.catalog = catalog
+        self.registry = registry
         # copy our class-level ACLs which we might mutate!
         self.catalog_acls = acls_union(self.catalog_acls)
         # be careful with owner ACL
@@ -128,6 +171,13 @@ class CatalogConfigurator (object):
         newbinds = bindings if replace else aclbiindings_merge(obj.acl_bindings, bindings)
         obj.acl_bindings.clear()
         obj.acl_bindings.update(newbinds)
+
+    def get_review_acl(self):
+        acl = set(cfde_portal_viewers)
+        for record in self.registry.get_groups_by_dcc_role():
+            # record is like dict(dcc=dcc_id, role=role_id, groups=[...])
+            acl.update({ grp['webauthn_id'] for grp in record['groups'] })
+        return sorted(list(acl))
 
     def apply_chaise_config(self, model):
         model.annotations[tag.chaise_config] = {
@@ -164,7 +214,13 @@ class CatalogConfigurator (object):
                     { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/CODEOFCONDUCT/"},
                     { "name": "|" },
                     { "name": "Dashboard", "url": "/dashboard.html" },
-                    { "name": "Data Review", "url": "/chaise/recordset/#registry/CFDE:datapackage" }
+                    {
+                        "name": "Data Review",
+                        "url": "/chaise/recordset/#registry/CFDE:datapackage",
+                        "acls": {
+                            "enable": self.get_review_acl(),
+                        }
+                    }
                 ]
             }
         }
@@ -251,8 +307,8 @@ class ReleaseConfigurator (CatalogConfigurator):
         }
     )
 
-    def __init__(self, catalog=None):
-        super(ReleaseConfigurator, self).__init__(catalog)
+    def __init__(self, catalog=None, registry=None):
+        super(ReleaseConfigurator, self).__init__(catalog, registry)
 
 class ReviewConfigurator (CatalogConfigurator):
 
@@ -264,25 +320,43 @@ class ReviewConfigurator (CatalogConfigurator):
         }
     )
 
-    # review catalogs allow CFDE-CC roles to read entire CFDE schema
-    schema_acls = multiplexed_acls_union(
-        CatalogConfigurator.schema_acls,
-        {
-            "CFDE": { "select": [ authn_id.cfde_portal_curator ] },
-        }
-    )
+    # SEE schema_acls property below!
 
-    def __init__(self, dcc_read_groups=[], catalog=None, registry=None, submission_id=None):
-        super(ReviewConfigurator, self).__init__(catalog)
-        self.registry = registry
+    def __init__(self, catalog=None, registry=None, submission_id=None):
+        super(ReviewConfigurator, self).__init__(catalog, registry)
         self.submission_id = submission_id
-        # review catalogs allow DCC-specific read-access on entire CFDE schema
-        self.schema_acls = multiplexed_acls_union(
-            self.schema_acls,
+
+    @property
+    def schema_acls(self):
+        # review catalogs allow CFDE-CC roles to read entire CFDE schema
+        acls = multiplexed_acls_union(
+            CatalogConfigurator.schema_acls,
             {
-                "CFDE": { "select": dcc_read_groups },
+                "CFDE": { "select": list(cfde_portal_viewers) },
             }
         )
+        if self.registry is not None and self.submission_id is not None:
+            metadata = self.registry.get_datapackage(self.submission_id)
+            dcc_read_acl = list(set.union(*[
+                set(self.registry.get_dcc_acl(metadata['submitting_dcc'], role))
+                for role in {
+                        terms.cfde_registry_grp_role.admin,
+                        terms.cfde_registry_grp_role.reviewer,
+                        terms.cfde_registry_grp_role.review_decider,
+                }
+            ]))
+            # review catalogs allow DCC-specific read-access on entire CFDE schema
+            acls = multiplexed_acls_union(
+                acls,
+                {
+                    "CFDE": { "select": dcc_read_acl },
+                }
+            )
+        return acls
+
+    def get_review_acl(self):
+        # restrict navbar ACL to match our content
+        return self.schema_acls["CFDE"]["select"]
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for review content by adjusting the standard config"""
@@ -306,9 +380,17 @@ class ReviewConfigurator (CatalogConfigurator):
                 url += '/RID=%s' % (rid,)
             return url
 
-        model.annotations[tag.chaise_config]['navbarMenu']['children'][0]["name"] = "Review Data"
+        model.annotations[tag.chaise_config]['navbarMenu']['children'][0].update({
+            "name": "Browse Submitted Data",
+            "acls": {
+                "enable": self.get_review_acl(),
+            },
+        })
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "In-Review Submission",
+            "acls": {
+                "enable": self.get_review_acl(),
+            },
             "children": [
                 {
                     "name": "Content Summary Charts",
@@ -367,8 +449,8 @@ class RegistryConfigurator (CatalogConfigurator):
         }
     )
 
-    def __init__(self, catalog=None):
-        super(RegistryConfigurator, self).__init__(catalog)
+    def __init__(self, catalog=None, registry=None):
+        super(RegistryConfigurator, self).__init__(catalog, registry)
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for registry by adjusting the standard config"""
@@ -393,6 +475,9 @@ class RegistryConfigurator (CatalogConfigurator):
 
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "Submission System",
+            "acls": {
+                "enable": self.get_review_acl(),
+            },
             "children": [
                 { "name": "Releases", "url": "/chaise/recordset/#registry/CFDE:release" },
                 { "name": "Submitted datapackages", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
