@@ -450,6 +450,20 @@ class RegistryConfigurator (CatalogConfigurator):
         }
     )
 
+    schema_table_aclbindings = multiplexed_aclbindings_merge(
+        CatalogConfigurator.schema_table_aclbindings,
+        {
+            ('public', 'ERMrest_Client'): {
+                "self_view": {
+                    "types": ["select"],
+                    "projection": ["ID"],
+                    "projection_type": "acl",
+                    "scope_acl": ["*"],
+                }
+            }
+        }
+    )
+
     def __init__(self, catalog=None, registry=None):
         super(RegistryConfigurator, self).__init__(catalog, registry)
 
