@@ -514,7 +514,7 @@ class Submission (object):
         specification.
         """
         packagefile = cls.datapackage_name_from_path(content_path)
-        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True)
+        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True, nopool=True)
         if post_process:
             post_process(content_path, packagefile, report)
         if report.stats['errors'] > 0:
