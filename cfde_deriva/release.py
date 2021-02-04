@@ -44,6 +44,7 @@ def main(subcommand, *args):
         dp = CfdeDataPackage(portal_schema_json, ReleaseConfigurator())
         dp.set_catalog(catalog, registry)
         dp.provision()
+        dp.load_data_files()
         print("Model deployed for %s." % (dp.package_filename,))
         dp.apply_custom_config()
         print('Policies and presentation configured for %s.' % (catalog._server_uri,))
@@ -53,10 +54,11 @@ def main(subcommand, *args):
         else:
             raise TypeError('"load" requires two or more positional argument: catalog_id filename...')
 
+        catalog = server.connect_ermrest(catalog_id)
         for filename in args[1:]:
             dp = CfdeDataPackage(filename, ReleaseConfigurator())
-            dp.provision()
             dp.set_catalog(catalog, registry)
+            dp.provision()
             dp.load_data_files(onconflict='skip')
 
         print("All data packages loaded.")
