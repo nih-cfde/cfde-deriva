@@ -372,6 +372,73 @@ class Submission (object):
     ## utility functions to help with various processing and validation tasks
 
     @classmethod
+    def report_external_ops_error(cls, registry, id, diagnostics=None, status=terms.cfde_registry_dp_status.ops_error):
+        """Idempotently update datapackage entry in registry with ops error and diagnostics
+
+        :param registry: An instance of Registry authorized to make updates to submissions.
+        :param id: The datapackage.id key for the failed submission
+        :param diagnostics: Optional text describing the error to a user.
+        :param status: The error status state to report.
+        
+        This method is to report errors detected outside the normal
+        ingest() routine, e.g. in a parent detecting a child process
+        failure.  It will set the submission status and diagnostics
+        information.
+
+        The diagostics should be a sanitized message appropriate for
+        sharing with system users, while the caller should log any
+        additional information necessary for devops staff.
+
+        The status should normally be left at its default to report an
+        ops-error.
+
+        """
+        try:
+            dp = registry.get_datapackage(id)
+        except exception.DatapackageUnknown as e:
+            logger.debug('report_external_ops_error: Cannot adjust status of unknown submission id=%s' % (id,))
+            logger.debug('report_external_ops_error: Discarding status="%s" diagnostics="%s"' % (status, diagnostics))
+            return
+
+        if diagnostics is None:
+            diagnostics = "Externally detected ingest() process failure."
+
+        # idempotently append to diagnostics string
+        # in case prior diagnostics are also useful to retain for user
+        new_diagnostics = dp["diagnostics"]
+        if new_diagnostics is None:
+            new_diagnostics = ''
+        if new_diagnostics.endswith(diagnostics):
+            pass
+        else:
+            if new_diagnostics.endswith('\n'):
+                pass
+            else:
+                if new_diagnostics.endswith('.'):
+                    pass
+                else:
+                    new_diagnostics += '.'
+                new_diagnostics += '\n'
+            new_diagnostics += diagnostics
+
+        # figure out changes for nicer, idempotent behavior and logging
+        update = {
+            k: v
+            for k, v in { "status": status, "diagnostics": new_diagnostics }.items()
+            if dp[k] != v
+        }
+
+        if update:
+            logger.debug("report_external_ops_error: Updating submission id=%(id)s status=%(status)s diagnostics=%(diagnostics)s" % dp)
+            logger.debug("report_external_ops_error: id=%s changes: %s" % (
+                id,
+                ", ".join([ '%s="%s"' % (k, v) for k, v in update.items() ]),
+            ))
+            registry.update_datapackage(id, **update)
+        else:
+            logger.debug('report_external_ops_error: No change needed on submission id=%(id)s status="%(status)s" diagnostics="%(diagnostics)s"' % dp)
+
+    @classmethod
     def retrieve_datapackage(cls, archive_url, download_filename, archive_headers_map):
         """Idempotently stage datapackage content from archive_url into download_filename.
 
@@ -704,6 +771,11 @@ def main(subcommand, *args):
         md = registry.get_datapackage(submission_id)
         catalog = server.connect_ermrest(Submission.extract_catalog_id(server, md['review_ermrest_url']))
         Submission.configure_review_catalog(registry, catalog, md['id'], provision=False)
+    elif subcommand == 'test_external_error':
+        if len(args) != 3:
+            raise TypeError('"test_external_error" requires three positional arguments: submission_id, diagnostics, status')
+        id, diagnostics, status = args
+        Submission.report_external_ops_error(registry, id, diagnostics, status)
     else:
         raise ValueError('unknown sub-command "%s"' % subcommand)
 
