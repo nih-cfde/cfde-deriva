@@ -769,8 +769,11 @@ def main(subcommand, *args):
             raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
 
         md = registry.get_datapackage(submission_id)
-        catalog = server.connect_ermrest(Submission.extract_catalog_id(server, md['review_ermrest_url']))
-        Submission.configure_review_catalog(registry, catalog, md['id'], provision=False)
+        if md["review_ermrest_url"] is None:
+            logger.info("Submission %s does not have a catalog to reconfigure." % submission_id)
+        else:
+            catalog = server.connect_ermrest(Submission.extract_catalog_id(server, md['review_ermrest_url']))
+            Submission.configure_review_catalog(registry, catalog, md['id'], provision=False)
     elif subcommand == 'test_external_error':
         if len(args) != 3:
             raise TypeError('"test_external_error" requires three positional arguments: submission_id, diagnostics, status')
