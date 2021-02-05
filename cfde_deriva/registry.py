@@ -152,6 +152,12 @@ class Registry (object):
             path = path.filter(path.table_instances[table_name].column_definitions['id'] == id)
         return list( path.entities().fetch() )
 
+    def list_datapackages(self):
+        """Get a list of all datapackage submissions in the registry
+
+        """
+        return self._get_entity('datapackage')
+
     def get_datapackage(self, id):
         """Get datapackage by submission id or raise exception.
         

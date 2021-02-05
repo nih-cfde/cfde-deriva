@@ -747,6 +747,14 @@ def main(subcommand, *args):
         ]
     )
 
+    def reconfigure_submission(row):
+        if row["review_ermrest_url"] is None:
+            logger.info("Submission %s does not have a catalog to reconfigure." % row["id"])
+        else:
+            catalog = server.connect_ermrest(Submission.extract_catalog_id(server, row['review_ermrest_url']))
+            Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
+            logger.info("Submission %s reconfigured." % row["id"])
+
     if subcommand == 'submit':
         # arguments dcc_id and archive_url would come from action provider
         # and it would also have a different way to obtain a submission ID
@@ -768,12 +776,11 @@ def main(subcommand, *args):
         else:
             raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
 
-        md = registry.get_datapackage(submission_id)
-        if md["review_ermrest_url"] is None:
-            logger.info("Submission %s does not have a catalog to reconfigure." % submission_id)
-        else:
-            catalog = server.connect_ermrest(Submission.extract_catalog_id(server, md['review_ermrest_url']))
-            Submission.configure_review_catalog(registry, catalog, md['id'], provision=False)
+        row = registry.get_datapackage(id)
+        reconfigure_submission(row)
+    elif subcommand == 'reconfigure-all':
+        for row in registry.list_datapackages():
+            reconfigure_submission(row)
     elif subcommand == 'test_external_error':
         if len(args) != 3:
             raise TypeError('"test_external_error" requires three positional arguments: submission_id, diagnostics, status')
