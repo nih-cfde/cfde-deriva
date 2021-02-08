@@ -933,7 +933,7 @@
                ],
                "filter": {"and": [
                   {
-                     "markdown_name": "Submtting DCC",
+                     "markdown_name": "Submitting DCC",
                      "source": [{"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]}, "RID"]
                   },
                   {
