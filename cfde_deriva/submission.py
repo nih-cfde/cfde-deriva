@@ -400,31 +400,25 @@ class Submission (object):
             logger.debug('report_external_ops_error: Discarding status="%s" diagnostics="%s"' % (status, diagnostics))
             return
 
-        if diagnostics is None:
-            diagnostics = "Externally detected ingest() process failure."
+        # strip newlines for presumed expansion inside a markdown table in UI
+        def get_stripped_default(orig, default):
+            if not orig:
+                orig = default
+            return orig.replace('\n', ' ').strip(' .')
 
         # idempotently append to diagnostics string
         # in case prior diagnostics are also useful to retain for user
-        new_diagnostics = dp["diagnostics"]
-        if new_diagnostics is None:
-            new_diagnostics = ''
-        if new_diagnostics.endswith(diagnostics):
-            pass
+        new_diagnostics = get_stripped_default(diagnostics, "Unknown ingest() process failure")
+        diagnostics = get_stripped_default(dp["diagnostics"], new_diagnostics)
+        if diagnostics.endswith(new_diagnostics):
+            diagnostics += '.'
         else:
-            if new_diagnostics.endswith('\n'):
-                pass
-            else:
-                if new_diagnostics.endswith('.'):
-                    pass
-                else:
-                    new_diagnostics += '.'
-                new_diagnostics += '\n'
-            new_diagnostics += diagnostics
+            diagnostics = '%s. %s' % (diagnostics, new_diagnostics)
 
         # figure out changes for nicer, idempotent behavior and logging
         update = {
             k: v
-            for k, v in { "status": status, "diagnostics": new_diagnostics }.items()
+            for k, v in { "status": status, "diagnostics": diagnostics }.items()
             if dp[k] != v
         }
 
