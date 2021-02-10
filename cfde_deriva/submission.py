@@ -774,7 +774,10 @@ def main(subcommand, *args):
         reconfigure_submission(row)
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
-            reconfigure_submission(row)
+            try:
+                reconfigure_submission(row)
+            except Exception as e:
+                logger.info("Submission %s reconfiguration failed: %s" % (row['id'], e))
     elif subcommand == 'test_external_error':
         if len(args) != 3:
             raise TypeError('"test_external_error" requires three positional arguments: submission_id, diagnostics, status')
