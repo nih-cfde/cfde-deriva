@@ -33,7 +33,6 @@ authn_id = AttrDict({
 cfde_portal_viewers = {
     authn_id.cfde_portal_admin,
     authn_id.cfde_portal_curator,
-    authn_id.cfde_portal_writer,
     authn_id.cfde_portal_reviewer,
 }
 
