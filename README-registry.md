@@ -142,7 +142,7 @@ This table summarizes these in more detail:
 | registry `public`.`ERMrest_Client`.`Client_Object` | select | none | N/A | column ACL | No part of the registry or submission needs this at present |
 | review catalog | enumerate | public | N/A | catalog ACL | tables detected (chaise avoids table-not-found) |
 | review catalog | owner | CFDE-CC ops/pipeline | N/A | catalog ACL | Pipeline needs to own since it creates catalog, ops should own everything |
-| review `CFDE`.* | select | CFDE-CC admin/curator + DCC admin/reviewer/decider | N/A | schema ACL | CFDE-CC roles and DCC groups wit role for submitting DCC can view content |
+| review `CFDE`.* | select | CFDE-CC admin/curator + DCC admin/reviewer/decider/submitter | N/A | schema ACL | CFDE-CC roles and DCC groups with role for submitting DCC can view content |
 | review `public`.* | select | none | N/A | schema ACL | non-CFDE tables hidden from users |
 | release catalog | enumerate | public | N/A | catalog ACL | tables detected (chaise avoids table-not-found) |
 | release catalog | owner | CFDE-CC ops/pipeline | N/A | catalog ACL | Pipeline needs to own since it creates catalog, ops should own everything |

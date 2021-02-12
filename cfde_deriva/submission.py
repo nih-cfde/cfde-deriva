@@ -747,7 +747,7 @@ def main(subcommand, *args):
         else:
             catalog = server.connect_ermrest(Submission.extract_catalog_id(server, row['review_ermrest_url']))
             Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
-            logger.info("Submission %s reconfigured." % row["id"])
+            logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
 
     if subcommand == 'submit':
         # arguments dcc_id and archive_url would come from action provider

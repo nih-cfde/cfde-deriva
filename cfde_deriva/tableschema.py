@@ -342,6 +342,7 @@ class ReviewConfigurator (CatalogConfigurator):
                         terms.cfde_registry_grp_role.admin,
                         terms.cfde_registry_grp_role.reviewer,
                         terms.cfde_registry_grp_role.review_decider,
+                        terms.cfde_registry_grp_role.submitter,
                 }
             ]))
             # review catalogs allow DCC-specific read-access on entire CFDE schema
