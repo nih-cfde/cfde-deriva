@@ -13,6 +13,7 @@ from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, bui
 
 from . import tableschema
 from .configs import portal, registry
+from .exception import IncompatibleDatapackageModel
 
 """
 Basic C2M2 catalog sketch
