@@ -544,9 +544,9 @@ class Submission (object):
         """Find datapackage name by globbing ./data/*.json under content_path."""
         candidates = glob('%s/data/*.json' % content_path)
         if len(candidates) < 1:
-            raise exceptions.FilenameError('Could not locate datapackage *.json file.')
+            raise exception.FilenameError('Could not locate datapackage *.json file.')
         elif len(candidates) > 1:
-            raise exceptions.FilenameError('Found too many (%d) potential datapackage *.json choices.' % (len(candidates),))
+            raise exception.FilenameError('Found too many (%d) potential datapackage *.json choices.' % (len(candidates),))
         return candidates[0]
 
     @classmethod
@@ -583,7 +583,7 @@ class Submission (object):
                 message = report.errors[0].message
             else:
                 message = report.flatten(['message'])[0][0]
-            raise exceptions.InvalidDatapackage(
+            raise exception.InvalidDatapackage(
                 'Found %d errors in datapackage "%s". First error: %s' % (
                     report.stats['errors'],
                     os.path.basename(packagefile),
