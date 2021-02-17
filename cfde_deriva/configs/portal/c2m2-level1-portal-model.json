@@ -881,7 +881,7 @@
                {
                   "name": "dcc_url",
                   "description": "URL of the front page of the website for this contact's DCC",
-                  "type": "string"
+                  "type": "string",
                   "constraints": {
                      "required": true
                   }
