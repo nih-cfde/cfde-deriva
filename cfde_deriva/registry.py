@@ -424,10 +424,10 @@ class Registry (object):
         list suitable for intersection tests with
         WebauthnUser.acl_authz_test().
         """
-        return [
-            grp['webauthn_id']
-            for grp in self.get_groups_by_dcc_role(role_id, dcc_id)[0]['groups']
-        ]
+        acl = set()
+        for row in self.get_groups_by_dcc_role(role_id, dcc_id):
+            acl.update({ grp['webauthn_id'] for grp in row['groups'] })
+        return list(sorted(acl))
 
     def enforce_dcc_submission(self, dcc_id, submitting_user):
         """Verify that submitting_user is authorized to submit datapackages for dcc_id.

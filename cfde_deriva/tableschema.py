@@ -166,10 +166,13 @@ class CatalogConfigurator (object):
         obj.acls.clear()
         obj.acls.update(newacls)
 
+    def augment_aclbindings(self, obj, bindings):
+        return dict(bindings)
+
     def apply_aclbindings_to_obj(self, obj, bindings, replace):
         newbinds = bindings if replace else aclbiindings_merge(obj.acl_bindings, bindings)
         obj.acl_bindings.clear()
-        obj.acl_bindings.update(newbinds)
+        obj.acl_bindings.update(self.augment_aclbindings(obj, newbinds))
 
     def get_review_acl(self):
         acl = set(cfde_portal_viewers)
@@ -260,6 +263,13 @@ class CatalogConfigurator (object):
                 'row_name',
                 {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
             )
+
+        # allow augmentation of acl bindings whether we apply class-based overrides or not...
+        for schema in model.schemas.values():
+            for table in schema.tables.values():
+                self.apply_aclbindings_to_obj(table, self.augment_aclbindings(table, table.acl_bindings), replace=True)
+                for column in table.columns:
+                    self.apply_aclbindings_to_obj(column, self.augment_aclbindings(column, column.acl_bindings), replace=True)
 
         self.apply_acls_to_obj(model, self.catalog_acls, replace=True)
         for sname, acls in self.schema_acls.items():
@@ -466,6 +476,29 @@ class RegistryConfigurator (CatalogConfigurator):
 
     def __init__(self, catalog=None, registry=None):
         super(RegistryConfigurator, self).__init__(catalog, registry)
+
+    def augment_aclbindings(self, obj, bindings):
+        """Add appropriate scope_acl to ACL bindings in registry that should only apply to certain DCC groups
+
+        This is an interim fix to reduce the scenarios where Chaise
+        shows edit controls but the submit button will yield a
+        forbidden error.
+
+        """
+        result = dict(bindings)
+        for bname, bdoc in bindings.items():
+            if bdoc is False:
+                continue
+            # hack: we must coordinate binding names here and in the registry model datapackage JSON
+            if bname in {'dcc_group_decider', 'dcc_group_admin'}:
+                bdoc['scope_acl'] = self.registry.get_dcc_acl(
+                    None,
+                    {
+                        'dcc_group_decider': terms.cfde_registry_grp_role.review_decider,
+                        'dcc_group_admin': terms.cfde_registry_grp_role.admin,
+                    }[bname]
+                )
+        return result
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for registry by adjusting the standard config"""
