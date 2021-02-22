@@ -527,20 +527,20 @@ class RegistryConfigurator (CatalogConfigurator):
                 "enable": self.get_review_acl(),
             },
             "children": [
-                { "name": "Releases", "url": "/chaise/recordset/#registry/CFDE:release" },
                 { "name": "Submitted datapackages", "url": "/chaise/recordset/#registry/CFDE:datapackage" },
                 { "name": "Enrolled DCCs", "url": "/chaise/recordset/#registry/CFDE:dcc" },
                 { "name": "Enrolled groups", "url": "/chaise/recordset/#registry/CFDE:group" },
                 #{ "name": "Enrolled namespaces", "url": "/chaise/recordset/#registry/CFDE:id_namespace" },
+                { "name": "Releases", "url": "/chaise/recordset/#registry/CFDE:release" },
                 {
                     "name": "Vocabulary",
                     "children": [
-                        { "name": "Release status", "url": "/chaise/recordset/#registry/CFDE:release_status" },
                         { "name": "Datapackage status", "url": "/chaise/recordset/#registry/CFDE:datapackage_status" },
                         { "name": "Table status", "url": "/chaise/recordset/#registry/CFDE:datapackage_table_status" },
                         { "name": "Approval status", "url": "/chaise/recordset/#registry/CFDE:approval_status" },
                         { "name": "Group role", "url": "/chaise/recordset/#registry/CFDE:group_role" },
                         #{ "name": "Namespace role", "url": "/chaise/recordset/#registry/CFDE:id_namespace_role" },
+                        { "name": "Release status", "url": "/chaise/recordset/#registry/CFDE:release_status" },
                     ]
                 },
             ]
