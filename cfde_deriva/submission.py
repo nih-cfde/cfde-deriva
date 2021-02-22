@@ -596,7 +596,6 @@ class Submission (object):
         canon_dp = CfdeDataPackage(portal_schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
-            conn.execute('PRAGMA foreign_keys = True;')
             logger.debug('Idempotently provisioning schema in %s' % (sqlite_filename,))
             canon_dp.provision_sqlite(conn)
             canon_dp.sqlite_import_data_files(conn, onconflict='skip')
@@ -608,7 +607,6 @@ class Submission (object):
         submitted_dp = CfdeDataPackage(packagefile)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
-            conn.execute('PRAGMA foreign_keys = True;')
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip')
 
@@ -623,7 +621,6 @@ class Submission (object):
         canon_dp = CfdeDataPackage(portal_schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
-            conn.execute('PRAGMA foreign_keys = True;')
             logger.debug('Building derived tables in %s' % (sqlite_filename,))
             canon_dp.sqlite_do_etl(conn)
 
