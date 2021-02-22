@@ -264,6 +264,14 @@ class Submission (object):
                     status= terms.cfde_registry_dpt_status.content_ready
                 )
 
+            def dpt_error2(name, path, diagnostics):
+                self.registry.update_datapackage_table(
+                    self.datapackage_id,
+                    self.rname_to_pos[name],
+                    status= terms.cfde_registry_dpt_status.content_error,
+                    diagnostics= diagnostics,
+                )
+
             if dp['status'] not in {
                     terms.cfde_registry_dp_status.check_valid,
             }:
@@ -279,7 +287,7 @@ class Submission (object):
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.load_sqlite(self.content_path, self.sqlite_filename)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
-            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2)
+            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.prepare_sqlite_derived_tables(self.sqlite_filename)
@@ -682,14 +690,14 @@ class Submission (object):
         return catalog
 
     @classmethod
-    def upload_datapackage_content(cls, catalog, content_path, table_done_callback=None):
+    def upload_datapackage_content(cls, catalog, content_path, table_done_callback=None, table_error_callback=None):
         """Idempotently upload submission content from datapackage into review catalog."""
         packagefile = cls.datapackage_name_from_path(content_path)
         submitted_dp = CfdeDataPackage(packagefile)
         submitted_dp.set_catalog(catalog)
         # TBD: pass through our registry knowledge of tables already in content-ready status?
         # TBD: restartable onconflict=skip here means we cannot validate whether there are duplicates?
-        submitted_dp.load_data_files(onconflict='skip', table_done_callback=table_done_callback)
+        submitted_dp.load_data_files(onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
 
     @classmethod
     def upload_derived_content(cls, catalog, sqlite_filename):

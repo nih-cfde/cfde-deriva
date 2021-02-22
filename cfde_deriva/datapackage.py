@@ -2,6 +2,7 @@
 import os
 import io
 import sys
+import re
 import json
 import csv
 import logging
@@ -10,10 +11,11 @@ from collections import UserString
 
 from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
+import requests
 
 from . import tableschema
 from .configs import portal, registry
-from .exception import IncompatibleDatapackageModel
+from .exception import IncompatibleDatapackageModel, InvalidDatapackage
 
 """
 Basic C2M2 catalog sketch
@@ -450,7 +452,7 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
-    def load_data_files(self, onconflict='abort', table_done_callback=None):
+    def load_data_files(self, onconflict='abort', table_done_callback=None, table_error_callback=None):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted():
             # we are doing a clean load of data in fkey dependency order
@@ -502,9 +504,17 @@ class CfdeDataPackage (object):
                         skipped = len(batch) - len(r.json())
                         if skipped and onconflict == 'skip':
                             logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
+                    except requests.exceptions.HTTPError as e:
+                        logger.error("Table %s data load FAILED from "
+                                     "%s: %s" % (table.name, self.package_filename, e))
+                        if e.response is not None:
+                            detail = e.response.text.replace('\n', '. ')
+                            raise InvalidDatapackage('Table "%s" load error: %s' % (table.name, detail))
+                        raise
                     except Exception as e:
                         logger.error("Table %s data load FAILED from "
                                      "%s: %s" % (table.name, self.package_filename, e))
+                        raise
                     else:
                         batch.clear()
                 #
@@ -531,14 +541,19 @@ class CfdeDataPackage (object):
                         upload_batch(batch)
 
             if "path" in resource:
-                if onconflict == 'update':
-                    upload_content('skip')     # first pass creates missing records, skipping existing keys
-                    upload_content('update')   # second pass revises non-key fields
-                else:
-                    upload_content(onconflict) # abort or skip in a single pass
-                logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
-                if table_done_callback:
-                    table_done_callback(table.name, resource["path"])
+                try:
+                    if onconflict == 'update':
+                        upload_content('skip')     # first pass creates missing records, skipping existing keys
+                        upload_content('update')   # second pass revises non-key fields
+                    else:
+                        upload_content(onconflict) # abort or skip in a single pass
+                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+                    if table_done_callback:
+                        table_done_callback(table.name, resource["path"])
+                except Exception as e:
+                    if table_error_callback:
+                        table_error_callback(table.name, resource["path"], str(e))
+                    raise
 
     def sqlite_import_data_files(self, conn, onconflict='abort'):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
