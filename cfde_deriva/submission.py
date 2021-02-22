@@ -521,7 +521,7 @@ class Submission (object):
             if len(children) < 1:
                 raise exception.InvalidDatapackage('Did not find expected top-level folder in bag archive')
             elif len(children) > 1:
-                raise exception.InvalidDatapackage('Found too many top-level folders in back archive')
+                raise exception.InvalidDatapackage('Found too many top-level folders in bag archive')
 
             os.rename(children[0], content_path)
             logger.debug('Renamed output "%s" to final "%s"' % (children[0], content_path))
