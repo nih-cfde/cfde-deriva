@@ -172,7 +172,7 @@ class Submission (object):
 
         # general sequence (with many idempotent steps)
         failed = False
-        diagnostics = 'An unknown operational error has occured.'
+        diagnostics = 'An unknown operational error has occurred.'
         failed_exc = None
         # streamline handling of error reporting...
         # next_error_state anticipates how to categorize exceptions
