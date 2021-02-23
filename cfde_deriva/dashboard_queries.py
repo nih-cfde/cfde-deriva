@@ -6,7 +6,7 @@
 import sys
 import os
 import json
-from deriva.core import ErmrestCatalog, urlquote, DEFAULT_HEADERS
+from deriva.core import ErmrestCatalog, urlquote, DEFAULT_HEADERS, DEFAULT_SESSION_CONFIG
 from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 
 ######
@@ -288,7 +288,9 @@ class StatsQuery (object):
 class DashboardQueryHelper (object):
 
     def __init__(self, hostname, catalogid, scheme='https', caching=True):
-        self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching)
+        session_config = DEFAULT_SESSION_CONFIG.copy()
+        session_config["allow_retry_on_all_methods"] = True
+        self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config)
         self.builder = self.catalog.getPathBuilder()
 
     def run_demo(self):
@@ -405,7 +407,7 @@ class DashboardQueryHelper (object):
 def main():
     """Runs demo of catalog dashboard queries."""
     hostname = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
-    catalogid = os.getenv('DERIVA_CATALOGID', '4')
+    catalogid = os.getenv('DERIVA_CATALOGID', '1')
     db = DashboardQueryHelper(hostname, catalogid)
     db.run_demo()
     return 0

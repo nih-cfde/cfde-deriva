@@ -25,7 +25,7 @@ setup(
     },
     scripts=[],
     requires=['deriva'],
-    install_requires=['deriva>=1.0', 'frictionless'],
+    install_requires=['deriva>=1.4.5', 'frictionless'],
     maintainer_email='support@misd.isi.edu',
     classifiers=[
         'Intended Audience :: Developers',

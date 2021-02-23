@@ -2,7 +2,7 @@
 import sys
 import datetime
 import json
-from deriva.core import DerivaServer, ErmrestCatalog, get_credential
+from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
@@ -115,7 +115,7 @@ class Registry (object):
     """CFDE Registry binding.
 
     """
-    def __init__(self, scheme='https', servername='app.nih-cfde.org', catalog='registry', credentials=None):
+    def __init__(self, scheme='https', servername='app.nih-cfde.org', catalog='registry', credentials=None, session_config=None):
         """Bind to specified registry.
 
         Note: this binding operates as an authenticated client
@@ -124,7 +124,10 @@ class Registry (object):
         """
         if credentials is None:
             credentials = get_credential(servername)
-        self._catalog = ErmrestCatalog(scheme, servername, catalog, credentials)
+        if not session_config:
+            session_config = DEFAULT_SESSION_CONFIG.copy()
+        session_config["allow_retry_on_all_methods"] = True
+        self._catalog = ErmrestCatalog(scheme, servername, catalog, credentials, session_config=session_config)
         self._builder = self._catalog.getPathBuilder()
 
     def validate_dcc_id(self, dcc_id, submitting_user):
@@ -459,7 +462,9 @@ def main(servername, subcommand, catalog_id=None):
 
     """
     credentials = get_credential(servername)
-    server = DerivaServer('https', servername, credentials)
+    session_config = DEFAULT_SESSION_CONFIG.copy()
+    session_config["allow_retry_on_all_methods"] = True
+    server = DerivaServer('https', servername, credentials, session_config=session_config)
 
     if subcommand == 'creators-acl':
         print(json.dumps(ermrest_creators_acl, indent=2))

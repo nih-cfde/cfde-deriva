@@ -3,7 +3,7 @@ import os
 import sys
 import logging
 
-from deriva.core import DerivaServer, get_credential
+from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG
 
 from .tableschema import ReleaseConfigurator
 from .datapackage import CfdeDataPackage, portal_schema_json
@@ -35,8 +35,10 @@ def main(subcommand, *args):
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     credential = get_credential(servername)
-    registry = Registry('https', servername, credentials=credential)
-    server = DerivaServer('https', servername, credential)
+    session_config = DEFAULT_SESSION_CONFIG.copy()
+    session_config["allow_retry_on_all_methods"] = True
+    registry = Registry('https', servername, credentials=credential, session_config=session_config)
+    server = DerivaServer('https', servername, credential, session_config=session_config)
 
     if subcommand == 'provision':
         catalog = server.create_ermrest_catalog()
