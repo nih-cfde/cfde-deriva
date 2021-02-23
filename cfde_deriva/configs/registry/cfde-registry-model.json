@@ -16,6 +16,7 @@
                   "name": "id",
                   "description": "The identifier for this DCC, issued by the CFDE-CC.",
                   "type": "string",
+                  "default": "cfde_registry_dcc:",
                   "constraints": {
                      "required": true
                   }
