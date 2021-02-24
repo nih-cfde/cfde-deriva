@@ -7,8 +7,15 @@ import sys
 import json
 import hashlib
 import base64
+import logging
+import requests
+
 from deriva.core import tag, AttrDict
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 if 'source_definitions' not in tag:
     # monkey-patch this newer annotation key until it appears in deriva-py
@@ -147,10 +154,26 @@ class CatalogConfigurator (object):
         self.catalog_acls = acls_union(self.catalog_acls)
         # be careful with owner ACL
         # ermrest will not allow us to drop our ownership!
-        session = catalog.get_authn_session().json()
+        try:
+            session = catalog.get_authn_session().json()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                logger.warning('We are not authenticated! Proceeding anyway with reduced capability... further problems likely!')
+                session = dict(attributes=[])
+            else:
+                logger.debug('Got unexpected error while retrieving our authn session: %s' % (e,))
+                raise
         my_attr_ids = { a['id'] for a in session['attributes'] }
         planned_owner = set(self.catalog_acls['owner'])
-        existing_owner = set(catalog.get('/acl').json()['owner'])
+        try:
+            existing_owner = set(catalog.get('/acl').json()['owner'])
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code in (401, 403):
+                logger.warning('We are not an owner of the catalog! Proceeding anyway with reduced capability... further problems likely!')
+                existing_owner = set()
+            else:
+                logger.debug('Got unexpected error while retrieving catalog ACLs: %s' % (e,))
+                raise
         if not planned_owner.intersection(my_attr_ids):
             # our designed config won't be allowed, so augment it
             # copy our class-level config before mutating!
