@@ -555,6 +555,69 @@ class CfdeDataPackage (object):
                         table_error_callback(table.name, resource["path"], str(e))
                     raise
 
+    def dump_data_files(self, resources=None, dump_dir=None):
+        """Dump resources to TSV files (inverse of normal load process)
+
+        :param resources: List of resources from datapackage or None (default) to get automatic list.
+        :param dump_dir: Path to a directory to write files or None (default) to use current working directory.
+
+        The automatic list of dump resources is derived from the
+        datapackage, including those tables that specified an input
+        file via the "path" attribute.  Other resources are skipped.
+
+        """
+        if resources is None:
+            resources = [
+                resource
+                for resource in self.package_def['resources']
+                if 'path' in resource
+            ]
+
+        for resource in resources:
+            if 'path' in resource:
+                fname = os.path.basename(resource['path'])
+            else:
+                # allow dumping of unusual resources?
+                fname = '%s.tsv' % (resource['name'],)
+
+            if dump_dir is not None:
+                fname = '%s/%s' % (dump_dir.rstrip('/'), fname)
+
+            # dump the same TSV columns included in package def (not extra DERIVA fields)
+            cnames = [ field['name'] for field in resource['schema']['fields'] ]
+
+            def get_data():
+                r = self.catalog.get(
+                    '/entity/CFDE:%s@sort(RID)?limit=%d' % (
+                        urlquote(resource['name']),
+                        self.batch_size,
+                    ))
+                rows = r.json()
+                yield rows
+
+                while rows:
+                    last = rows[-1]['RID']
+                    r = self.catalog.get(
+                        '/entity/CFDE:%s@sort(RID)@after(%s)?limit=%d' % (
+                            urlquote(resource['name']),
+                            urlquote(last),
+                            self.batch_size,
+                    ))
+                    rows = r.json()
+                    yield rows
+
+            with open(fname, 'w') as f:
+                writer = csv.writer(f, delimiter='\t')
+                writer.writerow(tuple(cnames))
+                for rows in get_data():
+                    for row in rows:
+                        writer.writerow(tuple([
+                            row[cname] if row is not None else ''
+                            for cname in cnames
+                        ]))
+                del writer
+            logger.info('Dumped resource "%s" as "%s"' % (resource['name'], fname))
+
     def sqlite_import_data_files(self, conn, onconflict='abort'):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):

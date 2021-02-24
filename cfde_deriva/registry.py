@@ -445,6 +445,16 @@ class Registry (object):
             'Submission to DCC %s is forbidden' % (dcc_id,)
         )
 
+    @classmethod
+    def dump_onboarding(self, registry_datapackage):
+        """Dump onboarding info about DCCs in registry"""
+        resources = [
+            resource
+            for resource in registry_datapackage.package_def['resources']
+            if resource['name'] in {'dcc', 'group', 'dcc_group_role'}
+        ]
+        registry_datapackage.dump_data_files(resources=resources)
+
 def main(servername, subcommand, catalog_id=None):
     """Perform registry maintenance.
 
@@ -459,6 +469,7 @@ def main(servername, subcommand, catalog_id=None):
     - 'reconfigure': Re-configure existing registry (requires catalog_id)
     - 'delete': Delete an existing (test) registry
     - 'creators-acl': Print ermrest creators ACL
+    - 'dump-onboarding': Write out *.tsv files for onboarding info in registry
 
     """
     credentials = get_credential(servername)
@@ -472,7 +483,7 @@ def main(servername, subcommand, catalog_id=None):
     if subcommand == 'provision':
         catalog = server.create_ermrest_catalog()
         print('Created new catalog %s' % catalog.catalog_id)
-    elif subcommand in { 'reconfigure', 'delete', 'reprovision' }:
+    elif subcommand in { 'reconfigure', 'delete', 'reprovision', 'dump-onboarding' }:
         if catalog_id is None:
             raise TypeError('missing 1 required positional argument: catalog_id')
         catalog = server.connect_ermrest(catalog_id)
@@ -513,6 +524,8 @@ def main(servername, subcommand, catalog_id=None):
     elif subcommand == 'delete':
         catalog.delete_ermrest_catalog(really=True)
         print('Deleted existing catalog %s' % catalog.catalog_id)
+    elif subcommand == 'dump-onboarding':
+        registry.dump_onboarding(dp)
 
     return 0
 
