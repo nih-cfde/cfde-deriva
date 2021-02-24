@@ -607,7 +607,7 @@ class CfdeDataPackage (object):
                     yield rows
 
             with open(fname, 'w') as f:
-                writer = csv.writer(f, delimiter='\t')
+                writer = csv.writer(f, delimiter='\t', lineterminator='\n')
                 writer.writerow(tuple(cnames))
                 for rows in get_data():
                     for row in rows:
