@@ -229,32 +229,32 @@ class Submission (object):
 
             def dpt_update1(content_path, packagefile, report):
                 """Update status of resources from frictionless report"""
-                ppath = os.path.dirname(os.path.abspath(packagefile))
-                # don't assume 1:1 correspondance of report.tables to resources list
-                for pos in range(len(report.tables)):
-                    # strip path where package resides
-                    offset = len(ppath) + (0 if ppath.endswith('/') else 1)
-                    tpath = os.path.abspath(report.tables[pos].path)[offset:]
-                    if tpath in self.rpath_to_pos:
-                        if report.tables[pos].errors:
+                for task in report.tasks:
+                    if not hasattr(task, 'resource'):
+                        continue
+                    if not hasattr(task.resource, 'path'):
+                        continue
+                    if not hasattr(task.resource, 'name'):
+                        logger.debug('Could not understand report resource lacking "name": %s' % task.resource)
+                        continue
+
+                    if task.errors:
                             status = terms.cfde_registry_dpt_status.check_error
                             diagnostics = 'Tabular resource found %d errors. First error: %s' % (
-                                len(report.tables[pos].errors),
-                                report.tables[pos].errors[0].message
+                                len(task.errors),
+                                task.errors[0].message
                             )
-                        else:
-                            status = nochange
-                            diagnostics = nochange
-                        num_rows = report.tables[pos].stats.get('rows', nochange)
-                        self.registry.update_datapackage_table(
-                            self.datapackage_id,
-                            self.rpath_to_pos[tpath],
-                            status= status,
-                            num_rows= num_rows,
-                            diagnostics= diagnostics
-                        )
                     else:
-                        logger.debug('Could not map table path %s (%s) to resources %s' % (report.tables[pos].path, tpath, rname_to_pos.keys()))
+                        status = nochange
+                        diagnostics = nochange
+                    num_rows = task.stats.get('rows', nochange)
+                    self.registry.update_datapackage_table(
+                        self.datapackage_id,
+                        self.rname_to_pos[task.resource.name],
+                        status= status,
+                        num_rows= num_rows,
+                        diagnostics= diagnostics
+                    )
 
             def dpt_update2(name, path):
                 """Update status of resource following content upload"""
@@ -583,7 +583,8 @@ class Submission (object):
         specification.
         """
         packagefile = cls.datapackage_name_from_path(content_path)
-        report = frictionless.validate_package(packagefile, trusted=False, noinfer=True, nopool=True)
+        logger.debug('Validating frictionless datapackage at "%s"' % packagefile)
+        report = frictionless.validate_package(packagefile, trusted=False, original=True, parallel=False)
         if post_process:
             post_process(content_path, packagefile, report)
         if report.stats['errors'] > 0:
