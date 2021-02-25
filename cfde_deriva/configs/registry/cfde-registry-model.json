@@ -141,6 +141,23 @@
                   },
                   "description"
                ],
+               "compact/select": [
+                  {
+                     "markdown_name": "DCC",
+                     "comment": "The identify of the DCC onboarded with the CFDE-CC.",
+                     "display": {
+                        "markdown_pattern": "{{dcc_name}}\n{{_dcc_url}}\n{{id}}\n"
+                     }
+                  },
+                  {
+                     "markdown_name": "Contact",
+                     "comment": "The primary contact of the DCC.",
+                     "display": {
+                        "markdown_pattern": "{{contact_name}}\n{{contact_email}}\n"
+                     }
+                  },
+                  "description"
+               ],
                "filter": {"and": [
                   {"source": "dcc_name"},
                   {"source": "contact_name"},
@@ -207,6 +224,14 @@
                      "source": [{"inbound": ["CFDE", "dcc_id_namespace_role_namespace_fkey"]}, "RID"]
                   }
                }
+            },
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "abbreviation",
+                  "name",
+                  "description"
+               ]
             },
             "visible_foreign_keys": {
                "*": [
@@ -321,6 +346,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
@@ -359,6 +391,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
@@ -397,6 +436,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
@@ -435,6 +481,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
@@ -473,6 +526,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
@@ -511,6 +571,13 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
          }
       },
       
