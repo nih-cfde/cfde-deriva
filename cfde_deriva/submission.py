@@ -247,7 +247,7 @@ class Submission (object):
                     else:
                         status = nochange
                         diagnostics = nochange
-                    num_rows = task.stats.get('rows', nochange)
+                    num_rows = task.resource.stats.get('rows', nochange)
                     self.registry.update_datapackage_table(
                         self.datapackage_id,
                         self.rname_to_pos[task.resource.name],
@@ -277,7 +277,7 @@ class Submission (object):
             }:
                 next_error_state = terms.cfde_registry_dp_status.check_error
                 self.datapackage_model_check(self.content_path, pre_process=dpt_register)
-                self.datapackage_validate(self.content_path, post_process=dpt_update1)
+                self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.provision_sqlite(self.content_path, self.sqlite_filename)
@@ -285,7 +285,7 @@ class Submission (object):
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.load_sqlite(self.content_path, self.sqlite_filename)
+            self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
             self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
@@ -575,8 +575,13 @@ class Submission (object):
         canon_dp.validate_model_subset(submitted_dp)
 
     @classmethod
-    def datapackage_validate(cls, content_path, post_process=None):
+    def datapackage_validate(cls, content_path, post_process=None, check_keys=True, check_fkeys=True):
         """Perform datapackage validation.
+
+        :param content_path: The path to the submission
+        :param post_process: Optional callback function with signature lambda content_path, packagefilename, report: ... (default None)
+        :param check_keys: Whether to check primary key and uniqueness constraints (default True)
+        :param check_fkeys: Whether to check foreign key reference constraints (default True)
 
         This validation considers the TSV content of the datapackage
         to be sure it conforms to its own JSON datapackage
@@ -584,7 +589,17 @@ class Submission (object):
         """
         packagefile = cls.datapackage_name_from_path(content_path)
         logger.debug('Validating frictionless datapackage at "%s"' % packagefile)
-        report = frictionless.validate_package(packagefile, trusted=False, original=True, parallel=False)
+
+        package = frictionless.Package(packagefile, trusted=False)
+        for resource in package.resources:
+            if not check_fkeys:
+                resource.schema.pop('foreignKeys', None)
+            if not check_keys:
+                resource.schema.pop('primaryKey', None)
+                for field in resource.schema.fields:
+                    field.constraints.pop('unique', None)
+
+        report = frictionless.validate_package(package, trusted=False, original=True, parallel=False)
         if post_process:
             post_process(content_path, packagefile, report)
         if report.stats['errors'] > 0:
@@ -610,14 +625,14 @@ class Submission (object):
             canon_dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
-    def load_sqlite(cls, content_path, sqlite_filename):
+    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None):
         """Idempotently insert submission content."""
         packagefile = cls.datapackage_name_from_path(content_path)
         submitted_dp = CfdeDataPackage(packagefile)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
-            submitted_dp.sqlite_import_data_files(conn, onconflict='skip')
+            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback)
 
     @classmethod
     def prepare_sqlite_derived_tables(cls, sqlite_filename):

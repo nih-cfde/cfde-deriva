@@ -618,19 +618,22 @@ class CfdeDataPackage (object):
                 del writer
             logger.info('Dumped resource "%s" as "%s"' % (resource['name'], fname))
 
-    def sqlite_import_data_files(self, conn, onconflict='abort'):
+    def sqlite_import_data_files(self, conn, onconflict='abort', table_error_callback=None):
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are doing a clean load of data in fkey dependency order
             table = self.doc_cfde_schema.tables[tname]
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-            if "path" in resource:
-                def open_package():
-                    if isinstance(self.package_filename, _PackageDataName):
-                        return self.package_filename.get_data_stringio(resource["path"])
-                    else:
-                        fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
-                        return open(fname, 'r')
+            logger.debug('Loading table "%s"...' % tname)
+            if "path" not in resource:
+                continue
+            def open_package():
+                if isinstance(self.package_filename, _PackageDataName):
+                    return self.package_filename.get_data_stringio(resource["path"])
+                else:
+                    fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
+                    return open(fname, 'r')
+            try:
                 with open_package() as f:
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
@@ -675,6 +678,10 @@ class CfdeDataPackage (object):
                                          "%s: %s" % (table.name, self.package_filename, e))
                             raise
                     logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+            except UnicodeDecodeError as e:
+                if table_error_callback:
+                    table_error_callback(resource["name"], resource["path"], str(e))
+                raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
 
     def load_sqlite_etl_tables(self, conn, onconflict='abort'):
         if not self.package_filename is portal_schema_json:
