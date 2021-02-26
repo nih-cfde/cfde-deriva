@@ -1052,12 +1052,21 @@
                   {"sourcekey": "S_creation_time"},
                   {
                      "markdown_name": "Super-Project",
-                     "comment": "Direct or indirect super-projects of the project.",
+                     "comment": "Direct or indirect ancestor of the project.",
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  {
+                     "markdown_name": "Parent Project",
+                     "comment": "Direct ancestor of the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_child_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
                         "RID"
                      ]
                   },
