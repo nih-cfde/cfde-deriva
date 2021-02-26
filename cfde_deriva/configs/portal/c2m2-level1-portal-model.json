@@ -1234,8 +1234,7 @@
                   "description": "An ID representing this collection, unique within this id_namespace",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
