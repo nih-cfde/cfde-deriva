@@ -508,7 +508,7 @@ class CfdeDataPackage (object):
                         logger.error("Table %s data load FAILED from "
                                      "%s: %s" % (table.name, self.package_filename, e))
                         if e.response is not None:
-                            detail = e.response.text.replace('\n', '. ')
+                            detail = e.response.text.strip('\n. ').replace('\n', '. ')
                             raise InvalidDatapackage('Table "%s" load error: %s' % (table.name, detail))
                         raise
                     except Exception as e:
