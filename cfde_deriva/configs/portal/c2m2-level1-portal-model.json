@@ -988,6 +988,15 @@
                   "S_creation_time": {
                      "comment": "The time when the project was created.",
                      "source": "creation_time"
+                  },
+                  "S_parent_project": {
+                     "markdown_name": "Parent Project",
+                     "comment": "Direct ancestor of the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_child_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
+                        "RID"
+                     ]
                   }
                }
             },
@@ -1061,15 +1070,7 @@
                         "RID"
                      ]
                   },
-                  {
-                     "markdown_name": "Parent Project",
-                     "comment": "Direct ancestor of the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "project_in_project_child_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_parent_project"},
                   {
                      "markdown_name": "Sub-Project",
                      "comment": "Direct or indirect sub-projects of the project.",
