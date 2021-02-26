@@ -1,3 +1,0 @@
-id	name	description	synonyms
-http://purl.obolibrary.org/obo/OBI_0000747	material sample	A material entity that has the material sample role	sample|sample population
-http://purl.obolibrary.org/obo/OBI_0001970	multiplexed sequencing library	a multiplexed library is a material entity which is the output of a library preparation process that uses a ligation step to attach a unique multiplexing sequence identifier to a specific sample, then mixes several such tagged samples prior to the library amplification process proper. A multiplexed library allows the sequencing of several samples in one sequencing run.	DNA-barcoded sequencing library

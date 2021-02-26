@@ -1,0 +1,7 @@
+id	name	description
+cfde_registry_dpt_status:enumerated	enumerated	The tabular resource was detected in a submitted datapackage.
+cfde_registry_dpt_status:name-error     name error	The tabular resource name is invalid or missing.
+cfde_registry_dpt_status:data-absent    data absent	The tabular resource was listed but lacks a corresponding data file.
+cfde_registry_dpt_status:check-error	check error	The tabular content failed one or more pre-checks.
+cfde_registry_dpt_status:content-ready	content ready	The tabular content was successfully loaded.
+cfde_registry_dpt_status:content-error	content error	The tabular content failed to load.

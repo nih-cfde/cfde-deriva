@@ -1,0 +1,1660 @@
+{
+   "profile": "tabular-data-package",
+   "name": "cfde_submission_registry",
+   "title": "A customized CFDE-CC submission registry with Chaise display directives",
+   "resources": [
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc",
+         "title": "Onboarded DCC",
+         "description": "Each onboarded DCC who may submit datapackages to the CFDE-CC.",
+         "path": "dcc.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this DCC, issued by the CFDE-CC.",
+                  "type": "string",
+                  "default": "cfde_registry_dcc:",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_name",
+                  "title": "DCC Name",
+                  "description": "A short, human-readable, label for this DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this DCC",
+                  "type": "string"
+               },
+               {
+                  "name": "contact_email",
+                  "description": "Email address of this DCC contact",
+                  "type": "string",
+                  "format": "email",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "contact_name",
+                  "description": "Name of this DCC contact",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_url",
+                  "title": "DCC URL",
+                  "description": "URL of the front page of the website for this DCC",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_dcc_url}}]({{_dcc_url}})"
+                        }
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{dcc_name}}"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_datapackages": {
+                     "markdown_name": "Submitted Datapackages",
+                     "source": [{"inbound": ["CFDE", "datapackage_submitting_dcc_fkey"]}, "RID"]
+                  },
+                  "S_releases": {
+                     "markdown_name": "Releases",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_group_roles": {
+                     "markdown_name": "Groups",
+                     "source": [{"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_id_namespaces": {
+                     "markdown_name": "ID Namespaces",
+                     "source": [{"inbound": ["CFDE", "dcc_id_namespace_role_dcc_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_datapackages"},
+                  {"sourcekey": "S_releases"},
+                  {"sourcekey": "S_group_roles"},
+                  {"sourcekey": "S_id_namespaces"}
+               ]
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "dcc_name",
+                  "dcc_url",
+                  "contact_name",
+                  "contact_email",
+                  "description"
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "DCC",
+                     "comment": "The identify of the DCC onboarded with the CFDE-CC.",
+                     "display": {
+                        "markdown_pattern": "{{dcc_name}}\n[{{_dcc_url}}]({{_dcc_url}})\n{{id}}\n"
+                     }
+                  },
+                  {
+                     "markdown_name": "Contact",
+                     "comment": "The primary contact of the DCC.",
+                     "display": {
+                        "markdown_pattern": "{{contact_name}}\n{{contact_email}}\n"
+                     }
+                  },
+                  "description"
+               ],
+               "compact/select": [
+                  {
+                     "markdown_name": "DCC",
+                     "comment": "The identify of the DCC onboarded with the CFDE-CC.",
+                     "display": {
+                        "markdown_pattern": "{{dcc_name}}\n{{_dcc_url}}\n{{id}}\n"
+                     }
+                  },
+                  {
+                     "markdown_name": "Contact",
+                     "comment": "The primary contact of the DCC.",
+                     "display": {
+                        "markdown_pattern": "{{contact_name}}\n{{contact_email}}\n"
+                     }
+                  },
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "dcc_name"},
+                  {"source": "contact_name"},
+                  {"source": "contact_email"}
+               ]}
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "id_namespace",
+         "title": "ID Namespace",
+         "description": "Each identifier namespace registered with the CFDE-CC for use with datapackage submissions.",
+         "path": "id_namespace.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "abbreviation",
+                  "description": "A very short display label for this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^[a-zA-Z0-9_]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{name}}\n{{id}}\n"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc_roles": {
+                     "markdown_name": "DCC Using Namespace",
+                     "source": [{"inbound": ["CFDE", "dcc_id_namespace_role_namespace_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "abbreviation",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_dcc_roles"}
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "group",
+         "title": "Registered Group",
+         "description": "Each group registered for use with the CFDE-CC.",
+         "path": "group.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The Globus Groups system's bare UUID for this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "webauthn_id",
+                  "description": "The DERIVA authentication system's identifier for the group, e.g. https://auth.globus.org/UUID-VALUE-HERE.",
+                  "type": "string",
+                  "default": "https://auth.globus.org/",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable label for this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this group",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{name}}"
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "webauthn_id",
+                  "name",
+                  {
+                     "markdown_name": "Globus Group Page",
+                     "display": {
+                        "markdown_pattern": "[{{name}} page at Globus](https://app.globus.org/groups/{{_id}}/about)"
+                     }
+                  },
+                  "description"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "group_role",
+         "title": "Group Role Term",
+         "path": "group_role.tsv",
+         "description": "Coded vocabulary for a group's role within the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this role concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this role concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this role concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "id_namespace_role",
+         "title": "ID Namespace Role Term",
+         "path": "id_namespace_role.tsv",
+         "description": "Coded vocabulary for a namespace's role within the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this role concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this role concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this role concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_status",
+         "title": "Datapackage Status Term",
+         "path": "datapackage_status.tsv",
+         "description": "Coded vocabulary for datapackage automated lifecycle states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "release_status",
+         "title": "Release Status Term",
+         "path": "release_status.tsv",
+         "description": "Coded vocabulary for release lifecycle states known by the submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "approval_status",
+         "title": "Approval Status Term",
+         "path": "approval_status.tsv",
+         "description": "Coded vocabulary for approval-decision states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_table_status",
+         "title": "Datapackage Tabular Resource Status Term",
+         "path": "datapackage_table_status.tsv",
+         "description": "Coded vocabulary for datapackage tabular file lifecycle states known by the datapackage submission system.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this status concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this status concept.",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this status concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage",
+         "title": "Submitted Datapackage",
+         "description": "Each submitted datapackage currently tracked by the CFDE-CC.",
+         "path": "datapackage.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this datapackage issued by the CFDE-CC for internal use.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "submitting_dcc",
+                  "title": "Submitting DCC",
+                  "description": "The identifier for the DCC submitting this datapackage.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "submitting_user",
+                  "description": "The DERIVA webauthn user identity for the originating user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "submission_time",
+                  "description": "A timestamp for when the datapackage was submitted to the CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "datapackage_url",
+                  "title": "Datapackage URL",
+                  "description": "URL of this datapackage in CFDE-CC controlled storage.",
+                  "type": "string",
+                  "format": "uri",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_datapackage_url}}]({{_datapackage_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this datapackage.",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {},
+                     "acl_bindings": {}
+                  }
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the datapackage within the submission pipeline.",
+                  "type": "string",
+                  "default": "cfde_registry_dp_status:submitted",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "dcc_approval_status",
+                  "title": "DCC Approval Status",
+                  "description": "A coded value for the post-review DCC approval of this datapackage.",
+                  "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {}
+                  }
+               },
+               {
+                  "name": "cfde_approval_status",
+                  "title": "CFDE Approval Status",
+                  "description": "A coded value for the post-review CFDE-CC approval of this datapackage.",
+                  "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "decision_time",
+                  "description": "A timestamp for when the datapackage reached a final decision status from the DCC and CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               },
+               {
+                  "name": "review_ermrest_url",
+                  "title": "EMRrest API URL",
+                  "description": "URL of ermrest catalog to review this datapackage.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_ermrest_url}}]({{_review_ermrest_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "review_browse_url",
+                  "title": "Browse URL",
+                  "description": "URL of review HTML UI for this datapackage.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_browse_url}}]({{_review_browse_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "review_summary_url",
+                  "title": "Summary URL",
+                  "description": "URL of review HTML summary page for this datapackage.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     },
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_review_summary_url}}]({{_review_summary_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "dcc_group_decider": false,
+                        "dcc_group_admin": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ],
+            "foreignKeys": [
+               {
+                  "fields": ["submitting_dcc"],
+                  "constraint_name": "datapackage_submitting_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["submitting_user"],
+                  "constraint_name": "datapackage_submitting_user_fkey",
+                  "reference": {
+                     "resourceSchema": "public",
+                     "resource": "ERMrest_Client",
+                     "fields": "ID"
+                  }
+               },
+               {
+                  "fields": ["status"],
+                  "constraint_name": "datapackage_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["dcc_approval_status"],
+                  "constraint_name": "datapackage_dcc_approval_status_fkey",
+                  "reference": {
+                     "resource": "approval_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["cfde_approval_status"],
+                  "constraint_name": "datapackage_cfde_approval_status_fkey",
+                  "reference": {
+                     "resource": "approval_status",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "delete": [  ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "dcc_group_decider": {
+                  "types": ["update"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:review-decider"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["this dummy acl is replaced by registry configurator"]
+               },
+               "dcc_group_admin": {
+                  "types": ["update"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:admin"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["this dummy acl is replaced by registry configurator"]
+               }
+            },
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "submission_time", "descending": true}]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_submission": {
+                     "markdown_name": "Submission",
+                     "comment": "Identifying information for submission.",
+                     "source": "submission_time",
+                     "display": {
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission | {{submission_time}} (ID {{id}}) |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
+                     }
+                  },
+                  "S_status_extra": {
+                     "markdown_name": "Status Summary",
+                     "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
+                     "comment": "The status of the datapackage in the submission system.",
+                     "display": {
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} by DCC, {{$fkeys.CFDE.datapackage_cfde_approval_status_fkey.rowName}} by CFDE-CC |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Review Content | {{#_review_browse_url}}[Browse Data]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[Summary Charts]({{.}}), {{/_review_summary_url}} [Raw Data]({{{_datapackage_url}}})|\n"
+                     }
+                  },
+                  "S_dcc_approval_status": {
+                     "source": [{"outbound": ["CFDE", "datapackage_dcc_approval_status_fkey"]}, "RID"]
+                  },
+                  "S_urls_brief": {
+                     "markdown_name": "Links",
+                     "comment": "Links to content related to this submission.",
+                     "source": "datapackage_url",
+                     "display": {
+                        "markdown_pattern": "{{#_review_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_review_browse_url}}{{#_review_summary_url}}- Summary: [{{.}}]({{.}})\n{{/_review_summary_url}}"
+                     }
+                  },
+                  "S_urls": {
+                     "markdown_name": "Links",
+                     "comment": "Links to content related to this submission.",
+                     "source": "datapackage_url",
+                     "display": {
+                        "markdown_pattern": "- Package: [{{_datapackage_url}}]({{_datapackage_url}})\n{{#_review_ermrest_url}}- ERMrest: [{{.}}]({{.}})\n{{/_review_ermrest_url}}{{#_review_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_review_browse_url}}{{#_review_summary_url}}- Summary: [{{.}}]({{.}})\n{{/_review_summary_url}}"
+                     }
+                  },
+                  "S_releases": {
+                     "markdown_name": "Releases",
+                     "comment": "Releases with this datapackage as a constituent part.",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_datapackage_tables": {
+                     "markdown_name": "Submitted Tables",
+                     "comment": "Tabular data resources included in this submission.",
+                     "source": [{"inbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_releases"},
+                  {"sourcekey": "S_datapackage_tables"}
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_submission"},
+                  {"sourcekey": "S_status_extra"}
+               ],
+               "filter": {"and": [
+                  {
+                     "markdown_name": "Submitting DCC",
+                     "source": [{"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Submitting User",
+                     "source": [{"outbound": ["CFDE", "datapackage_submitting_user_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "Status",
+                     "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "DCC Approval",
+                     "source": [{"outbound": ["CFDE", "datapackage_dcc_approval_status_fkey"]}, "RID"]
+                  },
+                  {
+                     "markdown_name": "CFDE Approval",
+                     "source": [{"outbound": ["CFDE", "datapackage_cfde_approval_status_fkey"]}, "RID"]
+                  },
+                  {"source": "submission_time"}
+               ]}
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_table",
+         "title": "Submitted Datapackage Tabular Resource",
+         "description": "Constituent submitted datapackage currently tracked by the CFDE-CC.",
+         "path": "datapackage_table.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The identifier for the datapackage as issued by the CFDE-CC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "position",
+                  "description": "The integer index (0-based) of the tabular resource within the datapackage",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "table_name",
+                  "description": "The reported table name for this tabular resource.",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the datapackage tabular file within the submission pipeline.",
+                  "type": "string",
+                  "default": "cfde_registry_dpt_status:enumerated",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               },
+               {
+                  "name": "num_rows",
+                  "description": "The number of rows found in this tabular input",
+                  "type": "integer",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "datapackage", "position" ],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_table_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "status",
+                  "constraint_name": "datapackage_table_status_fkey",
+                  "reference": {
+                     "resource": "datapackage_table_status",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "delete": [  ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "dcc_group_admin": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:admin"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ]
+               }
+            },
+            "table_display": {
+               "*": {
+                  "row_order": ["datapackage", "position"]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_datapackage": {
+                     "source": [{"outbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
+                  },
+                  "S_status_extra": {
+                     "markdown_name": "Status",
+                     "comment": "The status of this tabular resource in the submision system.",
+                     "source": [{"outbound": ["CFDE", "datapackage_table_status_fkey"]}, "RID"],
+                     "display": {
+                        "markdown_pattern": "{{$fkeys.CFDE.datapackage_table_status_fkey.rowName}}{{#_diagnostics}}\n{{diagnostics}}\n{{/_diagnostics}}"
+                     }
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_datapackage"},
+                  {"source": "table_name"},
+                  {"sourcekey": "S_status_extra"},
+                  {"source": "num_rows"}
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "release",
+         "title": "CFDE Release",
+         "description": "Each defined release known by the submission system.",
+         "path": "release.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this release issued by the CFDE-CC for internal use.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "status",
+                  "description": "A coded value for the current lifecycle status of the release within the submission pipeline.",
+                  "type": "string",
+                  "default": "cfde_registry_rel_status:planning",
+                  "constraints": {
+                     "required": true
+                  }               
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this datapackage.",
+                  "type": "string"
+               },
+               {
+                  "name": "cfde_approval_status",
+                  "title": "CFDE Approval Status",
+                  "description": "A coded value for the post-review CFDE-CC approval of this release.",
+                  "type": "string",
+                  "default": "cfde_registry_decision:pending",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "release_time",
+                  "description": "A timestamp for when the release was completed by the CFDE-CC.",
+                  "type": "datetime",
+                  "format": "any"
+               },
+               {
+                  "name": "ermrest_url",
+                  "title": "ERMrest URL",
+                  "description": "URL of ermrest catalog with the release content.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_ermrest_url}}]({{_ermrest_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "browse_url",
+                  "title": "Browse URL",
+                  "description": "URL of HTML browsing UI for this release.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_browse_url}}]({{_browse_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "summary_url",
+                  "title": "Summary URL",
+                  "description": "URL of HTML summary page for this release.",
+                  "type": "string",
+                  "format": "uri",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "markdown_pattern": "[{{_summary_url}}]({{_summary_url}})"
+                        }
+                     }
+                  }
+               },
+               {
+                  "name": "diagnostics",
+                  "description": "Diagnostic error information to augment coded status values.",
+                  "type": "string"
+               }
+            ],
+            "primaryKey": ["id"],
+            "foreignKeys": [
+               {
+                  "fields": "status",
+                  "constraint_name": "release_status_fkey",
+                  "reference": {
+                     "resource": "release_status",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": ["cfde_approval_status"],
+                  "constraint_name": "release_cfde_approval_status_fkey",
+                  "reference": {
+                     "resource": "approval_status",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "release_time", "descending": true}]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_release_extra": {
+                     "source": "id",
+                     "display": {
+                        "markdown_pattern": "{{id}}\n{{description}}\n"
+                     }
+                  },
+                  "S_status_extra": {
+                     "source": "status",
+                     "comment": "Status of this release in the submission system.",
+                     "display": {
+                        "markdown_pattern": "{{$fkeys.CFDE.release_status_fkey.rowName}}{{#$fkeys.CFDE.release_cfde_approval_status_fkey}}\n{{rowName}}{{/$fkeys.CFDE.release_cfde_approval_status_fkey}}{{#_diagnostics}}\n{{diagnostics}}\n{{/_diagnostics}}"
+                     }
+                  },
+                  "S_urls": {
+                     "markdown_name": "Links",
+                     "comments": "Links to content relevant to this release.",
+                     "source": "ermrest_url",
+                     "display": {
+                        "markdown_pattern": "{{#_ermrest_url}}- ERMrest: [{{.}}]({{.}})\n{{/_ermrest_url}}{{#_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_browse_url}}{{#_summary_url}}- Summary: [{{.}}]({{.}}){{/_summary_url}}"
+                     }
+                  },
+                  "S_status": {
+                     "source": [{"outbound": ["CFDE", "release_status_fkey"]}, "RID"]
+                  },
+                  "S_cfde_approval_status": {
+                     "source": [{"outbound": ["CFDE", "release_cfde_approval_status_fkey"]}, "RID"]
+                  },
+                  "S_dccs": {
+                     "markdown_name": "Contributing DCC",
+                     "comment": "DCC's submission is a constituent part of this release",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_dcc_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_datapackages": {
+                     "markdown_name": "Datapackage",
+                     "comment": "Datapackage is a constituent part of this release",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        "RID"
+                     ]
+                  }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_datapackages"}
+               ]
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_release_extra"},
+                  {"source": "release_time"},
+                  {"sourcekey": "S_status_extra"},
+                  {"sourcekey": "S_urls"}
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_status"},
+                  {"sourcekey": "S_cfde_approval_status"},
+                  {"source": "release_time"},
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_datapackages"}
+               ]}
+            }
+         }
+      },
+      
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_group_role",
+         "title": "DCC Group Role",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) a group (a Globus Group registered for use with the submission system), (2) a group role (a coded value for the purpose of a group within the submission system)",
+         "path": "dcc_group_role.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "group",
+                  "description": "Identifier for one group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "role",
+                  "description": "Concept identifier for the role assigned to this group with respect to this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "group", "role" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_group_role_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "group",
+                  "constraint_name": "dcc_group_role_group_fkey",
+                  "reference": {
+                     "resource": "group",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "role",
+                  "constraint_name": "dcc_group_role_role_fkey",
+                  "reference": {
+                     "resource": "group_role",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_group": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_group_fkey"]}, "RID"]
+                  },
+                  "S_role": {
+                     "source": [{"outbound": ["CFDE", "dcc_group_role_role_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_group"},
+                  {"sourcekey": "S_role"}
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_id_namespace_role",
+         "title": "DCC Namespace Role",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) an identifier namespace, (2) a namespace role (a coded value for how the namespace is related to the DCC)",
+         "path": "dcc_id_namespace_role.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "id_namespace",
+                  "description": "Identifier for one identifier namespace.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "role",
+                  "description": "Concept identifier for the role assigned to this namespace with respect to this group.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "id_namespace", "role" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_id_namespace_role_dcc_fkey",
+                  "reference": {
+                     "title": "DCC",
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "id_namespace",
+                  "constraint_name": "dcc_id_namespace_role_namespace_fkey",
+                  "reference": {
+                     "title": "ID Namespace",
+                     "resource": "id_namespace",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "role",
+                  "constraint_name": "dcc_id_namespace_role_role_fkey",
+                  "reference": {
+                     "title": "Role",
+                     "resource": "id_namespace_role",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_dcc_fkey"]}, "RID"]
+                  },
+                  "S_id_namespace": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_namespace_fkey"]}, "RID"]
+                  },
+                  "S_role": {
+                     "source": [{"outbound": ["CFDE", "dcc_id_namespace_role_role_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_id_namespace"},
+                  {"sourcekey": "S_role"}
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "dcc_release_datapackage",
+         "title": "DCC Release Datapackage",
+         "description": "Trinary association linking IDs representing (1) a DCC, (2) a planned release, (2) a submitted datapackage constituent of the release.",
+         "path": "dcc_release_datapackage.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "dcc",
+                  "title": "DCC",
+                  "description": "Identifier for one DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "release",
+                  "description": "Identifier for one release.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "datapackage",
+                  "description": "Identifier for one datapackage submitted by this DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "dcc", "release", "datapackage" ],
+            "foreignKeys": [
+               {
+                  "fields": "dcc",
+                  "constraint_name": "dcc_release_datapackage_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "release",
+                  "constraint_name": "dcc_release_datapackage_release_fkey",
+                  "reference": {
+                     "resource": "release",
+                     "fields": [ "id" ]
+                  }
+               },
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "dcc_release_datapackage_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": [ "id" ]
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_dcc": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_dcc_fkey"]}, "RID"]
+                  },
+                  "S_release": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]}, "RID"]
+                  },
+                  "S_datapackage": {
+                     "source": [{"outbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]}, "RID"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_release"},
+                  {"sourcekey": "S_datapackage"}
+               ]
+            }
+         }
+      }
+
+   ],
+   "deriva": {
+      "history_capture": true
+   }
+}

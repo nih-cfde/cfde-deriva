@@ -6,7 +6,7 @@
 import sys
 import os
 import json
-from deriva.core import ErmrestCatalog, urlquote
+from deriva.core import ErmrestCatalog, urlquote, DEFAULT_HEADERS, DEFAULT_SESSION_CONFIG
 from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 
 ######
@@ -267,7 +267,7 @@ class StatsQuery (object):
 
         return self
 
-    def fetch(self):
+    def fetch(self, headers=DEFAULT_HEADERS):
         """Fetch results for configured query"""
         if self.path is None:
             raise TypeError('Cannot call .fetch() method on a StatsQuery instance prior to calling .entity() method.')
@@ -278,17 +278,19 @@ class StatsQuery (object):
             ]).attributes(*[
                 attr_func(self.path)
                 for attr_func in self.attr_funcs
-            ]).fetch()
+            ]).fetch(headers=headers)
         else:
             return self.path.aggregates(*[
                 attr_func(self.path)
                 for attr_func in self.attr_funcs
-            ]).fetch()
+            ]).fetch(headers=headers)
 
 class DashboardQueryHelper (object):
 
-    def __init__(self, hostname, catalogid, scheme='https'):
-        self.catalog = ErmrestCatalog(scheme, hostname, catalogid)
+    def __init__(self, hostname, catalogid, scheme='https', caching=True):
+        session_config = DEFAULT_SESSION_CONFIG.copy()
+        session_config["allow_retry_on_all_methods"] = True
+        self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config)
         self.builder = self.catalog.getPathBuilder()
 
     def run_demo(self):
@@ -344,7 +346,7 @@ class DashboardQueryHelper (object):
         }
         print(json.dumps(results, indent=2))
 
-    def list_projects(self, use_root_projects=False, parent_project_RID=None):
+    def list_projects(self, use_root_projects=False, parent_project_RID=None, headers=DEFAULT_HEADERS):
         """Return list of projects AKA funded activities
 
         :param use_root_projects: Only consider root projects (default False)
@@ -388,24 +390,24 @@ class DashboardQueryHelper (object):
             path.project.column_definitions['name'],
             path.project.abbreviation,
             path.project.description,
-            CntD(path.children.RID).alias('num_subprojects'),
-        )
+            CntD(path.children.RID).alias('num_subprojects')
+        ).fetch(headers=headers)
 
-    def list_datatypes(self):
+    def list_datatypes(self, headers=DEFAULT_HEADERS):
         """Return list of data_type terms
         """
-        return self.builder.CFDE.data_type.path.entities().fetch()
+        return self.builder.CFDE.data_type.path.entities().fetch(headers=headers)
     
-    def list_formats(self):
+    def list_formats(self, headers=DEFAULT_HEADERS):
         """Return list of file format terms
         """
-        return self.builder.CFDE.file_format.path.entities().fetch()
+        return self.builder.CFDE.file_format.path.entities().fetch(headers=headers)
 
 ## ugly CLI wrapping...
 def main():
     """Runs demo of catalog dashboard queries."""
     hostname = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
-    catalogid = os.getenv('DERIVA_CATALOGID', '4')
+    catalogid = os.getenv('DERIVA_CATALOGID', '1')
     db = DashboardQueryHelper(hostname, catalogid)
     db.run_demo()
     return 0

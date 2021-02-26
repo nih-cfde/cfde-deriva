@@ -1,9 +1,0 @@
-id	name	description	synonyms
-http://edamontology.org/data_0897	Protein property	A report of primarily non-positional data describing intrinsic physical, chemical or other properties of a protein molecule or model.|This is a broad data type and is used a placeholder for other, more specific types.  Data may be based on analysis of nucleic acid sequence or structural data, for example reports on the surface properties (shape, hydropathy, electrostatic patches etc) of a protein structure, protein flexibility or motion, and protein architecture (spatial arrangement of secondary structure).	Protein physicochemical property|Protein properties|Protein sequence statistics
-http://edamontology.org/data_1270	Feature table	Annotation of positional sequence features, organised into a standard feature table.	Sequence feature table
-http://edamontology.org/data_1916	Alignment	An alignment of molecular sequences, structures or profiles derived from them.	
-http://edamontology.org/data_2044	Sequence	One or more molecular sequences, possibly with associated annotation.|This concept is a placeholder of concepts for primary sequence data including raw sequences and sequence records.  It should not normally be used for derivatives such as sequence alignments, motifs or profiles.	Sequences
-http://edamontology.org/data_2050	Molecular property (general)	General data for a molecule.	General molecular property
-http://edamontology.org/data_2082	Matrix	An array of numerical values.|This is a broad data type and is used a placeholder for other, more specific types.	Array
-http://edamontology.org/data_2976	Protein sequence	One or more protein sequences, possibly with associated annotation.	Protein sequences|Amino acid sequence|Amino acid sequences
-http://edamontology.org/data_3498	Sequence variations	Data on gene sequence variations resulting large-scale genotyping and DNA sequencing projects.|Variations are stored along with a reference genome.	Gene sequence variations

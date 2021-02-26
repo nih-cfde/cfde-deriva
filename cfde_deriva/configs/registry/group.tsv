@@ -1,0 +1,37 @@
+id	webauthn_id	name	description
+d5548e18-5ff2-11eb-bd29-0aa21a0136a3	https://auth.globus.org/d5548e18-5ff2-11eb-bd29-0aa21a0136a3	NIH CFDE 4DN Approvers	
+642533ba-f832-11ea-880f-0ac4e6b272c3	https://auth.globus.org/642533ba-f832-11ea-880f-0ac4e6b272c3	NIH CFDE 4DN Reviewers	
+b42cceba-5ff2-11eb-a5df-0ed99e3b11f1	https://auth.globus.org/b42cceba-5ff2-11eb-a5df-0ed99e3b11f1	NIH CFDE 4DN Submitters	
+2d01f71e-5ff3-11eb-bd29-0aa21a0136a3	https://auth.globus.org/2d01f71e-5ff3-11eb-bd29-0aa21a0136a3	NIH CFDE ExRNA Approvers	
+f6f4be74-5ff2-11eb-bd29-0aa21a0136a3	https://auth.globus.org/f6f4be74-5ff2-11eb-bd29-0aa21a0136a3	NIH CFDE ExRNA Reviewers	
+1190f976-5ff3-11eb-bd29-0aa21a0136a3	https://auth.globus.org/1190f976-5ff3-11eb-bd29-0aa21a0136a3	NIH CFDE ExRNA Submitters	
+e60ea783-5ff0-11eb-addd-0ed984e6d20d	https://auth.globus.org/e60ea783-5ff0-11eb-addd-0ed984e6d20d	NIH CFDE GTEx Approvers	
+7977181e-f82f-11ea-b43a-0efde36f5027	https://auth.globus.org/7977181e-f82f-11ea-b43a-0efde36f5027	NIH CFDE GTEx Reviewers	
+a29ec8d8-5ff0-11eb-bd28-0aa21a0136a3	https://auth.globus.org/a29ec8d8-5ff0-11eb-bd28-0aa21a0136a3	NIH CFDE GTEx Submitters	
+7343a5c7-5ff1-11eb-a5df-0ed99e3b11f1	https://auth.globus.org/7343a5c7-5ff1-11eb-a5df-0ed99e3b11f1	NIH CFDE HMP Approvers	
+4e335e29-f831-11ea-b43e-0efde36f5027	https://auth.globus.org/4e335e29-f831-11ea-b43e-0efde36f5027	NIH CFDE HMP Reviewers	
+5905d80a-5ff1-11eb-bd29-0aa21a0136a3	https://auth.globus.org/5905d80a-5ff1-11eb-bd29-0aa21a0136a3	NIH CFDE HMP Submitters	
+46671d25-5ff6-11eb-bd29-0aa21a0136a3	https://auth.globus.org/46671d25-5ff6-11eb-bd29-0aa21a0136a3	NIH CFDE HuBMAP Approvers	
+0a7f4ae9-5ff6-11eb-a5e2-0ed99e3b11f1	https://auth.globus.org/0a7f4ae9-5ff6-11eb-a5e2-0ed99e3b11f1	NIH CFDE HuBMAP Reviewers	
+288815d1-5ff6-11eb-a4e1-0ac91f9c4c91	https://auth.globus.org/288815d1-5ff6-11eb-a4e1-0ac91f9c4c91	NIH CFDE HuBMAP Submitters	
+22327b5c-5ff7-11eb-a5e2-0ed99e3b11f1	https://auth.globus.org/22327b5c-5ff7-11eb-a5e2-0ed99e3b11f1	NIH CFDE IDG Approvers	
+6455295d-5ff6-11eb-adde-0ed984e6d20d	https://auth.globus.org/6455295d-5ff6-11eb-adde-0ed984e6d20d	NIH CFDE IDG Reviewers	
+048182ef-5ff7-11eb-a4e1-0ac91f9c4c91	https://auth.globus.org/048182ef-5ff7-11eb-a4e1-0ac91f9c4c91	NIH CFDE IDG Submitters	
+2ecb2518-5ff1-11eb-addd-0ed984e6d20d	https://auth.globus.org/2ecb2518-5ff1-11eb-addd-0ed984e6d20d	NIH CFDE Kids First Approvers	
+1863c500-f831-11ea-b43d-0efde36f5027	https://auth.globus.org/1863c500-f831-11ea-b43d-0efde36f5027	NIH CFDE Kids First Reviewers	
+0bbc325f-5ff1-11eb-addd-0ed984e6d20d	https://auth.globus.org/0bbc325f-5ff1-11eb-addd-0ed984e6d20d	NIH CFDE Kids First Submitters	
+87f66c3e-5ff2-11eb-bd29-0aa21a0136a3	https://auth.globus.org/87f66c3e-5ff2-11eb-bd29-0aa21a0136a3	NIH CFDE LINCS Approvers	
+2b14318d-f832-11ea-880f-0ac4e6b272c3	https://auth.globus.org/2b14318d-f832-11ea-880f-0ac4e6b272c3	NIH CFDE LINCS Reviewers	
+61ab8b8e-5ff2-11eb-bd29-0aa21a0136a3	https://auth.globus.org/61ab8b8e-5ff2-11eb-bd29-0aa21a0136a3	NIH CFDE LINCS Submitters	
+41d518ac-5ff2-11eb-bd29-0aa21a0136a3	https://auth.globus.org/41d518ac-5ff2-11eb-bd29-0aa21a0136a3	NIH CFDE Metabolomics Approvers	
+f423d7d8-f831-11ea-a93a-0a738d2d09bf	https://auth.globus.org/f423d7d8-f831-11ea-a93a-0a738d2d09bf	NIH CFDE Metabolomics Reviewers	
+1a3a8a71-5ff2-11eb-addd-0ed984e6d20d	https://auth.globus.org/1a3a8a71-5ff2-11eb-addd-0ed984e6d20d	NIH CFDE Metabolomics Submitters	
+f83a2c28-5ff1-11eb-bd29-0aa21a0136a3	https://auth.globus.org/f83a2c28-5ff1-11eb-bd29-0aa21a0136a3	NIH CFDE MoTrPAC Approvers	
+8a32410e-f831-11ea-880f-0ac4e6b272c3	https://auth.globus.org/8a32410e-f831-11ea-880f-0ac4e6b272c3	NIH CFDE MoTrPAC Reviewers	
+d8231cd7-5ff1-11eb-a5df-0ed99e3b11f1	https://auth.globus.org/d8231cd7-5ff1-11eb-a5df-0ed99e3b11f1	NIH CFDE MoTrPAC Submitters	
+ec43c006-5ff5-11eb-bd29-0aa21a0136a3	https://auth.globus.org/ec43c006-5ff5-11eb-bd29-0aa21a0136a3	NIH CFDE SPARC Approvers	
+47534d7a-5ff3-11eb-bd29-0aa21a0136a3	https://auth.globus.org/47534d7a-5ff3-11eb-bd29-0aa21a0136a3	NIH CFDE SPARC Reviewers	
+640606d9-5ff3-11eb-adde-0ed984e6d20d	https://auth.globus.org/640606d9-5ff3-11eb-adde-0ed984e6d20d	NIH CFDE SPARC Submitters	
+5f742b05-9210-11e9-aa27-0e4b2da78b7a	https://auth.globus.org/5f742b05-9210-11e9-aa27-0e4b2da78b7a	NIH CFDE Portal Admin	
+1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516	https://auth.globus.org/1f8a9ec5-9211-11e9-bc6f-0aaa2b1d1516	NIH CFDE Portal Reviewer	
+b5ff40d0-9210-11e9-aa1a-0a294aef5614	https://auth.globus.org/b5ff40d0-9210-11e9-aa1a-0a294aef5614	NIH CFDE Portal Curator	
