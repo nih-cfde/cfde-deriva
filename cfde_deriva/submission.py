@@ -171,7 +171,7 @@ class Submission (object):
             raise exception.RegistrationError(e)
 
         # general sequence (with many idempotent steps)
-        failed = False
+        failed = True
         diagnostics = 'An unknown operational error has occurred.'
         failed_exc = None
         # streamline handling of error reporting...
@@ -306,6 +306,8 @@ class Submission (object):
                 review_browse_url=review_browse_url,
                 review_summary_url=review_summary_url,
             )
+            # guard against unexpected abends not caught explicitly...
+            failed = False
         except exception.CfdeError as e:
             # assume we can expose CfdeError text content
             failed, failed_exc, diagnostics = True, e, str(e)
@@ -318,10 +320,13 @@ class Submission (object):
             # record whatever we've discovered above
             if failed:
                 status, diagnostics = next_error_state, diagnostics
-                et, ev, tb = sys.exc_info()
-                logger.debug(traceback.format_exception(et, ev, tb))
+                if failed_exc is not None:
+                    et, ev, tb = sys.exc_info()
+                    logger.debug(traceback.format_exception(et, ev, tb))
+                else:
+                    diagnostics = 'Processing interrupted?'
                 logger.error(
-                    'Got exception %s in ingest sequence with next_error_state=%s for datapackage %s' \
+                    'Failed with exception %s in ingest sequence with next_error_state=%s for datapackage %s' \
                     % (failed_exc, next_error_state, self.datapackage_id,)
                 )
             else:
