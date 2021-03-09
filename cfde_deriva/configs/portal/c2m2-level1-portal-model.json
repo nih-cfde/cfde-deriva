@@ -121,6 +121,12 @@
                   "name": "mime_type",
                   "description": "A MIME type describing this file",
                   "type": "string"
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "file_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -178,6 +184,7 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "search-box": {"or": [ {"source": "kw", "markdown_name": "File metadata keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
                      "source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]
