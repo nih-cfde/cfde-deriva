@@ -587,8 +587,8 @@ def make_type(type, format):
         return builtin_types.int8
     if type == "number":
         return builtin_types.float8
-    if type == "list":
-        # assume a list is a list of strings for now...
+    if type == "array":
+        # assume array is a list of strings for now...
         return builtin_types["text[]"]
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
