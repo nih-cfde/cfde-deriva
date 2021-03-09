@@ -794,7 +794,7 @@ def main(subcommand, *args):
         else:
             raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
 
-        row = registry.get_datapackage(id)
+        row = registry.get_datapackage(submission_id)
         reconfigure_submission(row)
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
