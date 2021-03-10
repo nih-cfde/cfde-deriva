@@ -23,6 +23,10 @@ WITH s AS (
     SELECT "RID", local_id AS kw FROM file
     UNION
 
+    -- persistent_id
+    SELECT "RID", persistent_id AS kw FROM file WHERE persistent_id IS NOT NULL
+    UNION
+
     -- project_id_namespace, project_local_id
     SELECT "RID", project_id_namespace AS kw FROM file
     UNION
@@ -41,7 +45,7 @@ WITH s AS (
     WHERE p.description IS NOT NULL
     UNION
 
-    -- file ... super project facet
+    -- ... super project facet
     SELECT DISTINCT f."RID", pip.leader_project_id_namespace AS kw
     FROM file f
     JOIN project_in_project_transitive pip ON (f.project_id_namespace = pip.member_project_id_namespace AND f.project_local_id = pip.member_project_local_id)
@@ -89,7 +93,7 @@ WITH s AS (
     JOIN assay_type t ON (f.assay_type = t.id)
     UNION
 
-    -- file ... anatomy facet
+    -- ... anatomy facet
     SELECT f."RID", anatomy AS kw
     FROM file f
     JOIN file_anatomy fa ON (f.id_namespace = fa.file_id_namespace AND f.local_id = fa.file_local_id)
@@ -101,7 +105,7 @@ WITH s AS (
     JOIN anatomy t ON (fa.anatomy = t.id)
     UNION
 
-    -- file ... subject taxonomy facet
+    -- ... subject taxonomy facet
     SELECT f."RID", fsrt.subject_taxonomy_id AS kw
     FROM file f
     JOIN file_subject_role_taxonomy fsrt ON (f.id_namespace = fsrt.file_id_namespace AND f.local_id = fsrt.file_local_id)
@@ -113,7 +117,7 @@ WITH s AS (
     JOIN ncbi_taxonomy t ON (fsrt.subject_taxonomy_id = t.id)
     UNION
 
-    -- file ... subject role facet
+    -- ... subject role facet
     SELECT f."RID", fsrt.subject_role_id AS kw
     FROM file f
     JOIN file_subject_role_taxonomy fsrt ON (f.id_namespace = fsrt.file_id_namespace AND f.local_id = fsrt.file_local_id)
@@ -125,7 +129,7 @@ WITH s AS (
     JOIN subject_role t ON (fsrt.subject_role_id = t.id)
     UNION
 
-    -- file ... subject granularity facet
+    -- ... subject granularity facet
     SELECT f."RID", fsg.subject_granularity AS kw
     FROM file f
     JOIN file_subject_granularity fsg ON (f.id_namespace = fsg.file_id_namespace AND f.local_id = fsg.file_local_id)
@@ -137,7 +141,7 @@ WITH s AS (
     JOIN subject_granularity t ON (fsg.subject_granularity = t.id)
     UNION
 
-    -- file ... part of collection facet
+    -- ... part of collection facet
     SELECT DISTINCT f."RID", cic.leader_collection_id_namespace AS kw
     FROM file f
     JOIN file_in_collection fic ON (f.id_namespace = fic.file_id_namespace AND f.local_id = fic.file_local_id)

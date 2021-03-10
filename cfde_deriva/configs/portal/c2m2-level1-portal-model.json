@@ -184,7 +184,7 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "search-box": {"or": [ {"source": "kw", "markdown_name": "File metadata keywords"} ]},
+                  "search-box": {"or": [ {"source": "kw", "markdown_name": "file metadata, anatomy, taxonomy", "comment": "file name, format, data-type, assay-type, anatomy, taxonomy, subject granularity, project, or collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
                      "source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]
@@ -420,6 +420,12 @@
                   "constraints": {
                      "pattern": "^UBERON:[0-9]+$"
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "biosample_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -461,6 +467,7 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "search-box": {"or": [ {"source": "kw", "markdown_name": "biosample, file, subject metadata", "comment": "biosample identifers/anatomy, file format/assay/data type, subject granularity/role/taxonomy, project, collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
                      "source": [{"outbound": ["CFDE", "biosample_id_namespace_fkey"]}, "RID"]
