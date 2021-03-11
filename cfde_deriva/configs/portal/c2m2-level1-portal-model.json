@@ -652,6 +652,12 @@
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "biosample_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -693,6 +699,7 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "search-box": {"or": [ {"source": "kw", "markdown_name": "subject, biosample, file metadata", "comment": "subject identifiers/granularity/role/taxonomy, biosample anatomy, file format/assay/data type, project, collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
                      "source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]
