@@ -7,6 +7,7 @@ import json
 import csv
 import logging
 import pkgutil
+import itertools
 from collections import UserString
 
 from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag
@@ -452,109 +453,6 @@ class CfdeDataPackage (object):
             if table.name in tables_doc
         })
 
-    def load_data_files(self, onconflict='abort', table_done_callback=None, table_error_callback=None):
-        tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        for tname in self.data_tnames_topo_sorted():
-            # we are doing a clean load of data in fkey dependency order
-            table = self.cat_model_root.table("CFDE", tname)
-            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-
-            def open_package():
-                if isinstance(self.package_filename, _PackageDataName):
-                    return self.package_filename.get_data_stringio(resource["path"])
-                else:
-                    fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
-                    return open(fname, 'r')
-
-            def get_upload_func(onconflict):
-                if onconflict == 'update':
-                    # assume all rows exist, just update non-key fields
-                    cnames = {
-                        c.name
-                        for c in table.columns
-                        if c.name not in {'RID','RCT','RMT','RCB','RMB'}
-                    }
-                    key_cnames = set()
-                    for key in table.keys:
-                        key_cnames.update({
-                            c.name
-                            for c in key.unique_columns
-                            if c.name not in {'RID','RCT','RMT','RCB','RMB'}
-                        })
-                    nonkey_cnames = cnames.difference(key_cnames)
-                    url = "/attributegroup/CFDE:%s/%s;%s" % (
-                        urlquote(table.name),
-                        ",".join([ urlquote(cname) for cname in key_cnames ]),
-                        ",".join([ urlquote(cname) for cname in nonkey_cnames ]),
-                    )
-                    if not key_cnames:
-                        raise ValueError('Cannot perform update on table %s which lacks non-RID keys' % tname)
-                    if not nonkey_cnames:
-                        logger.info("Table %s has no update function since all columns are keys" % tname)
-                        http_req = None
-                    else:
-                        http_req = lambda batch: self.catalog.put(url, json=batch)
-                else:
-                    url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
-                    http_req = lambda batch: self.catalog.post(url, json=batch)
-                def upload_batch(batch):
-                    try:
-                        r = http_req(batch)
-                        logger.debug("Batch of rows for %s loaded onconflict=%s" % (table.name, onconflict))
-                        skipped = len(batch) - len(r.json())
-                        if skipped and onconflict == 'skip':
-                            logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-                    except requests.exceptions.HTTPError as e:
-                        logger.error("Table %s data load FAILED from "
-                                     "%s: %s" % (table.name, self.package_filename, e))
-                        if e.response is not None:
-                            detail = e.response.text.strip('\n. ').replace('\n', '. ')
-                            raise InvalidDatapackage('Table "%s" load error: %s' % (table.name, detail))
-                        raise
-                    except Exception as e:
-                        logger.error("Table %s data load FAILED from "
-                                     "%s: %s" % (table.name, self.package_filename, e))
-                        raise
-                    else:
-                        batch.clear()
-                #
-                return upload_batch if http_req else None
-
-            def upload_content(onconflict):
-                with open_package() as f:
-                    # translate TSV to python dicts
-                    reader = csv.reader(f, delimiter="\t")
-                    row2dict = self.make_row2dict(table, next(reader))
-                    upload_batch = get_upload_func(onconflict)
-                    if upload_batch is None:
-                        return
-                    # Batch catalog ingests; too-large ingests will hang and fail
-                    # Largest known CFDE ingest has file with >5m rows
-                    batch = []
-                    for raw_row in reader:
-                        # Collect full batch, then post at once
-                        batch.append(row2dict(raw_row))
-                        if len(batch) >= self.batch_size:
-                            upload_batch(batch)
-                    # After reader exhausted, ingest final batch
-                    if len(batch) > 0:
-                        upload_batch(batch)
-
-            if "path" in resource:
-                try:
-                    if onconflict == 'update':
-                        upload_content('skip')     # first pass creates missing records, skipping existing keys
-                        upload_content('update')   # second pass revises non-key fields
-                    else:
-                        upload_content(onconflict) # abort or skip in a single pass
-                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
-                    if table_done_callback:
-                        table_done_callback(table.name, resource["path"])
-                except Exception as e:
-                    if table_error_callback:
-                        table_error_callback(table.name, resource["path"], str(e))
-                    raise
-
     def dump_data_files(self, resources=None, dump_dir=None):
         """Dump resources to TSV files (inverse of normal load process)
 
@@ -683,17 +581,23 @@ class CfdeDataPackage (object):
                     table_error_callback(resource["name"], resource["path"], str(e))
                 raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
 
-    def load_sqlite_etl_tables(self, conn, onconflict='abort'):
+    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None):
         if not self.package_filename is portal_schema_json:
-            raise ValueError('load_sqlite_etl_tables() is only valid for built-in portal datapackage')
-        for resource in self.package_def['resources']:
-            if 'derivation_sql_path' not in resource:
-                continue
+            raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackage')
+        tables_doc = self.model_doc['schemas']['CFDE']['tables']
+        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are copying sqlite table content to catalog under same table name
-            table = self.cat_cfde_schema.tables[resource['name']]
+            table = self.doc_cfde_schema.tables[tname]
+            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+            logger.debug('Loading table "%s"...' % tname)
             entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
             cols = [ col for col in table.columns if col.name not in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'} ]
             colnames = [ col.name for col in cols ]
+            valfuncs = [
+                # f(x) does json decoding or is identify func, depending on column def
+                (lambda x: json.loads(x)) if col.type.typename == 'text[]' else lambda x: x
+                for col in cols
+            ]
             cur = conn.cursor()
             position = None
 
@@ -717,27 +621,65 @@ class CfdeDataPackage (object):
                     yield batch
                     batch = get_batch(cur)
 
-            for batch in get_batches(cur):
-                batch = [
-                    dict(zip( colnames, row[1:]))
-                    for row in batch
-                ]
-                r = self.catalog.post(entity_url, json=batch)
-                logger.debug("Batch of rows for %s loaded" % table.name)
-                skipped = len(batch) - len(r.json())
-                if skipped:
-                    logger.warning("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-            logger.info("All data for table %s loaded." % (table.name,))
+            try:
+                for batch in get_batches(cur):
+                    batch = [
+                        # generate per-row dict { colname: f(x), ... } with transcoded row values
+                        dict(zip( colnames, [ f(x) for f, x in zip (valfuncs, row[1:]) ]))
+                        for row in batch
+                    ]
+                    r = self.catalog.post(entity_url, json=batch)
+                    logger.debug("Batch of rows for %s loaded" % table.name)
+                    skipped = len(batch) - len(r.json())
+                    if skipped:
+                        logger.debug("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
+                    logger.info("All data for table %s loaded." % (table.name,))
+                    if table_done_callback:
+                        table_done_callback(table.name, resource.get("path", None))
+            except Exception as e:
+                logger.error("Error while loading data for table %s: %s" % (table.name, e))
+                if table_error_callback:
+                    table_error_callback(table.name, resource.get("path", None), str(e))
+                raise
 
-    def sqlite_do_etl(self, conn):
-        """Do ETL described in our customized datapackage"""
+    def sqlite_do_etl(self, conn, do_etl_tables=True, do_etl_columns=True):
+        """Do ETL described in our customized datapackage
+
+        :param do_etl_tables: Do normal ETL table processing (default True)
+        :param do_etl_columns: Do normal ETL column processing (default True)
+
+        Suppression of a processing step by the optional parameters
+        requires that the caller ensure any prerequisites are already
+        satisfied in the supplied database.
+
+        We assume that all ETL tables (resources w/ table-level
+        derivation_sql_path) are appropriate to process in document
+        order, assuming regular data tables (resources w/ path) are
+        already loaded.  Specifically, ETL queries may consume content
+        of ETL tables listed earlier in the resource list.
+
+        We assume that ETL columns (fields w/ field-level
+        derivation_sql_path) are appropriate to load in arbitrary
+        order, assuming regular data tables and ETL tables are already
+        prepared.  Specifically, ETL queries should not attempt to
+        consume content prepared in other ETL columns.
+
+        """
         if not self.package_filename is portal_schema_json:
             raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
         for resource in self.package_def['resources']:
-            if 'derivation_sql_path' in resource:
+            if 'derivation_sql_path' in resource and do_etl_tables:
                 sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
+                logger.debug('Running table-generating ETL for %s' % sql_identifier(resource['name']))
                 conn.execute(sql)
+        for resource in self.package_def['resources']:
+            for column in resource['schema']['fields']:
+                if 'derivation_sql_path' in column and do_etl_columns:
+                    sql = self.package_filename.get_data_str(column['derivation_sql_path'])
+                    conn.execute('UPDATE %s SET %s = NULL' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
+                    logger.debug('Running column-generating ETL for %s.%s' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
+                    conn.execute(sql)
 
     def provision_sqlite(self, conn):
         """Provision this datapackage schema into provided SQLite db
@@ -811,6 +753,7 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'date': 'date',
             'int8': 'int8',
             'float8': 'real',
+            'text[]': 'json',
         }[typeobj.typename]
 
     def key_sqlite_ddl(self, key):

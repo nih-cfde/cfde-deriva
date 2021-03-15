@@ -258,19 +258,27 @@ class Submission (object):
 
             def dpt_update2(name, path):
                 """Update status of resource following content upload"""
-                self.registry.update_datapackage_table(
-                    self.datapackage_id,
-                    self.rname_to_pos[name],
-                    status= terms.cfde_registry_dpt_status.content_ready
-                )
+                try:
+                    pos = self.rname_to_pos[name],
+                    self.registry.update_datapackage_table(
+                        self.datapackage_id,
+                        self.rname_to_pos[name],
+                        status= terms.cfde_registry_dpt_status.content_ready
+                    )
+                except KeyError as e:
+                    logger.debug("Swallowing dpt_update2 callback for table %s lacking position in datapackage" % (name,))
 
             def dpt_error2(name, path, diagnostics):
-                self.registry.update_datapackage_table(
-                    self.datapackage_id,
-                    self.rname_to_pos[name],
-                    status= terms.cfde_registry_dpt_status.content_error,
-                    diagnostics= diagnostics,
-                )
+                try:
+                    pos = self.rname_to_pos[name],
+                    self.registry.update_datapackage_table(
+                        self.datapackage_id,
+                        pos,
+                        status= terms.cfde_registry_dpt_status.content_error,
+                        diagnostics= diagnostics,
+                    )
+                except KeyError as e:
+                    logger.debug("Swallowing dpt_error2 callback for table %s lacking position in datapackage" % (name,))
 
             if dp['status'] not in {
                     terms.cfde_registry_dp_status.check_valid,
@@ -287,11 +295,10 @@ class Submission (object):
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
-            self.upload_datapackage_content(self.review_catalog, self.content_path, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.prepare_sqlite_derived_tables(self.sqlite_filename)
-            self.upload_derived_content(self.review_catalog, self.sqlite_filename)
+            self.prepare_sqlite_derived_data(self.sqlite_filename)
+            self.upload_sqlite_content(self.review_catalog, self.sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
@@ -640,8 +647,8 @@ class Submission (object):
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback)
 
     @classmethod
-    def prepare_sqlite_derived_tables(cls, sqlite_filename):
-        """Prepare derived table content via SQL queries in the C2M2 portal model.
+    def prepare_sqlite_derived_data(cls, sqlite_filename):
+        """Prepare derived content via SQL queries in the C2M2 portal model.
 
         This method will clear and recompute the derived results
         each time it is invoked.
@@ -650,7 +657,7 @@ class Submission (object):
         canon_dp = CfdeDataPackage(portal_schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
-            logger.debug('Building derived tables in %s' % (sqlite_filename,))
+            logger.debug('Building derived data in %s' % (sqlite_filename,))
             canon_dp.sqlite_do_etl(conn)
 
     @classmethod
@@ -705,29 +712,18 @@ class Submission (object):
         canon_dp.set_catalog(catalog, registry)
         if provision:
             canon_dp.provision() # get the model deployed
-            canon_dp.load_data_files(onconflict='skip') # get the built-in vocabularies deployed
         # TBD: annotate with submission ID for easier ops/inventory purposes?
         canon_dp.apply_custom_config() # get the chaise hints deloyed
         return catalog
 
     @classmethod
-    def upload_datapackage_content(cls, catalog, content_path, table_done_callback=None, table_error_callback=None):
-        """Idempotently upload submission content from datapackage into review catalog."""
-        packagefile = cls.datapackage_name_from_path(content_path)
-        submitted_dp = CfdeDataPackage(packagefile)
-        submitted_dp.set_catalog(catalog)
-        # TBD: pass through our registry knowledge of tables already in content-ready status?
-        # TBD: restartable onconflict=skip here means we cannot validate whether there are duplicates?
-        submitted_dp.load_data_files(onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
-
-    @classmethod
-    def upload_derived_content(cls, catalog, sqlite_filename):
-        """Idempotently upload prepared review content in sqlite db into review catalog."""
+    def upload_sqlite_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None):
+        """Idempotently upload (augmented) datapackage content in sqlite db into review catalog."""
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently uploading derived ETL data from %s' % (sqlite_filename,))
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
-            canon_dp.load_sqlite_etl_tables(conn, onconflict='skip')
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
 
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
@@ -798,7 +794,7 @@ def main(subcommand, *args):
         else:
             raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
 
-        row = registry.get_datapackage(id)
+        row = registry.get_datapackage(submission_id)
         reconfigure_submission(row)
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
