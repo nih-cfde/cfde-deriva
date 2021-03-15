@@ -116,7 +116,7 @@ SELECT _ermrest.model_change_event();
 
 """ % {
     "fname": col["derivation_sql_path"],
-    "sql": pkgutil.get_data(portal.__name__, col["derivation_sql_path"]).decode().replace('json_group_array', 'json_agg'),
+    "sql": pkgutil.get_data(portal.__name__, col["derivation_sql_path"]).decode().replace('json_group_array', 'array_agg'),
 })
 
     sys.stdout.write("""
