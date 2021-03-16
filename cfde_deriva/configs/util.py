@@ -101,7 +101,15 @@ SET search_path = "CFDE";
 
     # HACK: only works for our 2021-03 added keyword text[] columns...
     for res, col in etl_col_parts:
-        sys.stdout.write("ALTER TABLE %s ADD COLUMN %s text[];\n" % (sql_identifier(res["name"]), sql_identifier(col["name"]),))
+        sys.stdout.write("""
+ALTER TABLE %(tname)s ADD COLUMN %(cname)s text[];
+CREATE INDEX "%(raw_tname)s_%(raw_cname)s_pgtrgm_idx" USING gin (_ermrest.astext(%(cname)s) gin_trgm_ops);
+""" % {
+    'tname': sql_identifier(res["name"]),
+    'cname': sql_identifier(col["name"]),
+    'raw_tname': res["name"],
+    'raw_cname': col["name"]
+})
 
     sys.stdout.write("""
 SELECT _ermrest.model_change_event();

@@ -126,7 +126,13 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "file_kw.sql"
+                  "derivation_sql_path": "file_kw.sql",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -425,7 +431,13 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "biosample_kw.sql"
+                  "derivation_sql_path": "biosample_kw.sql",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -657,7 +669,13 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "subject_kw.sql"
+                  "derivation_sql_path": "subject_kw.sql",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
