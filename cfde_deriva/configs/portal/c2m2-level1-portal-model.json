@@ -2681,7 +2681,7 @@
                "sources": {
                   "S_subject": {
                      "markdown_name": "Subject",
-                     "comment": "List of sibjects referencing this subject granularity.",
+                     "comment": "List of subjects referencing this subject granularity.",
                      "source": [
                          {"inbound": ["CFDE",  "subject_granularity_fkey"]},
                          "RID"
