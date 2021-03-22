@@ -2501,12 +2501,23 @@
                          {"inbound": ["CFDE", "file_file_format_fkey"]},
                          "RID"
                      ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this format.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_file_format_fkey"]},
+                         {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
+                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                         "RID"
+                     ]
                   }
                 }
              },
              "visible_foreign_keys": {
                 "*": [
-                   {"sourcekey": "S_file"}
+                   {"sourcekey": "S_file"},
+                   {"sourcekey": "S_collection"}
                 ]
              }
           }
@@ -2565,12 +2576,23 @@
                          {"inbound": ["CFDE", "file_data_type_fkey"]},
                          "RID"
                      ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this format.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_data_type_fkey"]},
+                         {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
+                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                         "RID"
+                     ]
                   }
                 }
              },
              "visible_foreign_keys": {
                 "*": [
-                   {"sourcekey": "S_file"}
+                   {"sourcekey": "S_file"},
+                   {"sourcekey": "S_collection"}
                 ]
              }
           }
