@@ -2229,6 +2229,47 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+        },
+        "deriva": {
+           "source_definitions": {
+              "columns": true,
+              "fkeys": true,
+              "sources": {
+                 "S_biosample": {
+                    "markdown_name": "Biosample",
+                    "comment": "List of biosamples referencing this assay type.",
+                    "source": [
+                        {"inbound": ["CFDE", "biosample_assay_type_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "biosample_assay_type_biosample_fkey"]},
+                        "RID"
+                    ]
+                 },
+                 "S_collection": {
+                    "markdown_name": "Collection",
+                    "comment": "List of collections referencing this assay type.",
+                    "source": [
+                        {"inbound": ["CFDE", "collection_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "collection_assay_type_collection_fkey"]},
+                        "RID"
+                    ]
+                 },
+                 "S_file": {
+                    "markdown_name": "File",
+                    "comment": "List of files referencing this assay type.",
+                    "source": [
+                        {"inbound": ["CFDE", "file_assay_type_fkey"]},
+                        "RID"
+                    ]
+                 }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"}
+               ]
+            }
          }
       },
       {
@@ -2280,6 +2321,46 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+        },
+        "deriva": {
+           "source_definitions": {
+              "columns": true,
+              "fkeys": true,
+              "sources": {
+                 "S_subject": {
+                    "markdown_name": "Subject",
+                    "comment": "List of subjects referencing this taxonomy.",
+                    "source": [
+                        {"inbound": ["CFDE", "subject_species_species_fkey"]},
+                        {"outbound": ["CFDE", "subject_species_subject_fkey"]},
+                        "RID"
+                    ]
+                 },
+                 "S_collection": {
+                    "markdown_name": "Collection",
+                    "comment": "List of collections referencing this taxonomy.",
+                    "source": [
+                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                    ]
+                 },
+                 "S_file": {
+                    "markdown_name": "File",
+                    "comment": "List of files referencing this taxonomy.",
+                    "source": [
+                        {"inbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
+                        "RID"
+                    ]
+                 }
+               }
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_subject"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"}
+               ]
+            }
          }
       },
       {
@@ -2323,7 +2404,48 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-         }
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "List of biosamples referencing this anatomy.",
+                     "source": [
+                         {"inbound": ["CFDE", "biosample_anatomy_fkey"]},
+                         "RID"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this anatomy.",
+                     "source": [
+                         {"inbound": ["CFDE", "collection_anatomy_fkey"]},
+                         {"outbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                         "RID"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this anatomy.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_anatomy_fkey"]},
+                         {"outbound": ["CFDE", "file_anatomy_file_fkey"]},
+                         "RID"
+                     ]
+                  }
+                }
+             },
+             "visible_foreign_keys": {
+                "*": [
+                   {"sourcekey": "S_biosample"},
+                   {"sourcekey": "S_collection"},
+                   {"sourcekey": "S_file"}
+                ]
+             }
+          }
       },
       {
          "profile": "tabular-data-resource",
@@ -2366,7 +2488,28 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-         }
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this format.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_file_format_fkey"]},
+                         "RID"
+                     ]
+                  }
+                }
+             },
+             "visible_foreign_keys": {
+                "*": [
+                   {"sourcekey": "S_file"}
+                ]
+             }
+          }
       },
       {
          "profile": "tabular-data-resource",
@@ -2409,7 +2552,28 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-         }
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this data type.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_data_type_fkey"]},
+                         "RID"
+                     ]
+                  }
+                }
+             },
+             "visible_foreign_keys": {
+                "*": [
+                   {"sourcekey": "S_file"}
+                ]
+             }
+          }
       },
       {
          "profile": "tabular-data-resource",
@@ -2444,7 +2608,37 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-         }
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this subject role.",
+                     "source": [
+                         {"inbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
+                         "RID"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this subject role.",
+                     "source": [
+                         {"inbound": ["CFDE", "file_subject_role_taxonomy_role_fkey"]},
+                         "RID"
+                     ]
+                  }
+                }
+             },
+             "visible_foreign_keys": {
+                "*": [
+                   {"sourcekey": "S_collection"},
+                   {"sourcekey": "S_file"}
+                ]
+             }
+          }
       },
       {
          "profile": "tabular-data-resource",
@@ -2479,7 +2673,39 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-         }
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this subject granularity.",
+                     "source": [
+                         {"inbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
+                         {"outbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
+                         "RID"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this subject granularity.",
+                     "source": [
+                         {"inbound": ["CFDE",  "file_subject_granularity_granularity_fkey"]},
+                         {"outbound": ["CFDE",  "file_subject_granularity_file_fkey"]},
+                         "RID"
+                     ]
+                  }
+                }
+             },
+             "visible_foreign_keys": {
+                "*": [
+                   {"sourcekey": "S_collection"},
+                   {"sourcekey": "S_file"}
+                ]
+             }
+          }
       },
       {
          "profile": "tabular-data-resource",
@@ -2563,7 +2789,7 @@
          },
          "derivation_sql_path": "project_root.sql"
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "file_subject_granularity",
