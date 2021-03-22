@@ -2614,6 +2614,14 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "List of subjects referencing this subject role.",
+                     "source": [
+                         {"inbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
+                         "RID"
+                     ]
+                  },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this subject role.",
@@ -2634,6 +2642,7 @@
              },
              "visible_foreign_keys": {
                 "*": [
+                    {"sourcekey": "S_subject"},
                     {"sourcekey": "S_file"},
                     {"sourcekey": "S_collection"}
                 ]
