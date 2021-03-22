@@ -2266,8 +2266,8 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_biosample"},
-                  {"sourcekey": "S_collection"},
-                  {"sourcekey": "S_file"}
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_collection"}
                ]
             }
          }
@@ -2357,8 +2357,8 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_subject"},
-                  {"sourcekey": "S_collection"},
-                  {"sourcekey": "S_file"}
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_collection"}
                ]
             }
          }
@@ -2441,8 +2441,8 @@
              "visible_foreign_keys": {
                 "*": [
                    {"sourcekey": "S_biosample"},
-                   {"sourcekey": "S_collection"},
-                   {"sourcekey": "S_file"}
+                   {"sourcekey": "S_file"},
+                   {"sourcekey": "S_collection"}
                 ]
              }
           }
@@ -2634,8 +2634,8 @@
              },
              "visible_foreign_keys": {
                 "*": [
-                   {"sourcekey": "S_collection"},
-                   {"sourcekey": "S_file"}
+                    {"sourcekey": "S_file"},
+                    {"sourcekey": "S_collection"}
                 ]
              }
           }
@@ -2710,8 +2710,8 @@
              "visible_foreign_keys": {
                 "*": [
                    {"sourcekey": "S_subject"},
-                   {"sourcekey": "S_collection"},
-                   {"sourcekey": "S_file"}
+                   {"sourcekey": "S_file"},
+                   {"sourcekey": "S_collection"}
                 ]
              }
           }
