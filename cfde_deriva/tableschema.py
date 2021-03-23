@@ -219,6 +219,7 @@ class CatalogConfigurator (object):
                             { "name": "Biosample", "url": "/chaise/recordset/#%s/CFDE:biosample" % self.catalog._catalog_id },
                             { "name": "Subject", "url": "/chaise/recordset/#%s/CFDE:subject" % self.catalog._catalog_id },
                             { "name": "Project", "url": "/chaise/recordset/#%s/CFDE:project" % self.catalog._catalog_id },
+                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#%s/CFDE:primary_dcc_contact" % self.catalog._catalog_id },
                             {
                                 "name": "Vocabulary",
                                 "children": [
