@@ -32,7 +32,8 @@ def get_archive_headers_map(host):
     tokens = gnl.is_logged_in(requested_scopes=(scope, CFDE_DERIVA_SCOPE))
     if tokens:
         headers.update({'Authorization': 'Bearer %s' % gnl.find_access_token_for_scope(scope, tokens)})
-    logger.warning('Login required for host "%s" with scope: %s' % (host, scope))
+    else:
+        logger.warning('Login required for host "%s" with scope: %s' % (host, scope))
     hmap = {"%s/.*" % HOST_TO_GCS_ENDPOINTS[host]: headers}
     return hmap
 
