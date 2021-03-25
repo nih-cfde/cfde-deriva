@@ -1,8 +1,10 @@
 import sys
 import logging
-from deriva.core import GlobusNativeLogin
+from deriva.core import get_credential, GlobusNativeLogin
 
 logger = logging.getLogger(__name__)
+
+CFDE_DERIVA_SCOPE = "https://auth.globus.org/scopes/app.nih-cfde.org/deriva_all"
 
 HOST_TO_GCS_SCOPES = {
     "app": "https://auth.globus.org/scopes/d4c89edc-a22c-4bc3-bfa2-bca5fd19b404/https",
@@ -27,11 +29,12 @@ def get_archive_headers_map(host):
     scope = HOST_TO_GCS_SCOPES[host]
     gnl = GlobusNativeLogin()
     headers = {'X-Requested-With': 'XMLHttpRequest'}
-    tokens = gnl.is_logged_in(requested_scopes=(scope,))
+    tokens = gnl.is_logged_in(requested_scopes=(scope, CFDE_DERIVA_SCOPE))
     if tokens:
         headers.update({'Authorization': 'Bearer %s' % gnl.find_access_token_for_scope(scope, tokens)})
-    logger.warning('Login required for host "%s" with scope %s' % (host, scope))
-    return headers
+    logger.warning('Login required for host "%s" with scope: %s' % (host, scope))
+    hmap = {"%s/.*" % HOST_TO_GCS_ENDPOINTS[host]: headers}
+    return hmap
 
 
 def main(subcommand, *args):
@@ -40,7 +43,7 @@ def main(subcommand, *args):
             host = args[0]
             scope = HOST_TO_GCS_SCOPES[host]
             gnl = GlobusNativeLogin()
-            tokens = gnl.login(no_browser=True, no_local_server=True, requested_scopes=(scope,))
+            tokens = gnl.login(no_browser=True, no_local_server=True, requested_scopes=(scope, CFDE_DERIVA_SCOPE))
             access_token = gnl.find_access_token_for_scope(scope, tokens)
             print('Logged into host "%s" with scope: %s' % (host, scope))
         else:
@@ -50,7 +53,7 @@ def main(subcommand, *args):
             host = args[0]
             scope = HOST_TO_GCS_SCOPES[host]
             gnl = GlobusNativeLogin()
-            gnl.logout(requested_scopes=(scope,))
+            gnl.logout(requested_scopes=(scope, CFDE_DERIVA_SCOPE))
             print('Logged out of host "%s" with scope: %s' % (host, scope))
         else:
             raise ValueError("Expected hostname, one of the following: %s" % list(HOST_TO_GCS_SCOPES.keys()))
@@ -60,7 +63,18 @@ def main(subcommand, *args):
             url = HOST_TO_GCS_ENDPOINTS[host]
             headers = get_archive_headers_map(host)
             if headers:
-                print('Headers for "%s" (%s):\n%s' % (host, url, headers))
+                print('Header map for "%s" (%s):\n%s' % (host, url, headers))
+            else:
+                print('Login required for host: "%s"' % host)
+        else:
+            raise ValueError("Expected hostname, one of the following: %s" % list(HOST_TO_GCS_SCOPES.keys()))
+    elif subcommand == 'credential':
+        if len(args) > 0 and args[0] in HOST_TO_GCS_SCOPES.keys() and args[0] in HOST_TO_GCS_ENDPOINTS.keys():
+            host = args[0]
+            url = HOST_TO_GCS_ENDPOINTS[host]
+            credential = get_credential(host)
+            if credential:
+                print('Credential for "%s" (%s):\n%s' % (host, url, credential))
             else:
                 print('Login required for host: "%s"' % host)
         else:
