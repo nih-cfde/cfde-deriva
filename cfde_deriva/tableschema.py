@@ -15,7 +15,6 @@ from deriva.core.ermrest_model import builtin_types, Table, Column, Key, Foreign
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 if 'source_definitions' not in tag:
     # monkey-patch this newer annotation key until it appears in deriva-py
@@ -75,6 +74,18 @@ terms = _attrdict_from_strings(
     'cfde_registry_dpt_status:check-error',
     'cfde_registry_dpt_status:content-ready',
     'cfde_registry_dpt_status:content-error',
+    'cfde_registry_decision:pending',
+    'cfde_registry_decision:approved',
+    'cfde_registry_decision:approved-hold',
+    'cfde_registry_decision:rejected content rejected',
+    'cfde_registry_rel_status:planning',
+    'cfde_registry_rel_status:pending',
+    'cfde_registry_rel_status:content-ready',
+    'cfde_registry_rel_status:content-error',
+    'cfde_registry_rel_status:rejected',
+    'cfde_registry_rel_status:public-release',
+    'cfde_registry_rel_status:obsoleted',
+    'cfde_registry_rel_status:ops-error',
 )
 
 def acls_union(*sources):
@@ -870,6 +881,8 @@ def main():
     system columns RID,RCT,RCB,RMT,RMB for each table.
 
 """
+    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+
     if len(sys.argv) < 2:
         raise ValueError('missing required catalog-type argument: registry | review | release')
 

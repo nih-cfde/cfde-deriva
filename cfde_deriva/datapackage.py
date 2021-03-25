@@ -32,7 +32,6 @@ Demonstrates use of deriva-py APIs:
 """
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'

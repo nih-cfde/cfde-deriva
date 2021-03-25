@@ -77,7 +77,7 @@ class Submission (object):
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
     
-    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user, archive_headers_map=None):
+    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user, archive_headers_map=None, skip_dcc_check=False):
         """Represent a stateful processing flow for a C2M2 submission.
 
         :param server: A DerivaServer binding object where review catalogs are created.
@@ -87,6 +87,7 @@ class Submission (object):
         :param archive_url: The stable URL where the submission BDBag can be found.
         :param submitting_user: A WebauthnUser instance representing submitting user.
         :param archive_headers_map: A map of URL patterns to additional request headers.
+        :param skip_dcc_check: True overrides normal safety check during constructor (default False).
 
         The new instance is a binding for a submission which may or
         may not yet exist in the registry. The constructor WILL NOT
@@ -117,7 +118,8 @@ class Submission (object):
         Raises non-CfdeError exceptions for operational errors.
 
         """
-        registry.validate_dcc_id(dcc_id, submitting_user)
+        if not skip_dcc_check:
+            registry.validate_dcc_id(dcc_id, submitting_user)
         self.server = server
         self.registry = registry
         self.datapackage_id = id

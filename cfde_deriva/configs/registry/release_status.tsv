@@ -1,8 +1,9 @@
 id	name	description
-cfde_registry_rel_status:planning	planning	The release is in planning and not yet fully defined (initial state).
-cfde_registry_rel_status:pending	pending	The release is fully-defined and further processing is pending.
-cfde_registry_rel_status:content-ready	content ready	The release is loaded and ready for inspection at a preview location.
-cfde_registry_rel_status:content-error	content error	An unexpected error has occurred during loading, the release cannot proceed.
+cfde_registry_rel_status:planning	in progress (planning)	The release is in planning and not yet fully defined (initial state).
+cfde_registry_rel_status:pending	in progress (pending)	The release is fully-defined and further processing is pending.
+cfde_registry_rel_status:content-ready	in progress (in review)	The release is loaded and ready for inspection at a preview location.
+cfde_registry_rel_status:content-error	failed (content error)	An unexpected error has occurred while building and the release cannot proceed.
 cfde_registry_rel_status:rejected	rejected	The preview content has been rejected and will not be released.
 cfde_registry_rel_status:public-release	public release	The release is visible as the current public release.
 cfde_registry_rel_status:obsoleted	obsoleted	A prior public release has been replaced by a newer release.
+cfde_registry_rel_status:ops-error	failed (ops error)	An unexpected operational error has disrupted processing.
