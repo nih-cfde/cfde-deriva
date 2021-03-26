@@ -10,11 +10,10 @@ import base64
 import logging
 import requests
 
-from deriva.core import tag, AttrDict
+from deriva.core import tag, AttrDict, init_logging
 from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 if 'source_definitions' not in tag:
     # monkey-patch this newer annotation key until it appears in deriva-py
@@ -881,7 +880,7 @@ def main():
     system columns RID,RCT,RCB,RMT,RMB for each table.
 
 """
-    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+    init_logging(logging.INFO)
 
     if len(sys.argv) < 2:
         raise ValueError('missing required catalog-type argument: registry | review | release')

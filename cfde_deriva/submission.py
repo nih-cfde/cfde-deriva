@@ -19,14 +19,13 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG
+from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
 from .datapackage import CfdeDataPackage, portal_schema_json
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 class Submission (object):
     """Processing support for C2M2 datapackage submissions.
@@ -189,7 +188,7 @@ class Submission (object):
                     terms.cfde_registry_dp_status.release_pending,
                     terms.cfde_registry_dp_status.obsoleted,
             }:
-                logger.debug('Skipping ingest for datapackage %s with existing terminal status %s.' % (
+                logger.info('Skipping ingest for datapackage %s with existing terminal status %s.' % (
                     self.datapackage_id,
                     dp['status'],
                 ))
@@ -495,6 +494,7 @@ class Submission (object):
 
             # rename completed download to canonical name
             os.rename(tmp_name, download_filename)
+            logger.info('Renamed download "%s" to final "%s"' % (tmp_name, download_filename))
             tmp_name = None
         finally:
             if fd is not None:
@@ -546,7 +546,7 @@ class Submission (object):
                 raise exception.InvalidDatapackage('Found too many top-level folders in bag archive')
 
             os.rename(children[0], content_path)
-            logger.debug('Renamed output "%s" to final "%s"' % (children[0], content_path))
+            logger.info('Renamed output "%s" to final "%s"' % (children[0], content_path))
         finally:
             if tmp_name is not None:
                 shutil.rmtree(tmp_name)
@@ -557,8 +557,9 @@ class Submission (object):
         try:
             logger.debug('Validating unpacked bag at "%s"' % (content_path,))
             bdbag_api.validate_bag(content_path)
+            logger.info('Bag valid at %s' % content_path)
         except (BagError, BagValidationError) as e:
-            logger.debug('Validation failed for bag "%s" with error "%s"' % (content_path, e,))
+            logger.error('Validation failed for bag "%s" with error "%s"' % (content_path, e,))
             raise exception.InvalidDatapackage(e)
 
     @classmethod
@@ -744,7 +745,7 @@ def main(subcommand, *args):
     Set environment variable DERIVA_SERVERNAME to choose registry host.
 
     """
-    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+    init_logging(logging.INFO)
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
 

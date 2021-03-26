@@ -31,7 +31,6 @@ Demonstrates use of deriva-py APIs:
 
 """
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
@@ -321,6 +320,7 @@ class CfdeDataPackage (object):
                 column.alter(**cdoc)
                 logger.debug("Altered column %s.%s %s" % (column.table.name, column.name, cdoc))
 
+        logger.info('Provisioned model in catalog %s' % self.catalog.get_server_uri())
         self.get_model()
 
     def apply_custom_config(self):
@@ -415,6 +415,7 @@ class CfdeDataPackage (object):
 
         ## apply the above ACL and annotation changes to server
         self.cat_model_root.apply()
+        logger.info('Applied custom config to catalog %s' % self.catalog.get_server_uri())
         self.get_model()
 
     @classmethod
@@ -670,15 +671,17 @@ class CfdeDataPackage (object):
             if 'derivation_sql_path' in resource and do_etl_tables:
                 sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
-                logger.debug('Running table-generating ETL for %s' % sql_identifier(resource['name']))
+                logger.debug('Running table-generating ETL for %s...' % sql_identifier(resource['name']))
                 conn.execute(sql)
+                logger.info('ETL complete for %s' % sql_identifier(resource['name']))
         for resource in self.package_def['resources']:
             for column in resource['schema']['fields']:
                 if 'derivation_sql_path' in column and do_etl_columns:
                     sql = self.package_filename.get_data_str(column['derivation_sql_path'])
                     conn.execute('UPDATE %s SET %s = NULL' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
-                    logger.debug('Running column-generating ETL for %s.%s' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
+                    logger.debug('Running column-generating ETL for %s.%s...' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
                     conn.execute(sql)
+                    logger.info('ETL complete for %s.%s' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
 
     def provision_sqlite(self, conn):
         """Provision this datapackage schema into provided SQLite db

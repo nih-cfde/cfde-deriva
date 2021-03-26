@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 
-from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG
+from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG, init_logging
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
@@ -14,8 +14,6 @@ from .tableschema import RegistryConfigurator, authn_id, terms
 from .datapackage import CfdeDataPackage, registry_schema_json
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 ermrest_creators_acl = [
     authn_id.cfde_infrastructure_ops,
@@ -644,6 +642,8 @@ def main(servername, subcommand, catalog_id=None):
     - 'dump-onboarding': Write out *.tsv files for onboarding info in registry
 
     """
+    init_logging(logging.INFO)
+
     credentials = get_credential(servername)
     session_config = DEFAULT_SESSION_CONFIG.copy()
     session_config["allow_retry_on_all_methods"] = True

@@ -6,16 +6,16 @@ import logging
 import json
 import traceback
 
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG
+from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
 
 from . import exception
+from .cfde_login import get_archive_headers_map
 from .tableschema import ReleaseConfigurator
 from .datapackage import CfdeDataPackage, portal_schema_json
 from .registry import Registry, nochange, terms
 from .submission import Submission
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 class Release (object):
     """Processing support for CFDE C2M2 catalog releases
@@ -122,22 +122,24 @@ class Release (object):
                     terms.cfde_registry_rel_status.public_release,
                     terms.cfde_registry_rel_status.obsoleted,
             }:
-                logger.debug('Skipping ingest for release %s with existing terminal status %s.' % (
+                logger.info('Skipping ingest for release %s with existing terminal status %s.' % (
                     self.release_id,
                     rel['status'],
                 ))
                 failed = False
                 return rel
 
+            logger.info('Provisioning catalog...')
             rel = self.provision()
             catalog = self.server.connect_ermrest(
                 Submission.extract_catalog_id(self.server, rel['ermrest_url'])
             )
 
             # this includes portal schema and built-in vocabs
+            logger.info('Provisioning sqlite...')
             Submission.provision_sqlite(None, self.sqlite_filename)
 
-            logger.debug('Loading release constituents...')
+            logger.info('Loading release constituents...')
             for dprow in self.dcc_datapackages.values():
                 submission = Submission(
                     self.server,
@@ -166,7 +168,9 @@ class Release (object):
                 submission.load_sqlite(submission.content_path, self.sqlite_filename)
 
             # do this once w/ all content now loaded in sqlite
+            logger.info('Preparing derived data...')
             Submission.prepare_sqlite_derived_data(self.sqlite_filename)
+            logger.info('Uploading all release content...')
             Submission.upload_sqlite_content(catalog, self.sqlite_filename)
             logger.info('All release content successfully uploaded to %(ermrest_url)s' % rel)
 
@@ -244,7 +248,7 @@ def main(subcommand, *args):
     - DRAFT_NEED_DCC to 'false' to relax approval checks for release drafts
 
     """
-    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+    init_logging(logging.INFO)
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     credential = get_credential(servername)
