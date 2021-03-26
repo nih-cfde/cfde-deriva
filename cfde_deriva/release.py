@@ -70,6 +70,26 @@ class Release (object):
         # TBD: check permissions for safe service config?
         os.makedirs(os.path.dirname(self.sqlite_filename), exist_ok=True)
 
+    @classmethod
+    def configure_release_catalog(cls, registry, catalog, id, provision=False):
+        """Configure release catalog
+
+        Configure (or reconfigure) a release catalog.
+
+        :param registry: The Registry instance for the submission system
+        :param catalog: The ErmrestCatalog for the existing review catalog
+        :param id: The submission id of the submission providing the review content
+        :param provision: Perform model provisioning if True (default False, only reconfigure policies/presentation)
+
+        """
+        canon_dp = CfdeDataPackage(portal_schema_json, ReleaseConfigurator(catalog, registry))
+        canon_dp.set_catalog(catalog, registry)
+        if provision:
+            canon_dp.provision() # get the model deployed
+        # TBD: annotate with submission ID for easier ops/inventory purposes?
+        canon_dp.apply_custom_config() # get the chaise hints deloyed
+        return catalog
+
     def provision(self):
         rel, dcc_datapackages = self.registry.get_release(self.release_id)
         if rel['ermrest_url'] is not None:
@@ -139,7 +159,7 @@ class Release (object):
             logger.info('Provisioning sqlite...')
             Submission.provision_sqlite(None, self.sqlite_filename)
 
-            logger.info('Loading release constituents...')
+            logger.info('Loading %s release constituents...' % len(self.dcc_datapackages))
             for dprow in self.dcc_datapackages.values():
                 submission = Submission(
                     self.server,
@@ -236,8 +256,8 @@ def main(subcommand, *args):
        - Create new, empty release catalog
     - 'build' release_id
        - Build content based on release definition
-    - 'reconfigure' release_id
-       - Revise policy/resentation config on existing catalog
+    - 'reconfigure' catalog_id
+       - Revise policy/presentation config on existing catalog
 
     This client uses default DERIVA credentials for server.
 
@@ -296,11 +316,12 @@ def main(subcommand, *args):
         print('Release %(id)s has been built in %(ermrest_url)s' % rel)
     elif subcommand == 'reconfigure':
         if len(args) == 1:
-            release_id = args[0]
+            catalog_id = args[0]
+            catalog = server.connect_ermrest(catalog_id)
         else:
-            raise TypeError('"reconfigure" requires exactly one positional argument: release_id')
+            raise TypeError('"reconfigure" requires exactly one positional argument: catalog_id')
 
-        raise NotImplementedError()
+        Release.configure_release_catalog(registry, catalog, catalog_id)
     else:
         raise ValueError('unknown sub-command "%s"' % subcommand)
 

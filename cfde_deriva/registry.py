@@ -235,7 +235,7 @@ class Registry (object):
             newrow = {
                 'id': id,
                 'status': terms.cfde_registry_rel_status.planning,
-                'description': description,
+                'description': None if description is nochange else description,
             }
             defaults = [
                 cname

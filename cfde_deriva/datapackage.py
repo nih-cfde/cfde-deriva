@@ -629,7 +629,7 @@ class CfdeDataPackage (object):
                         for row in batch
                     ]
                     r = self.catalog.post(entity_url, json=batch)
-                    logger.debug("Batch of rows for %s loaded" % table.name)
+                    logger.info("Batch of rows for %s loaded" % table.name)
                     skipped = len(batch) - len(r.json())
                     if skipped:
                         logger.debug("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
