@@ -161,7 +161,7 @@ class Release (object):
                 # re-check for storage corruption?
                 submission.bdbag_validate(submission.content_path)
                 # re-check if portal model has changed since submission was checked?
-                submission.datapackag_model_check(submission.content_path)
+                submission.datapackage_model_check(submission.content_path)
                 submission.load_sqlite(submission.content_path, self.sqlite_filename)
 
             # do this once w/ all content now loaded in sqlite
@@ -255,12 +255,7 @@ def main(subcommand, *args):
     need_dcc_appr = os.getenv('DRAFT_NEED_DCC', 'true').lower() in {'t', 'y', 'true', 'yes'}
     need_cfde_appr = os.getenv('DRAFT_NEED_CFDE', 'true').lower() in {'t', 'y', 'true', 'yes'}
 
-    archive_headers_map = {
-        # dev VPC GCS endpoint
-        'https://g-c7e94.f19a4.5898.data.globus.org/.*': {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    }
+    archive_headers_map = get_archive_headers_map(servername)
 
     if subcommand == 'draft':
         if len(args) > 0:
