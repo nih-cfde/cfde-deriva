@@ -28,14 +28,16 @@ HOST_TO_GCS_ENDPOINTS = {
 def get_archive_headers_map(host):
     scope = HOST_TO_GCS_SCOPES[host]
     gnl = GlobusNativeLogin()
-    headers = {'X-Requested-With': 'XMLHttpRequest'}
+    headers = {}
     tokens = gnl.is_logged_in(requested_scopes=(scope, CFDE_DERIVA_SCOPE))
     if tokens:
         headers.update({'Authorization': 'Bearer %s' % gnl.find_access_token_for_scope(scope, tokens)})
     else:
-        logger.warning('Login required for host "%s" with scope: %s' % (host, scope))
-    hmap = {"%s/.*" % HOST_TO_GCS_ENDPOINTS[host]: headers}
-    return hmap
+        raise ValueError('Could not obtain tokens for host "%s"' % host)
+    return {
+        '.*': {'X-Requested-With': 'XMLHttpRequest'},
+        "%s/.*" % HOST_TO_GCS_ENDPOINTS[host]: headers,
+    }
 
 
 def main(subcommand, *args):
