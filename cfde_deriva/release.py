@@ -126,7 +126,8 @@ class Release (object):
                     self.release_id,
                     rel['status'],
                 ))
-                return
+                failed = False
+                return rel
 
             rel = self.provision()
             catalog = self.server.connect_ermrest(
