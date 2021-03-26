@@ -632,9 +632,9 @@ class CfdeDataPackage (object):
                     skipped = len(batch) - len(r.json())
                     if skipped:
                         logger.debug("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-                    logger.info("All data for table %s loaded." % (table.name,))
-                    if table_done_callback:
-                        table_done_callback(table.name, resource.get("path", None))
+                logger.info("All data for table %s loaded." % (table.name,))
+                if table_done_callback:
+                    table_done_callback(table.name, resource.get("path", None))
             except Exception as e:
                 logger.error("Error while loading data for table %s: %s" % (table.name, e))
                 if table_error_callback:
