@@ -1366,7 +1366,6 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_dccs"},
                   {"sourcekey": "S_datapackages"}
                ]
             },
@@ -1615,7 +1614,8 @@
                   "reference": {
                      "resource": "release",
                      "fields": [ "id" ]
-                  }
+                  },
+                  "on_delete": "CASCADE"
                },
                {
                   "fields": "datapackage",

@@ -2,7 +2,9 @@
 import sys
 import datetime
 import json
-from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG
+import logging
+
+from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG, init_logging
 from deriva.core.ermrest_model import nochange
 from deriva.core.datapath import ArrayD
 from deriva.core.utils.core_utils import AttrDict
@@ -10,6 +12,8 @@ from deriva.core.utils.core_utils import AttrDict
 from . import exception
 from .tableschema import RegistryConfigurator, authn_id, terms
 from .datapackage import CfdeDataPackage, registry_schema_json
+
+logger = logging.getLogger(__name__)
 
 ermrest_creators_acl = [
     authn_id.cfde_infrastructure_ops,
@@ -161,6 +165,21 @@ class Registry (object):
         """
         return self._get_entity('datapackage')
 
+    def get_latest_approved_datapackages(self, need_dcc_appr=True, need_cfde_appr=True):
+        """Get a map of latest datapackages approved for release for each DCC id."""
+        path = self._builder.CFDE.tables['datapackage'].path
+        status = path.datapackage.status
+        path = path.filter( (status == terms.cfde_registry_dp_status.content_ready) | (status == terms.cfde_registry_dp_status.release_pending) )
+        if need_dcc_appr:
+            path = path.filter(path.datapackage.dcc_approval_status == terms.cfde_registry_decision.approved)
+        if need_cfde_appr:
+            path = path.filter(path.datapackage.cfde_approval_status == terms.cfde_registry_decision.approved)
+        res = {}
+        for row in path.entities().sort(path.datapackage.submitting_dcc,  path.datapackage.submission_time.desc):
+            if row['submitting_dcc'] not in res:
+                res[row['submitting_dcc']] = row
+        return res
+
     def get_datapackage(self, id):
         """Get datapackage by submission id or raise exception.
         
@@ -188,6 +207,113 @@ class Registry (object):
         if len(rows) < 1:
             raise IndexError('Datapackage table ("%s", %d) not found in registry.' % (datapackage, position))
         return rows[0]
+
+    def register_release(self, id, dcc_datapackages, description=None):
+        """Idempotently register new release in registry, returning (release row, dcc_datapackages).
+
+        :param id: The release.id for the new record
+        :param dcc_datapackages: A dict mapping {dcc_id: datapackage, ...} for constituents
+        :param description: A human-readable description of this release
+
+        The constituents are a set of datapackage records (dicts) as
+        returned by the get_datapackage() method. The dcc_id key MUST
+        match the submitting_dcc of the record.
+
+        For repeat calls on existing releases, the definition will be
+        updated if the release is still in the planning state, but a
+        StateError will be raised if it is no longer in planning state.
+
+        """
+        for dcc_id, dp in dcc_datapackages.items():
+            if dcc_id != dp['submitting_dcc']:
+                raise ValueError('Mismatch in dcc_datapackages DCC IDs %s != %s' % (dcc_id, dp['submitting_dcc']))
+
+        try:
+            rel, old_dcc_dps = self.get_release(id)
+        except exception.ReleaseUnknown:
+            # create new release record
+            newrow = {
+                'id': id,
+                'status': terms.cfde_registry_rel_status.planning,
+                'description': None if description is nochange else description,
+            }
+            defaults = [
+                cname
+                for cname in self._builder.CFDE.release.column_definitions.keys()
+                if cname not in newrow
+            ]
+            logger.info('Registering new release %s' % (id,))
+            self._catalog.post(
+                '/entity/CFDE:release?defaults=%s' % (','.join(defaults),),
+                json=[newrow]
+            )
+            rel, old_dcc_dps = self.get_release(id)
+
+        if rel['status'] != terms.cfde_registry_rel_status.planning:
+            raise exception.StateError('Idempotent registration disallowed on existing release %(id)s with status=%(status)s' % rel)
+
+        # prepare for idempotent updates
+        old_dp_ids = { dp['id'] for dp in old_dcc_dps.values() }
+        dp_ids = { dp['id'] for dp in dcc_datapackages.values() }
+        datapackages = {
+            dp['id']: dp
+            for dp in dcc_datapackages.values()
+        }
+
+        # idempotently revise description
+        if rel['description'] != description:
+            logger.info('Updating release %s description: %s' % (id, description,))
+            self.update_release(id, description=description)
+
+        # find currently registered constituents
+        path = self._builder.CFDE.dcc_release_datapackage.path
+        path = path.filter(path.dcc_release_datapackage.release == id)
+        old_dp_ids = { row['datapackage'] for row in path.entities().fetch() }
+
+        # remove stale consituents
+        for dp_id in old_dp_ids.difference(dp_ids):
+            logger.info('Removing constituent datapackage %s from release %s' % (dp_id, id))
+            self._catalog.delete(
+                '/entity/CFDE:dcc_release_datapackage/release=%s&datapackage=%s' % (urlquote(id), urlquote(dp_id),)
+            )
+
+        # add new consituents
+        new_dp_ids = dp_ids.difference(old_dp_ids)
+        if new_dp_ids:
+            logger.info('Adding constituent datapackages %s to release %s' % (new_dp_ids, id))
+            self._catalog.post(
+                '/entity/CFDE:dcc_release_datapackage',
+                json=[
+                    {
+                        'dcc': datapackages[dp_id]['submitting_dcc'],
+                        'release': id,
+                        'datapackage': dp_id,
+                    }
+                    for dp_id in new_dp_ids
+                ]
+            )
+
+        # return registry content
+        return self.get_release(id)
+
+    def get_release(self, id):
+        """Get release by submission id or raise exception, returning (release_row, dcc_datapackages).
+        
+        :param id: The release.id key for the release definition in the registry
+
+        Raises ReleaseUnknown if record is not found.
+        """
+        rows = self._get_entity('release', id)
+        if len(rows) < 1:
+            raise exception.ReleaseUnknown('Release "%s" not found in registry.' % (id,))
+        rel = rows[0]
+        path = self._builder.CFDE.dcc_release_datapackage.path
+        path = path.filter(path.dcc_release_datapackage.release == id)
+        path = path.link(self._builder.CFDE.datapackage)
+        return rel, {
+            row['submitting_dcc']: row
+            for row in path.entities().fetch()
+        }
 
     def register_datapackage(self, id, dcc_id, submitting_user, archive_url):
         """Idempotently register new submission in registry.
@@ -263,6 +389,50 @@ class Registry (object):
         if len(rows) == 0:
             # row exits
             self.update_datapackage_table(datapackage, position, status=terms.cfde_registry_dpt_status.enumerated)
+
+    def update_release(self, id, status=nochange, description=nochange, cfde_approval_status=nochange, release_time=nochange, ermrest_url=nochange, browse_url=nochange, summary_url=nochange, diagnostics=nochange):
+        """Idempotently update release metadata in registry.
+
+        :param id: The release.id of the existing record to update
+        :param status: The new release.status value (default nochange)
+        :param description: The new release.description value (default nochange)
+        :param cfde_approval_status: The new release.cfde_approval_status value (default nochange)
+        :param release_time: The new release.release_time value (default nochange)
+        :param ermrest_url: The new release.review_ermrest_url value (default nochange)
+        :param browse_url: The new release.review_browse_url value (default nochange)
+        :param summary_url: The new release.review_summary_url value (default nochange)
+        :param diagnostics: The new release.diagnostics value (default nochange)
+
+        The special `nochange` singleton value used as default for
+        optional arguments represents the desire to keep whatever
+        current value exists for that field in the registry.
+
+        May raise non-CfdeError exceptions on operational errors.
+        """
+        if not isinstance(id, str):
+            raise TypeError('expected id of type str, not %s' % (type(id),))
+        existing, existing_dcc_dps = self.get_release(id)
+        changes = {
+            k: v
+            for k, v in {
+                    'status': status,
+                    'description': description,
+                    'cfde_approval_status': cfde_approval_status,
+                    'release_time': release_time,
+                    'ermrest_url': ermrest_url,
+                    'browse_url': browse_url,
+                    'summary_url': summary_url,
+                    'diagnostics': diagnostics,
+            }.items()
+            if v is not nochange and v != existing[k]
+        }
+        if not changes:
+            return
+        changes['id'] = id
+        self._catalog.put(
+            '/attributegroup/CFDE:release/id;%s' % (','.join([ c for c in changes.keys() if c != 'id']),),
+            json=[changes]
+        )
 
     def update_datapackage(self, id, status=nochange, diagnostics=nochange, review_ermrest_url=nochange, review_browse_url=nochange, review_summary_url=nochange):
         """Idempotently update datapackage metadata in registry.
@@ -472,6 +642,8 @@ def main(servername, subcommand, catalog_id=None):
     - 'dump-onboarding': Write out *.tsv files for onboarding info in registry
 
     """
+    init_logging(logging.INFO)
+
     credentials = get_credential(servername)
     session_config = DEFAULT_SESSION_CONFIG.copy()
     session_config["allow_retry_on_all_methods"] = True

@@ -19,14 +19,13 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG
+from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
 from .datapackage import CfdeDataPackage, portal_schema_json
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 class Submission (object):
     """Processing support for C2M2 datapackage submissions.
@@ -77,7 +76,7 @@ class Submission (object):
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
     
-    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user, archive_headers_map=None):
+    def __init__(self, server, registry, id, dcc_id, archive_url, submitting_user, archive_headers_map=None, skip_dcc_check=False):
         """Represent a stateful processing flow for a C2M2 submission.
 
         :param server: A DerivaServer binding object where review catalogs are created.
@@ -87,6 +86,7 @@ class Submission (object):
         :param archive_url: The stable URL where the submission BDBag can be found.
         :param submitting_user: A WebauthnUser instance representing submitting user.
         :param archive_headers_map: A map of URL patterns to additional request headers.
+        :param skip_dcc_check: True overrides normal safety check during constructor (default False).
 
         The new instance is a binding for a submission which may or
         may not yet exist in the registry. The constructor WILL NOT
@@ -117,7 +117,8 @@ class Submission (object):
         Raises non-CfdeError exceptions for operational errors.
 
         """
-        registry.validate_dcc_id(dcc_id, submitting_user)
+        if not skip_dcc_check:
+            registry.validate_dcc_id(dcc_id, submitting_user)
         self.server = server
         self.registry = registry
         self.datapackage_id = id
@@ -187,7 +188,7 @@ class Submission (object):
                     terms.cfde_registry_dp_status.release_pending,
                     terms.cfde_registry_dp_status.obsoleted,
             }:
-                logger.debug('Skipping ingest for datapackage %s with existing terminal status %s.' % (
+                logger.info('Skipping ingest for datapackage %s with existing terminal status %s.' % (
                     self.datapackage_id,
                     dp['status'],
                 ))
@@ -493,6 +494,7 @@ class Submission (object):
 
             # rename completed download to canonical name
             os.rename(tmp_name, download_filename)
+            logger.info('Renamed download "%s" to final "%s"' % (tmp_name, download_filename))
             tmp_name = None
         finally:
             if fd is not None:
@@ -544,7 +546,7 @@ class Submission (object):
                 raise exception.InvalidDatapackage('Found too many top-level folders in bag archive')
 
             os.rename(children[0], content_path)
-            logger.debug('Renamed output "%s" to final "%s"' % (children[0], content_path))
+            logger.info('Renamed output "%s" to final "%s"' % (children[0], content_path))
         finally:
             if tmp_name is not None:
                 shutil.rmtree(tmp_name)
@@ -555,8 +557,9 @@ class Submission (object):
         try:
             logger.debug('Validating unpacked bag at "%s"' % (content_path,))
             bdbag_api.validate_bag(content_path)
+            logger.info('Bag valid at %s' % content_path)
         except (BagError, BagValidationError) as e:
-            logger.debug('Validation failed for bag "%s" with error "%s"' % (content_path, e,))
+            logger.error('Validation failed for bag "%s" with error "%s"' % (content_path, e,))
             raise exception.InvalidDatapackage(e)
 
     @classmethod
@@ -742,7 +745,7 @@ def main(subcommand, *args):
     Set environment variable DERIVA_SERVERNAME to choose registry host.
 
     """
-    logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+    init_logging(logging.INFO)
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
 

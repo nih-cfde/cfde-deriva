@@ -31,3 +31,10 @@ class IncompatibleDatapackageModel (CfdeError):
     """The datapackage is incompatible with CFDE requirements."""
     pass
 
+class StateError (CfdeError):
+    """The registry resource has a status incompatible with the requested action."""
+    pass
+
+class ReleaseUnknown (CfdeError):
+    """The release definition is not known by the registry."""
+    pass
