@@ -2229,39 +2229,46 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-        },
-        "deriva": {
-           "source_definitions": {
-              "columns": true,
-              "fkeys": true,
-              "sources": {
-                 "S_biosample": {
-                    "markdown_name": "Biosample",
-                    "comment": "List of biosamples referencing this assay type.",
-                    "source": [
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "List of biosamples referencing this assay type.",
+                     "source": [
                         {"inbound": ["CFDE", "biosample_assay_type_assay_type_fkey"]},
                         {"outbound": ["CFDE", "biosample_assay_type_biosample_fkey"]},
                         "RID"
-                    ]
-                 },
-                 "S_collection": {
-                    "markdown_name": "Collection",
-                    "comment": "List of collections referencing this assay type.",
-                    "source": [
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this assay type.",
+                     "source": [
                         {"inbound": ["CFDE", "collection_assay_type_fkey"]},
                         {"outbound": ["CFDE", "collection_assay_type_collection_fkey"]},
                         "RID"
-                    ]
-                 },
-                 "S_file": {
-                    "markdown_name": "File",
-                    "comment": "List of files referencing this assay type.",
-                    "source": [
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this assay type.",
+                     "source": [
                         {"inbound": ["CFDE", "file_assay_type_fkey"]},
                         "RID"
-                    ]
-                 }
+                     ]
+                  }
                }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
             },
             "visible_foreign_keys": {
                "*": [
@@ -2321,38 +2328,45 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
-        },
-        "deriva": {
-           "source_definitions": {
-              "columns": true,
-              "fkeys": true,
-              "sources": {
-                 "S_subject": {
-                    "markdown_name": "Subject",
-                    "comment": "List of subjects referencing this taxon.",
-                    "source": [
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "List of subjects referencing this taxon.",
+                     "source": [
                         {"inbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         "RID"
-                    ]
-                 },
-                 "S_collection": {
-                    "markdown_name": "Collection",
-                    "comment": "List of collections referencing this taxon.",
-                    "source": [
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "List of collections referencing this taxon.",
+                     "source": [
                         {"inbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
                         "RID"
-                    ]
-                 },
-                 "S_file": {
-                    "markdown_name": "File",
-                    "comment": "List of files referencing this taxon.",
-                    "source": [
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files referencing this taxon.",
+                     "source": [
                         {"inbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
                         "RID"
-                    ]
-                 }
+                     ]
+                  }
                }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
             },
             "visible_foreign_keys": {
                "*": [
@@ -2414,38 +2428,45 @@
                      "markdown_name": "Biosample",
                      "comment": "List of biosamples referencing this anatomical term.",
                      "source": [
-                         {"inbound": ["CFDE", "biosample_anatomy_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "biosample_anatomy_fkey"]},
+                        "RID"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this anatomical term.",
                      "source": [
-                         {"inbound": ["CFDE", "collection_anatomy_fkey"]},
-                         {"outbound": ["CFDE", "collection_anatomy_collection_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "collection_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                        "RID"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this anatomical term.",
                      "source": [
-                         {"inbound": ["CFDE", "file_anatomy_fkey"]},
-                         {"outbound": ["CFDE", "file_anatomy_file_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "file_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "file_anatomy_file_fkey"]},
+                        "RID"
                      ]
                   }
-                }
-             },
-             "visible_foreign_keys": {
-                "*": [
-                   {"sourcekey": "S_biosample"},
-                   {"sourcekey": "S_file"},
-                   {"sourcekey": "S_collection"}
-                ]
-             }
-          }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_collection"}
+               ]
+            }
+         }
       },
       {
          "profile": "tabular-data-resource",
@@ -2498,29 +2519,36 @@
                      "markdown_name": "File",
                      "comment": "List of files referencing this format.",
                      "source": [
-                         {"inbound": ["CFDE", "file_file_format_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "file_file_format_fkey"]},
+                        "RID"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this format.",
                      "source": [
-                         {"inbound": ["CFDE", "file_file_format_fkey"]},
-                         {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
-                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "file_file_format_fkey"]},
+                        {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        "RID"
                      ]
                   }
-                }
-             },
-             "visible_foreign_keys": {
-                "*": [
-                   {"sourcekey": "S_file"},
-                   {"sourcekey": "S_collection"}
-                ]
-             }
-          }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_collection"}
+               ]
+            }
+         }
       },
       {
          "profile": "tabular-data-resource",
@@ -2573,29 +2601,36 @@
                      "markdown_name": "File",
                      "comment": "List of files referencing this data type.",
                      "source": [
-                         {"inbound": ["CFDE", "file_data_type_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "file_data_type_fkey"]},
+                        "RID"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this format.",
                      "source": [
-                         {"inbound": ["CFDE", "file_data_type_fkey"]},
-                         {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
-                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                         "RID"
+                        {"inbound": ["CFDE", "file_data_type_fkey"]},
+                        {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
+                        {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
+                        "RID"
                      ]
                   }
-                }
-             },
-             "visible_foreign_keys": {
-                "*": [
-                   {"sourcekey": "S_file"},
-                   {"sourcekey": "S_collection"}
-                ]
-             }
-          }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_collection"}
+               ]
+            }
+         }
       },
       {
          "profile": "tabular-data-resource",
@@ -2738,6 +2773,13 @@
                   }
                 }
              },
+           "visible_columns": {
+              "*": [
+                 "id",
+                 "name",
+                 "description"
+              ]
+           },
              "visible_foreign_keys": {
                 "*": [
                    {"sourcekey": "S_subject"},
