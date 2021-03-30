@@ -181,6 +181,151 @@
             ]
          },
          "deriva": {
+            "export_2019": {
+               "detailed": {
+                  "templates": [
+                     {
+                        "displayname": "File BDBAG",
+                        "type": "BAG",
+                        "outputs": [
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format,data_type,assay_type,mime_type"
+                              },
+                              "destination": {
+                                 "name": "file",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                              },
+                              "destination": {
+                                 "name": "project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                              },
+                              "destination": {
+                                 "name": "project_in_project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(file_format)=(CFDE:file_format:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "file_format",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(data_type)=(CFDE:data_type:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "data_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(assay_type)=(CFDE:assay_type:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "assay_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_biosample:file_id_namespace,file_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,anatomy"
+                              },
+                              "destination": {
+                                 "name": "biosample",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_biosample:file_id_namespace,file_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/(anatomy)=(CFDE:anatomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "anatomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_subject:file_id_namespace,file_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                              },
+                              "destination": {
+                                 "name": "subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_subject:file_id_namespace,file_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_granularity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_subject:file_id_namespace,file_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                              },
+                              "destination": {
+                                 "name": "subject_role_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_subject:file_id_namespace,file_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_role",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_describes_subject:file_id_namespace,file_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
@@ -470,6 +615,111 @@
             ]
          },
          "deriva": {
+            "export_2019": {
+               "detailed": {
+                  "templates": [
+                     {
+                        "displayname": "Biosample BDBAG",
+                        "type": "BAG",
+                        "outputs": [
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,anatomy"
+                              },
+                              "destination": {
+                                 "name": "biosample",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                              },
+                              "destination": {
+                                 "name": "project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                              },
+                              "destination": {
+                                 "name": "project_in_project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(anatomy)=(CFDE:anatomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "anatomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                              },
+                              "destination": {
+                                 "name": "subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_granularity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                              },
+                              "destination": {
+                                 "name": "subject_role_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_role",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
@@ -708,6 +958,91 @@
             ]
          },
          "deriva": {
+            "export_2019": {
+               "detailed": {
+                  "templates": [
+                     {
+                        "displayname": "Subject BDBAG",
+                        "type": "BAG",
+                        "outputs": [
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                              },
+                              "destination": {
+                                 "name": "subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                              },
+                              "destination": {
+                                 "name": "project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                              },
+                              "destination": {
+                                 "name": "project_in_project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_granularity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                              },
+                              "destination": {
+                                 "name": "subject_role_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_role",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+             },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
@@ -1328,6 +1663,161 @@
             ]
          },
          "deriva": {
+            "export_2019": {
+               "detailed": {
+                  "templates": [
+                     {
+                        "displayname": "Collection BDBAG",
+                        "type": "BAG",
+                        "outputs": [
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                              },
+                              "destination": {
+                                 "name": "collection",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:collection_defined_by_project:collection_id_namespace,collection_local_id)/(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                              },
+                              "destination": {
+                                 "name": "project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:collection_defined_by_project:collection_id_namespace,collection_local_id)/(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                              },
+                              "destination": {
+                                 "name": "project_in_project",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format,data_type,assay_type,mime_type"
+                              },
+                              "destination": {
+                                 "name": "file",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(file_format)=(CFDE:file_format:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "file_format",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(data_type)=(CFDE:data_type:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "data_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(assay_type)=(CFDE:assay_type:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "assay_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_in_collection:collection_id_namespace,collection_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,anatomy"
+                              },
+                              "destination": {
+                                 "name": "biosample",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:biosample_in_collection:collection_id_namespace,collection_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/(anatomy)=(CFDE:anatomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "anatomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                              },
+                              "destination": {
+                                 "name": "subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_granularity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                              },
+                              "destination": {
+                                 "name": "subject_role_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "subject_role",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+
+                              "source": {
+                                 "api": "attributegroup",
+                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
