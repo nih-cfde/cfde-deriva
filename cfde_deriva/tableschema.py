@@ -219,6 +219,7 @@ class CatalogConfigurator (object):
             #"navbarBrandText": "CFDE Data Browser",
             "SystemColumnsDisplayCompact": [],
             "SystemColumnsDisplayDetailed": [],
+            "disableDefaultExport": True,
             "navbarMenu": {
                 "children": [
                     {
