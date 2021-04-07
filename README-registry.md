@@ -1,43 +1,107 @@
 
 # CFDE Registry
 
-This document summarizes the design and purpose of the CFDE submission
-registry.
+This document summarizes the design and purpose of the CFDE data submission
+and user-preferences registry.
 
 ## Overview
 
-The submission registry is a bookkeeping system for the C2M2
-datapackage submission pipeline.  As a records system, it tracks
-individual submissions and their processing and review status. It also
-stores ancilliary metadata which supports the configuration and
-operation of the pipeline.
+The CFDE registry is a bookkeeping system for:
 
-### Registry Model
+1. The C2M2 datapackage submission pipeline.
+2. Metadata related to DCC federation.
+3. User-managed preferences/profile data.
 
-The registry model is illustrated in the [registry model
-diagram](diagrams/cfde-registry-model.png) and has these core tables
-which are populated based on DCC submission activity:
+The registry data model is illustrated in the [registry model
+diagram](diagrams/cfde-registry-model.png).
+
+### DCC Federation State Tables
+
+These registry tables are populated by CFDE-CC staff activity:
+
+- `dcc`: each row represents an onboarded DCC
+- `group`: each row represents a known group in the authentication system
+- `dcc_group_role`: each row binds a known group to a permission class for a DCC
+- `id_namespace`: each row represents a CFDE federated identifier namespace
+
+Other aspects of DCC federation are under continued development.
+
+### Ontological Tables
+
+These registry tables are populated by a mixture of CFDE-CC staff and
+submission system activity, representing known C2M2 vocabulary concepts:
+
+- `anatomy`
+- `assay_type`
+- `data_type`
+- `file_format`
+- `ncbi_taxonomy`
+- `subject_granularity`
+- `subject_role`
+
+Generally, these share structure with C2M2 vocabulary tables present
+in submissions, review catalogs, and release catalogs. However, we may
+introduce additional columns relevant to registry functionality.
+
+It is expected that CFDE-CC and/or DCC staff may pre-populate these
+tables with terms intended for common use.  Additionally, the tables
+may indicate automatically-detected terms found in C2M2 submissions.
+
+The usage of these tables is under continued development.
+
+### Submission System State Tables
+
+These registry tables are populated based on DCC submission system
+activity:
 
 - `datapackage`: each row represents one C2M2 submission
 - `datapackage_table`: each row represents one TSV file of one submission
 
-These submission records are augmented by supporting information
-which is maintained by adminstrators:
+These tables are populated by release-planning and preparation:
 
-- `dcc`: each row represents one onboarded DCC
-- `group`: each row represents one Globus Group known by the
-  submission system
-- `dcc_group_role`: each row associates a group w/ a pipeline role to
-  designate how a set of users relate to a given DCC's usage of the
-  submission system
+- `release`: each row represents a CFDE inventory release in some stage of planning
+- `dcc_release_datapackage`: each row binds a constituent submission to a release
 
-Other aspects of the model are under continued development, but
-they do not affect the initial MVP milestone.
+Other aspects of submission-tracking under continued development.
+
+### User Profile State Tables
+
+These registry tables are populated by user activity and represent
+their saved preferences or other state values relevant to
+personalization of CFDE service features:
+
+- `user_profile`: each row represents scalar settings for one user
+- `saved_query`: each row represents one saved query for a user
+- `favorite_anatomy`: each row represents one favorited vocabulary term for a user
+- `favorite_assay_type`: each row represents one favorited vocabulary term for a user
+- `favorite_data_type`: each row represents one favorited vocabulary term for a user
+- `favorite_file_format`: each row represents one favorited vocabulary term for a user
+- `favorite_ncbi_taxonomy`: each row represents one favorited vocabulary term for a user
+
+The `user_profile` table is keyed by authenticated user ID which is
+also a foreign key to the built-in `ERMrest_Client` table. Each user
+can have at most one profile record associated with their
+identity. The latter table is automatically populated by the DERIVA
+system, while the former will be populated by an explicit user action
+requesting that a profile be created.  The profile record will store
+any scalar settings for the user, as a single column for each named
+setting.
+
+The `saved_query` table is keyed by ??? and the authenticated user
+ID. Each user can have zero or more saved query records associated
+with their identity. Each record will store necessary information to
+reconstitute a query in Chaise, to name/describe the query in a query
+listing UI, and other system metadata TBD.
+
+Generally, the various "favorite" tables form binary associations to
+link a subset of vocabulary concepts from a given vocabulary table to
+a given user's profile.
+
 
 ### Client Roles
 
-It is intended to support several classes of client/user. Generally,
-one group corresponds directly to a role, and other groups for
+The registry supports several classes of client/user. Generally, one
+group corresponds directly to a role, and other groups for
 higher-privilege roles also enjoy the same privileges:
 
 1. Submission ingest pipeline automation (CFDE-hosted machine identity)
@@ -69,8 +133,10 @@ higher-privilege roles also enjoy the same privileges:
     - also CFDE Infrastructure Operations
 9. CFDE-CC staff with highest permissions on infrastructure
     - CFDE Infrastructure Operations
-10. Other roles TBD
+10. General users who have personal preferences/profile data
+    - any authenticated user, or member of a general CFDE Portal group?
 
+Other roles TBD.
 
 ## Registry Access Policy
 
@@ -80,11 +146,12 @@ a number of policy elements:
 - For simplicity, the bulk of the registry's CFDE schema is made
   visible to the public, not requiring detailed reconfiguration. This
   includes the general informational/vocabulary tables of the
-  registry.
+  registry. Only portal administrators can write to these tables.
   
 - The core `datapackage` and `datapackage_table` tables are configured
   with more-specific policies which override the schema-wide defaults
-  to make these tables more restrictive.
+  to make these tables more restrictive for read access and to allow
+  the automated submission system to perform certain updates.
 
 - The special built-in ERMrest client table is useful for converting
   low-level authentication IDs into human-readable display
