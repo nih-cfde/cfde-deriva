@@ -755,7 +755,9 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'date': 'date',
             'int8': 'int8',
             'float8': 'real',
+            'boolean': 'boolean',
             'text[]': 'json',
+            'jsonb': 'json',
         }[typeobj.typename]
 
     def key_sqlite_ddl(self, key):

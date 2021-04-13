@@ -134,7 +134,9 @@ higher-privilege roles also enjoy the same privileges:
 9. CFDE-CC staff with highest permissions on infrastructure
     - CFDE Infrastructure Operations
 10. General users who have personal preferences/profile data
-    - any authenticated user, or member of a general CFDE Portal group?
+    - a member of a general CFDE Portal group?
+11. The owner of a particular profile
+    - where the profile `id` or related content `user_id` matches the authenticated client
 
 Other roles TBD.
 
@@ -165,9 +167,10 @@ This table summarizes these in more detail:
 |----------|--------|------|------------|--------|-------|
 | registry catalog | enumerate | public | N/A | catalog ACL | tables detected (chaise avoids table-not-found) |
 | registry `CFDE`.* | select | public | N/A | schema ACL | basic vocabs/config can be public? |
-| registry `CFDE`.* | insert | CFDE admin | N/A | schema ACL | admin can insert all vocabs/config |
-| registry `CFDE`.* | update | CFDE admin | N/A | schema ACL | admin can update all vocabs/config |
-| registry `CFDE`.* | delete | CFDE admin | | N/A | schema ACL | admin can delete all vocabs/config |
+| registry `CFDE`.* | insert, update, delete | CFDE admin | N/A | schema ACL | admin can modify all vocabs/config |
+| registry `CFDE`. _vocab_ | select | public | N/A | table ACL | everyone can view vocabulary term sets |
+| registry `CFDE`. _vocab_ | insert | CFDE admin/curator/pipeline | N/A | table ACL | staff can curate vocabulary terms, pipeline can add newly encountered terms |
+| registry `CFDE`. _vocab_ | update, delete | CFDE admin/curator | N/A | table ACL | staff can curate vocabulary terms |
 | registry `CFDE`.`datapackage` | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
 | registry `CFDE`.`datapackage` | insert | CFDE pipeline | N/A | table ACL | CFDE-CC pipeline can record new submissions |
 | registry `CFDE`.`datapackage` | update | CFDE admin/curator/pipeline | N/A | table ACL | some CFDE-CC roles can edit all submission records |
@@ -191,10 +194,8 @@ This table summarizes these in more detail:
 | registry `CFDE`.`datapackage`.`dcc_approval_status` | update | DCC admin/decider | client belongs to decider or admin group role with `submitting_dcc` | inerited table ACL-binding | DCC admin or decider can edit DCC's submission approval |
 | registry `CFDE`.`datapackage`.* | update | DCC admin/decider | client belongs to decider or admin group role with `submitting_dcc` | masked table ACL-binding | DCC-derived rights are suppressed for all other columns not mentioned previously |
 | registry `CFDE`.`datapackage_table` | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
-| registry `CFDE`.`datapackage_table` | insert | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record new submissions |
-| registry `CFDE`.`datapackage_table` | update | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can edit all submission records |
+| registry `CFDE`.`datapackage_table` | insert, update | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record or edit submissions |
 | registry `CFDE`.`datapackage_table` | delete | CFDE admin | N/A | table ACL | CFDE-CC admin can delete submissions |
-| registry `CFDE`.`datapackage_table` | delete | DCC admin | client belongs to admin group role with `submitting_dcc` | table ACL-binding | DCC admin can delete DCC's submissions |
 | registry `CFDE`.`datapackage_table`.`datapackage` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
 | registry `CFDE`.`datapackage_table`.`position` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
 | registry `CFDE`.`datapackage_table`.`table_name` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
@@ -202,6 +203,27 @@ This table summarizes these in more detail:
 | registry `CFDE`.`datapackage_table`.`num_rows` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or pipeline |
 | registry `CFDE`.`datapackage_table`.`diagnostics` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or pipeline |
 | registry `CFDE`.`datapackage_table` | select | DCC group | client belongs to any group role with `submitting_dcc` | table ACL-binding | DCC members can see DCC's submissions |
+| registry `CFDE`.`datapackage_` _vocab_ | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
+| registry `CFDE`.`datapackage_` _vocab_ | insert | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record new submissions |
+| registry `CFDE`.`datapackage_` _vocab_ | update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can modify all submission records |
+| registry `CFDE`.`user_profile` | insert | CFDE community | N/A | table ACL | Community members can create a profile |
+| registry `CFDE`.`user_profile` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read all profiles |
+| registry `CFDE`.`user_profile` | update, delete | CFDE admin | user `id` matches client | table ACL binding | user can edit their own profile |
+| registry `CFDE`.`user_profile`.`id` | update | none | N/A | fkey ACL | user id is immutable |
+| registry `CFDE`.`user_profile`.`id` fkey | insert | CFDE admin | N/A | fkey ACL | only CFDE-CC admin can set other profile users |
+| registry `CFDE`.`user_profile`.`id` fkey | insert | user-self | N/A | fkey ACL binding | user can only set profile user `id` to self |
+| registry `CFDE`.`saved_query` | insert | CFDE community | N/A | table ACL | Community members can create |
+| registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read and modify all|
+| registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | user `user_id` matches client | table ACL binding | user can view and edit their own |
+| registry `CFDE`.`saved_query`.`user_id` | update | none | N/A | user_id is immutable |
+| registry `CFDE`.`saved_query`.`table_name` | update | none | N/A | column ACL | table name is immutable |
+| registry `CFDE`.`saved_query`.`facets` | update | none | N/A | column ACL | facets blob is immutable |
+| registry `CFDE`.`saved_query`.`user_id` fkey | insert | profile owner | user_id matches client | user can set own user ID in profile related records |
+| registry `CFDE`.`favorite_*` | insert | CFDE community | N/A | table ACL | Community members can create |
+| registry `CFDE`.`favorite_*` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read and modify all|
+| registry `CFDE`.`favorite_*` | select, update, delete | CFDE admin | user `user_id` matches client | table ACL binding | user can view and edit their own |
+| registry `CFDE`.`favorite_*`.`user_id` | update | none | N/A | user_id is immutable |
+| registry `CFDE`.`favorite_*`.`user_id` fkey | insert | profile owner | user_id matches client | user can set own user ID in profile related records |
 | registry `public`.`ERMrest_Client` | select | users | client matches record ID | table ACL-binding | User can see their own full ERMrest_Client record |
 | registry `public`.`ERMrest_Client` | insert | CFDE-CC admin + pipeline | N/A | table ACL | Submission can discover new submitting users before they visit registry themselves |
 | registry `public`.`ERMrest_Client`.`Email` | select | CFDE admin/curator | N/A | column ACL | Not everyone needs to know a submitting user's email |

@@ -599,9 +599,14 @@ def make_type(type, format):
         return builtin_types.int8
     if type == "number":
         return builtin_types.float8
+    if type == "boolean":
+        return builtin_types.boolean
     if type == "array":
         # assume array is a list of strings for now...
         return builtin_types["text[]"]
+    if type == "object":
+        # revisit if we need raw JSON support as an option...
+        return builtin_types.jsonb
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
 def make_column(tname, cdef, configurator):

@@ -1651,6 +1651,1884 @@
                ]
             }
          }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy",
+         "title": "Anatomy",
+         "description": "List of Uber-anatomy ontology (Uberon) CV terms used by CFDE members",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An Uberon CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^UBERON:[0-9]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Uberon term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type",
+         "title": "Assay Type",
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used by CFDE members",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^OBI:[0-9]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type",
+         "title": "Data Type",
+         "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An EDAM CV data term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^data:[0-9]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this EDAM data term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format",
+         "title": "File Format",
+         "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An EDAM CV format term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^format:[0-9]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this EDAM format term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy",
+         "title": "NCBI Taxonomy",
+         "description": "List of NCBI Taxonomy Database IDs identifying taxa used by CFDE members",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^NCBI:txid[0-9]+$"
+                  }
+               },
+               {
+                  "name": "clade",
+                  "description": "The phylogenetic level (e.g. species, genus) assigned to this taxon (use 'no rank' if not defined)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this taxon",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this taxon",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_granularity",
+         "title": "Subject Granularity",
+         "path": "subject_granularity.tsv",
+         "description": "INTERNAL CV: The category of a subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this subject_granularity",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this subject_granularity",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_role",
+         "title": "Subject Role",
+         "path": "subject_role.tsv",
+         "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this subject_role",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this subject_role",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this subject_role",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_anatomy",
+         "title": "Datapackage Anatomy",
+         "description": "An association of an anatomy term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "The referenced anatomy term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "anatomy"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_anatomy_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "datapackage_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_anatomy_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_assay_type",
+         "title": "Datapackage Assay Type",
+         "description": "An association of an assay type term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "The referenced assay type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "assay_type"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_assay_type_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "datapackage_assay_type_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_assay_type_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_data_type",
+         "title": "Datapackage Data Type",
+         "description": "An association of a data type term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_type",
+                  "description": "The referenced data type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "data_type"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_data_type_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "datapackage_data_type_data_type_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_data_type_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_file_format",
+         "title": "Datapackage File Format",
+         "description": "An association of a file format term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "description": "The referenced file format term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "file_format"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_file_format_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "file_format",
+                  "constraint_name": "datapackage_file_format_file_format_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_file_format_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_ncbi_taxonomy",
+         "title": "Datapackage Taxon",
+         "description": "An association of an NCBI taxon used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ncbi_taxonomy",
+                  "description": "The referenced NCBI taxon ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "ncbi_taxonomy"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_ncbi_taxonomy_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "ncbi_taxonomy",
+                  "constraint_name": "datapackage_ncbi_taxonomy_ncbi_taxonomy_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_ncbi_taxonomy_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_subject_granularity",
+         "title": "Datapackage Subject Granularity",
+         "description": "An association of a subject granularity term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_granularity",
+                  "description": "The referenced subject granularity term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "subject_granularity"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_subject_granularity_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "datapackage_subject_granularity_subject_granularity_fkey",
+                  "reference": {
+                     "resource": "subject_granularity",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_subject_granularity_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_subject_role",
+         "title": "Datapackage Subject Role",
+         "description": "An association of a subject role term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_role",
+                  "description": "The referenced subject role term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "subject_role"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_subject_role_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "subject_role",
+                  "constraint_name": "datapackage_subject_role_subject_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_subject_role_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "user_profile",
+         "title": "User Profile",
+         "description": "Profile and settings for each CFDE user who opts in.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The authentication system ID for the user who owns the profile.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "id",
+                  "constraint_name": "user_profile_id_fkey",
+                  "reference": {
+                     "resourceSchema": "public",
+                     "resource": "ERMrest_Client",
+                     "fields": "ID"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "ID" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "saved_query",
+         "title": "Saved Query",
+         "description": "A CFDE portal query saved by a user.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user who saved the query.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "table_name",
+                  "description": "The name of the CFDE inventory table being queried.",
+                  "type": "text",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "facets",
+                  "description": "The CFDE/DERIVA machine-readable description of the faceted query criteria",
+                  "type": "object",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable title for the saved query."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable summary of the saved query's purpose and/or search criteria."
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "table_name", "facets"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "saved_query_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_dcc",
+         "title": "Favorite DCC",
+         "description": "An association of a favorited DCC to a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "dcc",
+                  "description": "The favorited DCC ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "dcc"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_dcc_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "dcc",
+                  "constraint_name": "favorite_dcc_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_anatomy",
+         "title": "Favorite Anatomy",
+         "description": "An association of a favorited anatomy term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "The favorited anatomy term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "anatomy"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_anatomy_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "favorite_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_assay_type",
+         "title": "Favorite Assay Type",
+         "description": "An association of a favorited assay type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "The favorited assay type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "assay_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_assay_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "favorite_assay_type_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_data_type",
+         "title": "Favorite Data Type",
+         "description": "An association of a favorited data type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "data_type",
+                  "description": "The favorited data type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "data_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_data_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "favorite_data_type_data_type_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_file_format",
+         "title": "Favorite File Format",
+         "description": "An association of a favorited file format term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "description": "The favorited file format term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "file_format"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_file_format_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "constraint_name": "favorite_file_format_file_format_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_ncbi_taxonomy",
+         "title": "Favorite Taxon",
+         "description": "An association of a favorited NCBI taxon in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "ncbi_taxonomy",
+                  "description": "The favorited NCBI taxon ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "ncbi_taxonomy"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_ncbi_taxonomy_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "ncbi_taxonomy",
+                  "constraint_name": "favorite_ncbi_taxonomy_ncbi_taxonomy_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_subject_granularity",
+         "title": "Favorite Subject Granularity",
+         "description": "An association of a favorited subject granularity term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "subject_granularity",
+                  "description": "The favorited subject granularity term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "subject_granularity"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_subject_granularity_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "favorite_subject_granularity_subject_granularity_fkey",
+                  "reference": {
+                     "resource": "subject_granularity",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_subject_role",
+         "title": "Favorite Subject Role",
+         "description": "An association of a favorited subject role term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "subject_role",
+                  "description": "The favorited subject role term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "subject_role"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_subject_role_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "subject_role",
+                  "constraint_name": "favorite_subject_role_subject_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
       }
 
    ],
