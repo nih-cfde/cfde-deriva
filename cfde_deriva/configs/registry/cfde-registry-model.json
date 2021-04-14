@@ -984,13 +984,90 @@
                      "markdown_name": "Submitted Tables",
                      "comment": "Tabular data resources included in this submission.",
                      "source": [{"inbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
+                  },
+                  "S_anatomy": {
+                     "markdown_name": "Anatomy",
+                     "comment": "Anatomy terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_anatomy_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_anatomy_anatomy_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_assay_type": {
+                     "markdown_name": "Assay Type",
+                     "comment": "Assay type terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_assay_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_assay_type_assay_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_data_type": {
+                     "markdown_name": "Data Type",
+                     "comment": "Data type terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_data_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_data_type_data_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_file_format": {
+                     "markdown_name": "File Format",
+                     "comment": "File format terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_file_format_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_file_format_file_format_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_ncbi_taxonomy": {
+                     "markdown_name": "Taxonomy",
+                     "comment": "Taxonomy terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_ncbi_taxonomy_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_ncbi_taxonomy_ncbi_taxonomy_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_subject_granularity": {
+                     "markdown_name": "Subject Granularity",
+                     "comment": "Subject granularity terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_subject_granularity_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_subject_granularity_subject_granularity_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_subject_role": {
+                     "markdown_name": "Subject Role",
+                     "comment": "Subject role terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_subject_role_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_subject_role_subject_role_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
                   }
                }
             },
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_releases"},
-                  {"sourcekey": "S_datapackage_tables"}
+                  {"sourcekey": "S_datapackage_tables"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_ncbi_taxonomy"},
+                  {"sourcekey": "S_subject_granularity"},
+                  {"sourcekey": "S_subject_role"}
                ]
             },
             "visible_columns": {
@@ -1019,7 +1096,14 @@
                      "markdown_name": "CFDE Approval",
                      "source": [{"outbound": ["CFDE", "datapackage_cfde_approval_status_fkey"]}, "RID"]
                   },
-                  {"source": "submission_time"}
+                  {"source": "submission_time"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_ncbi_taxonomy"},
+                  {"sourcekey": "S_subject_granularity"},
+                  {"sourcekey": "S_subject_role"}
                ]}
             }
          }
