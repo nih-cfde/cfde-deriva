@@ -2728,7 +2728,14 @@
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": false
+                        "profile_owner": {
+                           "types": ["select"],
+                           "projection": [
+                              "id"
+                           ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
                      }
                   }
                },
@@ -2741,7 +2748,14 @@
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": false
+                        "profile_owner": {
+                           "types": ["select"],
+                           "projection": [
+                              "id"
+                           ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
                      }
                   }
                },
@@ -2754,7 +2768,14 @@
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": false
+                        "profile_owner": {
+                           "types": ["select"],
+                           "projection": [
+                              "id"
+                           ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
                      }
                   }
                }
