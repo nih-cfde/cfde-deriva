@@ -2810,7 +2810,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -2955,7 +2955,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3047,7 +3047,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3138,7 +3138,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3229,7 +3229,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3320,7 +3320,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3411,7 +3411,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3502,7 +3502,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3593,7 +3593,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },
@@ -3684,7 +3684,7 @@
          "deriva": {
             "acls": {
                "select": [ "cfde_portal_admin" ],
-               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_reader" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
                "update": [ "cfde_portal_admin" ],
                "delete": [ "cfde_portal_admin" ]
             },

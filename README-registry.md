@@ -135,6 +135,7 @@ higher-privilege roles also enjoy the same privileges:
     - CFDE Infrastructure Operations
 10. General users who have personal preferences/profile data
     - a member of a general CFDE Portal group?
+    - during dev cycle: CFDE Portal Curator, CFDE Portal Reviewer, CFDE Portal Writer, CFDE Portal Reader
 11. The owner of a particular profile
     - where the profile `id` or related content `user_id` matches the authenticated client
 
