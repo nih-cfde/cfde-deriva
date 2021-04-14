@@ -24,6 +24,7 @@ from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, in
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
 from .datapackage import CfdeDataPackage, portal_schema_json
+from .cfde_login import get_archive_headers_map
 
 logger = logging.getLogger(__name__)
 
@@ -783,13 +784,14 @@ def main(subcommand, *args):
             raise TypeError('"submit" requires exactly two positional arguments: dcc_id, archive_url')
         dcc_id, archive_url = args
         submission_id = str(uuid.uuid3(uuid.NAMESPACE_URL, archive_url))
+        archive_headers_map = get_archive_headers_map(servername)
 
         # pre-flight check like action provider might want to do?
         # this is optional, implicitly happening again in Submission(...)
         registry.validate_dcc_id(dcc_id, submitting_user)
 
         # run the actual submission work if we get this far
-        submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user)
+        submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user, archive_headers_map=archive_headers_map)
         submission.ingest()
     elif subcommand == 'reconfigure':
         if len(args) == 1:
