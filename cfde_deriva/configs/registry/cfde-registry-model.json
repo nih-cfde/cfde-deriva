@@ -2725,17 +2725,11 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": {
-                           "types": ["select"],
-                           "projection": [
-                              "id"
-                           ],
-                           "projection_type": "acl",
-                           "scope_acl": ["*"]
-                        }
+                        "profile_owner": false
                      }
                   }
                },
@@ -2745,17 +2739,11 @@
                   "type": "string",
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": {
-                           "types": ["select"],
-                           "projection": [
-                              "id"
-                           ],
-                           "projection_type": "acl",
-                           "scope_acl": ["*"]
-                        }
+                        "profile_owner": false
                      }
                   }
                },
@@ -2765,17 +2753,11 @@
                   "type": "string",
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
-                        "profile_owner": {
-                           "types": ["select"],
-                           "projection": [
-                              "id"
-                           ],
-                           "projection_type": "acl",
-                           "scope_acl": ["*"]
-                        }
+                        "profile_owner": false
                      }
                   }
                }
@@ -2866,6 +2848,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -2882,6 +2865,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -2898,6 +2882,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -2988,6 +2973,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3079,6 +3065,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3170,6 +3157,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3261,6 +3249,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3352,6 +3341,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3443,6 +3433,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3534,6 +3525,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
@@ -3625,6 +3617,7 @@
                   },
                   "deriva": {
                      "acls": {
+                        "select": ["*"],
                         "update": []
                      },
                      "acl_bindings": {
