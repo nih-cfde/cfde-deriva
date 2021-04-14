@@ -333,7 +333,7 @@ class CfdeDataPackage (object):
                         if change:
                             column.alter(**change)
                             logger.info("Altered column %s.%s.%s with changes %r" % (
-                                nschema.name, ntable.name, ncolumn.name, changes,
+                                nschema.name, ntable.name, ncolumn.name, change,
                             ))
         self.get_model()
 
@@ -382,7 +382,7 @@ class CfdeDataPackage (object):
                         if change:
                             fkey.alter(**change)
                             logger.info("Altered foreign key %s.%s with changes %r" % (
-                                nschema.name, fkey.constraint_name, changes
+                                nschema.name, fkey.constraint_name, change
                             ))
 
         if need_parts:

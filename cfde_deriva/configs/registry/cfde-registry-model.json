@@ -2817,6 +2817,14 @@
                "compact": [
                   "display_name",
                   "full_name"
+               ],
+               "entry/create": [
+                  {
+                     "markdown_name": "Profile Owner",
+                     "comment": "Select the profile owner (your own identity, unless you are an administrator)",
+                     "source": [ {"outbound": ["CFDE", "user_profile_id_denorm_fkey"]}, "ID" ],
+                     "entity": true
+                  }
                ]
             }
          }
