@@ -586,7 +586,6 @@
          "name": "datapackage",
          "title": "Submitted Datapackage",
          "description": "Each submitted datapackage currently tracked by the CFDE-CC.",
-         "path": "datapackage.tsv",
          "schema": {
             "fields": [
                {
@@ -1031,7 +1030,6 @@
          "name": "datapackage_table",
          "title": "Submitted Datapackage Tabular Resource",
          "description": "Constituent submitted datapackage currently tracked by the CFDE-CC.",
-         "path": "datapackage_table.tsv",
          "schema": {
             "fields": [
                {
@@ -1198,7 +1196,6 @@
          "name": "release",
          "title": "CFDE Release",
          "description": "Each defined release known by the submission system.",
-         "path": "release.tsv",
          "schema": {
             "fields": [
                {
@@ -2611,6 +2608,108 @@
 
       {
          "profile": "tabular-data-resource",
+         "resourceSchema": "public",
+         "name": "ERMrest_Client",
+         "title": "ERMrest Client",
+         "description": "Authentication information each logged in user.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "ID",
+                  "description": "The authentication system ID for the user",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  },
+                  "deriva": {
+                  }
+               },
+               {
+                  "name": "Display_Name",
+                  "description": "The display name for the user",
+                  "type": "string",
+                  "deriva": {
+                  }
+               },
+               {
+                  "name": "Full_Name",
+                  "description": "The full name for the user",
+                  "type": "string",
+                  "deriva": {
+                  }
+               },
+               {
+                  "name": "Email",
+                  "description": "The email address for the user",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "select": [ "cfde_portal_admin", "cfde_portal_curator" ],
+                        "enumerate": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     },
+                     "acl_bindings": {
+                        "data_submitter": false
+                     }
+                  }
+               },
+               {
+                  "name": "Client_Object",
+                  "description": "The email address for the user",
+                  "type": "object",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": [],
+                        "enumerate": [ "cfde_submission_pipeline" ]
+                     },
+                     "acl_bindings": {
+                        "data_submitter": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["ID", "Display_Name", "Full_Name" ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "update": [],
+               "delete": []
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select"],
+                  "projection": [
+                     "ID"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "data_submitter": {
+                  "types": ["select"],
+                  "projection": [
+                     {"inbound": ["CFDE", "datapackage_submitting_user_fkey"]},
+                     "RID"
+                  ],
+                  "projection_type": "nonnull",
+                  "scope_acl": ["*"]
+               }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"
+               }
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "user_profile",
          "title": "User Profile",
          "description": "Profile and settings for each CFDE user who opts in.",
@@ -2632,18 +2731,44 @@
                         "profile_owner": false
                      }
                   }
+               },
+               {
+                  "name": "display_name",
+                  "description": "The display name for the user",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "full_name",
+                  "description": "The full name for the user",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
             "primaryKey": "id",
             "foreignKeys": [
                {
-                  "fields": "id",
-                  "constraint_name": "user_profile_id_fkey",
+                  "fields": ["id", "display_name", "full_name" ],
+                  "constraint_name": "user_profile_id_denorm_fkey",
                   "reference": {
                      "resourceSchema": "public",
                      "resource": "ERMrest_Client",
-                     "fields": "ID"
+                     "fields": ["ID", "Display_Name", "Full_Name" ]
                   },
                   "deriva": {
                      "acls": {
@@ -2677,6 +2802,22 @@
                   "projection_type": "acl",
                   "scope_acl": ["*"]
                }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{full_name}}} ({{{display_name}}})"
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "display_name",
+                  "full_name"
+               ],
+               "compact": [
+                  "display_name",
+                  "full_name"
+               ]
             }
          }
       },
@@ -2706,7 +2847,7 @@
                {
                   "name": "table_name",
                   "description": "The name of the CFDE inventory table being queried.",
-                  "type": "text",
+                  "type": "string",
                   "constraints": {
                      "required": true
                   },
@@ -2737,7 +2878,7 @@
                },
                {
                   "name": "name",
-                  "description": "A short, human-readable title for the saved query."
+                  "description": "A short, human-readable title for the saved query.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -2745,7 +2886,7 @@
                },
                {
                   "name": "description",
-                  "description": "A human-readable summary of the saved query's purpose and/or search criteria."
+                  "description": "A human-readable summary of the saved query's purpose and/or search criteria.",
                   "type": "string",
                   "constraints": {
                      "required": true

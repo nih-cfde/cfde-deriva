@@ -668,19 +668,6 @@ def main(servername, subcommand, catalog_id=None):
     dp.set_catalog(catalog, registry)
 
     if subcommand == 'provision':
-        # HACK: need to pre-populate ERMrest client w/ identities used in test data for submitting_user
-        catalog.post(
-            '/entity/public:ERMrest_Client?onconflict=skip',
-            json=[
-                {
-                    'ID': 'https://auth.globus.org/ad02dee8-d274-11e5-b4a0-8752ee3cf7eb',
-                    'Display_Name': 'karlcz@globusid.org',
-                    'Full_Name': 'Karl Czajkowski',
-                    'Email': 'karlcz@isi.edu',
-                    'Client_Object': {},
-                }
-            ]
-        ).raise_for_status()
         dp.provision()
         dp.load_data_files()
         # reconnect registry after provisioning

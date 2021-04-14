@@ -126,7 +126,7 @@ class CfdeDataPackage (object):
         self.doc_model_root = Model(None, self.model_doc)
         self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
-        if set(self.model_doc['schemas']) != {'CFDE'}:
+        if not set(self.model_doc['schemas']).issubset({'CFDE', 'public'}):
             raise ValueError('Unexpected schema set in data package: %s' % (set(self.model_doc['schemas']),))
 
     def set_catalog(self, catalog, registry=None):
@@ -239,89 +239,162 @@ class CfdeDataPackage (object):
         self._compare_model_docs(subset)
 
     def provision(self, alter=False):
-        if 'CFDE' not in self.cat_model_root.schemas:
-            # blindly load the whole model on an apparently empty catalog
-            self.catalog.post('/schema', json=self.model_doc).raise_for_status()
-        else:
-            # do some naively idempotent model definitions on existing catalog
-            # adding missing tables and missing columns
-            need_tables = []
-            need_columns = []
-            alter_columns = []
-            for ntable in self.doc_cfde_schema.tables.values():
-                table = self.cat_cfde_schema.tables.get(ntable.name)
-                if table is not None:
-                    for ncolumn in ntable.column_definitions:
-                        column = table.column_definitions.elements.get(ncolumn.name)
-                        if ncolumn.name in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'}:
-                            # consider schema upgrades except on system columns...
-                            pass
-                        elif column is not None:
-                            change = {}
-                            if ncolumn.nullok != column.nullok:
-                                if alter:
-                                    change['nullok'] = ncolumn.nullok
-                                elif column.nullok:
-                                    # existing column can accept this data
-                                    pass
-                                else:
-                                    raise ValueError('Incompatible nullok settings for %s.%s' % (table.name, column.name))
-                            def defeq(d1, d2):
-                                if d1 is None:
-                                    if d2 is not None:
-                                        return False
-                                return d1 == d2
-                            if not defeq(ncolumn.default, column.default):
-                                if alter:
-                                    change['default'] = ncolumn.default
-                                else:
-                                    # no compatibility model for defaults?
-                                    pass
-                            def typeeq(t1, t2):
-                                if t1.typename != t2.typename:
-                                    return False
-                                if t1.is_domain != t2.is_domain:
-                                    return False
-                                if t1.is_array != t2.is_array:
-                                    return False
-                                if t1.is_domain or t1.is_array:
-                                    return typeeq(t1.base_type, t2.base_type)
-                                return True
-                            if not typeeq(ncolumn.type, column.type):
-                                if alter:
-                                    change['type'] = ncolumn.type
-                                else:
-                                    raise ValueError('Mismatched type settings for %s.%s' % (table.name, column.name))
-                            if change:
-                                alter_columns.append((column, change))
-                        else:
-                            cdoc = ncolumn.prejson()
-                            cdoc.update({'table_name': table.name, 'nullok': True})
-                            need_columns.append(cdoc)
-                    # TODO: check existing table keys/foreign keys for compatibility?
-                else:
+        """Provision model idempotently in self.catalog"""
+        need_parts = []
+
+        # create empty schemas if missing
+        for nschema in self.doc_model_root.schemas.values():
+            if nschema.name not in self.cat_model_root.schemas:
+                sdoc = nschema.prejson()
+                del sdoc['tables']
+                sdoc.update({"schema_name": nschema.name})
+                need_parts.append(sdoc)
+
+        if need_parts:
+            self.catalog.post('/schema', json=need_parts).raise_for_status()
+            logger.info("Added empty schemas %r" % ([ sdoc["schema_name"] for sdoc in need_parts ]))
+            need_parts.clear()
+            self.get_model()
+
+        # create tables if missing, but stripped of fkeys and acl-bindings which might be incoherent
+        for nschema in self.doc_model_root.schemas.values():
+            schema = self.cat_model_root.schemas[nschema.name]
+            for ntable in nschema.tables.values():
+                if ntable.name not in schema.tables:
                     tdoc = ntable.prejson()
-                    tdoc['schema_name'] = 'CFDE'
-                    need_tables.append(tdoc)
+                    tdoc.pop("foreign_keys")
+                    tdoc.pop("acl_bindings")
+                    for cdoc in tdoc["column_definitions"]:
+                        cdoc.pop("acl_bindings")
+                    tdoc.update({"schema_name": nschema.name, "table_name": ntable.name})
+                    need_parts.append(tdoc)
 
-            if need_tables:
-                self.catalog.post('/schema', json=need_tables).raise_for_status()
-                logger.debug("Added tables %s" % ([tdoc['table_name'] for tdoc in need_tables]))
+        if need_parts:
+            self.catalog.post('/schema', json=need_parts).raise_for_status()
+            logger.info("Added base tables %r" % ([ (tdoc["schema_name"], tdoc["table_name"]) for tdoc in need_parts ]))
+            need_parts.clear()
+            self.get_model()
 
-            for cdoc in need_columns:
-                self.catalog.post(
-                    '/schema/CFDE/table/%s/column' % urlquote(cdoc['table_name']),
-                    json=cdoc
-                ).raise_for_status()
-                logger.debug("Added column %s.%s" % (cdoc['table_name'], cdoc['name']))
-
-            for pair in alter_columns:
-                column, cdoc = pair
-                column.alter(**cdoc)
-                logger.debug("Altered column %s.%s %s" % (column.table.name, column.name, cdoc))
-
-        logger.info('Provisioned model in catalog %s' % self.catalog.get_server_uri())
+        # create and/or upgrade columns, but stripped of acl-bindings which might be incoherent
+        for nschema in self.doc_model_root.schemas.values():
+            schema = self.cat_model_root.schemas[nschema.name]
+            for ntable in nschema.tables.values():
+                table = schema.tables[ntable.name]
+                for ncolumn in ntable.columns:
+                    if ncolumn.name in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'}:
+                        # don't consider patching system columns...
+                        pass
+                    elif ncolumn.name not in table.columns.elements:
+                        cdoc = ncolumn.prejson()
+                        cdoc.pop('acl_bindings')
+                        self.catalog.post(
+                            '/schema/%s/table/%s/column' % (urlquote(nschema.name), urlquote(ntable.name)),
+                            json=cdoc
+                        ).raise_for_status()
+                        logger.info("Added column %s.%s.%s" % (nschema.name, ntable.name, ncolumn.name))
+                    else:
+                        # consider column upgrade
+                        column = table.columns[ncolumn.name]
+                        change = {}
+                        if ncolumn.nullok != column.nullok:
+                            if alter:
+                                change['nullok'] = ncolumn.nullok
+                            elif column.nullok:
+                                # existing column can accept this data
+                                pass
+                            else:
+                                raise ValueError('Incompatible nullok settings for %s.%s' % (table.name, column.name))
+                        def defeq(d1, d2):
+                            if d1 is None:
+                                if d2 is not None:
+                                    return False
+                            return d1 == d2
+                        if not defeq(ncolumn.default, column.default):
+                            if alter:
+                                change['default'] = ncolumn.default
+                            else:
+                                # no compatibility model for defaults?
+                                pass
+                        def typeeq(t1, t2):
+                            if t1.typename != t2.typename:
+                                return False
+                            if t1.is_domain != t2.is_domain:
+                                return False
+                            if t1.is_array != t2.is_array:
+                                return False
+                            if t1.is_domain or t1.is_array:
+                                return typeeq(t1.base_type, t2.base_type)
+                            return True
+                        if not typeeq(ncolumn.type, column.type):
+                            if alter:
+                                change['type'] = ncolumn.type
+                            else:
+                                raise ValueError('Mismatched type settings for %s.%s' % (table.name, column.name))
+                        if change:
+                            column.alter(**change)
+                            logger.info("Altered column %s.%s.%s with changes %r" % (
+                                nschema.name, ntable.name, ncolumn.name, changes,
+                            ))
         self.get_model()
+
+        # create and/or upgrade keys
+        for nschema in self.doc_model_root.schemas.values():
+            schema = self.cat_model_root.schemas[nschema.name]
+            for ntable in nschema.tables.values():
+                table = schema.tables[ntable.name]
+                for nkey in ntable.keys:
+                    cnames = { c.name for c in nkey.unique_columns }
+                    key = table.key_by_columns(cnames, raise_nomatch=False)
+                    if key is None:
+                        key = table.create_key(nkey.prejson())
+                        logger.info("Created key %s" % (key.constraint_name,))
+        self.get_model()
+
+        # create and/or upgrade fkeys, stripping acl-bindings which may be incoherent
+        for nschema in self.doc_model_root.schemas.values():
+            schema = self.cat_model_root.schemas[nschema.name]
+            for ntable in nschema.tables.values():
+                table = schema.tables[ntable.name]
+                for nfkey in ntable.foreign_keys:
+                    if { c.name for c in nfkey.foreign_key_columns }.issubset({'RCB', 'RMB'}):
+                        # skip built-in RCB/RMB fkeys we don't want
+                        continue
+                    pktable = schema.model.table(nfkey.pk_table.schema.name, nfkey.pk_table.name)
+                    cmap = {
+                        table.columns[nfkc.name]: pktable.columns[npkc.name]
+                        for nfkc, npkc in nfkey.column_map.items()
+                    }
+                    fkey = table.fkey_by_column_map(cmap, raise_nomatch=False)
+                    if fkey is None:
+                        fkdoc = nfkey.prejson()
+                        fkdoc["foreign_key_columns"][0].update({"schema_name": nschema.name, "table_name": ntable.name})
+                        fkdoc.pop("acl_bindings")
+                        need_parts.append(fkdoc)
+                    else:
+                        # consider fkey upgrade
+                        change = {}
+                        if nfkey.constraint_name != fkey.constraint_name:
+                            change['constraint_name'] = nfkey.constraint_name
+                        if nfkey.on_delete != fkey.on_delete:
+                            change['on_delete'] = nfkey.on_delete
+                        if nfkey.on_update != fkey.on_update:
+                            change['on_update'] = nfkey.on_update
+                        if change:
+                            fkey.alter(**change)
+                            logger.info("Altered foreign key %s.%s with changes %r" % (
+                                nschema.name, fkey.constraint_name, changes
+                            ))
+
+        if need_parts:
+            self.catalog.post('/schema', json=need_parts).raise_for_status()
+            logger.info("Added foreign-keys %r" % ([ tuple(fkdoc["names"][0]) for fkdoc in need_parts ]))
+            need_parts.clear()
+
+        self.get_model()
+
+        # restore acl-bindings we stripped earlier
+        self.apply_custom_config()
+        logger.info('Provisioned model in catalog %s' % self.catalog.get_server_uri())
 
     def apply_custom_config(self):
         self.get_model()
@@ -516,7 +589,123 @@ class CfdeDataPackage (object):
                 del writer
             logger.info('Dumped resource "%s" as "%s"' % (resource['name'], fname))
 
+    def load_data_files(self, onconflict='abort'):
+        """Load tabular data from files into catalog table.
+
+        :param onconflict: ERMrest onconflict query parameter to emulate (default abort)
+        """
+        tables_doc = self.model_doc['schemas']['CFDE']['tables']
+        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+            # we are doing a clean load of data in fkey dependency order
+            table = self.doc_cfde_schema.tables[tname]
+            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+            logger.debug('Loading table "%s"...' % tname)
+            if "path" not in resource:
+                continue
+            def open_package():
+                if isinstance(self.package_filename, _PackageDataName):
+                    return self.package_filename.get_data_stringio(resource["path"])
+                else:
+                    fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
+                    return open(fname, 'r')
+            try:
+                with open_package() as f:
+                    # translate TSV to python dicts
+                    reader = csv.reader(f, delimiter="\t")
+                    header = next(reader)
+                    missing = set(table.annotations[self.schema_tag].get("missingValues", []))
+                    for cname in header:
+                        if cname not in table.column_definitions.elements:
+                            raise ValueError("header column %s not found in table %s" % (cname, table.name))
+                    if onconflict == 'update':
+                        def has_key(cols):
+                            if set(cols).issubset(set(header)):
+                                return table.key_by_columns(cols, raise_nomatch=False) is not None
+                            return False
+                            
+                        keycols = None
+                        if has_key(('id',)):
+                            keycols = ('id',)
+                        elif has_key(('id_namespace', 'local_id')):
+                            keycols = ('id_namespace', 'local_id')
+                        else:
+                            for key in table.keys:
+                                if has_key([ c.name for c in key.unique_columns ]):
+                                    keycols = [ c.name for c in key.unique_columns ]
+                                    break
+                            if keycols is None:
+                                raise NotImplementedError('Table %s TSV columns %r do not cover a key' % (table.name, header))
+
+                        updcols = [ cname for cname in header if cname not in keycols ]
+                        update_sig = ','.join([ urlquote(cname) for cname in keycols ])
+                        if updcols:
+                            update_sig = ';'.join([ update_sig, ','.join([ urlquote(cname) for cname in updcols ])])
+                        else:
+                            update_sig = False
+                    # Largest known CFDE ingest has file with >5m rows
+                    batch = []
+                    def store_batch():
+                        def row_to_json(row):
+                            row = [ None if v in missing else v for v in row ]
+                            res = dict(zip(header, row))
+                            for cname in header:
+                                if table.columns[cname].type.typename in ('text[]', 'json', 'jsonb'):
+                                    res[cname] = json.loads(res[cname]) if res[cname] is not None else None
+                            return res
+                        payload = [ row_to_json(row) for row in batch ]
+                        if onconflict == 'update':
+                            # emulate as two passes
+                            rj = self.catalog.post(
+                                "/entity/CFDE:%s?onconflict=skip" % (urlquote(table.name),),
+                                json=payload
+                            ).json()
+                            if update_sig:
+                                self.catalog.put(
+                                    "/attributegroup/CFDE:%s/%s" % (urlquote(table.name), update_sig),
+                                    json=payload
+                                ).json() # drain response body...
+                        else:
+                            entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
+                            rj = self.catalog.post(
+                                entity_url,
+                                json=payload
+                            ).json()
+                        logger.info("Batch of rows for %s loaded" % table.name)
+                        skipped = len(batch) - len(rj)
+                        if skipped:
+                            logger.debug("Batch contained %d rows with existing keys" % skipped)
+
+                    for raw_row in reader:
+                        # Collect full batch, then insert at once
+                        batch.append(raw_row)
+                        if len(batch) >= self.batch_size:
+                            try:
+                                store_batch()
+                            except Exception as e:
+                                logger.error("Table %s data load FAILED from "
+                                             "%s: %s" % (table.name, self.package_filename, e))
+                                raise
+                            else:
+                                batch.clear()
+                    # After reader exhausted, ingest final batch
+                    if len(batch) > 0:
+                        try:
+                            store_batch()
+                        except Exception as e:
+                            logger.error("Table %s data load FAILED from "
+                                         "%s: %s" % (table.name, self.package_filename, e))
+                            raise
+                    logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
+            except UnicodeDecodeError as e:
+                raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
+
     def sqlite_import_data_files(self, conn, onconflict='abort', table_error_callback=None):
+        """Load tabular data from files into sqlite table.
+
+        :param conn: Existing sqlite3 connection to use as data destination.
+        :param onconflict: ERMrest onconflict query parameter to emulate (default abort)
+        :param table_error_callback: Optional callback to signal table loading errors, lambda rname, rpath, msg: ...
+        """
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are doing a clean load of data in fkey dependency order
@@ -581,14 +770,27 @@ class CfdeDataPackage (object):
                     table_error_callback(resource["name"], resource["path"], str(e))
                 raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
 
-    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None):
+    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None):
+        """Load tabular data from sqlite table into corresponding catalog table.
+
+        :param conn: Existing sqlite3 connection to use as data source.
+        :param onconflict: ERMrest onconflict query parameter for entity POST (default 'abort')
+        :param table_done_callback: Optional callback to signal completion of one table, lambda tname, tpath: ...
+        :param table_error_callback: Optional callback to signal error for one table, lambda tname, tpath, msg: ...
+        :param tablenames: Optional set of tablenames to load (default None means load all tables)
+        """
         if not self.package_filename is portal_schema_json:
             raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackage')
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
+        if tablenames is None:
+            tablenames = set(tables_doc.keys())
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are copying sqlite table content to catalog under same table name
             table = self.doc_cfde_schema.tables[tname]
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+            if tname not in tablenames:
+                # skip tables excluded in caller-supplied tablenames list
+                continue
             logger.debug('Loading table "%s"...' % tname)
             entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
             cols = [ col for col in table.columns if col.name not in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'} ]

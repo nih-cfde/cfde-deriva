@@ -290,15 +290,6 @@ class CatalogConfigurator (object):
             }
         )
 
-        # prettier display of built-in ERMrest_Client table entries
-        if 'public' in model.schemas \
-           and 'ERMrest_Client' in model.schemas['public'].tables:
-            _update(
-                model.table('public', 'ERMrest_Client').table_display,
-                'row_name',
-                {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
-            )
-
         # allow augmentation of acl bindings whether we apply class-based overrides or not...
         for schema in model.schemas.values():
             for table in schema.tables.values():
@@ -465,46 +456,6 @@ class RegistryConfigurator (CatalogConfigurator):
                 'insert': [ authn_id.cfde_portal_admin ],
                 'update': [ authn_id.cfde_portal_admin ],
                 'delete': [ authn_id.cfde_portal_admin ]
-            }
-        }
-    )
-
-    schema_table_acls = multiplexed_acls_union(
-        CatalogConfigurator.schema_table_acls,
-        {
-            # make client table visible for provenance presentation...
-            ('public', 'ERMrest_Client'): {
-                "select": [ "*" ],
-                "insert": [ authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
-            },
-        }
-    )
-
-    schema_table_column_acls = multiplexed_acls_union(
-        CatalogConfigurator.schema_table_acls,
-        {
-            # ... but hide sensitive client table cols
-            ('public', 'ERMrest_Client', 'Email'): {
-                "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
-                "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
-            },
-            ('public', 'ERMrest_Client', 'Client_Object'): {
-                "select": [],
-                "enumerate": [ authn_id.cfde_submission_pipeline ],
-            },
-        }
-    )
-
-    schema_table_aclbindings = multiplexed_aclbindings_merge(
-        CatalogConfigurator.schema_table_aclbindings,
-        {
-            ('public', 'ERMrest_Client'): {
-                "self_view": {
-                    "types": ["select"],
-                    "projection": ["ID"],
-                    "projection_type": "acl",
-                    "scope_acl": ["*"],
-                }
             }
         }
     )
@@ -833,10 +784,13 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
 
 def make_model(tableschema, configurator, trusted=False):
     resources = tableschema.pop('resources')
-    rnames = {}
+    rnames = set()
     for r in resources:
-        if r["name"] in rnames:
-            raise ValueError('Resource name "%s" appears more than once' % (r["name"],))
+        np = (r.get("resourceSchema", schema_name), r["name"])
+        if np in rnames:
+            raise ValueError('Resource name "%r" appears more than once' % (np,))
+        rnames.add(np)
+
     pre_annotations = tableschema.get("deriva", {})
     history_capture = pre_annotations.pop('history_capture', False) if trusted else False
     annotations = {
@@ -848,17 +802,19 @@ def make_model(tableschema, configurator, trusted=False):
             continue
         if k in pre_annotations and trusted:
             annotations[t] = pre_annotations.pop(k)
-    return {
-        "schemas": {
-            schema_name: {
-                "schema_name": schema_name,
-                "tables": {
-                    tdef["name"]: make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
-                    for tdef in resources
-                },
+
+    schemas = {}
+    for tdef in resources:
+        sname, tname = tdef.pop("resourceSchema", schema_name), tdef["name"]
+        if sname not in schemas:
+            schemas[sname] = {
+                "schema_name": sname,
+                "tables": {},
                 "acls": configurator.schema_acls.get(schema_name, {}),
             }
-        },
+        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
+    return {
+        "schemas": schemas,
         "annotations": annotations,
         "acls": configurator.catalog_acls,
     }
