@@ -19,7 +19,7 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
+from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
@@ -297,6 +297,7 @@ class Submission (object):
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
+            self.record_vocab_usage(self.registry, self.sqlite_filename, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.prepare_sqlite_derived_data(self.sqlite_filename)
@@ -728,6 +729,61 @@ class Submission (object):
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
+
+    @classmethod
+    def record_vocab_usage(cls, registry, sqlite_filename, id):
+        """Upload vocabulary information to registry.
+
+        :param registry: The Registry instance for the submission system
+        :param sqlite_filename: The sqlite3 file for the loaded submission content.
+        :param id: The submission id.
+        """
+        def get_batches(cur):
+            batch = cur.fetchmany()
+            while batch:
+                yield batch
+                batch = cur.fetchmany()
+
+        catalog = registry._catalog
+        # HACK: use portal schema to load same tables that exist in registry
+        canon_dp = CfdeDataPackage(portal_schema_json)
+        canon_dp.set_catalog(catalog)
+
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.info('Augmenting registry vocabulary tables...')
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', tablenames={'anatomy', 'assay_type', 'data_type', 'file_format', 'ncbi_taxonomy'})
+            logger.info('Recording submission vocabulary usage in registry...')
+            cur = conn.cursor()
+            cur.arraysize = CfdeDataPackage.batch_size
+            for src_tname, src_cname, dst_tname, dst_cname in [
+                    ('biosample', 'anatomy', 'datapackage_anatomy', 'anatomy'),
+                    ('file', 'assay_type', 'datapackage_assay_type', 'assay_type'),
+                    ('file', 'data_type', 'datapackage_data_type', 'data_type'),
+                    ('file', 'file_format', 'datapackage_file_format', 'file_format'),
+                    ('subject_role_taxonomy', 'taxonomy_id', 'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
+                    ('subject', 'granularity', 'datapackage_subject_granularity', 'subject_granularity'),
+                    ('subject_role_taxonomy', 'role_id', 'datapackage_subject_role', 'subject_role'),
+            ]:
+                try:
+                    cur.execute("""
+SELECT DISTINCT %(cname)s
+FROM %(tname)s
+WHERE %(cname)s IS NOT NULL
+""" % {
+    "tname": src_tname,
+    "cname": src_cname,
+})
+                    for batch in get_batches(cur):
+                        batch = [ { "datapackage": id, dst_cname: row[0] } for row in batch ]
+                        entity_url = "/entity/CFDE:%s?onconflict=skip" % (urlquote(dst_tname),)
+                        r = catalog.post(entity_url, json=batch)
+                        logger.info("Batch of terms for %s recorded" % dst_tname)
+                        r.json() # consume response
+
+                    logger.info("All terms for table %s recorded" % dst_tname)
+                except Exception as e:
+                    logger.error("Error while recording terms for table %s: %s" % (dst_tname, e))
+                    raise
 
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
