@@ -797,7 +797,7 @@ class CfdeDataPackage (object):
             colnames = [ col.name for col in cols ]
             valfuncs = [
                 # f(x) does json decoding or is identify func, depending on column def
-                (lambda x: json.loads(x)) if col.type.typename == 'text[]' else lambda x: x
+                (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb') else lambda x: x
                 for col in cols
             ]
             cur = conn.cursor()
