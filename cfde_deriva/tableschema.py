@@ -372,15 +372,7 @@ class ReviewConfigurator (CatalogConfigurator):
         )
         if self.registry is not None and self.submission_id is not None:
             metadata = self.registry.get_datapackage(self.submission_id)
-            dcc_read_acl = list(set.union(*[
-                set(self.registry.get_dcc_acl(metadata['submitting_dcc'], role))
-                for role in {
-                        terms.cfde_registry_grp_role.admin,
-                        terms.cfde_registry_grp_role.reviewer,
-                        terms.cfde_registry_grp_role.review_decider,
-                        terms.cfde_registry_grp_role.submitter,
-                }
-            ]))
+            dcc_read_acl = self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.reviewer)
             # review catalogs allow DCC-specific read-access on entire CFDE schema
             acls = multiplexed_acls_union(
                 acls,

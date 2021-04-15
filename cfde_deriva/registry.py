@@ -598,8 +598,28 @@ class Registry (object):
         WebauthnUser.acl_authz_test().
         """
         acl = set()
-        for row in self.get_groups_by_dcc_role(role_id, dcc_id):
-            acl.update({ grp['webauthn_id'] for grp in row['groups'] })
+        roles_sufficient = {
+            terms.cfde_registry_grp_role.submitter: {
+                terms.cfde_registry_grp_role.submitter,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.reviewer: {
+                terms.cfde_registry_grp_role.submitter,
+                terms.cfde_registry_grp_role.reviewer,
+                terms.cfde_registry_grp_role.review_decider,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.review_decider: {
+                terms.cfde_registry_grp_role.review_decider,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.admin: {
+                terms.cfde_registry_grp_role.admin,
+            }
+        }
+        for sub_role_id in roles_sufficient.get(role_id, {role_id,}):
+            for row in self.get_groups_by_dcc_role(sub_role_id, dcc_id):
+                acl.update({ grp['webauthn_id'] for grp in row['groups'] })
         return list(sorted(acl))
 
     def enforce_dcc_submission(self, dcc_id, submitting_user):
