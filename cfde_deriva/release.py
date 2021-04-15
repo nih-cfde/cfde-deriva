@@ -186,6 +186,8 @@ class Release (object):
                 # re-check if portal model has changed since submission was checked?
                 submission.datapackage_model_check(submission.content_path)
                 submission.load_sqlite(submission.content_path, self.sqlite_filename)
+                # this works because we incrementally translate each DCC's primary_dcc_contact rows
+                submission.transitional_etl_dcc_table(submission.content_path, self.sqlite_filename, submission.submitting_dcc_id)
 
             # do this once w/ all content now loaded in sqlite
             logger.info('Preparing derived data...')

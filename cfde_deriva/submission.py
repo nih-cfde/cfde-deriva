@@ -23,7 +23,7 @@ from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, in
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, portal_schema_json
+from .datapackage import CfdeDataPackage, portal_schema_json, sql_literal
 from .cfde_login import get_archive_headers_map
 
 logger = logging.getLogger(__name__)
@@ -298,9 +298,11 @@ class Submission (object):
             self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
             self.record_vocab_usage(self.registry, self.sqlite_filename, self.datapackage_id)
+            self.transitional_etl_dcc_table(self.content_path, self.sqlite_filename, self.submitting_dcc_id)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.prepare_sqlite_derived_data(self.sqlite_filename)
+            self.validate_submission_dcc_table(self.sqlite_filename, self.submitting_dcc_id)
             self.upload_sqlite_content(self.review_catalog, self.sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
@@ -650,6 +652,63 @@ class Submission (object):
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback)
+
+    @classmethod
+    def transitional_etl_dcc_table(cls, content_path, sqlite_filename, submitting_dcc):
+        """Apply transitional ETL if needed to prepare dcc table"""
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        # this with block produces a transaction in sqlite3
+        with sqlite3.connect(sqlite_filename) as conn:
+            cur = conn.cursor()
+            if 'primary_dcc_contact' in submitted_dp.doc_cfde_schema.tables:
+                if 'dcc' in submitted_dp.doc_cfde_schema.tables:
+                    raise exception.InvalidDatapackage('Submission mixes C2M2 dcc and legacy primary_dcc_contact tables')
+                logger.info('Translating legacy primary_dcc_contact into dcc table...')
+                cur.execute("""
+INSERT INTO dcc (id, dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id)
+SELECT
+  %(dcc_id)s,
+  dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+FROM (
+  SELECT
+    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+  FROM primary_dcc_contact
+  EXCEPT
+  SELECT
+    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+   FROM dcc
+) s;
+""" % {
+    'dcc_id': sql_literal(submitting_dcc)
+})
+                logger.info('Deleting legacy primary_dcc_contact records...')
+                cur.execute("""DELETE FROM primary_dcc_contact;""")
+
+    @classmethod
+    def validate_submission_dcc_table(cls, sqlite_filename, submitting_dcc):
+        """Validate that the dcc table in sqlite has exactly one row matching the submitting_dcc"""
+        with sqlite3.connect(sqlite_filename) as conn:
+            cur = conn.cursor()
+            cur.execute("""SELECT count(*) FROM dcc;""")
+            cnt = cur.fetchone()[0]
+            if cnt != 1:
+                raise exception.InvalidDatapackage('The CFDE submission must have one entry in the dcc table, not %d.' % cnt)
+            cur.execute("""SELECT id FROM dcc;""")
+            dcc_id = cur.fetchone()[0]
+            if dcc_id != submitting_dcc:
+                raise exception.InvalidDatapackage('Submission dcc.id = %s does not match submitting DCC %s' % (dcc_id, submitting_dcc,))
+            cur.execute("""
+SELECT d.project_id_namespace, d.project_local_id, p."RID"
+FROM dcc d
+LEFT OUTER JOIN project_root p ON (d.project_id_namespace = p.project_id_namespace AND d.project_local_id = p.project_local_id);
+""")
+            id_namespace, local_id, rid = cur.fetchone()
+            if rid is None:
+                raise exception.InvalidDatapackage('DCC project identifier (%s, %s) does not designate a root in the project hierarchy' % (
+                    id_namespace,
+                    local_id
+                ))
 
     @classmethod
     def prepare_sqlite_derived_data(cls, sqlite_filename):

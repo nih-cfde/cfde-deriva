@@ -1193,6 +1193,102 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "dcc",
+         "title": "DCC",
+         "description": "The Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The identifier for this DCC, issued by the CFDE-CC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_name",
+                  "description": "A short, human-readable, machine-read-friendly label for this DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_abbreviation",
+                  "description": "A very short display label for this contact's DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^[a-zA-Z0-9_]+$"
+                  }
+               },
+               {
+                  "name": "dcc_description",
+                  "description": "A human-readable description of this DCC.",
+                  "type": "string"
+               },
+               {
+                  "name": "contact_email",
+                  "description": "Email address of this DCC's primary contact.",
+                  "type": "string",
+                  "format": "email",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "contact_name",
+                  "description": "Name of this DCC's primary contact.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc_url",
+                  "description": "URL of the front page of the website for this contact's DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this DCC.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "id" ],
+            "foreignKeys": [
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "dcc_project_fkey",
+                  "reference": {
+                     "title": "DCC Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "primary_dcc_contact",
          "title": "Primary DCC Contact",
          "description": "One primary contact person for the Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
