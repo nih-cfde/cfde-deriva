@@ -361,10 +361,10 @@
                         {"outbound": ["CFDE", "file_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
                         "RID"
-                     ]
+                     ],
+                     "entity": true
                   },
                   "S_file_format": {
                      "comment": "The content format of the file.",
@@ -768,8 +768,7 @@
                         {"outbound": ["CFDE", "biosample_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -1068,8 +1067,7 @@
                         {"outbound": ["CFDE", "subject_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -1195,7 +1193,7 @@
          "profile": "tabular-data-resource",
          "name": "dcc",
          "title": "DCC",
-         "description": "The Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
+         "description": "The Common Fund program or data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
          "schema": {
             "fields": [
                {
@@ -1208,6 +1206,7 @@
                },
                {
                   "name": "dcc_name",
+                  "title": "DCC Name",
                   "description": "A short, human-readable, machine-read-friendly label for this DCC.",
                   "type": "string",
                   "constraints": {
@@ -1216,6 +1215,7 @@
                },
                {
                   "name": "dcc_abbreviation",
+                  "title": "Abbreviation",
                   "description": "A very short display label for this contact's DCC",
                   "type": "string",
                   "constraints": {
@@ -1226,6 +1226,7 @@
                },
                {
                   "name": "dcc_description",
+                  "title": "Description",
                   "description": "A human-readable description of this DCC.",
                   "type": "string"
                },
@@ -1285,6 +1286,40 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{dcc_abbreviation}}}: {{{dcc_name}}}"
+               }
+            },
+            "visible_columns": {
+               "detailed": [
+                  "id",
+                  "dcc_name",
+                  "dcc_abbreviation",
+                  {"outbound": ["CFDE", "dcc_project_fkey"]},
+                  "contact_name",
+                  "contact_email",
+                  "dcc_url",
+                  "dcc_description"
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "DCC",
+                     "comment": "Identifying and contact information for the program or DCC.",
+                     "display": {
+                        "markdown_pattern": "{{{dcc_abbreviation}}}: {{{dcc_name}}}\n{{{contact_name}}} ({{{contact_email}}})\n[{{{dcc_abbreviation}}} website]({{{dcc_url}}})"
+                     }
+                  },
+                  "dcc_description"
+               ],
+               "filter": {"and": [
+                  {"source": "dcc_abbreviation"},
+                  {"source": "contact_name"},
+                  {"source": "contact_email"}
+               ]}
+            }
          }
       },
       {
@@ -1460,6 +1495,16 @@
                      "comment": "The time when the project was created.",
                      "source": "creation_time"
                   },
+                  "S_root_project": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program containing this project.",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
+                        "RID"
+                     ]
+                  },
                   "S_parent_project": {
                      "markdown_name": "Parent Project",
                      "comment": "Direct ancestor of the project.",
@@ -1473,7 +1518,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {
+                 {
                      "markdown_name": "Parent Project",
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_child_fkey"]},
@@ -1530,6 +1575,7 @@
                ],
                "filter": {"and": [
                   {"sourcekey": "S_creation_time"},
+                  {"sourcekey": "S_root_project"},
                   {
                      "markdown_name": "Super-Project",
                      "comment": "Direct or indirect ancestor of the project.",
@@ -1946,8 +1992,7 @@
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
                         "RID"
                      ]
                   },
