@@ -2924,6 +2924,24 @@
          "schema": {
             "fields": [
                {
+                  "name": "id",
+                  "description": "The client-generated unique ID for the query (i.e. UUID or hash).",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     },
+                     "generated": true
+                  }
+               },
+               {
                   "name": "user_id",
                   "description": "The authentication system ID for the user who saved the query.",
                   "type": "string",
@@ -2937,7 +2955,8 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true
                   }
                },
                {
@@ -2954,7 +2973,8 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true
                   }
                },
                {
@@ -2971,7 +2991,8 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true
                   }
                },
                {
@@ -2992,7 +3013,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": ["user_id", "table_name", "facets"],
+            "primaryKey": ["id"],
             "foreignKeys": [
                {
                   "fields": "user_id",

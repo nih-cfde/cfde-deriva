@@ -87,16 +87,18 @@ requesting that a profile be created.  The profile record will store
 any scalar settings for the user, as a single column for each named
 setting.
 
-The `saved_query` table is keyed by ??? and the authenticated user
-ID. Each user can have zero or more saved query records associated
-with their identity. Each record will store necessary information to
-reconstitute a query in Chaise, to name/describe the query in a query
-listing UI, and other system metadata TBD.
+The `saved_query` table is keyed by a client-generated `id` column. To
+avoid collisions between users of the system, the client SHOULD use a
+UUID scheme which includes randomness or a hashing scheme which
+includes the `user_id` as well as other query identity information in
+the hash input. Each user can have zero or more saved query records
+associated with their identity. Each record will store necessary
+information to reconstitute a query in Chaise, to name/describe the
+query in a query listing UI, and other system metadata TBD.
 
-Generally, the various "favorite" tables form binary associations to
+Generally, the various `favorite_*` tables form binary associations to
 link a subset of vocabulary concepts from a given vocabulary table to
 a given user's profile.
-
 
 ### Client Roles
 
