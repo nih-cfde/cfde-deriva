@@ -354,7 +354,7 @@
                         "RID"
                      ]
                   },
-                  "S_root_project": {
+                  "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the file.",
                      "source": [
@@ -471,7 +471,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy", "open": true},
                   {"sourcekey": "S_taxonomy"},
-                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {
                      "markdown_name": "Subject Granularity",
@@ -761,7 +761,7 @@
                      "comment": "The project attributed as the source of the biosample.",
                      "source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
                   },
-                  "S_root_project": {
+                  "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the biosample.",
                      "source": [
@@ -844,7 +844,7 @@
                   {"sourcekey": "S_assay_type", "open": true},
                   {"sourcekey": "S_anatomy", "open": true},
                   {"sourcekey": "S_taxonomy"},
-                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_subjects"},
@@ -1060,7 +1060,7 @@
                      "comment": "The project attributed as the source of the subject.",
                      "source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]
                   },
-                  "S_root_project": {
+                  "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the subject.",
                      "source": [
@@ -1170,7 +1170,7 @@
                   {"sourcekey": "S_taxonomy", "open": true},
                   {"sourcekey": "S_granularity", "open": true},
                   {"sourcekey": "S_role"},
-                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_dcc"},
                   {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the subject.",
@@ -1495,7 +1495,7 @@
                      "comment": "The time when the project was created.",
                      "source": "creation_time"
                   },
-                  "S_root_project": {
+                  "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program containing this project.",
                      "source": [
@@ -1575,7 +1575,7 @@
                ],
                "filter": {"and": [
                   {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_dcc"},
                   {
                      "markdown_name": "Super-Project",
                      "comment": "Direct or indirect ancestor of the project.",
@@ -1984,7 +1984,7 @@
                         "RID"
                      ]
                   },
-                  "S_root_project": {
+                  "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program which defined the collection.",
                      "source": [
@@ -2114,7 +2114,7 @@
                         "RID"
                      ]
                   },
-                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {
                      "markdown_name": "Subject Granularity",
