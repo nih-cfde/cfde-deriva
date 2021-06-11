@@ -550,7 +550,7 @@ class RegistryConfigurator (CatalogConfigurator):
         def fixup(*entries):
             for entry in entries:
                 if 'url' in entry:
-                    entry['url'] = entry['url'].replace('#registry/', '#1/')
+                    entry['url'] = entry['url'].replace('#{{$catalog.id}}/', '#1/')
                 elif 'children' in entry:
                     fixup(*entry['children'])
 
