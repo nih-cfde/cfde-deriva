@@ -358,7 +358,7 @@ class CfdeDataPackage (object):
                 if True or table.is_association():
                     for cname in {'RCB', 'RMB'}:
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
-                            print('Dropping %s' % fkey.uri_path)
+                            logger.info('Dropping %s' % fkey.uri_path)
                             fkey.drop()
 
         def compact_visible_columns(table):
