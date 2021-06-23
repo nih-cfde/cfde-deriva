@@ -63,6 +63,7 @@ class Release (object):
                     raise TypeError('Expected datapackage id (str) or registry row (dict) not %s' % (type(dp),))
                 if dcc_id != dp['submitting_dcc']:
                     raise ValueError('Datapackage %s submitting DCC %s not valid for dcc %s' % (dp['id'], dp['submitting_dcc'], dcc_id))
+                self.dcc_datapackages[dcc_id] = dp
         else:
             self.dcc_datapackages = registry.get_latest_approved_datapackages()
 
@@ -311,7 +312,8 @@ def main(subcommand, *args):
             raise TypeError('"build" requires one positional argument: release_id')
 
         rel_id = args[0]
-        release = Release(server, registry, rel_id, archive_headers_map=archive_headers_map)
+        rel_row, dcc_datapackages = registry.get_release(rel_id)
+        release = Release(server, registry, rel_id, dcc_datapackages=dcc_datapackages, archive_headers_map=archive_headers_map)
         rel = release.build()
         print('Release %(id)s has been built in %(ermrest_url)s' % rel)
     elif subcommand == 'reconfigure':
