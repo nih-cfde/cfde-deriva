@@ -19,11 +19,11 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
+from deriva.core import DerivaServer, get_credential, init_logging
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, portal_schema_json
+from .datapackage import CfdeDataPackage, portal_schema_json, make_session_config
 
 logger = logging.getLogger(__name__)
 
@@ -758,8 +758,7 @@ def main(subcommand, *args):
     # find our authenticated user info for this test harness
     # action provider would derive this from Globus?
     credential = get_credential(servername)
-    session_config = DEFAULT_SESSION_CONFIG.copy()
-    session_config["allow_retry_on_all_methods"] = True
+    session_config = make_session_config()
     registry = Registry('https', servername, credentials=credential, session_config=session_config)
     server = DerivaServer('https', servername, credential, session_config=session_config)
     user_session = server.get('/authn/session').json()

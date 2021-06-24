@@ -10,7 +10,7 @@ import pkgutil
 import itertools
 from collections import UserString
 
-from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag
+from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag, DEFAULT_SESSION_CONFIG
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
 import requests
 
@@ -80,6 +80,21 @@ def sql_literal(s):
         return s
     else:
         raise TypeError('Unexpected type %s in sql_literal(%r)' % (type(s), s))
+
+def make_session_config():
+    """Return custom requests session_config for our data submission scenarios
+    """
+    session_config = DEFAULT_SESSION_CONFIG.copy()
+    session_config.update({
+        # our PUT/POST to ermrest is idempotent
+        "allow_retry_on_all_methods": True,
+        # do more retries before aborting
+        "retry_read": 8,
+        "retry_connect": 5,
+        # increase delay factor * 2**(n-1) for Nth retry
+        "retry_backoff_factor": 5,
+    })
+    return session_config
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation

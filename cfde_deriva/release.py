@@ -6,12 +6,12 @@ import logging
 import json
 import traceback
 
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging
+from deriva.core import DerivaServer, get_credential, init_logging
 
 from . import exception
 from .cfde_login import get_archive_headers_map
 from .tableschema import ReleaseConfigurator
-from .datapackage import CfdeDataPackage, portal_schema_json
+from .datapackage import CfdeDataPackage, portal_schema_json, make_session_config
 from .registry import Registry, nochange, terms
 from .submission import Submission
 
@@ -300,8 +300,7 @@ def main(subcommand, *args):
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     credential = get_credential(servername)
-    session_config = DEFAULT_SESSION_CONFIG.copy()
-    session_config["allow_retry_on_all_methods"] = True
+    session_config = make_session_config()
     registry = Registry('https', servername, credentials=credential, session_config=session_config)
     server = DerivaServer('https', servername, credential, session_config=session_config)
 
