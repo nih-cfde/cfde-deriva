@@ -516,15 +516,20 @@ class CfdeDataPackage (object):
                 del writer
             logger.info('Dumped resource "%s" as "%s"' % (resource['name'], fname))
 
-    def sqlite_import_data_files(self, conn, onconflict='abort', table_error_callback=None):
+    def sqlite_import_data_files(self, conn, onconflict='abort', table_error_callback=None, progress=None):
+        if progress is None:
+            progress = dict()
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are doing a clean load of data in fkey dependency order
             table = self.doc_cfde_schema.tables[tname]
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-            logger.debug('Loading table "%s"...' % tname)
             if "path" not in resource:
                 continue
+            if progress.get(tname):
+                logger.info("Skipping sqlite import for %s due to existing progress marker" % tname)
+                continue
+            logger.debug('Importing table "%s" into sqlite...' % tname)
             def open_package():
                 if isinstance(self.package_filename, _PackageDataName):
                     return self.package_filename.get_data_stringio(resource["path"])
@@ -575,13 +580,16 @@ class CfdeDataPackage (object):
                             logger.error("Table %s data load FAILED from "
                                          "%s: %s" % (table.name, self.package_filename, e))
                             raise
+                    progress[tname] = True
                     logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
             except UnicodeDecodeError as e:
                 if table_error_callback:
                     table_error_callback(resource["name"], resource["path"], str(e))
                 raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
 
-    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None):
+    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, progress=None):
+        if progress is None:
+            progress = dict()
         if not self.package_filename is portal_schema_json:
             raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackage')
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
@@ -589,7 +597,7 @@ class CfdeDataPackage (object):
             # we are copying sqlite table content to catalog under same table name
             table = self.doc_cfde_schema.tables[tname]
             resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-            logger.debug('Loading table "%s"...' % tname)
+            logger.debug('Loading table "%s" from sqlite to catalog...' % tname)
             entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
             cols = [ col for col in table.columns if col.name not in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'} ]
             colnames = [ col.name for col in cols ]
@@ -599,7 +607,10 @@ class CfdeDataPackage (object):
                 for col in cols
             ]
             cur = conn.cursor()
-            position = None
+            position = progress.get(tname, None)
+            batchnum = 0
+            if position is not None:
+                logger.info("Restarting after %r due to existing restart marker" % (position,))
 
             def get_batch(cur):
                 nonlocal position
@@ -623,16 +634,19 @@ class CfdeDataPackage (object):
 
             try:
                 for batch in get_batches(cur):
+                    marker = batch[-1][0]
                     batch = [
                         # generate per-row dict { colname: f(x), ... } with transcoded row values
                         dict(zip( colnames, [ f(x) for f, x in zip (valfuncs, row[1:]) ]))
                         for row in batch
                     ]
                     r = self.catalog.post(entity_url, json=batch)
-                    logger.info("Batch of rows for %s loaded" % table.name)
+                    logger.info("Batch %s of rows for %s loaded" % (batchnum, table.name))
+                    progress[tname] = marker
                     skipped = len(batch) - len(r.json())
                     if skipped:
                         logger.debug("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
+                    batchnum += 1
                 logger.info("All data for table %s loaded." % (table.name,))
                 if table_done_callback:
                     table_done_callback(table.name, resource.get("path", None))
@@ -642,11 +656,12 @@ class CfdeDataPackage (object):
                     table_error_callback(table.name, resource.get("path", None), str(e))
                 raise
 
-    def sqlite_do_etl(self, conn, do_etl_tables=True, do_etl_columns=True):
+    def sqlite_do_etl(self, conn, do_etl_tables=True, do_etl_columns=True, progress=None):
         """Do ETL described in our customized datapackage
 
         :param do_etl_tables: Do normal ETL table processing (default True)
         :param do_etl_columns: Do normal ETL column processing (default True)
+        :param progress: Dictionary to mutate with progress/restart markers (default None)
 
         Suppression of a processing step by the optional parameters
         requires that the caller ensure any prerequisites are already
@@ -665,22 +680,32 @@ class CfdeDataPackage (object):
         consume content prepared in other ETL columns.
 
         """
+        if progress is None:
+            progress = dict()
         if not self.package_filename is portal_schema_json:
             raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
         for resource in self.package_def['resources']:
             if 'derivation_sql_path' in resource and do_etl_tables:
+                if progress.setdefault("tables", {}).get(resource["name"], False):
+                    logger.info('Skipping table-generating ETL for %s due to restart marker' % resource['name'])
+                    continue
                 sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
                 logger.debug('Running table-generating ETL for %s...' % sql_identifier(resource['name']))
                 conn.execute(sql)
+                progress["tables"][resource["name"]] = True
                 logger.info('ETL complete for %s' % sql_identifier(resource['name']))
         for resource in self.package_def['resources']:
             for column in resource['schema']['fields']:
                 if 'derivation_sql_path' in column and do_etl_columns:
+                    if progress.setdefault("columns", {}).setdefault(resource["name"], {}).get(column["name"], False):
+                        logger.info('Skipping column-generating ETL for %s.%s due to restart marker' % (resource['name'], column['name']))
+                        continue
                     sql = self.package_filename.get_data_str(column['derivation_sql_path'])
                     conn.execute('UPDATE %s SET %s = NULL' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
                     logger.debug('Running column-generating ETL for %s.%s...' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
                     conn.execute(sql)
+                    progress["columns"][resource["name"]][column["name"]] = True
                     logger.info('ETL complete for %s.%s' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
 
     def provision_sqlite(self, conn):

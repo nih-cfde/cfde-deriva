@@ -134,6 +134,15 @@ class Release (object):
         # next_error_state anticipates how to categorize exceptions
         # based on what we are trying to do during sequence
         next_error_state = terms.cfde_registry_rel_status.ops_error
+
+        try:
+            os.makedirs(os.path.dirname(self.restart_marker_filename), exist_ok=True)
+            with open(self.restart_marker_filename, 'r') as f:
+                progress = json.load(f)
+            logger.info("Loaded restart marker file %s" % self.restart_marker_filename)
+        except:
+            progress = dict()
+
         try:
             # shortcut if already in terminal state
             if rel['status'] in {
@@ -186,14 +195,21 @@ class Release (object):
                 submission.bdbag_validate(submission.content_path)
                 # re-check if portal model has changed since submission was checked?
                 submission.datapackage_model_check(submission.content_path)
-                submission.load_sqlite(submission.content_path, self.sqlite_filename)
+                submission.load_sqlite(
+                    submission.content_path,
+                    self.sqlite_filename,
+                    progress=progress.setdefault('sqlite_load', {}).setdefault(dprow['id'], {}),
+                )
+                self.dump_progress(progress)
 
             # do this once w/ all content now loaded in sqlite
             logger.info('Preparing derived data...')
-            Submission.prepare_sqlite_derived_data(self.sqlite_filename)
+            Submission.prepare_sqlite_derived_data(self.sqlite_filename, progress=progress.setdefault('etl', {}))
             logger.info('Uploading all release content...')
-            Submission.upload_sqlite_content(catalog, self.sqlite_filename)
+            self.dump_progress(progress)
+            Submission.upload_sqlite_content(catalog, self.sqlite_filename, progress=progress.setdefault('upload', {}))
             logger.info('All release content successfully uploaded to %(ermrest_url)s' % rel)
+            self.dump_progress(progress)
 
             failed = False
 
@@ -202,6 +218,7 @@ class Release (object):
             failed, failed_exc = True, e
             raise
         finally:
+            self.dump_progress(progress)
             if failed:
                 status, diagnostics = next_error_state, diagnostics
                 if failed_exc is not None:
@@ -229,6 +246,11 @@ class Release (object):
             self.registry.update_release(self.release_id, status=status, diagnostics=diagnostics)
             logger.debug('Release %s status successfully updated.' % (self.release_id,))
 
+    def dump_progress(self, progress):
+        with open(self.restart_marker_filename, 'w') as f:
+            json.dump(progress, f, indent=2)
+        logger.info("Dumped restart marker file %s" % self.restart_marker_filename)
+
     @property
     def sqlite_filename(self):
         """Return sqlite_filename scratch C2M2 DB target name for given release id.
@@ -241,6 +263,11 @@ class Release (object):
         # naive mapping should be OK for UUIDs...
         return '%s/databases/%s.sqlite3' % (self.content_path_root, self.release_id)
 
+    @property
+    def restart_marker_filename(self):
+        """Return restart_marker JSON file name for given release id.
+        """
+        return '%s/progress/%s.json' % (self.content_path_root, self.release_id)
 
 
 def main(subcommand, *args):

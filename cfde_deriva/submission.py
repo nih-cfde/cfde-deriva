@@ -640,28 +640,32 @@ class Submission (object):
             canon_dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
-    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None):
+    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None):
         """Idempotently insert submission content."""
+        if progress is None:
+            progress = dict()
         packagefile = cls.datapackage_name_from_path(content_path)
         submitted_dp = CfdeDataPackage(packagefile)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
-            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback)
+            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
-    def prepare_sqlite_derived_data(cls, sqlite_filename):
+    def prepare_sqlite_derived_data(cls, sqlite_filename, progress=None):
         """Prepare derived content via SQL queries in the C2M2 portal model.
 
         This method will clear and recompute the derived results
         each time it is invoked.
 
         """
+        if progress is None:
+            progress = dict()
         canon_dp = CfdeDataPackage(portal_schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
-            canon_dp.sqlite_do_etl(conn)
+            canon_dp.sqlite_do_etl(conn, progress=progress)
 
     @classmethod
     def extract_catalog_id(cls, server, catalog_url):
@@ -720,13 +724,15 @@ class Submission (object):
         return catalog
 
     @classmethod
-    def upload_sqlite_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None):
+    def upload_sqlite_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None, progress=None):
         """Idempotently upload (augmented) datapackage content in sqlite db into review catalog."""
+        if progress is None:
+            progress = dict()
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently uploading derived ETL data from %s' % (sqlite_filename,))
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
-            canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
