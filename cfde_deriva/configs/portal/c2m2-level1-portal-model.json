@@ -362,7 +362,7 @@
             },
             "source_definitions": {
                "columns": true,
-               "fkeys": true,
+               "fkeys": false,
                "sources": {
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "file metadata, anatomy, taxonomy", "comment": "file name, format, data-type, assay-type, anatomy, taxonomy, subject granularity, project, or collection keywords"} ]},
                   "S_id_namespace": {
@@ -1439,7 +1439,7 @@
             },
             "source_definitions": {
                "columns": true,
-               "fkeys": true,
+               "fkeys": false,
                "sources": {
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the project ID.",
@@ -1502,17 +1502,15 @@
             },
             "visible_columns": {
                "compact": [
-                  {"sourcekey": "S_id_namespace"},
-                  "local_id",
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed":  [
-                  {"sourcekey": "S_id_namespace"},
+                  "name",
+                  "id_namespace",
                   "local_id",
                   "persistent_id",
-                  "name",
                   "abbreviation",
                   "description",
                   {"sourcekey": "S_creation_time"}
