@@ -206,6 +206,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "export_2019": {
                "*": {
                   "templates": [
@@ -661,6 +665,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "export_2019": {
                "*": {
                   "templates": [
@@ -1025,6 +1033,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "export_2019": {
                "*": {
                   "templates": [
@@ -1338,6 +1350,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -1415,6 +1433,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -1649,6 +1671,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -1726,6 +1754,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "export_2019": {
                "*": {
                   "templates": [
@@ -2178,6 +2210,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2246,6 +2284,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2314,6 +2358,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2382,6 +2432,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2450,6 +2506,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2518,6 +2580,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2586,6 +2654,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2654,6 +2728,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
       {
@@ -2731,6 +2811,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "visible_columns": {
                "compact": [
                   {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]}, "RID"]},
@@ -2780,6 +2864,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -2879,6 +2967,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -2969,6 +3061,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3060,6 +3156,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3142,6 +3242,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3216,6 +3320,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3290,6 +3398,10 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3375,6 +3487,12 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "id"
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          }
       },
 
@@ -3417,6 +3535,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "project_root.sql"
       },
@@ -3479,6 +3603,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "file_subject_granularity.sql"
       },
 
@@ -3540,6 +3670,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "biosample_assay_type.sql"
       },
 
@@ -3600,6 +3736,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "subject_species.sql"
       },
@@ -3678,6 +3820,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "file_subject_role_taxonomy.sql"
       },
 
@@ -3727,6 +3875,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "file_biosample_creation_time.sql"
       },
@@ -3787,6 +3941,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "file_anatomy.sql"
       },
@@ -3934,6 +4094,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "collection_project_root.sql"
       },
 
@@ -4004,6 +4170,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "collection_in_collection_transitive.sql"
       },
 
@@ -4064,6 +4236,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "collection_subject_granularity.sql"
       },
@@ -4142,6 +4320,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "collection_subject_role_taxonomy.sql"
       },
 
@@ -4194,6 +4378,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "collection_biosample_creation_time.sql"
       },
@@ -4258,6 +4448,12 @@
                }
             ]
          },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         },
          "derivation_sql_path": "collection_assay_type.sql"
       },
 
@@ -4320,6 +4516,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
          },
          "derivation_sql_path": "collection_anatomy.sql"
       },
@@ -4500,6 +4702,10 @@
             ]
          },
          "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{_project_id_namespace}}{{_project_local_id}} {{assay_type_id}} {{data_type_id}} {{file_format_id}} {{anatomy_id}} {{granularity_id}} {{species_id}}"
