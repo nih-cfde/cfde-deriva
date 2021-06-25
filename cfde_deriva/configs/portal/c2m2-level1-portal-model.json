@@ -358,11 +358,8 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "file_project_root_file_fkey"]},
+                        {"outbound": ["CFDE", "file_project_root_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -765,11 +762,8 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "biosample_project_root_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_project_root_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -1065,11 +1059,8 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "subject_project_root_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_project_root_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -1846,12 +1837,8 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program which defined the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        {"inbound": ["CFDE", "project_root_project_fkey"]},
-                        {"outbound": ["CFDE", "project_root_project_fkey"]},
+                        {"inbound": ["CFDE", "collection_project_root_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_project_root_project_fkey"]},
                         "RID"
                      ]
                   },
@@ -3800,6 +3787,286 @@
             ]
          },
          "derivation_sql_path": "project_in_project_transitive.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_project_root",
+         "title": "file_project_root",
+         "description": "Collapsed association of root projects for each file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file_id_namespace",
+                  "description": "Identifier namespace for this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_local_id",
+                  "description": "The ID of this file",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for the project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file_id_namespace",
+               "file_local_id",
+               "project_id_namespace",
+               "project_local_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "constraint_name": "file_project_root_file_fkey",
+                  "reference": {
+                     "title": "Characterized File",
+                     "resource": "file",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "file_project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_project_root.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "biosample_project_root",
+         "title": "biosample_project_root",
+         "description": "Collapsed association of root projects for each biosample",
+         "schema": {
+            "fields": [
+               {
+                  "name": "biosample_id_namespace",
+                  "description": "Identifier namespace for this biosample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "biosample_local_id",
+                  "description": "The ID of this biosample",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for the project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "biosample_id_namespace",
+               "biosample_local_id",
+               "project_id_namespace",
+               "project_local_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "constraint_name": "biosample_project_root_biosample_fkey",
+                  "reference": {
+                     "title": "Characterized Biosample",
+                     "resource": "biosample",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "biosample_project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "biosample_project_root.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_project_root",
+         "title": "subject_project_root",
+         "description": "Collapsed association of root projects for each subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_local_id",
+                  "description": "The ID of this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for the project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject_id_namespace",
+               "subject_local_id",
+               "project_id_namespace",
+               "project_local_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "constraint_name": "subject_project_root_subject_fkey",
+                  "reference": {
+                     "title": "Characterized Subject",
+                     "resource": "subject",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "subject_project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "subject_project_root.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_project_root",
+         "title": "collection_project_root",
+         "description": "Collapsed association of root projects for each collection",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for the project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of this project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "project_id_namespace",
+               "project_local_id"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_project_root_collection_fkey",
+                  "reference": {
+                     "title": "Characterized Collection",
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "constraint_name": "collection_project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_project_root.sql"
       },
 
       {
