@@ -346,10 +346,11 @@ def main(subcommand, *args):
         if len(args) == 1:
             catalog_id = args[0]
             catalog = server.connect_ermrest(catalog_id)
+            reprovision = os.getenv('REPROVISION_MODEL', 'false').lower() in {'t', 'y', 'true', 'yes'}
         else:
             raise TypeError('"reconfigure" requires exactly one positional argument: catalog_id')
 
-        Release.configure_release_catalog(registry, catalog, catalog_id)
+        Release.configure_release_catalog(registry, catalog, catalog_id, provision=reprovision)
     else:
         raise ValueError('unknown sub-command "%s"' % subcommand)
 
