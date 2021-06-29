@@ -370,6 +370,7 @@
                      "source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]
                   },
                   "S_project": {
+                     "markdown_name": "Project",
                      "comment": "The project attributed as the source of the file.",
                      "source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]
                   },
@@ -465,8 +466,6 @@
             },
             "visible_columns": {
                "compact": [
-                  {"sourcekey": "S_id_namespace"},
-                  "local_id",
                   "filename",
                   {"sourcekey": "S_project"},
                   "size_in_bytes",
@@ -2907,9 +2906,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_biosample"},
-                  {"sourcekey": "S_file"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_file"}
                ]
             }
          }
@@ -2987,6 +2984,7 @@
                      "comment": "List of collections referencing this taxon.",
                      "source": [
                         {"inbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
+                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
                         "RID"
                      ]
                   },
@@ -2995,6 +2993,7 @@
                      "comment": "List of files referencing this taxon.",
                      "source": [
                         {"inbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
+                        {"outbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
                         "RID"
                      ]
                   }
@@ -3009,9 +3008,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_subject"},
-                  {"sourcekey": "S_file"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_subject"}
                ]
             }
          }
@@ -3104,9 +3101,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_biosample"},
-                  {"sourcekey": "S_file"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_biosample"}
                ]
             }
          }
@@ -3191,8 +3186,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_file"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_file"}
                ]
             }
          }
@@ -3277,8 +3271,7 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  {"sourcekey": "S_file"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_file"}
                ]
             }
          }
@@ -3354,9 +3347,7 @@
              },
              "visible_foreign_keys": {
                 "*": [
-                    {"sourcekey": "S_subject"},
-                    {"sourcekey": "S_file"},
-                    {"sourcekey": "S_collection"}
+                    {"sourcekey": "S_subject"}
                 ]
              }
           }
@@ -3441,9 +3432,7 @@
            },
              "visible_foreign_keys": {
                 "*": [
-                   {"sourcekey": "S_subject"},
-                   {"sourcekey": "S_file"},
-                   {"sourcekey": "S_collection"}
+                   {"sourcekey": "S_subject"}
                 ]
              }
           }
@@ -3822,6 +3811,9 @@
             "indexing_preferences": {
                "btree": false,
                "trgm": false
+            },
+            "source_definitions": {
+               "fkeys": false
             }
          },
          "derivation_sql_path": "file_subject_role_taxonomy.sql"
