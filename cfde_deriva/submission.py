@@ -19,12 +19,14 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, DEFAULT_SESSION_CONFIG, init_logging, urlquote
+
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, portal_schema_json, sql_literal
+from .datapackage import CfdeDataPackage, portal_schema_json, sql_literal, make_session_config
 from .cfde_login import get_archive_headers_map
+
 
 logger = logging.getLogger(__name__)
 
@@ -644,14 +646,16 @@ class Submission (object):
             canon_dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
-    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None):
+    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None):
         """Idempotently insert submission content."""
+        if progress is None:
+            progress = dict()
         packagefile = cls.datapackage_name_from_path(content_path)
         submitted_dp = CfdeDataPackage(packagefile)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
-            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback)
+            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
     def transitional_etl_dcc_table(cls, content_path, sqlite_filename, submitting_dcc):
@@ -711,18 +715,20 @@ LEFT OUTER JOIN project_root p ON (d.project_id_namespace = p.project_id_namespa
                 ))
 
     @classmethod
-    def prepare_sqlite_derived_data(cls, sqlite_filename):
+    def prepare_sqlite_derived_data(cls, sqlite_filename, progress=None):
         """Prepare derived content via SQL queries in the C2M2 portal model.
 
         This method will clear and recompute the derived results
         each time it is invoked.
 
         """
+        if progress is None:
+            progress = dict()
         canon_dp = CfdeDataPackage(portal_schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
-            canon_dp.sqlite_do_etl(conn)
+            canon_dp.sqlite_do_etl(conn, progress=progress)
 
     @classmethod
     def extract_catalog_id(cls, server, catalog_url):
@@ -781,13 +787,15 @@ LEFT OUTER JOIN project_root p ON (d.project_id_namespace = p.project_id_namespa
         return catalog
 
     @classmethod
-    def upload_sqlite_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None):
+    def upload_sqlite_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None, progress=None):
         """Idempotently upload (augmented) datapackage content in sqlite db into review catalog."""
+        if progress is None:
+            progress = dict()
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently uploading derived ETL data from %s' % (sqlite_filename,))
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
-            canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback)
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
     def record_vocab_usage(cls, registry, sqlite_filename, id):
@@ -868,8 +876,7 @@ def main(subcommand, *args):
     # find our authenticated user info for this test harness
     # action provider would derive this from Globus?
     credential = get_credential(servername)
-    session_config = DEFAULT_SESSION_CONFIG.copy()
-    session_config["allow_retry_on_all_methods"] = True
+    session_config = make_session_config()
     registry = Registry('https', servername, credentials=credential, session_config=session_config)
     server = DerivaServer('https', servername, credential, session_config=session_config)
     user_session = server.get('/authn/session').json()

@@ -1,6 +1,6 @@
 import sys
 import logging
-from deriva.core import get_credential, GlobusNativeLogin
+from deriva.core import bootstrap, get_credential, GlobusNativeLogin
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ def get_archive_headers_map(host):
 
 
 def main(subcommand, *args):
+    bootstrap()
     if subcommand == 'login':
         if len(args) > 0 and args[0] in HOST_TO_GCS_SCOPES.keys():
             host = args[0]
