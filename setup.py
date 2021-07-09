@@ -18,6 +18,7 @@ setup(
         'cfde_deriva.configs',
         'cfde_deriva.configs.portal',
         'cfde_deriva.configs.registry',
+        'cfde_deriva.configs.submission',
     ],
     package_data={
         'cfde_deriva.configs.portal': ['*.json', '*.tsv', '*.sql'],
