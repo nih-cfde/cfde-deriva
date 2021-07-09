@@ -159,6 +159,26 @@ class Registry (object):
             path = path.filter(path.table_instances[table_name].column_definitions['id'] == id)
         return list( path.entities().fetch() )
 
+    def get_user(self, client_id):
+        """Get WebauthnUser instance representing existing registry user with client_id.
+
+        :param client_id: The public.ERMrest_Client.ID or CFDE.datapackage.submitting_user key value
+        """
+        path = self._builder.public.ERMrest_Client.path
+        path = path.filter(path.ERMrest_Client.ID == client_id)
+        rows = list(path.entities().fetch())
+        if rows:
+            row = rows[0]
+            return WebauthnUser(
+                row['ID'],
+                row['Display_Name'],
+                row.get('Full_Name'),
+                row.get('Email'),
+                []
+            )
+        else:
+            raise ValueError("Registry user with ID=%r not found." % (client_id,))
+
     def list_datapackages(self):
         """Get a list of all datapackage submissions in the registry
 

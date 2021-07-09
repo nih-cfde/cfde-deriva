@@ -860,8 +860,11 @@ def main(subcommand, *args):
     Sub-commands:
     - 'submit' <dcc_id> <archive_url>
        - Test harness for submission pipeline ingest flow
+    - 'rebuild' <submission id>
+       - Test harness for idempotent ingest flow on existing registered submission
     - 'reconfigure' <submission_id>
        - Revise policy/resentation config on existing review catalog
+    - 'reconfigure-all'
 
     This client uses default DERIVA credentials for server both for
     registry operations and as "submitting user" in CFDE parlance.
@@ -891,6 +894,8 @@ def main(subcommand, *args):
         ]
     )
 
+    archive_headers_map = get_archive_headers_map(servername)
+
     def reconfigure_submission(row):
         if row["review_ermrest_url"] is None:
             logger.info("Submission %s does not have a catalog to reconfigure." % row["id"])
@@ -899,6 +904,18 @@ def main(subcommand, *args):
             Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
             logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
 
+    def rebuild_submission(row):
+        submission_id = row['id']
+        dcc_id = row['submitting_dcc']
+        archive_url = row['datapackage_url']
+        submission = Submission(
+            server, registry,
+            submission_id, dcc_id, archive_url,
+            submitting_user if submitting_user.webauthn_id == row['submitting_user'] else registry.get_user(row['submitting_user']),
+            archive_headers_map=archive_headers_map
+        )
+        submission.ingest()
+
     if subcommand == 'submit':
         # arguments dcc_id and archive_url would come from action provider
         # and it would also have a different way to obtain a submission ID
@@ -906,7 +923,6 @@ def main(subcommand, *args):
             raise TypeError('"submit" requires exactly two positional arguments: dcc_id, archive_url')
         dcc_id, archive_url = args
         submission_id = str(uuid.uuid3(uuid.NAMESPACE_URL, archive_url))
-        archive_headers_map = get_archive_headers_map(servername)
 
         # pre-flight check like action provider might want to do?
         # this is optional, implicitly happening again in Submission(...)
@@ -915,14 +931,17 @@ def main(subcommand, *args):
         # run the actual submission work if we get this far
         submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user, archive_headers_map=archive_headers_map)
         submission.ingest()
-    elif subcommand == 'reconfigure':
+    elif subcommand in {'reconfigure', 'rebuild'}:
         if len(args) == 1:
             submission_id = args[0]
         else:
-            raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
+            raise TypeError('"%s" requires exactly one positional argument: submission_id' % subcommand)
 
         row = registry.get_datapackage(submission_id)
-        reconfigure_submission(row)
+        if subcommand == 'reconfigure':
+            reconfigure_submission(row)
+        elif subcommand == 'rebuild':
+            rebuild_submission(row)
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
             try:
