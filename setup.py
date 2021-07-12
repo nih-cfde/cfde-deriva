@@ -17,6 +17,7 @@ setup(
         'cfde_deriva',
         'cfde_deriva.configs',
         'cfde_deriva.configs.portal',
+        'cfde_deriva.configs.portal_prep',
         'cfde_deriva.configs.registry',
         'cfde_deriva.configs.submission',
     ],

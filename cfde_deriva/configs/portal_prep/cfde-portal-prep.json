@@ -1,7 +1,7 @@
 {
    "profile": "tabular-data-package",
-   "name": "c2m2_submission_datapackage_specs",
-   "title": "A customized C2M2 model augmented with ingest processing hints",
+   "name": "cfde_portal_prep_specs",
+   "title": "Transformation of C2M2 model as intermediate ETL, converting to \"nid\" surrogate keys.",
    "resources": [
 
       {
@@ -12,33 +12,61 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this file",
-                  "type": "string",
+                  "description": "Numeric ID of the identifier namespace in which this file is assigned a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "project",
+                  "description": "Numeric ID of the primary project within which this file was created",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "description": "Numeric ID for the file_format term describing the digital format of this file (e.g. TSV or FASTQ)",
+                  "type": "integer"
+               },
+               {
+                  "name": "data_type",
+                  "description": "Numeric ID for the data_type term describing information stored in this file (e.g. RNA sequence reads)",
+                  "type": "integer"
+               },
+               {
+                  "name": "assay_type",
+                  "description": "Numeric ID for the assay_type term describing the type of experiment that generated the results summarized by this file",
+                  "type": "integer"
+               },
+               {
+                  "name": "mime_type",
+                  "description": "Numeric ID for the MIME type describing this file",
+                  "type": "integer"
                },
                {
                   "name": "local_id",
-                  "description": "An ID representing this file, unique within this id_namespace",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the primary project within which this file was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the primary project within which this file was created",
+                  "description": "An ID representing this file, unique in combination with this file's id_namespace.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -85,54 +113,25 @@
                   "constraints": {
                      "pattern": "^[^\/\\:]+$"
                   }
-               },
-               {
-                  "name": "file_format",
-                  "description": "An EDAM CV term ID identifying the digital format of this file (e.g. TSV or FASTQ)",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^format:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "data_type",
-                  "description": "An EDAM CV term ID identifying the type of information stored in this file (e.g. RNA sequence reads)",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^data:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "assay_type",
-                  "description": "An OBI CV term ID describing the type of experiment that generated the results summarized by this file",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^OBI:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "mime_type",
-                  "description": "A MIME type describing this file",
-                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "file_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "file_project_fkey",
                   "reference": {
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
@@ -140,7 +139,7 @@
                   "constraint_name": "file_file_format_fkey",
                   "reference": {
                      "resource": "file_format",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
@@ -148,7 +147,7 @@
                   "constraint_name": "file_data_type_fkey",
                   "reference": {
                      "resource": "data_type",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
@@ -156,11 +155,20 @@
                   "constraint_name": "file_assay_type_fkey",
                   "reference": {
                      "resource": "assay_type",
-                     "fields": "id"
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "mime_type",
+                  "constraint_name": "file_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "file.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -170,13 +178,48 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this biosample",
-                  "type": "string",
+                  "description": "Numeric ID of the identifier namespace in which this biosample is assigned a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "project",
+                  "description": "Numeric ID of the primary project within which this biosample was created",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "Numeric ID for the anatomy term describing the origin of this biosample within the physiology of its source or host organism",
+                  "type": "integer"
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -187,59 +230,29 @@
                   }
                },
                {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the primary project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the primary project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
                   "name": "persistent_id",
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this biosample",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
-               },
-               {
-                  "name": "anatomy",
-                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^UBERON:[0-9]+$"
-                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "biosample_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "biosample_project_fkey",
                   "reference": {
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
@@ -247,11 +260,12 @@
                   "constraint_name": "biosample_anatomy_fkey",
                   "reference": {
                      "resource": "anatomy",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "biosample.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -261,13 +275,51 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this subject",
+                  "description": "Numeric ID of the identifier namespace in which this subject is assigned a local_id.",
                   "type": "string",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "project",
+                  "description": "Numeric ID of the primary project within which this subject was created",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "granularity",
+                  "description": "A CFDE CV term categorizing this subject by multiplicity",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -278,59 +330,29 @@
                   }
                },
                {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the primary project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the primary project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
                   "name": "persistent_id",
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this subject",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
-               },
-               {
-                  "name": "granularity",
-                  "description": "A CFDE CV term categorizing this subject by multiplicity",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "subject_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "subject_project_fkey",
                   "reference": {
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
@@ -338,11 +360,12 @@
                   "constraint_name": "subject_granularity_fkey",
                   "reference": {
                      "resource": "subject_granularity",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "subject.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -352,11 +375,21 @@
          "schema": {
             "fields": [
                {
+                  "name": "project",
+                  "description": "Foreign key identifying the top-level C2M2 project record representing byproducts of this DCC.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               }
+               {
                   "name": "id",
                   "description": "The identifier for this DCC, issued by the CFDE-CC.",
                   "type": "string",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
                },
                {
@@ -410,124 +443,23 @@
                   "constraints": {
                      "required": true
                   }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this DCC.",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this DCC.",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id" ],
+            "primaryKey": [ "project" ],
             "foreignKeys": [
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "dcc_project_fkey",
                   "reference": {
                      "title": "DCC Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "primary_dcc_contact",
-         "title": "Primary DCC Contact",
-         "description": "One primary contact person for the Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
-         "schema": {
-            "fields": [
-               {
-                  "name": "contact_email",
-                  "description": "Email address of this DCC contact",
-                  "type": "string",
-                  "format": "email",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "contact_name",
-                  "description": "Name of this DCC contact",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "dcc_abbreviation",
-                  "description": "A very short display label for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "pattern": "^[a-zA-Z0-9_]+$"
-                  }
-               },
-               {
-                  "name": "dcc_name",
-                  "description": "A short, human-readable, machine-read-friendly label for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "dcc_description",
-                  "description": "A human-readable description of this contact's DCC",
-                  "type": "string"
-               },
-               {
-                  "name": "dcc_url",
-                  "description": "URL of the front page of the website for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": [ "contact_email" ],
-            "foreignKeys": [
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "primary_dcc_contact_project_fkey",
-                  "reference": {
-                     "title": "DCC Project",
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               }
-            ]
-         }
+         },
+         "derivation_sql_path": "dcc.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -537,13 +469,29 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this project in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this project",
-                  "type": "string",
+                  "description": "Numeric ID of the identifier namespace in which this project is assigned a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this project's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -558,12 +506,6 @@
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this project",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this project's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
                },
                {
                   "name": "abbreviation",
@@ -588,18 +530,19 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "project_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "project.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -609,65 +552,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "parent_project_id_namespace",
-                  "description": "ID of the identifier namespace for the parent in this parent-child project pair",
-                  "type": "string",
+                  "name": "parent_project",
+                  "description": "Numeric ID of the parent in this parent-child project pair",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "parent_project_local_id",
-                  "description": "The ID of the containing (parent) project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "child_project_id_namespace",
-                  "description": "ID of the identifier namespace for the child in this parent-child project pair",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "child_project_local_id",
-                  "description": "The ID of the contained (child) project",
-                  "type": "string",
+                  "name": "child_project",
+                  "description": "Numeric ID of the child in this parent-child project pair",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "parent_project_id_namespace",
-               "parent_project_local_id",
-               "child_project_id_namespace",
-               "child_project_local_id"
+               "parent_project",
+               "child_project"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "parent_project_id_namespace", "parent_project_local_id" ],
+                  "fields": [ "parent_project" ],
                   "constraint_name": "project_in_project_parent_fkey",
                   "reference": {
                      "title": "Parent Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "child_project_id_namespace", "child_project_local_id" ],
+                  "fields": [ "child_project" ],
                   "constraint_name": "project_in_project_child_fkey",
                   "reference": {
                      "title": "Child Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "project_in_project.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -677,13 +603,35 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this collection",
-                  "type": "string",
+                  "description": "Numeric ID of the identifier namespace in which this collection is assigned a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this collection's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -698,12 +646,6 @@
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this collection",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this collection's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
                },
                {
                   "name": "abbreviation",
@@ -728,18 +670,19 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "collection_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "collection.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -749,32 +692,16 @@
          "schema": {
             "fields": [
                {
-                  "name": "superset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the superset collection",
-                  "type": "string",
+                  "name": "superset_collection",
+                  "description": "Numeric ID of the superset collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "superset_collection_local_id",
-                  "description": "The ID of the superset collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the subset collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subset_collection_local_id",
-                  "description": "The ID of the subset collection",
+                  "name": "subset_collection",
+                  "description": "Numeric ID of the subset collection",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -782,32 +709,31 @@
                }
             ],
             "primaryKey": [
-               "superset_collection_id_namespace",
-               "superset_collection_local_id",
-               "subset_collection_id_namespace",
-               "subset_collection_local_id"
+               "superset_collection",
+               "subset_collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "superset_collection_id_namespace", "superset_collection_local_id" ],
+                  "fields": [ "superset_collection" ],
                   "constraint_name": "collection_in_collection_superset_fkey",
                   "reference": {
                      "title": "Superset Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subset_collection_id_namespace", "subset_collection_local_id" ],
+                  "fields": [ "subset_collection" ],
                   "constraint_name": "collection_in_collection_subset_fkey",
                   "reference": {
                      "title": "Subset Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "collection_in_collection.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -817,65 +743,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "Numeric ID of the defined collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "The ID of this project",
-                  "type": "string",
+                  "name": "project",
+                  "description": "Numeric ID of the defining project",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "project_id_namespace",
-               "project_local_id"
+               "collection",
+               "project"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "collection_defined_by_project_collection_fkey",
                   "reference": {
                      "title": "Defined Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "collection_defined_by_project_project_fkey",
                   "reference": {
                      "title": "Defined by Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "collection_defined_by_project.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -885,65 +794,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
+                  "name": "file",
+                  "description": "The numeric ID of this file",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "file",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_in_collection_file_fkey",
                   "reference": {
                      "title": "Contained File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "file_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "file_in_collection.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -953,65 +845,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_local_id",
-                  "description": "The ID of this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "biosample_id_namespace",
-               "biosample_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "biosample",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "biosample_in_collection_biosample_fkey",
                   "reference": {
                      "title": "Contained Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "biosample_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "biosample_in_collection.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1021,65 +896,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The nueric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "subject_id_namespace",
-               "subject_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "subject",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "subject_in_collection_subject_fkey",
                   "reference": {
                      "title": "Contained Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "subject_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "subject_in_collection.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1089,65 +947,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
+                  "name": "file",
                   "description": "The ID of this file",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "biosample_local_id",
+                  "name": "biosample",
                   "description": "The ID of this biosample",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "biosample_id_namespace",
-               "biosample_local_id"
+               "file",
+               "biosample"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_describes_biosample_file_fkey",
                   "reference": {
                      "title": "Described by File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "file_describes_biosample_biosample_fkey",
                   "reference": {
                      "title": "Described Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "file_describes_biosample.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1157,65 +998,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
+                  "name": "file",
+                  "description": "The numeric ID of this file",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "subject_id_namespace",
-               "subject_local_id"
+               "file",
+               "subject"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_describes_subject_file_fkey",
                   "reference": {
                      "title": "Described by File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "file_describes_subject_subject_fkey",
                   "reference": {
                      "title": "Described Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "file_describes_subject.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1225,65 +1049,48 @@
          "schema": {
             "fields": [
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_local_id",
-                  "description": "The ID of this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "biosample_id_namespace",
-               "biosample_local_id",
-               "subject_id_namespace",
-               "subject_local_id"
+               "biosample",
+               "subject"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "biosample_from_subject_biosample_fkey",
                   "reference": {
                      "title": "Derived Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "biosample_from_subject_subject_fkey",
                   "reference": {
                      "title": "Source Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "biosample_from_subject.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1293,72 +1100,64 @@
          "schema": {
             "fields": [
                {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
                   "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "description": "The numeric ID of the characterized subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "role_id",
-                  "description": "The ID of the role assigned to this organism-level constituent component of this subject",
-                  "type": "string",
+                  "name": "role",
+                  "description": "The numeric ID of the subject role term characterizing this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "taxonomy_id",
-                  "description": "An NCBI Taxonomy Database ID identifying this taxon",
-                  "type": "string",
+                  "name": "taxonomy",
+                  "description": "The numeric ID of the taxon term characterizing this subject.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "subject_id_namespace",
-               "subject_local_id",
-               "role_id",
-               "taxonomy_id"
+               "subject",
+               "role",
+               "taxonomy"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "subject_role_taxonomy_subject_fkey",
                   "reference": {
                      "title": "Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": "role_id",
+                  "fields": "role",
                   "constraint_name": "subject_role_taxonomy_role_fkey",
                   "reference": {
                      "resource": "subject_role",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": "taxonomy_id",
+                  "fields": "taxonomy",
                   "constraint_name": "subject_role_taxonomy_taxonomy_fkey",
                   "reference": {
                      "resource": "ncbi_taxonomy",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
-         }
+         },
+         "derivation_sql_path": "subject_role_taxonomy.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1367,6 +1166,16 @@
          "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used in this dataset to describe types of experiment that generate results stored in files",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this assay_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An OBI CV term",
@@ -1394,8 +1203,9 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "assay_type.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1404,6 +1214,16 @@
          "description": "List of NCBI Taxonomy Database IDs identifying taxa used to describe subjects in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this taxon in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
@@ -1442,8 +1262,9 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "ncbi_taxonomy"
       },
       {
          "profile": "tabular-data-resource",
@@ -1452,6 +1273,16 @@
          "description": "List of Uber-anatomy ontology (Uberon) CV terms used in this dataset to locate the origin of a biosample within the physiology of its source or host organism",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this anatomy in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An Uberon CV term",
@@ -1482,8 +1313,9 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "anatomy.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1492,6 +1324,16 @@
          "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this file_format in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An EDAM CV format term",
@@ -1522,8 +1364,9 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "file_format.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1532,6 +1375,16 @@
          "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this data_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An EDAM CV data term",
@@ -1562,17 +1415,27 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "data_type.sql"
       },
       {
          "profile": "tabular-data-resource",
          "name": "subject_role",
          "title": "Subject Role",
-         "path": "subject_role.tsv",
          "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_role in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "A globally unique ID representing this subject_role",
@@ -1597,17 +1460,27 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "subject_role.sql"
       },
       {
          "profile": "tabular-data-resource",
          "name": "subject_granularity",
          "title": "Subject Granularity",
-         "path": "subject_granularity.tsv",
          "description": "INTERNAL CV: The category of a subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_granularity in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "A globally unique ID representing this subject_granularity",
@@ -1632,8 +1505,9 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "subject_granularity.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1642,6 +1516,16 @@
          "description": "INTERNAL CV: Dictionary of CFDE-generated identifier namespaces corresponding to top-level C2M2 metadatasets",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this identifier namespace in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "A globally unique ID representing this identifier namespace",
@@ -1671,8 +1555,235 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
-         }
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "id_namespace.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "mime_type",
+         "title": "MIME Type",
+         "description": "Dimension table of each distinct MIME type referenced by C2M2 files.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this MIME type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "The unique MIME type string",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "mime_type.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_species",
+         "title": "subject_species",
+         "description": "Collapsed association of subject-species, simplifying subject-role-taxonomy association",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "species",
+                  "description": "The numeric ID of a taxon categorizing described subject species",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "species"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "constraint_name": "subject_species_subject_fkey",
+                  "reference": {
+                     "title": "Characterized Subject",
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "species",
+                  "constraint_name": "subject_species_species_fkey",
+                  "reference": {
+                     "title": "Species",
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "subject_species.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact",
+         "title": "Core Fact",
+         "description": "Core C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id_namespace",
+                  "description": "The numeric ID of the id_namespace in which described entities were issued a local_id.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [ "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
+            "foreignKeys": [
+               {
+                  "fields": "id_namespace",
+                  "constraint_name": "core_fact_id_namespace_fkey",
+                  "reference": {
+                     "resource": "id_namespace",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_facts"
       }
 
    ]
