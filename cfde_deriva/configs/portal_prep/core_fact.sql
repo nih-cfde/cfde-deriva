@@ -255,8 +255,14 @@ WITH collection_facts(
   SELECT
     col.nid,
     col.id_namespace,
-    col.projects,
-    col.dccs,
+    (SELECT json_group_array(DISTINCT cdbp.project ORDER BY cdbp.project)
+     FROM collection_defined_by_project cdbp
+     WHERE cdbp.collection = col.nid),
+    (SELECT json_group_array(DISTINCT cdbp.project ORDER BY cdbp.project)
+     FROM collection_defined_by_project cdbp
+     JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
+     JOIN dccs d ON (pipt.leader_project = d.project)
+     WHERE cdbp.collection = col.nid),
     (SELECT json_group_array(DISTINCT s.e ORDER BY s.e)
      FROM (
        SELECT j.value
@@ -383,20 +389,7 @@ WITH collection_facts(
        FROM subject_in_collection sic, subject s, core_facts cf, json_each(cf.mime_types) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s(e))
-  FROM (
-    SELECT
-      col.nid,
-      col.id_namespace,
-      json_group_array(DISTINCT cdbp.project ORDER BY cdbp.project),
-      json_group_array(DISTINCT d.project ORDER BY d.project)
-    FROM collection col
-    LEFT JOIN (
-      collection_defined_by_project cdbp
-      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
-      JOIN dccs d ON (pipt.leader_project = d.project)
-    ) ON (col.nid = cdbp.collection)
-    GROUP BY col.nid, col.id_namespace
-  ) col(nid, id_namespace, projects, dccs)
+  FROM collection col
 ), new_facts AS (
   INSERT INTO core_fact
   SELECT DISTINCT
