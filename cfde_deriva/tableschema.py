@@ -611,6 +611,12 @@ def make_id(*components):
     else:
         # we have to shorten this id
         truncate_threshold = 4
+
+        if len(expanded) > (63 // (truncate_threshold + 1)):
+            # will be too long even if every elemenent is hashed by helper below
+            # so concatenate interior elements and hash as one...
+            expanded = [ expanded[0], '_'.join(expanded[1:-2]), expanded[-1] ]
+
         def helper(e):
             if len(e) <= truncate_threshold:
                 # retain short elements
