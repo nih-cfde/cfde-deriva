@@ -924,7 +924,12 @@ class CfdeDataPackage (object):
                     raise
                 progress["tables"][resource["name"]] = True
                 logger.info('ETL complete for %s' % sql_identifier(resource['name']))
-        for resource in self.package_def['resources']:
+        tables_map = {
+            resource['name']: resource
+            for resource in self.package_def['resources']
+        }
+        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+            resource = tables_map[tname]
             for column in resource['schema']['fields']:
                 if 'derivation_sql_path' in column and do_etl_columns:
                     if progress.setdefault("columns", {}).setdefault(resource["name"], {}).get(column["name"], False):

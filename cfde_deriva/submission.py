@@ -765,7 +765,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
         if progress is None:
             progress = dict()
         dp = CfdeDataPackage(schema_json)
-        # this with block produces a transaction in sqlite3
+
         def json_sorted(j):
             if j is None:
                 return None
@@ -784,11 +784,54 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                 logger.error('json_sorted(%r) JSON encode failed: %s' % (j, e))
                 raise
 
+        def cfde_keywords_set(*strings):
+            """Downcase and split strings into tokens, remove common junk tokens, merge into set."""
+            kw = set()
+            for s in strings:
+                if s is None:
+                    continue
+                kw.update([s.strip('-.,;:()"[]') for s in re.split('\s|[/.,;()[\]"_]', s.lower())])
+            kw.difference_update({'', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on', 'or', 'and', 'is', 'by', 'not', 'from', 'are'})
+            return kw
+
+        def cfde_keywords(*strings):
+            """Downcase and split strings into tokens, remove common junk tokens, merge into sorted JSON array."""
+            kw = cfde_keywords_set(*strings)
+            return json.dumps(sorted(kw), separators=(',',':'))
+
+        def cfde_keywords_merge_set(*arrays):
+            """Merge JSON arrays of keywords into one set."""
+            kw = set()
+            for a in arrays:
+                if a is None:
+                    continue
+                kw.update(json.loads(a))
+            kw.difference_update({None,})
+            return kw
+
+        def cfde_keywords_merge(*arrays):
+            """Merge JSON arrays of keywords into one sorted JSON array."""
+            kw = cfde_keywords_merge_set(*arrays)
+            return json.dumps(sorted(kw), separators=(',',':'))
+
+        class cfde_keywords_agg(object):
+            """Like cfde_keywords() but merge each call in aggregate"""
+            def __init__(self):
+                self.kw = set()
+            def step(self, *strings):
+                self.kw.update(cfde_keywords_set(*strings))
+            def finalize(self):
+                return json.dumps(sorted(self.kw), separators=(',',':'))
+
+        # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
             for dbname, dbfilename in attach.items():
                 conn.execute("ATTACH DATABASE %s AS %s;" % (sql_literal(dbfilename), sql_identifier(dbname)))
             conn.create_function('json_sorted', 1, json_sorted)
+            conn.create_function('cfde_keywords', -1, cfde_keywords)
+            conn.create_function('cfde_keywords_merge', -1, cfde_keywords_merge)
+            conn.create_aggregate('cfde_keywords_agg', -1, cfde_keywords_agg)
             conn.set_trace_callback(logger.debug)
             dp.sqlite_do_etl(conn, progress=progress)
 
