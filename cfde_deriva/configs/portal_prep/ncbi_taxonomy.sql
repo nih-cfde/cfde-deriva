@@ -1,6 +1,7 @@
 INSERT INTO ncbi_taxonomy (
   nid,
   id,
+  clade,
   "name",
   description,
   synonyms
@@ -8,6 +9,7 @@ INSERT INTO ncbi_taxonomy (
 SELECT
   nid,
   id,
+  clade,
   "name",
   description,
   synonyms

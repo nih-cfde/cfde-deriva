@@ -94,54 +94,14 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": "id_namespace",
-                  "constraint_name": "file_id_namespace_fkey",
+                  "fields": "fact_class",
+                  "constraint_name": "file_fact_class_fkey",
                   "reference": {
-                     "resource": "id_namespace",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "file_project_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": [ "project_root_id_namespace", "project_root_local_id" ],
-                  "constraint_name": "file_project_root_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "file_format",
-                  "constraint_name": "file_file_format_fkey",
-                  "reference": {
-                     "resource": "file_format",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "data_type",
-                  "constraint_name": "file_data_type_fkey",
-                  "reference": {
-                     "resource": "data_type",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "assay_type",
-                  "constraint_name": "file_assay_type_fkey",
-                  "reference": {
-                     "resource": "assay_type",
-                     "fields": "id"
+                     "resource": "core_fact_class",
+                     "fields": "nid"
                   }
                }
             ]
@@ -4874,9 +4834,9 @@
 
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact",
-         "title": "Core Fact",
-         "description": "Core C2M2 entity (aggregate) facts.",
+         "name": "core_fact_class",
+         "title": "Core Fact Class",
+         "description": "Core C2M2 entity class (aggregate) facts.",
          "schema": {
             "fields": [
                {
@@ -4981,7 +4941,7 @@
             ],
             "primaryKey": "nid"
          },
-         "derivation_sql_path": "core_fact.sql"
+         "derivation_sql_path": "core_fact_class.sql"
       }
 
    ]

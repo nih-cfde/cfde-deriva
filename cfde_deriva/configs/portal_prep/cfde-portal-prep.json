@@ -314,7 +314,7 @@
                   "constraints": {
                      "required": true
                   }
-               }
+               },
                {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
@@ -382,7 +382,7 @@
                      "required": true,
                      "unique": true
                   }
-               }
+               },
                {
                   "name": "id",
                   "description": "The identifier for this DCC, issued by the CFDE-CC.",
@@ -1100,8 +1100,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "subject_local_id",
-                  "description": "The numeric ID of the characterized subject",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -1109,15 +1109,15 @@
                },
                {
                   "name": "role",
-                  "description": "The numeric ID of the subject role term characterizing this subject",
+                  "description": "The numeric ID of the role assigned to this organism-level constituent component of this subject",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "taxonomy",
-                  "description": "The numeric ID of the taxon term characterizing this subject.",
+                  "name": "taxon",
+                  "description": "The numeric ID of an ncbi_taxonomy taxon",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -1127,7 +1127,7 @@
             "primaryKey": [
                "subject",
                "role",
-               "taxonomy"
+               "taxon"
             ],
             "foreignKeys": [
                {
@@ -1148,7 +1148,7 @@
                   }
                },
                {
-                  "fields": "taxonomy",
+                  "fields": "taxon",
                   "constraint_name": "subject_role_taxonomy_taxonomy_fkey",
                   "reference": {
                      "resource": "ncbi_taxonomy",
@@ -1264,7 +1264,7 @@
             "missingValues": [ "" ],
             "primaryKey": "nid"
          },
-         "derivation_sql_path": "ncbi_taxonomy"
+         "derivation_sql_path": "ncbi_taxonomy.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1656,6 +1656,142 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "project_in_project_transitive",
+         "title": "project_in_project_transitive",
+         "description": "Reflexive transitive-closure of project_in_project relationship",
+         "schema": {
+            "fields": [
+               {
+                  "name": "leader_project",
+                  "description": "The numeric ID of the leader (containing) project",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_project",
+                  "description": "The numeric ID of the member (contained or reflexive) project",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "leader_project",
+               "member_project"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "leader_project" ],
+                  "constraint_name": "project_in_project_transitive_leader_fkey",
+                  "reference": {
+                     "title": "Leader Project",
+                     "resource": "project",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": [ "member_project" ],
+                  "constraint_name": "project_in_project_transitive_member_fkey",
+                  "reference": {
+                     "title": "Member Project",
+                     "resource": "project",
+                     "fields": [ "nid" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "project_in_project_transitive.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "project_root",
+         "title": "Project Root",
+         "description": "The subject of project records which do not have a superset project by the project_in_project relationship.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "project",
+                  "description": "Foreign key identifying the C2M2 project record which is a project root.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "project" ],
+            "foreignKeys": [
+               {
+                  "fields": [ "project" ],
+                  "constraint_name": "project_root_project_fkey",
+                  "reference": {
+                     "title": "Project",
+                     "resource": "project",
+                     "fields": [ "nid" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "project_root.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_in_collection_transitive",
+         "title": "collection_in_collection_transitive",
+         "description": "Reflexive transitive-closure of collection_in_collection relationship",
+         "schema": {
+            "fields": [
+               {
+                  "name": "leader_collection",
+                  "description": "The numeric ID of the leader (containing) collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "member_collection",
+                  "description": "The numeric ID of the member (contained or reflexive) collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "leader_collection",
+               "member_collection"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "leader_collection" ],
+                  "constraint_name": "collection_in_collection_transitive_leader_fkey",
+                  "reference": {
+                     "title": "Leader Collection",
+                     "resource": "collection",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": [ "member_collection" ],
+                  "constraint_name": "collection_in_collection_transitive_member_fkey",
+                  "reference": {
+                     "title": "Member Collection",
+                     "resource": "collection",
+                     "fields": [ "nid" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "collection_in_collection_transitive.sql"
+      },
+      
+      {
+         "profile": "tabular-data-resource",
          "name": "core_fact",
          "title": "Core Fact",
          "description": "Core C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
@@ -1818,7 +1954,7 @@
                }
             ]
          },
-         "derivation_sql_path": "core_facts"
+         "derivation_sql_path": "core_fact.sql"
       }
 
    ]

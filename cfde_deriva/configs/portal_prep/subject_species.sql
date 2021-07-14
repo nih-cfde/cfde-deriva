@@ -13,7 +13,7 @@ FROM (
   JOIN subject s ON (srt.subject = s.nid)
   JOIN subject_granularity sg ON (s.granularity = sg.nid)
   JOIN subject_role sr ON (srt."role" = sr.nid)
-  JOIN ncbi_taxonomy t ON (srt.taxonomy = t.nid)
+  JOIN ncbi_taxonomy t ON (srt.taxon = t.nid)
   WHERE sg."name" = 'single organism'
     AND sr."name" = 'single organism'
     AND t.clade = 'species'
@@ -23,7 +23,7 @@ FROM (
 -- now find species info
 JOIN subject_role_taxonomy srt ON (srt.subject = s.nid)
 JOIN subject_role sr ON (srt."role" = sr.nid)
-JOIN ncbi_taxonomy t ON (srt.taxonomy = t.nid)
+JOIN ncbi_taxonomy t ON (srt.taxon = t.nid)
 WHERE sr."name" = 'single organism'
   AND t.clade = 'species'
 ;

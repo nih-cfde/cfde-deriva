@@ -15,7 +15,7 @@ from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, bui
 import requests
 
 from . import tableschema
-from .configs import portal, registry
+from .configs import submission, portal_prep, portal, registry
 from .exception import IncompatibleDatapackageModel, InvalidDatapackage
 
 """
@@ -67,7 +67,9 @@ class _PackageDataName (object):
         """
         return io.StringIO(self.get_data_str(key))
 
-portal_schema_json = _PackageDataName(portal, 'c2m2-level1-portal-model.json')
+submission_schema_json = _PackageDataName(submission, 'c2m2-datapackage.json')
+portal_prep_schema_json = _PackageDataName(portal_prep, 'cfde-portal-prep.json')
+portal_schema_json = _PackageDataName(portal, 'cfde-portal.json')
 registry_schema_json = _PackageDataName(registry, 'cfde-registry-model.json')
 
 def sql_identifier(s):
@@ -296,8 +298,8 @@ class CfdeDataPackage (object):
             for ntable in nschema.tables.values():
                 table = schema.tables[ntable.name]
                 for ncolumn in ntable.columns:
-                    if ncolumn.name in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'}:
-                        # don't consider patching system columns...
+                    if ncolumn.name in {'nid', 'RID', 'RCT', 'RMT', 'RCB', 'RMB'}:
+                        # don't consider patching system nor special CFDE columns...
                         pass
                     elif ncolumn.name not in table.columns.elements:
                         cdoc = ncolumn.prejson()
@@ -445,6 +447,8 @@ class CfdeDataPackage (object):
                     column.acl_bindings.update(doc_column.acl_bindings)
                 if True or table.is_association():
                     for cname in {'RCB', 'RMB'}:
+                        if cname not in table.columns.elements:
+                            continue
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             logger.info('Dropping %s' % fkey.uri_path)
                             fkey.drop()
@@ -461,7 +465,7 @@ class CfdeDataPackage (object):
             return [
                 fkeys_by_col.get(col.name, col.name)
                 for col in table.column_definitions
-                if col.name not in {"RID", "RCT", "RMT", "RCB", "RMB"}
+                if col.name not in {"nid", "RID", "RCT", "RMT", "RCB", "RMB"}
             ]
 
         def visible_foreign_keys(table):
@@ -574,7 +578,7 @@ class CfdeDataPackage (object):
 
             def get_data():
                 r = self.catalog.get(
-                    '/entity/CFDE:%s@sort(RID)?limit=%d' % (
+                    '/entity/CFDE:%s@sort(nid)?limit=%d' % (
                         urlquote(resource['name']),
                         self.batch_size,
                     ))
@@ -582,9 +586,9 @@ class CfdeDataPackage (object):
                 yield rows
 
                 while rows:
-                    last = rows[-1]['RID']
+                    last = rows[-1]['nid']
                     r = self.catalog.get(
-                        '/entity/CFDE:%s@sort(RID)@after(%s)?limit=%d' % (
+                        '/entity/CFDE:%s@sort(nid)@after(%s)?limit=%d' % (
                             urlquote(resource['name']),
                             urlquote(last),
                             self.batch_size,
@@ -835,10 +839,10 @@ class CfdeDataPackage (object):
 
             def get_batch(cur):
                 nonlocal position
-                sql = 'SELECT %(cols)s FROM %(table)s %(where)s ORDER BY "RID" ASC LIMIT %(batchsize)s' % {
-                    'cols': ', '.join([ "RID" ] + [ sql_identifier(cname) for cname in colnames ]),
+                sql = 'SELECT %(cols)s FROM %(table)s %(where)s ORDER BY "nid" ASC LIMIT %(batchsize)s' % {
+                    'cols': ', '.join([ "nid" ] + [ sql_identifier(cname) for cname in colnames ]),
                     'table': sql_identifier(table.name),
-                    'where': '' if position is None else ('WHERE "RID" > %s' % sql_literal(position)),
+                    'where': '' if position is None else ('WHERE "nid" > %s' % sql_literal(position)),
                     'batchsize': '%d' % self.batch_size,
                 }
                 cur.execute(sql)
@@ -903,7 +907,7 @@ class CfdeDataPackage (object):
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename is portal_schema_json:
+        if not self.package_filename in { portal_schema_json, portal_prep_schema_json }:
             raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
         for resource in self.package_def['resources']:
             if 'derivation_sql_path' in resource and do_etl_tables:
@@ -913,7 +917,11 @@ class CfdeDataPackage (object):
                 sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
                 logger.debug('Running table-generating ETL for %s...' % sql_identifier(resource['name']))
-                conn.execute(sql)
+                try:
+                    conn.executescript(sql)
+                except Exception as e:
+                    logger.error('Failed to run table-generating ETL for %s: %s' % (sql_identifier(resource['name']), e))
+                    raise
                 progress["tables"][resource["name"]] = True
                 logger.info('ETL complete for %s' % sql_identifier(resource['name']))
         for resource in self.package_def['resources']:
@@ -925,7 +933,11 @@ class CfdeDataPackage (object):
                     sql = self.package_filename.get_data_str(column['derivation_sql_path'])
                     conn.execute('UPDATE %s SET %s = NULL' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
                     logger.debug('Running column-generating ETL for %s.%s...' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
-                    conn.execute(sql)
+                    try:
+                        conn.executescript(sql)
+                    except Exception as e:
+                        logger.error('Failed to run column-generating ETL for %s.%s: %s' % (resource['name'], sql_identifier(column['name']), e))
+                        raise
                     progress["columns"][resource["name"]][column["name"]] = True
                     logger.info('ETL complete for %s.%s' % (sql_identifier(resource['name']), sql_identifier(column['name'])))
 
@@ -951,7 +963,7 @@ class CfdeDataPackage (object):
             self.column_sqlite_ddl(col)
             for col in table.column_definitions
             # ignore ermrest system columns
-            if col.name not in {'RCT', 'RCB', 'RMT', 'RMB'}
+            if col.name not in {'RID', 'RCT', 'RCB', 'RMT', 'RMB'}
         ]
         parts.extend([
             self.key_sqlite_ddl(key)
@@ -981,9 +993,9 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
 
     def column_sqlite_ddl(self, col):
         """Output SQLite DDL for column (as part of CREATE TABLE statement)"""
-        if col.name == 'RID':
+        if col.name == 'nid':
             # special mapping to help with our ETL scripts...
-            return '"RID" INTEGER PRIMARY KEY AUTOINCREMENT'
+            return '"nid" INTEGER PRIMARY KEY AUTOINCREMENT'
         parts = [ sql_identifier(col.name), self.type_sqlite_ddl(col.type) ]
         if not col.nullok:
             parts.append('NOT NULL')

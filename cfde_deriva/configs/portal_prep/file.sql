@@ -37,7 +37,7 @@ FROM submission.file f
 JOIN submission.id_namespace i ON (f.id_namespace = i.id)
 JOIN submission.project p ON (f.project_id_namespace = p.id_namespace AND f.project_local_id = p.local_id)
 LEFT JOIN submission.file_format ff ON (f.file_format = ff.id)
-LEFT JOIN submission.data_type tt ON (f.data_type = dt.id)
+LEFT JOIN submission.data_type dt ON (f.data_type = dt.id)
 LEFT JOIN submission.assay_type "at" ON (f.assay_type = "at".id)
 LEFT JOIN mime_type mt ON (f.mime_type = mt.id)
 ;

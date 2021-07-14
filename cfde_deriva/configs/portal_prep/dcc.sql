@@ -4,8 +4,8 @@ INSERT INTO dcc (
   project,
   id,
   dcc_name,
-  abbreviation,
-  description,
+  dcc_abbreviation,
+  dcc_description,
   contact_email,
   contact_name,
   dcc_url
@@ -14,8 +14,8 @@ SELECT
   p.nid,
   d.id,
   d.dcc_name,
-  d.abbreviation,
-  d.description,
+  d.dcc_abbreviation,
+  d.dcc_description,
   d.contact_email,
   d.contact_name,
   d.dcc_url

@@ -2,12 +2,12 @@ INSERT INTO subject_role (
   nid,
   id,
   "name",
-  desription
+  description
 )
 SELECT
   nid,
   id,
   "name",
-  desription
+  description
 FROM submission.subject_role
 ;

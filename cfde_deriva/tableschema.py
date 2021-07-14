@@ -680,7 +680,7 @@ def make_fkey(tname, fkdef):
     )
 
 def make_table(tdef, configurator, trusted=False, history_capture=False):
-    provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
+    provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
     tname = tdef["name"]
     if provide_system:
         system_columns = Table.system_column_defs()
@@ -716,24 +716,28 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         system_columns = []
         system_keys = []
         system_fkeys = []
+
+    # always add "nid" we use for batched transfer
+    system_columns.append(Column.define("nid", builtin_types.float8, nullok=False, comment="A numeric surrogate key for this record."))
+    system_keys.append(make_key(tname, ['nid']))
     tcomment = tdef.get("description")
     tdef_resource = tdef
     tdef = tdef_resource.pop("schema")
-    keys = []
-    keysets = set()
+    # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints
+    keys = {
+        frozenset(kdef["unique_columns"]): kdef
+        for kdef in system_keys
+    }
     pk = tdef.pop("primaryKey", None)
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
-        keys.append(make_key(tname, pk))
-        keysets.add(frozenset(pk))
+        keys.setdefault(frozenset(pk), make_key(tname, pk))
     tdef_fields = tdef.pop("fields", None)
     for cdef in tdef_fields:
         if cdef.get("constraints", {}).pop("unique", False):
-            kcols = [cdef["name"]]
-            if frozenset(kcols) not in keysets:
-                keys.append(make_key(tname, kcols))
-                keysets.add(frozenset(kcols))
+            keys.setdefault(frozenset([cdef["name"]]), make_key(tname, [cdef["name"]]))
+    keys = list(keys.values())
     tdef_fkeys = tdef.pop("foreignKeys", [])
     title = tdef_resource.get("title", None)
     annotations = {
@@ -761,8 +765,9 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         column_defs=system_columns + [
             make_column(tname, cdef, configurator)
             for cdef in tdef_fields
+            if cdef.get("name") not in {"nid", "RID", "RCT", "RMT", "RCB", "RMB"}
         ],
-        key_defs=system_keys + keys,
+        key_defs=keys,
         fkey_defs=system_fkeys + [
             make_fkey(tname, fkdef)
             for fkdef in tdef_fkeys

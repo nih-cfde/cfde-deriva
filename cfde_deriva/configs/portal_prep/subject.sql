@@ -10,15 +10,15 @@ INSERT INTO subject (
   persistent_id
 )
 SELECT
-  s.nid,
-  i.nid,
-  p.nid,
-  sg.nid,
+  s.nid AS nid,
+  i.nid AS id_namespace,
+  p.nid AS project,
+  sg.nid AS granularity,
   s.creation_time,
   s.local_id,
   s.persistent_id
 FROM submission.subject s
 JOIN submission.id_namespace i ON (s.id_namespace = i.id)
 JOIN submission.project p ON (s.project_id_namespace = p.id_namespace AND s.project_local_id = p.local_id)
-LEFT JOIN subject_granularity sg ON (s.granularity = sg.id)
+JOIN submission.subject_granularity sg ON (s.granularity = sg.id)
 ;

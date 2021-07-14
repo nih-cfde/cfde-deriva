@@ -1,7 +1,8 @@
 -- Assume a submission db is attached at as the schema "submission"
 INSERT INTO mime_type (id)
-SELECT DISTINCT mime_type
+SELECT DISTINCT f.mime_type
 FROM submission.file f
--- use upsert so we can optionally pre-load canonical MIME types and patch 
+WHERE True -- avoids parsing ambiguity in sqlit
+-- allow us to pre-load some mime types in future?
 ON CONFLICT DO NOTHING
 ;

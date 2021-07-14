@@ -24,7 +24,7 @@ from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, portal_schema_json, sql_literal, make_session_config
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, sql_literal, sql_identifier, make_session_config
 from .cfde_login import get_archive_headers_map
 
 
@@ -134,8 +134,14 @@ class Submission (object):
         # check filesystem config early to abort ASAP on errors
         # TBD: check permissions for safe service config?
         os.makedirs(os.path.dirname(self.download_filename), exist_ok=True)
-        os.makedirs(os.path.dirname(self.sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.ingest_sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.portal_prep_sqlite_filename), exist_ok=True)
         os.makedirs(os.path.dirname(self.content_path), exist_ok=True)
+
+    def dump_progress(self, progress):
+        with open(self.restart_marker_filename, 'w') as f:
+            json.dump(progress, f, indent=2)
+        logger.info("Dumped restart marker file %s" % self.restart_marker_filename)
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -173,6 +179,14 @@ class Submission (object):
         except Exception as e:
             logger.error('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
             raise exception.RegistrationError(e)
+
+        try:
+            os.makedirs(os.path.dirname(self.restart_marker_filename), exist_ok=True)
+            with open(self.restart_marker_filename, 'r') as f:
+                progress = json.load(f)
+            logger.info("Loaded restart marker file %s" % self.restart_marker_filename)
+        except:
+            progress = dict()
 
         # general sequence (with many idempotent steps)
         failed = True
@@ -289,22 +303,25 @@ class Submission (object):
             }:
                 next_error_state = terms.cfde_registry_dp_status.check_error
                 self.datapackage_model_check(self.content_path, pre_process=dpt_register)
-                self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
+                #self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.provision_sqlite(self.content_path, self.sqlite_filename)
+            self.provision_sqlite(submission_schema_json, self.ingest_sqlite_filename)
+            self.provision_sqlite(portal_prep_schema_json, self.portal_prep_sqlite_filename)
             if self.review_catalog is None:
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
-            self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
-            self.record_vocab_usage(self.registry, self.sqlite_filename, self.datapackage_id)
-            self.transitional_etl_dcc_table(self.content_path, self.sqlite_filename, self.submitting_dcc_id)
+            #self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
+            #self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
+            #self.record_vocab_usage(self.registry, self.ingest_sqlite_filename, self.datapackage_id)
+            #self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.prepare_sqlite_derived_data(self.sqlite_filename)
-            self.validate_submission_dcc_table(self.sqlite_filename, self.submitting_dcc_id)
+            self.prepare_sqlite_derived_data(portal_prep_schema_json, self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
+            self.validate_submission_dcc_table(self.portal_prep_sqlite_filename, self.submitting_dcc_id)
+
+            raise NotImplementedError('ABORT DEVELOPMENT CODE')
             self.upload_sqlite_content(self.review_catalog, self.sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
@@ -385,18 +402,36 @@ class Submission (object):
         return '%s/unpacked/%s' % (self.content_path_root, self.datapackage_id)
 
     @property
-    def sqlite_filename(self):
-        """Return sqlite_filename scratch C2M2 DB target name for given submssion id.
+    def ingest_sqlite_filename(self):
+        """Return ingest_sqlite_filename scratch C2M2 DB target name for given submssion id.
 
         We use a deterministic mapping of submission id to
-        sqlite_filename so that we can do reentrant processing.
+        ingest_sqlite_filename so that we can do reentrant processing.
 
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/databases/%s.sqlite3' % (self.content_path_root, self.datapackage_id)
+        return '%s/databases/%s_submission.sqlite3' % (self.content_path_root, self.datapackage_id)
+
+    @property
+    def portal_prep_sqlite_filename(self):
+        """Return portal_prep_sqlite_filename scratch C2M2 DB target name for given submssion id.
+
+        We use a deterministic mapping of submission id to
+        portal_prep_sqlite_filename so that we can do reentrant processing.
+
+        """
+        # TBD: check or remap id character range?
+        # naive mapping should be OK for UUIDs...
+        return '%s/databases/%s_portal_prep.sqlite3' % (self.content_path_root, self.datapackage_id)
 
     ## utility functions to help with various processing and validation tasks
+
+    @property
+    def restart_marker_filename(self):
+        """Return restart_marker JSON file name for given submission id.
+        """
+        return '%s/progress/%s.json' % (self.content_path_root, self.datapackage_id)
 
     @classmethod
     def report_external_ops_error(cls, registry, id, diagnostics=None, status=terms.cfde_registry_dp_status.ops_error):
@@ -588,7 +623,7 @@ class Submission (object):
         introduce any undesired deviations in the model definition.
 
         """
-        canon_dp = CfdeDataPackage(portal_schema_json)
+        canon_dp = CfdeDataPackage(submission_schema_json)
         packagefile = cls.datapackage_name_from_path(content_path)
         if pre_process:
             pre_process(content_path, packagefile)
@@ -636,14 +671,14 @@ class Submission (object):
             ))
 
     @classmethod
-    def provision_sqlite(cls, content_path, sqlite_filename):
-        """Idempotently prepare sqlite database containing portal model and base vocab."""
-        canon_dp = CfdeDataPackage(portal_schema_json)
+    def provision_sqlite(cls, schema_json, sqlite_filename):
+        """Idempotently prepare sqlite database, with givem model and base vocab."""
+        dp = CfdeDataPackage(schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently provisioning schema in %s' % (sqlite_filename,))
-            canon_dp.provision_sqlite(conn)
-            canon_dp.sqlite_import_data_files(conn, onconflict='skip')
+            dp.provision_sqlite(conn)
+            dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
     def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None):
@@ -703,20 +738,25 @@ FROM (
             if dcc_id != submitting_dcc:
                 raise exception.InvalidDatapackage('Submission dcc.id = %s does not match submitting DCC %s' % (dcc_id, submitting_dcc,))
             cur.execute("""
-SELECT d.project_id_namespace, d.project_local_id, p."RID"
+SELECT
+  i.id,
+  p.local_id,
+  pr.nid IS NOT NULL AS is_project_root
 FROM dcc d
-LEFT OUTER JOIN project_root p ON (d.project_id_namespace = p.project_id_namespace AND d.project_local_id = p.project_local_id);
+JOIN project p ON (d.project = p.nid)
+JOIN id_namespace i ON (p.id_namespace = i.nid)
+LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
 """)
-            id_namespace, local_id, rid = cur.fetchone()
-            if rid is None:
+            id_namespace, local_id, is_root = cur.fetchone()
+            if not is_root:
                 raise exception.InvalidDatapackage('DCC project identifier (%s, %s) does not designate a root in the project hierarchy' % (
                     id_namespace,
                     local_id
                 ))
 
     @classmethod
-    def prepare_sqlite_derived_data(cls, sqlite_filename, progress=None):
-        """Prepare derived content via SQL queries in the C2M2 portal model.
+    def prepare_sqlite_derived_data(cls, schema_json, sqlite_filename, progress=None, attach={}):
+        """Prepare derived content via embedded SQL ETL 
 
         This method will clear and recompute the derived results
         each time it is invoked.
@@ -724,11 +764,33 @@ LEFT OUTER JOIN project_root p ON (d.project_id_namespace = p.project_id_namespa
         """
         if progress is None:
             progress = dict()
-        canon_dp = CfdeDataPackage(portal_schema_json)
+        dp = CfdeDataPackage(schema_json)
         # this with block produces a transaction in sqlite3
+        def json_sorted(j):
+            if j is None:
+                return None
+            try:
+                v = json.loads(j)
+            except Exception as e:
+                logger.error('json_sorted(%r) JSON decode failed: %s' % (j, e))
+                raise
+            if not isinstance(v, list):
+                logger.error('json_sorted unexpected input %r' % (j,))
+                raise ValueError(j)
+            try:
+                v = json.dumps(sorted(v, key=lambda x: (-1 if x is None else x)), separators=(',',':'))
+                return v
+            except Exception as e:
+                logger.error('json_sorted(%r) JSON encode failed: %s' % (j, e))
+                raise
+
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
-            canon_dp.sqlite_do_etl(conn, progress=progress)
+            for dbname, dbfilename in attach.items():
+                conn.execute("ATTACH DATABASE %s AS %s;" % (sql_literal(dbfilename), sql_identifier(dbname)))
+            conn.create_function('json_sorted', 1, json_sorted)
+            conn.set_trace_callback(logger.debug)
+            dp.sqlite_do_etl(conn, progress=progress)
 
     @classmethod
     def extract_catalog_id(cls, server, catalog_url):

@@ -1,7 +1,7 @@
 {
    "profile": "tabular-data-package",
    "name": "c2m2_submission_datapackage_specs",
-   "title": "A customized C2M2 model augmented with ingest processing hints",
+   "title": "A customized C2M2 model augmented with 'nid' surrogate keys",
    "resources": [
 
       {
