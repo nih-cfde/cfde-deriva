@@ -2,7 +2,7 @@ CREATE TEMPORARY TABLE file_facts AS
   SELECT
     f.nid,
     f.id_namespace,
-    json_sorted(json_group_array(DISTINCT f.project)) AS projects,
+    json_array(f.project) AS projects,
     json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
@@ -26,10 +26,23 @@ CREATE TEMPORARY TABLE file_facts AS
       LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
     ) ON (b.nid = bfs.biosample)
   ) ON (f.nid = fdb.file)
-  GROUP BY f.nid, f.id_namespace
+  GROUP BY f.nid, f.id_namespace, json_array(f.project)
 ;
+CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
+    id_namespace,
+    projects,
+    dccs,
+    subject_roles,
+    subject_granularities,
+    subject_species,
+    ncbi_taxons,
+    anatomies,
+    assay_types,
+    file_formats,
+    data_types,
+    mime_types
+);
 INSERT INTO core_fact (
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -44,7 +57,6 @@ INSERT INTO core_fact (
     mime_types
 )
   SELECT DISTINCT
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -83,7 +95,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
   SELECT
     b.nid,
     b.id_namespace,
-    json_sorted(json_group_array(DISTINCT b.project)) AS projects,
+    json_array(b.project) AS projects,
     json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
@@ -107,10 +119,23 @@ CREATE TEMPORARY TABLE biosample_facts AS
     LEFT JOIN subject_species ss ON (ss.subject = s.nid)
     LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
   ) ON (b.nid = bfs.biosample)
-  GROUP BY b.nid, b.id_namespace
+  GROUP BY b.nid, b.id_namespace, json_array(b.project)
 ;
+CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
+    id_namespace,
+    projects,
+    dccs,
+    subject_roles,
+    subject_granularities,
+    subject_species,
+    ncbi_taxons,
+    anatomies,
+    assay_types,
+    file_formats,
+    data_types,
+    mime_types
+);
 INSERT INTO core_fact (
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -125,7 +150,6 @@ INSERT INTO core_fact (
     mime_types
 )
   SELECT DISTINCT
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -164,7 +188,7 @@ CREATE TEMPORARY TABLE subject_facts AS
   SELECT
     s.nid,
     s.id_namespace,
-    json_sorted(json_group_array(DISTINCT s.project)) AS projects,
+    json_array(s.project) AS projects,
     json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
@@ -188,9 +212,23 @@ CREATE TEMPORARY TABLE subject_facts AS
       JOIN file f ON (fdb.file = f.nid)
     ) ON (b.nid = fdb.biosample)
   ) ON (s.nid = bfs.subject)
+  GROUP BY s.nid, s.id_namespace, json_array(s.project)
 ;
+CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
+    id_namespace,
+    projects,
+    dccs,
+    subject_roles,
+    subject_granularities,
+    subject_species,
+    ncbi_taxons,
+    anatomies,
+    assay_types,
+    file_formats,
+    data_types,
+    mime_types
+);
 INSERT INTO core_fact (
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -205,7 +243,6 @@ INSERT INTO core_fact (
     mime_types
 )
   SELECT DISTINCT
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -218,7 +255,7 @@ INSERT INTO core_fact (
     file_formats,
     data_types,
     mime_types
-  FROM biosample_facts
+  FROM subject_facts
   WHERE True
   ON CONFLICT DO NOTHING
 ;
@@ -380,8 +417,21 @@ CREATE TEMPORARY TABLE collection_facts AS
      ) s) AS mime_types
   FROM collection col
 ;
+CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
+    id_namespace,
+    projects,
+    dccs,
+    subject_roles,
+    subject_granularities,
+    subject_species,
+    ncbi_taxons,
+    anatomies,
+    assay_types,
+    file_formats,
+    data_types,
+    mime_types
+);
 INSERT INTO core_fact (
-    nid,
     id_namespace,
     projects,
     dccs,
@@ -396,7 +446,6 @@ INSERT INTO core_fact (
     mime_types
 )
   SELECT DISTINCT
-    nid,
     id_namespace,
     projects,
     dccs,
