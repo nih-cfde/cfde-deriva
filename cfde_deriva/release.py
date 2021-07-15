@@ -11,7 +11,7 @@ from deriva.core import DerivaServer, get_credential, init_logging
 from . import exception
 from .cfde_login import get_archive_headers_map
 from .tableschema import ReleaseConfigurator
-from .datapackage import CfdeDataPackage, portal_schema_json, make_session_config
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, make_session_config
 from .registry import Registry, nochange, terms
 from .submission import Submission
 
@@ -69,7 +69,8 @@ class Release (object):
 
         # check filesystem config early to abort ASAP on errors
         # TBD: check permissions for safe service config?
-        os.makedirs(os.path.dirname(self.sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.ingest_sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.portal_prep_sqlite_filename), exist_ok=True)
 
     @classmethod
     def configure_release_catalog(cls, registry, catalog, id, provision=False):
@@ -167,7 +168,8 @@ class Release (object):
 
             # this includes portal schema and built-in vocabs
             logger.info('Provisioning sqlite...')
-            Submission.provision_sqlite(None, self.sqlite_filename)
+            Submission.provision_sqlite(submission_schema_json, self.ingest_sqlite_filename)
+            Submission.provision_sqlite(portal_prep_schema_json, self.portal_prep_sqlite_filename)
 
             logger.info('Loading %s release constituents...' % len(self.dcc_datapackages))
             for dprow in self.dcc_datapackages.values():
@@ -198,19 +200,24 @@ class Release (object):
 
                 submission.load_sqlite(
                     submission.content_path,
-                    self.sqlite_filename,
+                    self.ingest_sqlite_filename,
                     progress=progress.setdefault('sqlite_load', {}).setdefault(dprow['id'], {}),
                 )
                 # this works because we incrementally translate each DCC's primary_dcc_contact rows
-                submission.transitional_etl_dcc_table(submission.content_path, self.sqlite_filename, submission.submitting_dcc_id)
+                submission.transitional_etl_dcc_table(submission.content_path, self.ingest_sqlite_filename, submission.submitting_dcc_id)
                 self.dump_progress(progress)
 
             # do this once w/ all content now loaded in sqlite
             logger.info('Preparing derived data...')
-            Submission.prepare_sqlite_derived_data(self.sqlite_filename, progress=progress.setdefault('etl', {}))
+            Submission.prepare_sqlite_derived_data(
+                portal_prep_schema_json,
+                self.portal_prep_sqlite_filename,
+                attach={'submission': self.ingest_sqlite_filename},
+                progress=progress.setdefault('etl', {}),
+            )
             logger.info('Uploading all release content...')
             self.dump_progress(progress)
-            Submission.upload_sqlite_content(catalog, self.sqlite_filename, progress=progress.setdefault('upload', {}))
+            Submission.upload_sqlite_content(catalog, self.portal_prep_sqlite_filename, progress=progress.setdefault('upload', {}))
             logger.info('All release content successfully uploaded to %(ermrest_url)s' % rel)
             self.dump_progress(progress)
 
@@ -255,16 +262,28 @@ class Release (object):
         logger.info("Dumped restart marker file %s" % self.restart_marker_filename)
 
     @property
-    def sqlite_filename(self):
-        """Return sqlite_filename scratch C2M2 DB target name for given release id.
+    def ingest_sqlite_filename(self):
+        """Return ingest_sqlite_filename scratch C2M2 DB target name for given release id.
 
         We use a deterministic mapping of release id to
-        sqlite_filename so that we can do reentrant processing.
+        ingest_sqlite_filename so that we can do reentrant processing.
 
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/databases/%s.sqlite3' % (self.content_path_root, self.release_id)
+        return '%s/databases/%s_submission.sqlite3' % (self.content_path_root, self.release_id)
+
+    @property
+    def portal_prep_sqlite_filename(self):
+        """Return portal_prep_sqlite_filename scratch C2M2 DB target name for given release id.
+
+        We use a deterministic mapping of release id to
+        portal_prep_sqlite_filename so that we can do reentrant processing.
+
+        """
+        # TBD: check or remap id character range?
+        # naive mapping should be OK for UUIDs...
+        return '%s/databases/%s_portal_prep.sqlite3' % (self.content_path_root, self.release_id)
 
     @property
     def restart_marker_filename(self):
@@ -308,7 +327,7 @@ def main(subcommand, *args):
     server = DerivaServer('https', servername, credential, session_config=session_config)
 
     need_dcc_appr = os.getenv('DRAFT_NEED_DCC', 'true').lower() in {'t', 'y', 'true', 'yes'}
-    need_cfde_appr = os.getenv('DRAFT_NEED_CFDE', 'true').lower() in {'t', 'y', 'true', 'yes'}
+    need_cfde_appr = os.getenv('DRAFT_NEED_CFDE', 'false').lower() in {'t', 'y', 'true', 'yes'}
 
     archive_headers_map = get_archive_headers_map(servername)
 
