@@ -1964,6 +1964,63 @@
                },
 
                {
+                  "name": "project",
+                  "description": "The numeric ID of a singular source or defining project attributed for the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_project.sql"
+               },
+               {
+                  "name": "dcc",
+                  "description": "The numeric ID of a singular source or defining DCC attributed for the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_dcc.sql"
+               },
+               {
+                  "name": "subject_granularity",
+                  "description": "The numeric ID of a singular subject_granularity term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_subject_granularity.sql"
+               },
+               {
+                  "name": "ncbi_taxon",
+                  "description": "The numeric ID of a singular ncbi_taxonomy term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_ncbi_taxon.sql"
+               },
+
+               {
+                  "name": "anatomy",
+                  "description": "The numeric ID of a singular anatomy term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_anatomy.sql"
+               },
+
+               {
+                  "name": "assay_type",
+                  "description": "The numeric ID of a singular assay_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_assay_type.sql"
+               },
+               {
+                  "name": "file_format",
+                  "description": "The numeric ID of a singular file_format term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_file_format.sql"
+               },
+               {
+                  "name": "data_type",
+                  "description": "The numeric ID of a singuar data_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_data_type.sql"
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The numeric ID of a singular mime_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_mime_type.sql"
+               },
+
+               {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
@@ -2012,6 +2069,78 @@
                   "constraint_name": "core_fact_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "project",
+                  "constraint_name": "core_fact_project_fkey",
+                  "reference": {
+                     "resource": "project",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "dcc",
+                  "constraint_name": "core_fact_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "core_fact_subject_granularity_fkey",
+                  "reference": {
+                     "resource": "subject_granularity",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "ncbi_taxon",
+                  "constraint_name": "core_fact_ncbi_taxon_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxon",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "core_fact_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "core_fact_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "constraint_name": "core_fact_file_format_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "core_fact_data_type_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "mime_type",
+                  "constraint_name": "core_fact_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
                      "fields": "nid"
                   }
                }
