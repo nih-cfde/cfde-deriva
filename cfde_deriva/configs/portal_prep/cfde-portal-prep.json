@@ -2147,7 +2147,512 @@
             ]
          },
          "derivation_sql_path": "core_fact.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_project",
+         "description": "An exploded representation of the core_fact.projects array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project",
+                  "description": "The numeric ID of a term found in the core_fact.projects array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "project"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_project_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "project",
+                  "constraint_name": "core_fact_project_project_fkey",
+                  "reference": {
+                     "resource": "project",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_project_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_dcc",
+         "description": "An exploded representation of the core_fact.dccs array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dcc",
+                  "description": "The numeric ID of a term found in the core_fact.dccs array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "dcc"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_dcc_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "dcc",
+                  "constraint_name": "core_fact_dcc_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_dcc_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_role",
+         "description": "An exploded representation of the core_fact.subject_roles array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_role",
+                  "description": "The numeric ID of a term found in the core_fact.subject_roles array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "subject_role"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_role_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_role",
+                  "constraint_name": "core_fact_subject_role_subject_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_subject_role_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_granularity",
+         "description": "An exploded representation of the core_fact.subject_granularities array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_granularity",
+                  "description": "The numeric ID of a term found in the core_fact.subject_granularities array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "subject_granularity"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_granularity_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "core_fact_subject_granularity_subject_granularity_fkey",
+                  "reference": {
+                     "resource": "subject_granularity",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_subject_granularity_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_species",
+         "description": "An exploded representation of the core_fact.subject_species array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of a term found in the core_fact.subject_species array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "subject_species"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_species_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_species",
+                  "constraint_name": "core_fact_subject_species_subject_species_fkey",
+                  "reference": {
+                     "resource": "subject_species",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_subject_species_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_ncbi_taxonomy",
+         "description": "An exploded representation of the core_fact.ncbi_taxons array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ncbi_taxon",
+                  "description": "The numeric ID of a term found in the core_fact.ncbi_taxons array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "ncbi_taxon"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_ncbi_taxonomy_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "ncbi_taxon",
+                  "constraint_name": "core_fact_ncbi_taxonomy_ncbi_taxon_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_ncbi_taxonomy_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_anatomy",
+         "description": "An exploded representation of the core_fact.anatomies array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "The numeric ID of a term found in the core_fact.anatomies array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "anatomy"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_anatomy_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "core_fact_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_anatomy_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_assay_type",
+         "description": "An exploded representation of the core_fact.assay_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "The numeric ID of a term found in the core_fact.assay_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "assay_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_assay_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "core_fact_assay_type_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_assay_type_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_file_format",
+         "description": "An exploded representation of the core_fact.file_formats array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "description": "The numeric ID of a term found in the core_fact.file_formats array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "file_format"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_file_format_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "constraint_name": "core_fact_file_format_file_format_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_file_format_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_data_type",
+         "description": "An exploded representation of the core_fact.data_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_type",
+                  "description": "The numeric ID of a term found in the core_fact.data_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "data_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_data_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "core_fact_data_type_data_type_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_data_type_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_mime_type",
+         "description": "An exploded representation of the core_fact.mime_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The numeric ID of a term found in the core_fact.mime_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "mime_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_mime_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "mime_type",
+                  "constraint_name": "core_fact_mime_type_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_mime_type_assoc.sql"
       }
-
    ]
 }
