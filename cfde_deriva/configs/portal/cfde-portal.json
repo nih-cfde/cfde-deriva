@@ -1,7 +1,7 @@
 {
    "profile": "tabular-data-package",
    "name": "c2m2_portal_etl_specs",
-   "title": "Transformation of C2M2-nid model with basic data-warehouse techniques and portal UI hints",
+   "title": "Subset of transformed C2M2 model with basic data-warehouse techniques and portal UI hints",
    "resources": [
 
       {
@@ -22,13 +22,10 @@
                   }
                },
                {
-                  "name": "fact_class",
-                  "title": "Fact Class",
-                  "description": "Numeric ID of the aggregated class of C2M2 facts to which this file belongs.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true
-                  }
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
                },
                {
                   "name": "local_id",
@@ -79,28 +76,16 @@
                   "constraints": {
                      "pattern": "^[^\/\\:]+$"
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "file_kw.sql",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
             "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": "fact_class",
-                  "constraint_name": "file_fact_class_fkey",
+                  "fields": "core_fact",
+                  "constraint_name": "file_core_fact_fkey",
                   "reference": {
-                     "resource": "core_fact_class",
+                     "resource": "core_fact",
                      "fields": "nid"
                   }
                }
@@ -258,7 +243,7 @@
             },
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
+                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{local_id}}{{/persistent_id}}"
                }
             },
             "source_definitions": {
@@ -268,40 +253,42 @@
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "file metadata, anatomy, taxonomy", "comment": "file name, format, data-type, assay-type, anatomy, taxonomy, subject granularity, project, or collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
-                     "source": [{"outbound": ["CFDE", "file_id_namespace_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
                   },
                   "S_project": {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the file.",
-                     "source": [{"outbound": ["CFDE", "file_project_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
                   },
                   "S_super_projects": {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_project_fkey"]},
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
-                     "comment": "The Common Fund Program attributed as source of the file.",
+                     "comment": "The data coordinating center attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_project_root_fkey"]},
-                        {"inbound": ["CFDE", "dcc_project_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
                      ],
                      "entity": true
                   },
                   "S_file_format": {
                      "comment": "The content format of the file.",
-                     "source": [{"outbound": ["CFDE", "file_file_format_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_file_format_fkey"]}, "nid"]
                   },
                   "S_data_type": {
                      "comment": "The type of data represented by the file.",
-                     "source": [{"outbound": ["CFDE", "file_data_type_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_data_type_fkey"]}, "nid"]
                   },
                   "S_creation_time": {
                      "comment": "The time when the file was created.",
@@ -312,22 +299,38 @@
                      "source": [
                         {"inbound": ["CFDE", "file_describes_biosample_file_fkey"]},
                         {"outbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_anatomy": {
                      "comment": "Anatomy for biosamples described by file.",
                      "source": [
-                        {"inbound": ["CFDE", "file_anatomy_file_fkey"]},
-                        {"outbound": ["CFDE", "file_anatomy_fkey"]},
-                        "id"
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_assay_type": {
                      "comment": "Assay type used to generate the file.",
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_assay_type_fkey"]}, "nid"]
+                  },
+                  "S_subject_granularity": {
+                     "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
-                        "id"
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject_role": {
+                     "comment": "The taxonomy role(s) of subjects described directly or indirectly by the file.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_described_subjects": {
@@ -335,7 +338,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_describes_subject_file_fkey"]},
                         {"outbound": ["CFDE", "file_describes_subject_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_part_of_collections": {
@@ -346,16 +349,17 @@
                         {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
                      "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -400,35 +404,11 @@
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
-                  {
-                     "markdown_name": "Subject Granularity",
-                     "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_subject_granularity_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_granularity_granularity_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Subject Role",
-                     "comment": "The taxonomical role(s) characterizing subjects described directly or indirectly by the file.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_role_taxonomy_role_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_subject_granularity"},
+                  {"sourcekey": "S_subject_Role"},
                   {
                      "markdown_name": "File Creation Time",
                      "sourcekey": "S_creation_time"
-                  },
-                  {
-                     "markdown_name": "Biosample Creation Time",
-                     "comment": "The time when a biosample described by this file was created.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
-                        "biosample_creation_time"
-                     ]
                   },
                   {"source": "size_in_bytes"},
                   {"source": "uncompressed_size_in_bytes"},
@@ -447,13 +427,26 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this biosample",
-                  "type": "string",
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
+                  "type": "integer",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -464,58 +457,12 @@
                   }
                },
                {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the primary project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the primary project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_root_id_namespace",
-                  "description": "Computed id_namespace for the root project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": false
-                  },
-                  "derivation_sql_path": "biosample_project_root.sql"
-               },
-               {
-                  "name": "project_root_local_id",
-                  "description": "Computed local_id for the root project within which this biosample was created",
-                  "type": "string",
-                  "constraints": {
-                     "required": false
-                  }
-               },
-               {
                   "name": "persistent_id",
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this biosample",
                   "type": "string"
                },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
-               },
-               {
-                  "name": "anatomy",
-                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^UBERON:[0-9]+$"
-                  }
-               },
+
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
@@ -530,38 +477,14 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": "id_namespace",
-                  "constraint_name": "biosample_id_namespace_fkey",
+                  "fields": "core_fact",
+                  "constraint_name": "biosample_core_fact_fkey",
                   "reference": {
-                     "resource": "id_namespace",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "biosample_project_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": [ "project_root_id_namespace", "project_root_local_id" ],
-                  "constraint_name": "biosample_project_root_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "anatomy",
-                  "constraint_name": "biosample_anatomy_fkey",
-                  "reference": {
-                     "resource": "anatomy",
-                     "fields": "id"
+                     "resource": "core_fact",
+                     "fields": "nid"
                   }
                }
             ]
@@ -683,57 +606,59 @@
             },
             "source_definitions": {
                "columns": true,
-               "fkeys": true,
+               "fkeys": false,
                "sources": {
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "biosample, file, subject metadata", "comment": "biosample identifers/anatomy, file format/assay/data type, subject granularity/role/taxonomy, project, collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
-                     "source": [{"outbound": ["CFDE", "biosample_id_namespace_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
                   },
                   "S_assay_type": {
                      "comment": "The assay type characterizing the biosample.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_assay_type_biosample_fkey"]},
-                        {"outbound": ["CFDE", "biosample_assay_type_assay_type_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_anatomy": {
                      "comment": "The anatomy from which the biosample is derived.",
-                     "source": [{"outbound": ["CFDE", "biosample_anatomy_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_anatomy_fkey"]}, "nid"]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject of the biosampling.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
-                        {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
-                     "source": [{"outbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "RID"]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
-                     "comment": "The Common Fund Program attributed as source of the biosample.",
+                     "comment": "The data coordinating center attributed as source of the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_project_root_fkey"]},
-                        {"inbound": ["CFDE", "dcc_project_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_super_projects": {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_project_fkey"]},
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_creation_time": {
@@ -816,13 +741,26 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this subject",
-                  "type": "string",
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -833,57 +771,10 @@
                   }
                },
                {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the primary project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the primary project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_root_id_namespace",
-                  "description": "Computed id_namespace for the root project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": false
-                  },
-                  "derivation_sql_path": "subject_project_root.sql"
-               },
-               {
-                  "name": "project_root_local_id",
-                  "description": "Computed local_id for the root project within which this subject was observed",
-                  "type": "string",
-                  "constraints": {
-                     "required": false
-                  }
-               },
-               {
                   "name": "persistent_id",
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this subject",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
-               },
-               {
-                  "name": "granularity",
-                  "description": "A CFDE CV term categorizing this subject by multiplicity",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
                },
                {
                   "name": "kw",
@@ -899,38 +790,14 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": "id_namespace",
-                  "constraint_name": "subject_id_namespace_fkey",
+                  "fields": "core_fact",
+                  "constraint_name": "subject_core_fact_fkey",
                   "reference": {
-                     "resource": "id_namespace",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "subject_project_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": [ "project_root_id_namespace", "project_root_local_id" ],
-                  "constraint_name": "subject_project_root_fkey",
-                  "reference": {
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "granularity",
-                  "constraint_name": "subject_granularity_fkey",
-                  "reference": {
-                     "resource": "subject_granularity",
-                     "fields": "id"
+                     "resource": "core_fact",
+                     "fields": "nid"
                   }
                }
             ]
@@ -1037,27 +904,25 @@
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "subject, biosample, file metadata", "comment": "subject identifiers/granularity/role/taxonomy, biosample anatomy, file format/assay/data type, project, collection keywords"} ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
-                     "source": [{"outbound": ["CFDE", "subject_id_namespace_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the subject.",
-                     "source": [{"outbound": ["CFDE", "subject_project_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_project_root_fkey"]},
-                        {"inbound": ["CFDE", "dcc_project_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
-                     "source": [
-                        {"outbound": ["CFDE", "subject_granularity_fkey"]},
-                        "RID"
-                     ]
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_subject_granularity_fkey"]}, "nid"]
                   },
                   "S_role": {
                      "markdown_name": "Taxonomic Role",
@@ -1066,8 +931,7 @@
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
                         "name"
-                     ],
-                     "aggregate": "array"
+                     ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Taxonomy",
@@ -1076,8 +940,7 @@
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
                         "name"
-                     ],
-                     "aggregate": "array"
+                     ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the subject record created.",
@@ -1088,7 +951,7 @@
                      "comment": "Taxonomic characterizations of the subject.",
                      "source": [
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ],
                      "entity": true
                   },
@@ -1178,11 +1041,30 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "description": "The numeric surrogate key for this record.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "project",
+                  "description": "Foreign key identifying the top-level C2M2 project record representing byproducts of this DCC.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
                   "name": "id",
                   "description": "The identifier for this DCC, issued by the CFDE-CC.",
                   "type": "string",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
                },
                {
@@ -1236,34 +1118,18 @@
                   "constraints": {
                      "required": true
                   }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this DCC.",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this DCC.",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "dcc_project_fkey",
                   "reference": {
                      "title": "DCC Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -1305,111 +1171,35 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "primary_dcc_contact",
-         "title": "Primary DCC Contact",
-         "description": "One primary contact person for the Common Fund data coordinating center (DCC) that produced the top-level C2M2 metadataset identified by the given project foreign key",
-         "schema": {
-            "fields": [
-               {
-                  "name": "contact_email",
-                  "description": "Email address of this DCC contact",
-                  "type": "string",
-                  "format": "email",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "contact_name",
-                  "description": "Name of this DCC contact",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "dcc_abbreviation",
-                  "description": "A very short display label for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "pattern": "^[a-zA-Z0-9_]+$"
-                  }
-               },
-               {
-                  "name": "dcc_name",
-                  "description": "A short, human-readable, machine-read-friendly label for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "dcc_description",
-                  "description": "A human-readable description of this contact's DCC",
-                  "type": "string"
-               },
-               {
-                  "name": "dcc_url",
-                  "description": "URL of the front page of the website for this contact's DCC",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": [ "contact_email" ],
-            "foreignKeys": [
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "primary_dcc_contact_project_fkey",
-                  "reference": {
-                     "title": "DCC Project",
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         }
-      },
-      {
-         "profile": "tabular-data-resource",
          "name": "project",
          "title": "Project",
          "description": "A node in the project hierarchy subdividing this id_namespace",
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this project in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                  "required": true,
+                     "unique": true
+                  }
+               },
+               {
                   "name": "id_namespace",
                   "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this project",
-                  "type": "string",
+                  "description": "Numeric ID of the identifier namespace in which this project is assigned a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this project's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -1424,12 +1214,6 @@
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this project",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this project's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
                },
                {
                   "name": "abbreviation",
@@ -1450,21 +1234,18 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this project",
-                  "type": "string",
-                  "deriva": {
-                    "indexing_preferences": {"btree": false}
-                 }
+                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
                   "constraint_name": "project_id_namespace_fkey",
                   "reference": {
                      "resource": "id_namespace",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
@@ -1659,61 +1440,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "parent_project_id_namespace",
-                  "description": "ID of the identifier namespace for the parent in this parent-child project pair",
-                  "type": "string",
+                  "name": "parent_project",
+                  "description": "Numeric ID of the parent in this parent-child project pair",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "parent_project_local_id",
-                  "description": "The ID of the containing (parent) project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "child_project_id_namespace",
-                  "description": "ID of the identifier namespace for the child in this parent-child project pair",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "child_project_local_id",
-                  "description": "The ID of the contained (child) project",
-                  "type": "string",
+                  "name": "child_project",
+                  "description": "Numeric ID of the child in this parent-child project pair",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "parent_project_id_namespace",
-               "parent_project_local_id",
-               "child_project_id_namespace",
-               "child_project_local_id"
+               "parent_project",
+               "child_project"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "parent_project_id_namespace", "parent_project_local_id" ],
+                  "fields": [ "parent_project" ],
                   "constraint_name": "project_in_project_parent_fkey",
                   "reference": {
                      "title": "Parent Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "child_project_id_namespace", "child_project_local_id" ],
+                  "fields": [ "child_project" ],
                   "constraint_name": "project_in_project_child_fkey",
                   "reference": {
                      "title": "Child Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -1733,13 +1496,26 @@
          "schema": {
             "fields": [
                {
-                  "name": "id_namespace",
-                  "title": "ID Namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this collection",
-                  "type": "string",
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer",
                   "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
+               },
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "creation_time",
+                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this collection's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
+                  "type": "datetime",
+                  "format": "any"
                },
                {
                   "name": "local_id",
@@ -1754,12 +1530,6 @@
                   "title": "Persistent ID",
                   "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC and attached to this collection",
                   "type": "string"
-               },
-               {
-                  "name": "creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this collection's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
                },
                {
                   "name": "abbreviation",
@@ -1780,21 +1550,30 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this collection",
-                  "type": "string",
+                  "type": "string"
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "collection_kw.sql",
                   "deriva": {
-                    "indexing_preferences": {"btree": false}
-                 }
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "id_namespace", "local_id" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
-                  "fields": "id_namespace",
-                  "constraint_name": "collection_id_namespace_fkey",
+                  "fields": "core_fact",
+                  "constraint_name": "collection_core_fact_fkey",
                   "reference": {
-                     "resource": "id_namespace",
-                     "fields": "id"
+                     "resource": "core_fact",
+                     "fields": "nid"
                   }
                }
             ]
@@ -1971,8 +1750,9 @@
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_id_namespace_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_project": {
@@ -1980,17 +1760,26 @@
                      "source": [
                         {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
-                        "RID"
+                        "nid"
+                     ]
+                  },
+                  "S_projects": {
+                     "markdown_name": "Project",
+                     "comment": "A project which defined the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program which defined the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_project_root_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_project_root_project_fkey"]},
-                        {"inbound": ["CFDE", "dcc_project_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_super_projects": {
@@ -2001,7 +1790,7 @@
                         {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_file_format": {
@@ -2010,7 +1799,7 @@
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
                         {"outbound": ["CFDE", "file_file_format_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_data_type": {
@@ -2019,25 +1808,57 @@
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
                         {"outbound": ["CFDE", "file_data_type_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_assay_type": {
                      "markdown_name": "Assay Type",
                      "comment": "The assay type of a directly or indirectly constituent biosample.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_assay_type_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_assay_type_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_ncbi_taxons": {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "The assay type of a directly or indirectly constituent biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject_granularities": {
+                     "markdown_name": "Subject Granularity",
+                     "comment": "The specificity of a directly or indirectly constituent subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject_roles": {
+                     "markdown_name": "Subject Role",
+                     "comment": "The role of a directly or indirectly constituent subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_anatomy": {
                      "markdown_name": "Anatomy",
                      "comment": "The anatomical source of a directly or indirectly constituent biosample.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_anatomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_anatomy_fkey"]},
-                        "RID"
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_creation_time": {
@@ -2053,28 +1874,28 @@
                      "source": [
                         {"inbound": ["CFDE", "collection_in_collection_child_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_parent_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
                      "source": [
                         {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
                      "source": [
                         {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
                      "source": [
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                ]
@@ -2092,7 +1913,7 @@
                   {"sourcekey": "S_id_namespace"},
                   "local_id",
                   "persistent_id",
-                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_projects"},
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
@@ -2102,35 +1923,11 @@
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy", "open": true},
-                  {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The taxonomy of a directly or indirectly constituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourceKey": "S_ncbi_taxons"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
-                  {
-                     "markdown_name": "Subject Granularity",
-                     "comment": "The specificity of description for a directly or indirectly consituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
-                        "RID"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Subject Role",
-                     "comment": "The taxonomic role for a directly or indirectly constituent subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
-                        "RID"
-                     ]
-                  },
+                  {"sourcekey": "S_subject_granularities"},
+                  {"sourcekey": "S_subject_role"},
                   {
                      "markdown_name": "Collection Creation Time",
                      "sourcekey": "S_creation_time"
@@ -2148,10 +1945,9 @@
                      "markdown_name": "Biosample Creation Time",
                      "comment": "The time when a constituent biosample was created.",
                      "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        {"inbound": ["CFDE", "file_biosample_creation_time_file_fkey"]},
-                        "biosample_creation_time"
+                        {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
+                        {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
+                        "creation_time"
                      ]
                   },
                   {
@@ -2199,61 +1995,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "superset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the superset collection",
-                  "type": "string",
+                  "name": "superset_collection",
+                  "description": "Numeric ID of the superset collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "superset_collection_local_id",
-                  "description": "The ID of the superset collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the subset collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subset_collection_local_id",
-                  "description": "The ID of the subset collection",
-                  "type": "string",
+                  "name": "subset_collection",
+                  "description": "Numeric ID of the subset collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "superset_collection_id_namespace",
-               "superset_collection_local_id",
-               "subset_collection_id_namespace",
-               "subset_collection_local_id"
+               "superset_collection",
+               "subset_collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "superset_collection_id_namespace", "superset_collection_local_id" ],
+                  "fields": [ "superset_collection" ],
                   "constraint_name": "collection_in_collection_superset_fkey",
                   "reference": {
                      "title": "Superset Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subset_collection_id_namespace", "subset_collection_local_id" ],
+                  "fields": [ "subset_collection" ],
                   "constraint_name": "collection_in_collection_subset_fkey",
                   "reference": {
                      "title": "Subset Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2273,61 +2051,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "Numeric ID of the defined collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing this project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "The ID of this project",
-                  "type": "string",
+                  "name": "project",
+                  "description": "Numeric ID of the defining project",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "project_id_namespace",
-               "project_local_id"
+               "collection",
+               "project"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "collection_defined_by_project_collection_fkey",
                   "reference": {
                      "title": "Defined Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
+                  "fields": [ "project" ],
                   "constraint_name": "collection_defined_by_project_project_fkey",
                   "reference": {
                      "title": "Defined by Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2347,61 +2107,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
+                  "name": "file",
+                  "description": "The numeric ID of this file",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "file",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_in_collection_file_fkey",
                   "reference": {
                      "title": "Contained File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "file_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2421,61 +2163,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_local_id",
-                  "description": "The ID of this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "biosample_id_namespace",
-               "biosample_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "biosample",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "biosample_in_collection_biosample_fkey",
                   "reference": {
                      "title": "Contained Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "biosample_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2495,61 +2219,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The nueric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "subject_id_namespace",
-               "subject_local_id",
-               "collection_id_namespace",
-               "collection_local_id"
+               "subject",
+               "collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "subject_in_collection_subject_fkey",
                   "reference": {
                      "title": "Contained Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "fields": [ "collection" ],
                   "constraint_name": "subject_in_collection_collection_fkey",
                   "reference": {
                      "title": "Part of Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2569,61 +2275,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
+                  "name": "file",
                   "description": "The ID of this file",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "biosample_local_id",
+                  "name": "biosample",
                   "description": "The ID of this biosample",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "biosample_id_namespace",
-               "biosample_local_id"
+               "file",
+               "biosample"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_describes_biosample_file_fkey",
                   "reference": {
                      "title": "Described by File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "file_describes_biosample_biosample_fkey",
                   "reference": {
                      "title": "Described Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2643,61 +2331,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
+                  "name": "file",
+                  "description": "The numeric ID of this file",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "subject_id_namespace",
-               "subject_local_id"
+               "file",
+               "subject"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
+                  "fields": [ "file" ],
                   "constraint_name": "file_describes_subject_file_fkey",
                   "reference": {
                      "title": "Described by File",
                      "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "file_describes_subject_subject_fkey",
                   "reference": {
                      "title": "Described Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2717,61 +2387,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "biosample_local_id",
-                  "description": "The ID of this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "biosample_id_namespace",
-               "biosample_local_id",
-               "subject_id_namespace",
-               "subject_local_id"
+               "biosample",
+               "subject"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
+                  "fields": [ "biosample" ],
                   "constraint_name": "biosample_from_subject_biosample_fkey",
                   "reference": {
                      "title": "Derived Biosample",
                      "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "biosample_from_subject_subject_fkey",
                   "reference": {
                      "title": "Source Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -2791,68 +2443,59 @@
          "schema": {
             "fields": [
                {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
+                  "name": "role",
+                  "description": "The numeric ID of the role assigned to this organism-level constituent component of this subject",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "role_id",
-                  "description": "The ID of the role assigned to this organism-level constituent component of this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "taxonomy_id",
-                  "description": "An NCBI Taxonomy Database ID identifying this taxon",
-                  "type": "string",
+                  "name": "taxon",
+                  "description": "The numeric ID of an ncbi_taxonomy taxon",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "subject_id_namespace",
-               "subject_local_id",
-               "role_id",
-               "taxonomy_id"
+               "subject",
+               "role",
+               "taxon"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "fields": [ "subject" ],
                   "constraint_name": "subject_role_taxonomy_subject_fkey",
                   "reference": {
                      "title": "Subject",
                      "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": "role_id",
+                  "fields": "role",
                   "constraint_name": "subject_role_taxonomy_role_fkey",
                   "reference": {
                      "resource": "subject_role",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": "taxonomy_id",
+                  "fields": "taxon",
                   "constraint_name": "subject_role_taxonomy_taxonomy_fkey",
                   "reference": {
                      "resource": "ncbi_taxonomy",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                }
             ]
@@ -2864,9 +2507,9 @@
             },
             "visible_columns": {
                "compact": [
-                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]}, "RID"]},
-                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]}, "RID"]},
-                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]}, "RID"]}
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]}, "nid"]},
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]}, "nid"]},
+                  {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]}, "nid"]}
                ]
             }
          }
@@ -2878,6 +2521,16 @@
          "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used in this dataset to describe types of experiment that generate results stored in files",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this assay_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An OBI CV term",
@@ -2905,7 +2558,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -2920,26 +2573,30 @@
                      "markdown_name": "Biosample",
                      "comment": "List of biosamples referencing this assay type.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_assay_type_assay_type_fkey"]},
-                        {"outbound": ["CFDE", "biosample_assay_type_biosample_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this assay type.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_assay_type_fkey"]},
-                        {"outbound": ["CFDE", "collection_assay_type_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this assay type.",
                      "source": [
-                        {"inbound": ["CFDE", "file_assay_type_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -2965,6 +2622,16 @@
          "description": "List of NCBI Taxonomy Database IDs identifying taxa used to describe subjects in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this taxon in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
@@ -3003,7 +2670,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3020,25 +2687,27 @@
                      "source": [
                         {"inbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this taxon.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_taxonomy_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_role_taxonomy_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this taxon.",
                      "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_taxonomy_fkey"]},
-                        {"outbound": ["CFDE", "file_subject_role_taxonomy_file_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -3064,6 +2733,16 @@
          "description": "List of Uber-anatomy ontology (Uberon) CV terms used in this dataset to locate the origin of a biosample within the physiology of its source or host organism",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this anatomy in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An Uberon CV term",
@@ -3094,7 +2773,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3109,26 +2788,30 @@
                      "markdown_name": "Biosample",
                      "comment": "List of biosamples referencing this anatomical term.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_anatomy_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this anatomical term.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_anatomy_fkey"]},
-                        {"outbound": ["CFDE", "collection_anatomy_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this anatomical term.",
                      "source": [
-                        {"inbound": ["CFDE", "file_anatomy_fkey"]},
-                        {"outbound": ["CFDE", "file_anatomy_file_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -3154,6 +2837,16 @@
          "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this file_format in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An EDAM CV format term",
@@ -3184,7 +2877,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3199,18 +2892,20 @@
                      "markdown_name": "File",
                      "comment": "List of files referencing this format.",
                      "source": [
-                        {"inbound": ["CFDE", "file_file_format_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this format.",
                      "source": [
-                        {"inbound": ["CFDE", "file_file_format_fkey"]},
-                        {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -3236,6 +2931,16 @@
          "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this data_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "An EDAM CV data term",
@@ -3266,7 +2971,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3281,18 +2986,20 @@
                      "markdown_name": "File",
                      "comment": "List of files referencing this data type.",
                      "source": [
-                        {"inbound": ["CFDE", "file_data_type_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this format.",
                      "source": [
-                        {"inbound": ["CFDE", "file_data_type_fkey"]},
-                        {"inbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -3320,6 +3027,16 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_role in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
                   "name": "id",
                   "description": "A globally unique ID representing this subject_role",
                   "type": "string",
@@ -3343,7 +3060,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3358,24 +3075,30 @@
                      "markdown_name": "Subject",
                      "comment": "List of subjects referencing this subject role.",
                      "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this subject role.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_subject_role_taxonomy_role_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this subject role.",
                      "source": [
-                        {"inbound": ["CFDE", "file_subject_role_taxonomy_role_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
                      ]
                   }
                }
@@ -3403,6 +3126,16 @@
          "schema": {
             "fields": [
                {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_granularity in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
                   "name": "id",
                   "description": "A globally unique ID representing this subject_granularity",
                   "type": "string",
@@ -3426,7 +3159,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3441,27 +3174,31 @@
                      "markdown_name": "Subject",
                      "comment": "List of subjects referencing this subject granularity.",
                      "source": [
-                        {"inbound": ["CFDE",  "subject_granularity_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
                      "comment": "List of collections referencing this subject granularity.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_subject_granularity_granularity_fkey"]},
-                        {"outbound": ["CFDE", "collection_subject_granularity_collection_fkey"]},
-                        "RID"
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
                      "comment": "List of files referencing this subject granularity.",
                      "source": [
-                        {"inbound": ["CFDE",  "file_subject_granularity_granularity_fkey"]},
-                        {"outbound": ["CFDE",  "file_subject_granularity_file_fkey"]},
-                        "RID"
-                     ]
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                      ]
                   }
                }
             },
@@ -3486,6 +3223,16 @@
          "description": "INTERNAL CV: Dictionary of CFDE-generated identifier namespaces corresponding to top-level C2M2 metadatasets",
          "schema": {
             "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this identifier namespace in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
                {
                   "name": "id",
                   "description": "A globally unique ID representing this identifier namespace",
@@ -3515,7 +3262,54 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "mime_type",
+         "title": "MIME Type",
+         "description": "Dimension table of each distinct MIME type referenced by C2M2 files.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this MIME type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "The unique MIME type string",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
          },
          "deriva": {
             "indexing_preferences": {
@@ -3527,525 +3321,49 @@
 
       {
          "profile": "tabular-data-resource",
-         "name": "project_root",
-         "title": "Root Project",
-         "description": "Top-level projects not declared a sub-project of any other.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "project_id_namespace",
-                  "description": "Identifier namespace for the project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "The ID of this project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "project_id_namespace",
-               "project_local_id"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "project_root_project_fkey",
-                  "reference": {
-                     "title": "Project",
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "project_root.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "file_subject_granularity",
-         "title": "file_subject_granularity",
-         "description": "Collapsed association of subject-granularities for subjects described by file",
-         "schema": {
-            "fields": [
-               {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_granularity",
-                  "description": "A CFDE CV term categorizing described subject by multiplicity",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "subject_granularity"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
-                  "constraint_name": "file_subject_granularity_file_fkey",
-                  "reference": {
-                     "title": "Characterized File",
-                     "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "subject_granularity",
-                  "constraint_name": "file_subject_granularity_granularity_fkey",
-                  "reference": {
-                     "title": "Subject Granularity",
-                     "resource": "subject_granularity",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "file_subject_granularity.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "biosample_assay_type",
-         "title": "biosample_assay_type",
-         "description": "Collapsed association of file-assay-types for biosamples described by file",
-         "schema": {
-            "fields": [
-               {
-                  "name": "biosample_id_namespace",
-                  "description": "Identifier namespace for this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "biosample_local_id",
-                  "description": "The ID of this biosample",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "assay_type",
-                  "description": "A CFDE CV term categorizing described biosample assay-type",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "biosample_id_namespace",
-               "biosample_local_id",
-               "assay_type"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "biosample_id_namespace", "biosample_local_id" ],
-                  "constraint_name": "biosample_assay_type_biosample_fkey",
-                  "reference": {
-                     "title": "Characterized Biosample",
-                     "resource": "biosample",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "assay_type",
-                  "constraint_name": "biosample_assay_type_assay_type_fkey",
-                  "reference": {
-                     "title": "Assay Type",
-                     "resource": "assay_type",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "biosample_assay_type.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "subject_species",
-         "title": "subject_species",
-         "description": "Collapsed association of subject-species, simplifying subject-role-taxonomy association",
-         "schema": {
-            "fields": [
-               {
-                  "name": "subject_id_namespace",
-                  "description": "Identifier namespace for this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_local_id",
-                  "description": "The ID of this subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "species",
-                  "description": "A CFDE CV term categorizing described subject species, drawn from NCBI Taxonomy",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "subject_id_namespace",
-               "subject_local_id",
-               "species"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "subject_id_namespace", "subject_local_id" ],
-                  "constraint_name": "subject_species_subject_fkey",
-                  "reference": {
-                     "title": "Characterized Subject",
-                     "resource": "subject",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "species",
-                  "constraint_name": "subject_species_species_fkey",
-                  "reference": {
-                     "title": "Species",
-                     "resource": "ncbi_taxonomy",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "subject_species.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "file_subject_role_taxonomy",
-         "title": "file_subject_role_taxonomy",
-         "description": "Collapsed association of subject-role-taxonomies for subjects described by file",
-         "schema": {
-            "fields": [
-               {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_role_id",
-                  "description": "The ID of the role assigned to this organism-level constituent component of described subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_taxonomy_id",
-                  "description": "An NCBI Taxonomy Database ID identifying taxon of described subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "subject_role_id",
-               "subject_taxonomy_id"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
-                  "constraint_name": "file_subject_role_taxonomy_file_fkey",
-                  "reference": {
-                     "title": "Characterized File",
-                     "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "subject_role_id",
-                  "constraint_name": "file_subject_role_taxonomy_role_fkey",
-                  "reference": {
-                     "resource": "subject_role",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "subject_taxonomy_id",
-                  "constraint_name": "file_subject_role_taxonomy_taxonomy_fkey",
-                  "reference": {
-                     "resource": "ncbi_taxonomy",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
-            "source_definitions": {
-               "fkeys": false
-            }
-         },
-         "derivation_sql_path": "file_subject_role_taxonomy.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "file_biosample_creation_time",
-         "title": "file_biosample_creation_time",
-         "description": "Collapsed association of biosample-creation-times for biosamples described by file",
-         "schema": {
-            "fields": [
-               {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "biosample_creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any"
-               }
-            ],
-            "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "biosample_creation_time"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
-                  "constraint_name": "file_biosample_creation_time_file_fkey",
-                  "reference": {
-                     "title": "Characterized File",
-                     "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "file_biosample_creation_time.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "file_anatomy",
-         "title": "file_anatomy",
-         "description": "Collapsed association of anatomies described by file",
-         "schema": {
-            "fields": [
-               {
-                  "name": "file_id_namespace",
-                  "description": "Identifier namespace for this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "file_local_id",
-                  "description": "The ID of this file",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "anatomy",
-                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^UBERON:[0-9]+$"
-                  }
-               }
-            ],
-            "primaryKey": [
-               "file_id_namespace",
-               "file_local_id",
-               "anatomy"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "file_id_namespace", "file_local_id" ],
-                  "constraint_name": "file_anatomy_file_fkey",
-                  "reference": {
-                     "title": "Characterized File",
-                     "resource": "file",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "anatomy",
-                  "constraint_name": "file_anatomy_fkey",
-                  "reference": {
-                     "resource": "anatomy",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "file_anatomy.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
          "name": "project_in_project_transitive",
          "title": "project_in_project_transitive",
          "description": "Reflexive transitive-closure of project_in_project relationship",
          "schema": {
             "fields": [
                {
-                  "name": "leader_project_id_namespace",
-                  "description": "ID of the identifier namespace for the leader in this leader-member project pair",
-                  "type": "string",
+                  "name": "leader_project",
+                  "description": "The numeric ID of the leader (containing) project",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "leader_project_local_id",
-                  "description": "The ID of the leader (containing) project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "member_project_id_namespace",
-                  "description": "ID of the identifier namespace for the member in this leader-member project pair",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "member_project_local_id",
-                  "description": "The ID of the member (contained or reflexive) project",
-                  "type": "string",
+                  "name": "member_project",
+                  "description": "The numeric ID of the member (contained or reflexive) project",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "leader_project_id_namespace",
-               "leader_project_local_id",
-               "member_project_id_namespace",
-               "member_project_local_id"
+               "leader_project",
+               "member_project"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "leader_project_id_namespace", "leader_project_local_id" ],
+                  "fields": [ "leader_project" ],
                   "constraint_name": "project_in_project_transitive_leader_fkey",
                   "reference": {
                      "title": "Leader Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "member_project_id_namespace", "member_project_local_id" ],
+                  "fields": [ "member_project" ],
                   "constraint_name": "project_in_project_transitive_member_fkey",
                   "reference": {
                      "title": "Member Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -4055,73 +3373,35 @@
                "btree": false,
                "trgm": false
             }
-         },
-         "derivation_sql_path": "project_in_project_transitive.sql"
+         }
       },
-
       {
          "profile": "tabular-data-resource",
-         "name": "collection_project_root",
-         "title": "collection_project_root",
-         "description": "Collapsed association of root projects for each collection",
+         "name": "project_root",
+         "title": "Project Root",
+         "description": "The subject of project records which do not have a superset project by the project_in_project relationship.",
          "schema": {
             "fields": [
                {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
+                  "name": "project",
+                  "description": "Foreign key identifying the C2M2 project record which is a project root.",
+                  "type": "integer",
                   "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "Identifier namespace for the project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "The ID of this project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
+                     "required": true,
+                     "unique": true
                   }
                }
             ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "project_id_namespace",
-               "project_local_id"
-            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "project" ],
             "foreignKeys": [
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_project_root_collection_fkey",
-                  "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "collection_project_root_project_fkey",
+                  "fields": [ "project" ],
+                  "constraint_name": "project_root_project_fkey",
                   "reference": {
                      "title": "Project",
                      "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -4131,10 +3411,8 @@
                "btree": false,
                "trgm": false
             }
-         },
-         "derivation_sql_path": "collection_project_root.sql"
+         }
       },
-
       {
          "profile": "tabular-data-resource",
          "name": "collection_in_collection_transitive",
@@ -4143,61 +3421,43 @@
          "schema": {
             "fields": [
                {
-                  "name": "leader_collection_id_namespace",
-                  "description": "ID of the identifier namespace for the leader in this leader-member collection pair",
-                  "type": "string",
+                  "name": "leader_collection",
+                  "description": "The numeric ID of the leader (containing) collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "leader_collection_local_id",
-                  "description": "The ID of the leader (containing) collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "member_collection_id_namespace",
-                  "description": "ID of the identifier namespace for the member in this leader-member collection pair",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "member_collection_local_id",
-                  "description": "The ID of the member (contained or reflexive) collection",
-                  "type": "string",
+                  "name": "member_collection",
+                  "description": "The numeric ID of the member (contained or reflexive) collection",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
             "primaryKey": [
-               "leader_collection_id_namespace",
-               "leader_collection_local_id",
-               "member_collection_id_namespace",
-               "member_collection_local_id"
+               "leader_collection",
+               "member_collection"
             ],
             "foreignKeys": [
                {
-                  "fields": [ "leader_collection_id_namespace", "leader_collection_local_id" ],
+                  "fields": [ "leader_collection" ],
                   "constraint_name": "collection_in_collection_transitive_leader_fkey",
                   "reference": {
                      "title": "Leader Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                },
                {
-                  "fields": [ "member_collection_id_namespace", "member_collection_local_id" ],
+                  "fields": [ "member_collection" ],
                   "constraint_name": "collection_in_collection_transitive_member_fkey",
                   "reference": {
                      "title": "Member Collection",
                      "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "fields": [ "nid" ]
                   }
                }
             ]
@@ -4207,528 +3467,305 @@
                "btree": false,
                "trgm": false
             }
-         },
-         "derivation_sql_path": "collection_in_collection_transitive.sql"
+         }
       },
 
       {
          "profile": "tabular-data-resource",
-         "name": "collection_subject_granularity",
-         "title": "collection_subject_granularity",
-         "description": "Collapsed association of subject-granularities for subjects described by collection",
+         "name": "core_fact",
+         "title": "Core Fact",
+         "description": "Core C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
          "schema": {
             "fields": [
                {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id_namespace",
+                  "description": "The numeric ID of the id_namespace in which described entities were issued a local_id.",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
                },
                {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "project",
+                  "description": "The numeric ID of a singular source or defining project attributed for the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_project.sql"
+               },
+               {
+                  "name": "dcc",
+                  "description": "The numeric ID of a singular source or defining DCC attributed for the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_dcc.sql"
                },
                {
                   "name": "subject_granularity",
-                  "description": "A CFDE CV term categorizing described subject by multiplicity",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
+                  "description": "The numeric ID of a singular subject_granularity term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_subject_granularity.sql"
+               },
+               {
+                  "name": "ncbi_taxon",
+                  "description": "The numeric ID of a singular ncbi_taxonomy term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_ncbi_taxon.sql"
+               },
+
+               {
+                  "name": "anatomy",
+                  "description": "The numeric ID of a singular anatomy term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_anatomy.sql"
+               },
+
+               {
+                  "name": "assay_type",
+                  "description": "The numeric ID of a singular assay_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_assay_type.sql"
+               },
+               {
+                  "name": "file_format",
+                  "description": "The numeric ID of a singular file_format term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_file_format.sql"
+               },
+               {
+                  "name": "data_type",
+                  "description": "The numeric ID of a singuar data_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_data_type.sql"
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The numeric ID of a singular mime_type term qualifying the described entities.",
+                  "type": "integer",
+                  "derivation_sql_path": "core_fact_mime_type.sql"
+               },
+
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "core_fact_kw.sql"
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "core_fact_num_subjects.sql"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "core_fact_num_biosamples.sql"
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "core_fact_num_files.sql"
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "core_fact_num_collections.sql"
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
                }
             ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "subject_granularity"
-            ],
+            "primaryKey": [ "id_namespace", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_subject_granularity_collection_fkey",
+                  "fields": "id_namespace",
+                  "constraint_name": "core_fact_id_namespace_fkey",
                   "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "resource": "id_namespace",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "project",
+                  "constraint_name": "core_fact_project_fkey",
+                  "reference": {
+                     "resource": "project",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "dcc",
+                  "constraint_name": "core_fact_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "nid"
                   }
                },
                {
                   "fields": "subject_granularity",
-                  "constraint_name": "collection_subject_granularity_granularity_fkey",
+                  "constraint_name": "core_fact_subject_granularity_fkey",
                   "reference": {
-                     "title": "Subject Granularity",
                      "resource": "subject_granularity",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "collection_subject_granularity.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "collection_subject_role_taxonomy",
-         "title": "collection_subject_role_taxonomy",
-         "description": "Collapsed association of subject-role-taxonomies for subjects described by collection",
-         "schema": {
-            "fields": [
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
+                     "fields": "nid"
                   }
                },
                {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_role_id",
-                  "description": "The ID of the role assigned to this organism-level constituent component of described subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "subject_taxonomy_id",
-                  "description": "An NCBI Taxonomy Database ID identifying taxon of described subject",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "subject_role_id",
-               "subject_taxonomy_id"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_subject_role_taxonomy_collection_fkey",
+                  "fields": "ncbi_taxon",
+                  "constraint_name": "core_fact_ncbi_taxon_fkey",
                   "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "subject_role_id",
-                  "constraint_name": "collection_subject_role_taxonomy_role_fkey",
-                  "reference": {
-                     "resource": "subject_role",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "subject_taxonomy_id",
-                  "constraint_name": "collection_subject_role_taxonomy_taxonomy_fkey",
-                  "reference": {
-                     "resource": "ncbi_taxonomy",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "collection_subject_role_taxonomy.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "collection_biosample_creation_time",
-         "title": "collection_biosample_creation_time",
-         "description": "Collapsed association of biosample-creation-times for biosamples described by collection",
-         "schema": {
-            "fields": [
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "biosample_creation_time",
-                  "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting desribed biosamples' creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
-                  "type": "datetime",
-                  "format": "any",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "biosample_creation_time"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_biosample_creation_time_collection_fkey",
-                  "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "collection_biosample_creation_time.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "collection_assay_type",
-         "title": "collection_assay_type",
-         "description": "Collapsed association of assay-types described by collection",
-         "schema": {
-            "fields": [
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "assay_type",
-                  "description": "An OBI CV term ID describing the type of material represented by this collection",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^OBI:[0-9]+$"
-                  },
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "assay_type"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_assay_type_collection_fkey",
-                  "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "assay_type",
-                  "constraint_name": "collection_assay_type_fkey",
-                  "reference": {
-                     "resource": "assay_type",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "collection_assay_type.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "collection_anatomy",
-         "title": "collection_anatomy",
-         "description": "Collapsed association of anatomies described by collection",
-         "schema": {
-            "fields": [
-               {
-                  "name": "collection_id_namespace",
-                  "description": "Identifier namespace for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "collection_local_id",
-                  "description": "The ID of this collection",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "anatomy",
-                  "description": "An UBERON CV term ID used to locate the origin of this biosample within the physiology of its source or host organism",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^UBERON:[0-9]+$"
-                  },
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ],
-            "primaryKey": [
-               "collection_id_namespace",
-               "collection_local_id",
-               "anatomy"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_name": "collection_anatomy_collection_fkey",
-                  "reference": {
-                     "title": "Characterized Collection",
-                     "resource": "collection",
-                     "fields": [ "id_namespace", "local_id" ]
+                     "resource": "ncbi_taxon",
+                     "fields": "nid"
                   }
                },
                {
                   "fields": "anatomy",
-                  "constraint_name": "collection_anatomy_fkey",
+                  "constraint_name": "core_fact_anatomy_fkey",
                   "reference": {
                      "resource": "anatomy",
-                     "fields": "id"
-                  }
-               }
-            ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
-         },
-         "derivation_sql_path": "collection_anatomy.sql"
-      },
-
-      {
-         "profile": "tabular-data-resource",
-         "name": "level1_stats",
-         "title": "Core Statistics",
-         "description": "Basic statistical roll-up of core entities by metadata combination.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "root_project_id_namespace",
-                  "description": "Identifier namespace for attributed root project (DCC)",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
+                     "fields": "nid"
                   }
                },
                {
-                  "name": "root_project_local_id",
-                  "description": "The ID of attributed root project (DCC)",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_id_namespace",
-                  "description": "Identifier namespace for attributed project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "project_local_id",
-                  "description": "The ID of attributed project",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "assay_type_id",
-                  "description": "A CFDE CV term for generated file assay types",
-                  "type": "string"
-               },
-               {
-                  "name": "data_type_id",
-                  "description": "A CFDE CV term for generated file data types",
-                  "type": "string"
-               },
-               {
-                  "name": "file_format_id",
-                  "description": "A CFDE CV term for generated file format types",
-                  "type": "string"
-               },
-               {
-                  "name": "anatomy_id",
-                  "description": "A CFDE CV term for anatomical sources of collected biosamples",
-                  "type": "string"
-               },
-               {
-                  "name": "granularity_id",
-                  "description": "A CFDE CV term for granularity of described subjects",
-                  "type": "string"
-               },
-               {
-                  "name": "species_id",
-                  "description": "A CFDE CV term for single organism subject species, a subset of subject taxonomy concepts",
-                  "type": "string"
-               },
-               {
-                  "name": "num_files",
-                  "description": "The number of files related to this combination of metadata terms",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_bytes",
-                  "description": "The total size in bytes of files related to this combination of metadata terms",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_biosamples",
-                  "description": "The number of biosamples related to this combination of metadata terms",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_subjects",
-                  "description": "The number of subjects related to this combination of metadata terms",
-                  "type": "integer"
-               }
-            ],
-            "primaryKey": [
-               "project_id_namespace",
-               "project_local_id",
-               "assay_type_id",
-               "data_type_id",
-               "file_format_id",
-               "anatomy_id",
-               "granularity_id",
-               "species_id"
-            ],
-            "foreignKeys": [
-               {
-                  "fields": [ "root_project_id_namespace", "root_project_local_id" ],
-                  "constraint_name": "level1_stats_root_project_fkey",
+                  "fields": "assay_type",
+                  "constraint_name": "core_fact_assay_type_fkey",
                   "reference": {
-                     "title": "Attributed Root Project",
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": [ "project_id_namespace", "project_local_id" ],
-                  "constraint_name": "level1_stats_project_fkey",
-                  "reference": {
-                     "title": "Attributed Project",
-                     "resource": "project",
-                     "fields": [ "id_namespace", "local_id" ]
-                  }
-               },
-               {
-                  "fields": "assay_type_id",
-                  "constraint_name": "level1_stats_assay_type_fkey",
-                  "reference": {
-                     "title": "Assay Type",
                      "resource": "assay_type",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": "data_type_id",
-                  "constraint_name": "level1_stats_data_type_fkey",
+                  "fields": "file_format",
+                  "constraint_name": "core_fact_file_format_fkey",
                   "reference": {
-                     "title": "Data Type",
-                     "resource": "data_type",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "file_format_id",
-                  "constraint_name": "level1_stats_file_format_fkey",
-                  "reference": {
-                     "title": "File Format",
                      "resource": "file_format",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": "anatomy_id",
-                  "constraint_name": "level1_stats_anatomy_fkey",
+                  "fields": "data_type",
+                  "constraint_name": "core_fact_data_type_fkey",
                   "reference": {
-                     "title": "Anatomy",
-                     "resource": "anatomy",
-                     "fields": "id"
+                     "resource": "data_type",
+                     "fields": "nid"
                   }
                },
                {
-                  "fields": "granularity_id",
-                  "constraint_name": "level1_stats_granularity_fkey",
+                  "fields": "mime_type",
+                  "constraint_name": "core_fact_mime_type_fkey",
                   "reference": {
-                     "title": "Subject Granularity",
-                     "resource": "subject_granularity",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "species_id",
-                  "constraint_name": "level1_stats_species_fkey",
-                  "reference": {
-                     "title": "Subject Species",
-                     "resource": "ncbi_taxonomy",
-                     "fields": "id"
+                     "resource": "mime_type",
+                     "fields": "nid"
                   }
                }
             ]
@@ -4737,11 +3774,6 @@
             "indexing_preferences": {
                "btree": false,
                "trgm": false
-            },
-            "table_display": {
-               "row_name": {
-                  "row_markdown_pattern": "{{_project_id_namespace}}{{_project_local_id}} {{assay_type_id}} {{data_type_id}} {{file_format_id}} {{anatomy_id}} {{granularity_id}} {{species_id}}"
-               }
             },
             "source_definitions": {
                "columns": true,
@@ -4828,120 +3860,502 @@
                   {"source": "num_subjects"}
                ]}
             }
-         },
-         "derivation_sql_path": "level1_stats.sql"
+         }
       },
-
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_class",
-         "title": "Core Fact Class",
-         "description": "Core C2M2 entity class (aggregate) facts.",
+         "name": "core_fact_project",
+         "description": "An exploded representation of the core_fact.projects array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "nid",
+                  "name": "core_fact",
                   "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "description": "The numeric ID of a core_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
-                  "name": "id_namespace",
-                  "description": "The numeric ID of the id_namespace in which described entities were issued a local_id.",
-                  "type": "integer"
+                  "name": "project",
+                  "description": "The numeric ID of a term found in the core_fact.projects array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "project"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_project_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
                },
                {
-                  "name": "projects",
-                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
-                  "type": "array"
+                  "fields": "project",
+                  "constraint_name": "core_fact_project_project_fkey",
+                  "reference": {
+                     "resource": "project",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_dcc",
+         "description": "An exploded representation of the core_fact.dccs array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
-                  "name": "dccs",
-                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
-                  "type": "array"
-               },
-               
+                  "name": "dcc",
+                  "description": "The numeric ID of a term found in the core_fact.dccs array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "dcc"],
+            "foreignKeys": [
                {
-                  "name": "subject_roles",
-                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
-                  "type": "array"
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_dcc_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
                },
                {
-                  "name": "subject_granularities",
-                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
-                  "type": "array"
+                  "fields": "dcc",
+                  "constraint_name": "core_fact_dcc_dcc_fkey",
+                  "reference": {
+                     "resource": "dcc",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_role",
+         "description": "An exploded representation of the core_fact.subject_roles array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_role",
+                  "description": "The numeric ID of a term found in the core_fact.subject_roles array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "subject_role"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_role_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_role",
+                  "constraint_name": "core_fact_subject_role_subject_role_fkey",
+                  "reference": {
+                     "resource": "subject_role",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_granularity",
+         "description": "An exploded representation of the core_fact.subject_granularities array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_granularity",
+                  "description": "The numeric ID of a term found in the core_fact.subject_granularities array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "subject_granularity"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_granularity_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_granularity",
+                  "constraint_name": "core_fact_subject_granularity_subject_granularity_fkey",
+                  "reference": {
+                     "resource": "subject_granularity",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_subject_species",
+         "description": "An exploded representation of the core_fact.subject_species array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "subject_species",
-                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
-                  "type": "array"
-               },
-               {
-                  "name": "ncbi_taxons",
-                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
-                  "type": "array"
-               },
-
-               {
-                  "name": "anatomy",
-                  "description": "The numeric ID of terms qualifying the described entities.",
-                  "type": "array"
-               },
-
-               {
-                  "name": "assay_types",
-                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
-                  "type": "array"
-               },
-               {
-                  "name": "file_formats",
-                  "description": "The numeric ID of file_format terms qualifying the described entities.",
-                  "type": "array"
-               },
-               {
-                  "name": "data_types",
-                  "description": "The numeric ID of data_type terms qualifying the described entities.",
-                  "type": "array"
-               },
-               {
-                  "name": "mime_types",
-                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
-                  "type": "array"
-               },
-               
-               {
-                  "name": "num_subjects",
-                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_biosamples",
-                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_files",
-                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
-                  "type": "integer"
-               },
-               {
-                  "name": "num_collections",
-                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
-                  "type": "integer"
-               },
-               {
-                  "name": "total_byte_count",
-                  "description": "The total byte count for files with this distinct combination of C2M2 characteristics.",
-                  "type": "integer"
+                  "description": "The numeric ID of a term found in the core_fact.subject_species array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
                }
             ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "core_fact_class.sql"
+            "primaryKey": ["core_fact", "subject_species"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_subject_species_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "subject_species",
+                  "constraint_name": "core_fact_subject_species_subject_species_fkey",
+                  "reference": {
+                     "resource": "subject_species",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_ncbi_taxonomy",
+         "description": "An exploded representation of the core_fact.ncbi_taxons array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "ncbi_taxon",
+                  "description": "The numeric ID of a term found in the core_fact.ncbi_taxons array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "ncbi_taxon"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_ncbi_taxonomy_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "ncbi_taxon",
+                  "constraint_name": "core_fact_ncbi_taxonomy_ncbi_taxon_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_anatomy",
+         "description": "An exploded representation of the core_fact.anatomies array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "The numeric ID of a term found in the core_fact.anatomies array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "anatomy"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_anatomy_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_name": "core_fact_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_assay_type",
+         "description": "An exploded representation of the core_fact.assay_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type",
+                  "description": "The numeric ID of a term found in the core_fact.assay_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "assay_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_assay_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "core_fact_assay_type_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_file_format",
+         "description": "An exploded representation of the core_fact.file_formats array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "file_format",
+                  "description": "The numeric ID of a term found in the core_fact.file_formats array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "file_format"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_file_format_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "file_format",
+                  "constraint_name": "core_fact_file_format_file_format_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_data_type",
+         "description": "An exploded representation of the core_fact.data_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "data_type",
+                  "description": "The numeric ID of a term found in the core_fact.data_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "data_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_data_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "core_fact_data_type_data_type_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_mime_type",
+         "description": "An exploded representation of the core_fact.mime_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The numeric ID of a term found in the core_fact.mime_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "mime_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_mime_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "mime_type",
+                  "constraint_name": "core_fact_mime_type_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
       }
 
    ]

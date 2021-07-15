@@ -238,6 +238,7 @@ class CatalogConfigurator (object):
                                     { "name": "Assay Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:assay_type" },
                                     { "name": "Data Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:data_type" },
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
+                                    { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
                                     { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity"  },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },

@@ -312,17 +312,20 @@ class Submission (object):
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            #self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
-            #self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
-            #self.record_vocab_usage(self.registry, self.ingest_sqlite_filename, self.datapackage_id)
-            #self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
+            self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
+            self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.record_vocab_usage(self.registry, self.ingest_sqlite_filename, self.datapackage_id)
+            self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
             self.prepare_sqlite_derived_data(portal_prep_schema_json, self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
+
+            # this needs project_root from prepare_sqlite_derived_data...
+            next_error_state = terms.cfde_registry_dp_status.content_error
             self.validate_submission_dcc_table(self.portal_prep_sqlite_filename, self.submitting_dcc_id)
 
-            raise NotImplementedError('ABORT DEVELOPMENT CODE')
-            self.upload_sqlite_content(self.review_catalog, self.sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
+            next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
