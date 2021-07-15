@@ -3,7 +3,7 @@ CREATE TEMPORARY TABLE file_facts AS
     f.nid,
     f.id_namespace,
     json_array(f.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
+    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
     json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
@@ -96,7 +96,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
     b.nid,
     b.id_namespace,
     json_array(b.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
+    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
     json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
@@ -189,7 +189,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     s.nid,
     s.id_namespace,
     json_array(s.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.project)) AS dccs,
+    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
     json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
     json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
     json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
@@ -284,7 +284,7 @@ CREATE TEMPORARY TABLE collection_facts AS
     (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project)), '[]')
      FROM collection_defined_by_project cdbp
      WHERE cdbp.collection = col.nid) AS projects,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT d.nid)), '[]')
      FROM collection_defined_by_project cdbp
      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
      JOIN dcc d ON (pipt.leader_project = d.project)

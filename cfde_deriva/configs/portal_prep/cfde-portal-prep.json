@@ -6,6 +6,49 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "mime_type",
+         "title": "MIME Type",
+         "description": "Dimension table of each distinct MIME type referenced by C2M2 files.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this MIME type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "The unique MIME type string",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "mime_type.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "file",
          "title": "File",
          "description": "A digital asset",
@@ -758,7 +801,7 @@
                {
                   "name": "subset_collection",
                   "description": "Numeric ID of the subset collection",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -1614,48 +1657,6 @@
             "primaryKey": "nid"
          },
          "derivation_sql_path": "id_namespace.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "mime_type",
-         "title": "MIME Type",
-         "description": "Dimension table of each distinct MIME type referenced by C2M2 files.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this MIME type in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "The unique MIME type string",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
-                  "type": "string"
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this identifier namespace",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "mime_type.sql"
       },
 
       {
