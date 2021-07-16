@@ -3,16 +3,16 @@ CREATE TEMPORARY TABLE file_facts AS
     f.nid,
     f.id_namespace,
     json_array(f.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
-    json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
-    json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
-    json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
-    json_sorted(json_group_array(DISTINCT srt.taxon)) AS ncbi_taxons,
-    json_sorted(json_group_array(DISTINCT b.anatomy)) AS anatomies,
-    json_sorted(json_group_array(DISTINCT f.assay_type)) AS assay_types,
-    json_sorted(json_group_array(DISTINCT f.file_format)) AS file_formats,
-    json_sorted(json_group_array(DISTINCT f.data_type)) AS data_types,
-    json_sorted(json_group_array(DISTINCT f.mime_type)) AS mime_types
+    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
+    json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
+    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
+    json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL), '[]')) AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
   FROM file f
   JOIN project_in_project_transitive pipt ON (f.project = pipt.member_project)
   JOIN dcc d ON (pipt.leader_project = d.project)
@@ -96,16 +96,16 @@ CREATE TEMPORARY TABLE biosample_facts AS
     b.nid,
     b.id_namespace,
     json_array(b.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
-    json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
-    json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
-    json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
-    json_sorted(json_group_array(DISTINCT srt.taxon)) AS ncbi_taxons,
-    json_sorted(json_group_array(DISTINCT b.anatomy)) AS anatomies,
-    json_sorted(json_group_array(DISTINCT f.assay_type)) AS assay_types,
-    json_sorted(json_group_array(DISTINCT f.file_format)) AS file_formats,
-    json_sorted(json_group_array(DISTINCT f.data_type)) AS data_types,
-    json_sorted(json_group_array(DISTINCT f.mime_type)) AS mime_types
+    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
+    json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
+    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
+    json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL), '[]')) AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
   FROM biosample b
   JOIN project_in_project_transitive pipt ON (b.project = pipt.member_project)
   JOIN dcc d ON (pipt.leader_project = d.project)
@@ -189,16 +189,16 @@ CREATE TEMPORARY TABLE subject_facts AS
     s.nid,
     s.id_namespace,
     json_array(s.project) AS projects,
-    json_sorted(json_group_array(DISTINCT d.nid)) AS dccs,
-    json_sorted(json_group_array(DISTINCT srt."role")) AS subject_roles,
-    json_sorted(json_group_array(DISTINCT s.granularity)) AS subject_granularities,
-    json_sorted(json_group_array(DISTINCT ss.species)) AS subject_species,
-    json_sorted(json_group_array(DISTINCT srt.taxon)) AS ncbi_taxons,
-    json_sorted(json_group_array(DISTINCT b.anatomy)) AS anatomies,
-    json_sorted(json_group_array(DISTINCT f.assay_type)) AS assay_types,
-    json_sorted(json_group_array(DISTINCT f.file_format)) AS file_formats,
-    json_sorted(json_group_array(DISTINCT f.data_type)) AS data_types,
-    json_sorted(json_group_array(DISTINCT f.mime_type)) AS mime_types
+    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
+    json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
+    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
+    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
+    json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL), '[]')) AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
   FROM subject s
   JOIN project_in_project_transitive pipt ON (s.project = pipt.member_project)
   JOIN dcc d ON (pipt.leader_project = d.project)
@@ -281,15 +281,15 @@ CREATE TEMPORARY TABLE collection_facts AS
   SELECT
     col.nid,
     col.id_namespace,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project) FILTER (WHERE cdbp.project IS NOT NULL)), '[]')
      FROM collection_defined_by_project cdbp
      WHERE cdbp.collection = col.nid) AS projects,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT d.nid)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL)), '[]')
      FROM collection_defined_by_project cdbp
      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
      JOIN dcc d ON (pipt.leader_project = d.project)
      WHERE cdbp.collection = col.nid) AS dccs,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_roles) j
@@ -303,7 +303,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_roles) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS subject_roles,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_granularities) j
@@ -317,7 +317,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_granularities) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS subject_granularities,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_species) j
@@ -331,7 +331,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_species) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS subject_species,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.ncbi_taxons) j
@@ -345,7 +345,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.ncbi_taxons) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS ncbi_taxons,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.anatomies) j
@@ -359,7 +359,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.anatomies) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS anatomies,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.assay_types) j
@@ -373,7 +373,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.assay_types) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS assay_types,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.file_formats) j
@@ -387,7 +387,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.file_formats) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS file_formats,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.data_types) j
@@ -401,7 +401,7 @@ CREATE TEMPORARY TABLE collection_facts AS
        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.data_types) j
        WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
      ) s) AS data_types,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value)), '[]')
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.mime_types) j
