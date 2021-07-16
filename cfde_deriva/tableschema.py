@@ -725,7 +725,7 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         system_fkeys = []
 
     # always add "nid" we use for batched transfer
-    system_columns.append(Column.define("nid", builtin_types.float8, nullok=False, comment="A numeric surrogate key for this record."))
+    system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
     system_keys.append(make_key(tname, ['nid']))
     tcomment = tdef.get("description")
     tdef_resource = tdef
