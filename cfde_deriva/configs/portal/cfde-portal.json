@@ -76,6 +76,17 @@
                   "constraints": {
                      "pattern": "^[^\/\\:]+$"
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -467,7 +478,6 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "biosample_kw.sql",
                   "deriva": {
                      "indexing_preferences": {
                         "btree": false,
@@ -780,7 +790,6 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "subject_kw.sql",
                   "deriva": {
                      "indexing_preferences": {
                         "btree": false,
@@ -1556,7 +1565,6 @@
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
                   "type": "array",
-                  "derivation_sql_path": "collection_kw.sql",
                   "deriva": {
                      "indexing_preferences": {
                         "btree": false,
@@ -3473,7 +3481,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "core_fact",
-         "title": "Core Fact",
+         "title": "Core Statistics",
          "description": "Core C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
          "schema": {
             "fields": [
@@ -3590,94 +3598,80 @@
                {
                   "name": "project",
                   "description": "The numeric ID of a singular source or defining project attributed for the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_project.sql"
+                  "type": "integer"
                },
                {
                   "name": "dcc",
                   "description": "The numeric ID of a singular source or defining DCC attributed for the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_dcc.sql"
+                  "type": "integer"
                },
                {
                   "name": "subject_granularity",
                   "description": "The numeric ID of a singular subject_granularity term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_subject_granularity.sql"
+                  "type": "integer"
                },
                {
                   "name": "ncbi_taxon",
                   "description": "The numeric ID of a singular ncbi_taxonomy term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_ncbi_taxon.sql"
+                  "type": "integer"
                },
 
                {
                   "name": "anatomy",
                   "description": "The numeric ID of a singular anatomy term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_anatomy.sql"
+                  "type": "integer"
                },
 
                {
                   "name": "assay_type",
                   "description": "The numeric ID of a singular assay_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_assay_type.sql"
+                  "type": "integer"
                },
                {
                   "name": "file_format",
                   "description": "The numeric ID of a singular file_format term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_file_format.sql"
+                  "type": "integer"
                },
                {
                   "name": "data_type",
                   "description": "The numeric ID of a singuar data_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_data_type.sql"
+                  "type": "integer"
                },
                {
                   "name": "mime_type",
                   "description": "The numeric ID of a singular mime_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_mime_type.sql"
+                  "type": "integer"
                },
 
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "core_fact_kw.sql"
+                  "type": "array"
                },
 
                {
                   "name": "num_subjects",
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_subjects.sql"
+                  "default": 0
                },
                {
                   "name": "num_biosamples",
                   "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_biosamples.sql"
+                  "default": 0
                },
                {
                   "name": "num_files",
                   "description": "The number of files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_files.sql"
+                  "default": 0
                },
                {
                   "name": "num_collections",
                   "description": "The number of collections with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_collections.sql"
+                  "default": 0
                },
                {
                   "name": "total_size_in_bytes",
@@ -4448,6 +4442,334 @@
                   }
                }
             ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "level1_stats",
+         "title": "Legacy Core Statistics",
+         "description": "Basic statistical roll-up of core entities by metadata combination.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "root_project_nid",
+                  "description": "The numeric ID of attributed root project (DCC)",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_nid",
+                  "description": "The numeric ID of attributed project",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type_nid",
+                  "description": "The numeric ID for a file assay type",
+                  "type": "integer"
+               },
+               {
+                  "name": "data_type_nid",
+                  "description": "The numeric ID of a file data type",
+                  "type": "integer"
+               },
+               {
+                  "name": "file_format_nid",
+                  "description": "The numeric ID for a file format type",
+                  "type": "integer"
+               },
+               {
+                  "name": "anatomy_nid",
+                  "description": "The numeric ID for an anatomical source of biosamples",
+                  "type": "integer"
+               },
+               {
+                  "name": "granularity_nid",
+                  "description": "The numeric ID for granularity of described subjects",
+                  "type": "integer"
+               },
+               {
+                  "name": "species_nid",
+                  "description": "The numeric ID for single organism subject species, a subset of subject taxonomy concepts",
+                  "type": "integer"
+               },
+               {
+                  "name": "root_project_id_namespace",
+                  "description": "Identifier namespace for attributed root project (DCC)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "root_project_local_id",
+                  "description": "The ID of attributed root project (DCC)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_id_namespace",
+                  "description": "Identifier namespace for attributed project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "project_local_id",
+                  "description": "The ID of attributed project",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "assay_type_id",
+                  "description": "The numeric ID of a CFDE CV term for generated file assay types",
+                  "type": "string"
+               },
+               {
+                  "name": "data_type_id",
+                  "description": "A CFDE CV term for generated file data types",
+                  "type": "string"
+               },
+               {
+                  "name": "file_format_id",
+                  "description": "A CFDE CV term for generated file format types",
+                  "type": "string"
+               },
+               {
+                  "name": "anatomy_id",
+                  "description": "A CFDE CV term for anatomical sources of collected biosamples",
+                  "type": "string"
+               },
+               {
+                  "name": "granularity_id",
+                  "description": "A CFDE CV term for granularity of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "species_id",
+                  "description": "A CFDE CV term for single organism subject species, a subset of subject taxonomy concepts",
+                  "type": "string"
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_bytes",
+                  "description": "The total size in bytes of files related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples related to this combination of metadata terms",
+                  "type": "integer"
+               },
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects related to this combination of metadata terms",
+                  "type": "integer"
+               }
+            ],
+            "primaryKey": [
+               "project_nid",
+               "assay_type_nid",
+               "data_type_nid",
+               "file_format_nid",
+               "anatomy_nid",
+               "granularity_nid",
+               "species_nid"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "root_project_nid" ],
+                  "constraint_name": "level1_stats_root_project_fkey",
+                  "reference": {
+                     "title": "Attributed Root Project",
+                     "resource": "project",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": [ "project_nid" ],
+                  "constraint_name": "level1_stats_project_fkey",
+                  "reference": {
+                     "title": "Attributed Project",
+                     "resource": "project",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "assay_type_nid",
+                  "constraint_name": "level1_stats_assay_type_fkey",
+                  "reference": {
+                     "title": "Assay Type",
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "data_type_nid",
+                  "constraint_name": "level1_stats_data_type_fkey",
+                  "reference": {
+                     "title": "Data Type",
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "file_format_nid",
+                  "constraint_name": "level1_stats_file_format_fkey",
+                  "reference": {
+                     "title": "File Format",
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "anatomy_nid",
+                  "constraint_name": "level1_stats_anatomy_fkey",
+                  "reference": {
+                     "title": "Anatomy",
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "granularity_nid",
+                  "constraint_name": "level1_stats_granularity_fkey",
+                  "reference": {
+                     "title": "Subject Granularity",
+                     "resource": "subject_granularity",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "species_nid",
+                  "constraint_name": "level1_stats_species_fkey",
+                  "reference": {
+                     "title": "Subject Species",
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{nid}}"
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_root_project": {
+                     "comment": "A root project (DCC) to which a set of C2M2 entities is implicitly attributed.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_root_project_fkey"]}, "nid"]
+                  },
+                  "S_project": {
+                     "comment": "A particular project to which a set of C2M2 entities is explicitly attributed.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_project_fkey"]}, "nid"]
+                  },
+                  "S_assay_type": {
+                     "comment": "An assay-type CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_assay_type_fkey"]}, "nid"]
+                  },
+                  "S_data_type": {
+                     "comment": "A data-type  CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_data_type_fkey"]}, "nid"]
+                  },
+                  "S_file_format": {
+                     "comment": "A file-format  CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_file_format_fkey"]}, "nid"]
+                  },
+                  "S_anatomy": {
+                     "comment": "An anatomy CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_anatomy_fkey"]}, "nid"]
+                  },
+                  "S_granularity": {
+                     "comment": "A subject granularity CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_granularity_fkey"]}, "nid"]
+                  },
+                  "S_species": {
+                     "comment": "A single-organism subject species CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_species_fkey"]}, "nid"]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ],
+               "compact": [
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {
+                     "markdown_name": "Counts",
+                     "source": "num_files",
+                     "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
+                     "display": {
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}"
+                     }
+                  }
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_root_project"},
+                  {"sourcekey": "S_project"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_species"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ]}
+            }
          }
       }
 
