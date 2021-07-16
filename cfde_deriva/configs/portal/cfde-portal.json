@@ -3779,86 +3779,179 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_root_project": {
-                     "comment": "A root project (DCC) to which a set of C2M2 entities is implicitly attributed.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_root_project_fkey"]}, "RID"]
+                  "S_dccs": {
+                     "comment": "A singular data coordinating center to which a set of C2M2 entities is implicitly attributed.",
+                     "source": [{"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]}, "nid"]
                   },
-                  "S_project": {
+                  "S_projects": {
                      "comment": "A particular project to which a set of C2M2 entities is explicitly attributed.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_project_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_project_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_project_fkey"]}, "nid"]
                   },
-                  "S_assay_type": {
+                  "S_assay_types": {
                      "comment": "An assay-type CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_assay_type_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]}, "nid"]
                   },
-                  "S_data_type": {
+                  "S_data_types": {
                      "comment": "A data-type  CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_data_type_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]}, "nid"]
                   },
-                  "S_file_format": {
+                  "S_mime_types": {
+                     "comment": "A MIME type associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "core_fact_mime_type_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_mime_type_mime_type_fkey"]}, "nid"]
+                  },
+                  "S_file_formats": {
                      "comment": "A file-format  CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_file_format_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]}, "nid"]
                   },
-                  "S_anatomy": {
+                  "S_anatomies": {
                      "comment": "An anatomy CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_anatomy_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]}, "nid"]
                   },
-                  "S_granularity": {
+                  "S_granularities": {
                      "comment": "A subject granularity CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_granularity_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]}, "nid"]
                   },
                   "S_species": {
                      "comment": "A single-organism subject species CV term associated with a set of C2M2 entities.",
-                     "source": [{"outbound": ["CFDE", "level1_stats_species_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "core_fact_subject_species_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_subject_species_subject_species_fkey"]}, "nid"]
+                  },
+                  "S_ncbi_taxons": {
+                     "comment": "A taxonomy CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]}, "nid"]
                   }
+               }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{_nid}}}"
                }
             },
             "visible_columns": {
                "*": [
-                  {"sourcekey": "S_root_project"},
-                  {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_data_type"},
-                  {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_anatomy"},
-                  {"sourcekey": "S_granularity"},
-                  {"sourcekey": "S_species"},
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_projects"},
+                  {"sourcekey": "S_assay_types"},
+                  {"sourcekey": "S_data_types"},
+                  {"sourcekey": "S_file_formats"},
+                  {"sourcekey": "S_mime_types"},
+                  {"sourcekey": "S_anatomies"},
+                  {"sourcekey": "S_granularities"},
+                  {"sourcekey": "S_ncbi_taxons"},
                   {"source": "num_files"},
                   {"source": "num_bytes"},
                   {"source": "num_biosamples"},
-                  {"source": "num_subjects"}
+                  {"source": "num_subjects"},
+                  {"source": "num_collections"}
                ],
                "compact": [
-                  {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type"},
+                  {
+                     "markdown_name": "Common Fund Program",
+                     "source": "dccs",
+                     "comment": "Data coordinating center to which a set of C2M2 entities is implicitly attributed.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _dccs.length \"1\")}}{{_dccs.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_dcc_fkey}}{{{$fkeys.CFDE.core_fact_dcc_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Project",
+                     "source": "projects",
+                     "comment": "Project to which a set of C2M2 entities is attributed.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _projects.length \"1\")}}{{_projects.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_project_fkey}}{{{$fkeys.CFDE.core_fact_project_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Assay Type",
+                     "source": "assay_types",
+                     "comment": "Assay type to which a set of C2M2 entities is attributed.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _assay_types.length \"1\")}}{{_assay_types.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_assay_type_fkey}}{{{$fkeys.CFDE.core_fact_assay_type_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Data Type",
+                     "source": "data_types",
+                     "comment": "Data type to which a set of C2M2 entities is attributed.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _data_types.length \"1\")}}{{_data_types.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_data_type_fkey}}{{{$fkeys.CFDE.core_fact_data_type_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
                   {"sourcekey": "S_data_type"},
-                  {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_anatomy"},
-                  {"sourcekey": "S_granularity"},
-                  {"sourcekey": "S_species"},
+                  {
+                     "markdown_name": "File Format",
+                     "source": "file_formats",
+                     "comment": "File format term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _file_formats.length \"1\")}}{{_file_formats.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_file_format_fkey}}{{{$fkeys.CFDE.core_fact_file_format_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Anatomy",
+                     "source": "anatomies",
+                     "comment": "Anatomy term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _anatomies.length \"1\")}}{{_anatomies.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_anatomy_fkey}}{{{$fkeys.CFDE.core_fact_anatomy_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Granularity",
+                     "source": "subject_granularities",
+                     "comment": "Subject granularity term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _subject_granularities.length \"1\")}}{{_subject_granularities.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_subject_granularity_fkey}}{{{$fkeys.CFDE.core_fact_subject_granularity_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
                   {
                      "markdown_name": "Counts",
                      "source": "num_files",
                      "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
                      "display": {
-                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}"
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_total_size_in_bytes}}- {{total_size_in_bytes}} bytes\n{{/_total_size_in_bytes}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}{{#_num_collections}}- {{num_collections}} collections{{/_num_collections}}"
                      }
                   }
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_root_project"},
-                  {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_data_type"},
-                  {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_anatomy"},
-                  {"sourcekey": "S_granularity"},
+                  {"sourcekey": "S_dccs"},
+                  {"sourcekey": "S_projects"},
+                  {"sourcekey": "S_assay_types"},
+                  {"sourcekey": "S_data_types"},
+                  {"sourcekey": "S_file_formats"},
+                  {"sourcekey": "S_anatomies"},
+                  {"sourcekey": "S_granularities"},
                   {"sourcekey": "S_species"},
+                  {"sourcekey": "S_ncbi_taxons"},
                   {"source": "num_files"},
                   {"source": "num_bytes"},
                   {"source": "num_biosamples"},
                   {"source": "num_subjects"}
                ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Files in Class",
+                     "source": [{"inbound": ["CFDE", "file_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Biosamples in Class",
+                     "source": [{"inbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Subjects in Class",
+                     "source": [{"inbound": ["CFDE", "subject_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Collections in Class",
+                     "source": [{"inbound": ["CFDE", "collection_core_fact_fkey"]}, "nid"]
+                  }
+               ]
             }
          }
       },
