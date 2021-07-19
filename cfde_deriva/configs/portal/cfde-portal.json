@@ -648,7 +648,7 @@
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
-                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
@@ -680,7 +680,7 @@
                      "source": [
                         {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_described_by_file": {
@@ -688,7 +688,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
                         {"outbound": ["CFDE", "file_describes_biosample_file_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_part_of_collections": {
@@ -699,7 +699,7 @@
                         {"outbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
                         {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                }
@@ -969,7 +969,7 @@
                      "source": [
                         {"inbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
                         {"outbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_files": {
@@ -977,7 +977,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_describes_subject_subject_fkey"]},
                         {"outbound": ["CFDE", "file_describes_subject_file_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_part_of_collections": {
@@ -988,7 +988,7 @@
                         {"outbound": ["CFDE", "subject_in_collection_collection_fkey"]},
                         {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                }
@@ -1031,7 +1031,7 @@
                         {"outbound": ["CFDE", "subject_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {"sourcekey": "S_creation_time"},
@@ -1270,7 +1270,7 @@
                "sources": {
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the project ID.",
-                     "source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "RID"]
+                     "source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "nid"]
                   },
                   "S_creation_time": {
                      "comment": "The time when the project was created.",
@@ -1283,7 +1283,7 @@
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         {"inbound": ["CFDE", "dcc_project_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   "S_parent_project": {
@@ -1292,7 +1292,7 @@
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                }
@@ -1304,7 +1304,7 @@
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1312,7 +1312,7 @@
                      "source": [
                         {"inbound": ["CFDE", "project_in_project_parent_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_child_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1320,20 +1320,20 @@
                      "source": [
                         {"inbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
                         {"outbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
                      "markdown_name": "Attributed Subject",
-                     "source": [{"inbound": ["CFDE", "subject_project_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "subject_project_fkey"]}, "nid"]
                   },
                   {
                      "markdown_name": "Attributed Biosample",
-                     "source": [{"inbound": ["CFDE", "biosample_project_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "biosample_project_fkey"]}, "nid"]
                   },
                   {
                      "markdown_name": "Attributed File",
-                     "source": [{"inbound": ["CFDE", "file_project_fkey"]}, "RID"]
+                     "source": [{"inbound": ["CFDE", "file_project_fkey"]}, "nid"]
                   }
                ]
             },
@@ -1363,7 +1363,7 @@
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {"sourcekey": "S_parent_project"},
@@ -1375,7 +1375,7 @@
                         {"outbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1383,7 +1383,7 @@
                      "source": [
                         {"inbound": ["CFDE", "subject_project_fkey"]},
                         {"outbound": ["CFDE", "subject_granularity_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1392,7 +1392,7 @@
                         {"inbound": ["CFDE", "subject_project_fkey"]},
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1402,7 +1402,7 @@
                         {"inbound": ["CFDE", "subject_project_fkey"]},
                         {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1410,7 +1410,7 @@
                      "source": [
                         {"inbound": ["CFDE", "biosample_project_fkey"]},
                         {"outbound": ["CFDE", "biosample_anatomy_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1418,7 +1418,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_project_fkey"]},
                         {"outbound": ["CFDE", "file_assay_type_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1426,7 +1426,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_project_fkey"]},
                         {"outbound": ["CFDE", "file_file_format_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1434,7 +1434,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_project_fkey"]},
                         {"outbound": ["CFDE", "file_data_type_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                ]}
@@ -1964,7 +1964,7 @@
                      "source": [
                         {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1972,7 +1972,7 @@
                      "source": [
                         {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1980,7 +1980,7 @@
                      "source": [
                         {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   },
                   {
@@ -1988,7 +1988,7 @@
                      "source": [
                         {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        "RID"
+                        "nid"
                      ]
                   }
                ]}
