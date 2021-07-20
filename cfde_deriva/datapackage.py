@@ -9,6 +9,7 @@ import logging
 import pkgutil
 import itertools
 from collections import UserString
+import sqlite3
 
 from deriva.core import DerivaServer, get_credential, urlquote, topo_sorted, tag, DEFAULT_SESSION_CONFIG
 from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, builtin_types
@@ -768,7 +769,26 @@ class CfdeDataPackage (object):
                             ]),
                             'upsert': 'ON CONFLICT DO NOTHING' if onconflict == 'skip' else '',
                         }
-                        conn.execute(sql)
+                        try:
+                            conn.execute(sql)
+                        except sqlite3.IntegrityError as e:
+                            msg = str(e)
+                            if msg.find('NOT NULL constraint failed') >= 0:
+                                # find offending row to give better error details
+                                error_cname = msg.split('.')[-1] # HACK works because of simple C2M2 column naming
+                                try:
+                                    pos = header.index(error_cname)
+                                    for row in batch:
+                                        if row[pos] is None or row[pos] in missing:
+                                            raise InvalidDatapackage('Resource file "%s" missing required value for column %r, row %r' % (
+                                                resource["path"],
+                                                error_cname,
+                                                dict(zip(header, row)),
+                                            ))
+                                except ValueError:
+                                    raise InvalidDatapackage('Resource file "%s" does not supply required column %r' % (error_cname))
+                            # re-raise if we don't have a better idea
+                            raise
                         logger.debug("Batch of rows for %s loaded" % table.name)
 
                     for raw_row in reader:
