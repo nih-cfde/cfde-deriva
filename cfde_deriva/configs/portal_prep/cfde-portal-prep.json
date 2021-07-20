@@ -1966,59 +1966,79 @@
 
                {
                   "name": "project",
-                  "description": "The numeric ID of a singular source or defining project attributed for the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_project.sql"
-               },
-               {
-                  "name": "dcc",
-                  "description": "The numeric ID of a singular source or defining DCC attributed for the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_dcc.sql"
+                  "description": "The numeric ID of the project attributed as source for the described entities.",
+                  "type": "integer"
                },
                {
                   "name": "subject_granularity",
-                  "description": "The numeric ID of a singular subject_granularity term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_subject_granularity.sql"
+                  "description": "The numeric ID of the subject_granularity term qualifying the described subjects.",
+                  "type": "integer"
                },
-               {
-                  "name": "ncbi_taxon",
-                  "description": "The numeric ID of a singular ncbi_taxonomy term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_ncbi_taxon.sql"
-               },
-
                {
                   "name": "anatomy",
-                  "description": "The numeric ID of a singular anatomy term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_anatomy.sql"
+                  "description": "The numeric ID of the anatomy term qualifying the described biosamples.",
+                  "type": "integer"
                },
-
                {
                   "name": "assay_type",
-                  "description": "The numeric ID of a singular assay_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_assay_type.sql"
+                  "description": "The numeric ID of the assay_type term qualifying the described files.",
+                  "type": "integer"
                },
                {
                   "name": "file_format",
-                  "description": "The numeric ID of a singular file_format term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_file_format.sql"
+                  "description": "The numeric ID of the file_format term qualifying the described files.",
+                  "type": "integer"
                },
                {
                   "name": "data_type",
-                  "description": "The numeric ID of a singuar data_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_data_type.sql"
+                  "description": "The numeric ID of the data_type term qualifying the described files.",
+                  "type": "integer"
                },
                {
                   "name": "mime_type",
-                  "description": "The numeric ID of a singular mime_type term qualifying the described entities.",
-                  "type": "integer",
-                  "derivation_sql_path": "core_fact_mime_type.sql"
+                  "description": "The numeric ID of the mime_type term qualifying the described files.",
+                  "type": "integer"
+               },
+
+               {
+                  "name": "id_namespace_row",
+                  "description": "Denormalized copy of the id_namespace in which described entities were issued a local_id.",
+                  "type": "object"
+               },
+               {
+                  "name": "project_row",
+                  "description": "Denormalized copy of the project attributed as source for the described entities.",
+                  "type": "object"
+               },
+               {
+                  "name": "subject_granularity_row",
+                  "description": "Denormalized copy of the subject_granularity term qualifying the described subjects.",
+                  "type": "object"
+               },
+               {
+                  "name": "anatomy_row",
+                  "description": "Denormalized copy of the anatomy term qualifying the described biosamples.",
+                  "type": "object"
+               },
+               {
+                  "name": "assay_type_row",
+                  "description": "Denormalized copy of the assay_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "file_format_row",
+                  "description": "Denormalized copy of the file_format term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "data_type_row",
+                  "description": "Denormalized copy of the data_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "mime_type_row",
+                  "description": "Denormalized copy of the mime_type term qualifying the described files.",
+                  "type": "object"
                },
 
                {
@@ -2063,7 +2083,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -2082,26 +2102,10 @@
                   }
                },
                {
-                  "fields": "dcc",
-                  "constraint_name": "core_fact_dcc_fkey",
-                  "reference": {
-                     "resource": "dcc",
-                     "fields": "nid"
-                  }
-               },
-               {
                   "fields": "subject_granularity",
                   "constraint_name": "core_fact_subject_granularity_fkey",
                   "reference": {
                      "resource": "subject_granularity",
-                     "fields": "nid"
-                  }
-               },
-               {
-                  "fields": "ncbi_taxon",
-                  "constraint_name": "core_fact_ncbi_taxon_fkey",
-                  "reference": {
-                     "resource": "ncbi_taxon",
                      "fields": "nid"
                   }
                },

@@ -262,6 +262,9 @@
                "fkeys": false,
                "sources": {
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "file metadata, anatomy, taxonomy", "comment": "file name, format, data-type, assay-type, anatomy, taxonomy, subject granularity, project, or collection keywords"} ]},
+                  "S_core_fact": {
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
                      "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
@@ -385,11 +388,40 @@
             "visible_columns": {
                "compact": [
                   "filename",
-                  {"sourcekey": "S_project"},
+                  "persistent_id",
+                  {
+                     "markdown_name": "Project",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                     }
+                  },
                   "size_in_bytes",
-                  {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_data_type"},
-                  {"sourcekey": "S_assay_type"},
+                  {
+                     "markdown_name": "File Format",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Data Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Assay Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                     }
+                  },
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -619,12 +651,15 @@
                "fkeys": false,
                "sources": {
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "biosample, file, subject metadata", "comment": "biosample identifers/anatomy, file format/assay/data type, subject granularity/role/taxonomy, project, collection keywords"} ]},
+                  "S_core_fact": {
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
                   },
                   "S_assay_type": {
-                     "comment": "The assay type characterizing the biosample.",
+                     "comment": "The assay type(s) of files describing the biosample.",
                      "source": [
                         {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -713,11 +748,24 @@
             },
             "visible_columns": {
                "compact": [
-                  {"sourcekey": "S_id_namespace"},
                   "local_id",
-                  {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_anatomy"},
+                  "persistent_id",
+                  {
+                     "markdown_name": "Project",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Anatomy",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._anatomy_row.name}}{{/with}}"
+                     }
+                  },
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -911,6 +959,9 @@
                "fkeys": true,
                "sources": {
                   "search-box": {"or": [ {"source": "kw", "markdown_name": "subject, biosample, file metadata", "comment": "subject identifiers/granularity/role/taxonomy, biosample anatomy, file format/assay/data type, project, collection keywords"} ]},
+                  "S_core_fact": {
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
                      "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
@@ -1003,10 +1054,25 @@
             },
             "visible_columns": {
                "compact": [
-                  {"sourcekey": "S_id_namespace"},
                   "local_id",
-                  {"sourcekey": "S_project"},
-                  {"sourcekey": "S_granularity"},
+                  "persistent_id",
+                  {
+                     "markdown_name": "Project",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                     }
+                  },
+                  "size_in_bytes",
+                  {
+                     "markdown_name": "Granularity",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._subject_granularity_row.name}}{{/with}}"
+                     }
+                  },
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_creation_time"}
                ],
@@ -3635,50 +3701,79 @@
 
                {
                   "name": "project",
-                  "description": "The numeric ID of a singular source or defining project attributed for the described entities.",
-                  "type": "integer"
-               },
-               {
-                  "name": "dcc",
-                  "description": "The numeric ID of a singular source or defining DCC attributed for the described entities.",
+                  "description": "The numeric ID of the project attributed as source for the described entities.",
                   "type": "integer"
                },
                {
                   "name": "subject_granularity",
-                  "description": "The numeric ID of a singular subject_granularity term qualifying the described entities.",
+                  "description": "The numeric ID of the subject_granularity term qualifying the described subjects.",
                   "type": "integer"
                },
-               {
-                  "name": "ncbi_taxon",
-                  "description": "The numeric ID of a singular ncbi_taxonomy term qualifying the described entities.",
-                  "type": "integer"
-               },
-
                {
                   "name": "anatomy",
-                  "description": "The numeric ID of a singular anatomy term qualifying the described entities.",
+                  "description": "The numeric ID of the anatomy term qualifying the described biosamples.",
                   "type": "integer"
                },
-
                {
                   "name": "assay_type",
-                  "description": "The numeric ID of a singular assay_type term qualifying the described entities.",
+                  "description": "The numeric ID of the assay_type term qualifying the described files.",
                   "type": "integer"
                },
                {
                   "name": "file_format",
-                  "description": "The numeric ID of a singular file_format term qualifying the described entities.",
+                  "description": "The numeric ID of the file_format term qualifying the described files.",
                   "type": "integer"
                },
                {
                   "name": "data_type",
-                  "description": "The numeric ID of a singuar data_type term qualifying the described entities.",
+                  "description": "The numeric ID of the data_type term qualifying the described files.",
                   "type": "integer"
                },
                {
                   "name": "mime_type",
-                  "description": "The numeric ID of a singular mime_type term qualifying the described entities.",
+                  "description": "The numeric ID of the mime_type term qualifying the described files.",
                   "type": "integer"
+               },
+
+               {
+                  "name": "id_namespace_row",
+                  "description": "Denormalized copy of the id_namespace in which described entities were issued a local_id.",
+                  "type": "object"
+               },
+               {
+                  "name": "project_row",
+                  "description": "Denormalized copy of the project attributed as source for the described entities.",
+                  "type": "object"
+               },
+               {
+                  "name": "subject_granularity_row",
+                  "description": "Denormalized copy of the subject_granularity term qualifying the described subjects.",
+                  "type": "object"
+               },
+               {
+                  "name": "anatomy_row",
+                  "description": "Denormalized copy of the anatomy term qualifying the described biosamples.",
+                  "type": "object"
+               },
+               {
+                  "name": "assay_type_row",
+                  "description": "Denormalized copy of the assay_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "file_format_row",
+                  "description": "Denormalized copy of the file_format term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "data_type_row",
+                  "description": "Denormalized copy of the data_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "mime_type_row",
+                  "description": "Denormalized copy of the mime_type term qualifying the described files.",
+                  "type": "object"
                },
 
                {
@@ -3718,7 +3813,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -3737,26 +3832,10 @@
                   }
                },
                {
-                  "fields": "dcc",
-                  "constraint_name": "core_fact_dcc_fkey",
-                  "reference": {
-                     "resource": "dcc",
-                     "fields": "nid"
-                  }
-               },
-               {
                   "fields": "subject_granularity",
                   "constraint_name": "core_fact_subject_granularity_fkey",
                   "reference": {
                      "resource": "subject_granularity",
-                     "fields": "nid"
-                  }
-               },
-               {
-                  "fields": "ncbi_taxon",
-                  "constraint_name": "core_fact_ncbi_taxon_fkey",
-                  "reference": {
-                     "resource": "ncbi_taxon",
                      "fields": "nid"
                   }
                },
@@ -3812,6 +3891,7 @@
                "fkeys": true,
                "sources": {
                   "S_dccs": {
+                     "markdown_name": "Common Fund Program",
                      "comment": "A singular data coordinating center to which a set of C2M2 entities is implicitly attributed.",
                      "source": [{"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]}, "nid"]
                   },
@@ -3876,15 +3956,6 @@
                   {"source": "num_collections"}
                ],
                "compact": [
-                  {
-                     "markdown_name": "Common Fund Program",
-                     "source": "dccs",
-                     "comment": "Data coordinating center to which a set of C2M2 entities is implicitly attributed.",
-                     "display": {
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#if (gt _dccs.length \"1\")}}{{_dccs.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_dcc_fkey}}{{{$fkeys.CFDE.core_fact_dcc_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
-                     }
-                  },
                   {
                      "markdown_name": "Project",
                      "source": "projects",
