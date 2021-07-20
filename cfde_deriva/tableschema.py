@@ -268,14 +268,8 @@ class CatalogConfigurator (object):
         if replace or tag.chaise_config not in model.annotations:
             self.apply_chaise_config(model)
 
-        def _update(parent, key, d):
-            if key not in parent:
-                parent[key] = dict()
-            parent[key].update(d)
-
         # have Chaise display underscores in model element names as whitespace
-        _update(
-            model.schemas['CFDE'].display,
+        model.schemas['CFDE'].display.setdefault(
             "name_style",
             {
                 "underline_space": True,
@@ -283,13 +277,14 @@ class CatalogConfigurator (object):
             }
         )
         # turn off clutter of many links in tabular views
-        _update(
-            model.schemas['CFDE'].display,
+        model.schemas['CFDE'].display.setdefault(
             "show_foreign_key_link",
             {
                 "compact": False
             }
         )
+        # disable default Chaise (heuristic) bdbag export choices
+        model.schemas['CFDE'].export_2019 = False
 
         # allow augmentation of acl bindings whether we apply class-based overrides or not...
         for schema in model.schemas.values():

@@ -107,7 +107,7 @@
                "btree": false,
                "trgm": false
             },
-            "export_2019": {
+            "export_2019_disable": {
                "*": {
                   "templates": [
                      {
@@ -536,7 +536,7 @@
                "btree": false,
                "trgm": false
             },
-            "export_2019": {
+            "export_2019_disable": {
                "*": {
                   "templates": [
                      {
@@ -864,7 +864,7 @@
                "btree": false,
                "trgm": false
             },
-            "export_2019": {
+            "export_2019_disable": {
                "*": {
                   "templates": [
                      {
@@ -1657,7 +1657,7 @@
                "btree": false,
                "trgm": false
             },
-            "export_2019": {
+            "export_2019_disable": {
                "*": {
                   "templates": [
                      {
