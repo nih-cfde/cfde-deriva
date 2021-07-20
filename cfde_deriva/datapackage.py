@@ -156,7 +156,7 @@ class CfdeDataPackage (object):
         self.cat_model_root = self.catalog.getCatalogModel()
         self.cat_cfde_schema = self.cat_model_root.schemas.get('CFDE')
 
-    def _compare_model_docs(self, candidate, absent_table_ok=True, absent_column_ok=True, extra_table_ok=False, extra_column_ok=False, extra_fkey_ok=False):
+    def _compare_model_docs(self, candidate, absent_table_ok=True, absent_column_ok=True, absent_nonnull_ok=True, extra_table_ok=False, extra_column_ok=False, extra_fkey_ok=False, extra_nonnull_ok=True):
         """General-purpose model comparison to serve validation functions.
 
         :param candidate: A CfdeDatapackage instance being evaluated with self as baseline.
@@ -165,6 +165,8 @@ class CfdeDataPackage (object):
         :param extra_table_ok: Whether candidate is allowed to include tables.
         :param extra_column_ok: Whether candidate is allowed to include non-critical columns.
         :param extra_fkey_ok: Whether candidate is allowed to include foreign keys on extra, non-critical columns.
+        :param absent_nonnull_ok: Whether candidate is allowed to omit a non-null constraint.
+        :param extra_nonnull_ok: Whether candidate is allowed to include extra non-null constraints.
 
         For model comparisons, a non-critical column is one which is
         allowed to contain NULL values.
@@ -206,7 +208,7 @@ class CfdeDataPackage (object):
                 raise IncompatibleDatapackageModel(
                     'Missing columns in resource %s: %s' % (tname, ','.join(missing_cnames),)
                 )
-            if missing_nonnull_cnames:
+            if missing_nonnull_cnames and not absent_nonnull_ok:
                 raise IncompatibleDatapackageModel(
                     'Missing non-nullable columns in resource %s: %s' % (tname, ','.join(missing_nonnull_cnames),)
                 )
@@ -214,7 +216,7 @@ class CfdeDataPackage (object):
                 raise IncompatibleDatapackageModel(
                     'Extra columns in resource %s: %s' % (tname, ','.join(extra_cnames),)
                 )
-            if extra_nonnull_cnames:
+            if extra_nonnull_cnames and not extra_nonnull_ok:
                 raise IncompatibleDatapackageModel(
                     'Extra non-nullable columns in resource %s: %s' % (tname, ','.join(extra_nonnull_cnames),)
                 )
@@ -236,7 +238,7 @@ class CfdeDataPackage (object):
                     raise IncompatibleDatapackageModel(
                         'Type mismatch for resource %s column %s' % (tname, cname)
                     )
-                if not baseline_col.nullok and candidate_col.nullok:
+                if not baseline_col.nullok and candidate_col.nullok and not extra_nonnull_ok:
                     # candidate can be more strict but not more relaxed?
                     raise IncompatibleDatapackageModel(
                         'Inconsistent nullability for resource %s column %s' % (tname, cname)
