@@ -268,6 +268,11 @@
                   }
                },
                {
+                  "name": "assay_type",
+                  "description": "Numeric ID for assay_type term ID describing the type of experiment that generated this biosample",
+                  "type": "integer"
+               },
+               {
                   "name": "anatomy",
                   "description": "Numeric ID for the anatomy term describing the origin of this biosample within the physiology of its source or host organism",
                   "type": "integer"
@@ -324,6 +329,14 @@
                   "reference": {
                      "resource": "project",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "assay_type",
+                  "constraint_name": "biosample_assay_type_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "id"
                   }
                },
                {
@@ -836,6 +849,53 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "file_describes_collection",
+         "title": "file_describes_collection",
+         "description": "Association between a summary file and an entire collection described by that file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "file",
+                  "description": "The numeric ID of this file",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "file",
+               "collection"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "file" ],
+                  "reference": {
+                     "resource": "file",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": [ "collection" ],
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "nid" ]
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "file_describes_collection.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "collection_defined_by_project",
          "title": "collection_defined_by_project",
          "description": "(Shallow) association between a collection and a project that defined it",
@@ -1193,6 +1253,100 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "biosample_disease",
+         "title": "biosample_disease",
+         "description": "Association between a C2M2 biosample and a disease known to be associated with that biosample",
+         "schema": {
+            "fields": [
+               {
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "biosample",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "biosample" ],
+                  "reference": {
+                     "resource": "biosample",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "biosample_disease.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_disease",
+         "title": "subject_disease",
+         "description": "Association between a C2M2 subject and a disease positively identified in that subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "subject_disease.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_role_taxonomy",
          "title": "Subject Role Taxonomy",
          "description": "Trinary association linking IDs representing (1) a subject, (2) a subject_role (a named organism-level constituent component of a subject, like 'host', 'pathogen', 'endosymbiont', 'taxon detected inside a microbiome subject', etc.) and (3) a taxonomic label (which is hereby assigned to this particular subject_role within this particular subject)",
@@ -1517,6 +1671,57 @@
             "primaryKey": "nid"
          },
          "derivation_sql_path": "data_type.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease",
+         "title": "disease",
+         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects, biosamples or projects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease term in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Disease Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "derivation_sql_path": "disease.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1888,6 +2093,15 @@
                      "required": true
                   }
                },
+
+               {
+                  "name": "diseases",
+                  "description": "The numeric ID of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
                
                {
                   "name": "subject_roles",
@@ -2083,7 +2297,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "diseases", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -2244,6 +2458,52 @@
             ]
          },
          "derivation_sql_path": "core_fact_dcc_assoc.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_disease",
+         "description": "An exploded representation of the core_fact.diseases array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a term found in the core_fact.anatomies array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "disease"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_disease_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "core_fact_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_fact_disease_assoc.sql"
       },
       {
          "profile": "tabular-data-resource",

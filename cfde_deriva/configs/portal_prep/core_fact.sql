@@ -11,12 +11,13 @@ CREATE TEMPORARY TABLE file_facts AS
     f.mime_type,
     json_array(f.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
     json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
-    CASE WHEN f.assay_type  IS NOT NULL THEN json_array(f.assay_type)  ELSE '[]' END AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT "at".nid) FILTER (WHERE "at".nid IS NOT NULL), '[]')) AS assay_types,
     CASE WHEN f.file_format IS NOT NULL THEN json_array(f.file_format) ELSE '[]' END AS file_formats,
     CASE WHEN f.data_type   IS NOT NULL THEN json_array(f.data_type)   ELSE '[]' END AS data_types,
     CASE WHEN f.mime_type   IS NOT NULL THEN json_array(f.mime_type)   ELSE '[]' END AS mime_types
@@ -26,13 +27,17 @@ CREATE TEMPORARY TABLE file_facts AS
   LEFT JOIN (
     file_describes_biosample fdb
     JOIN biosample b ON (fdb.biosample = b.nid)
+    LEFT JOIN biosample_disease bd ON (b.nid = bd.biosample)
     LEFT JOIN (
       biosample_from_subject bfs
       JOIN subject s ON (bfs.subject = s.nid)
       LEFT JOIN subject_species ss ON (ss.subject = s.nid)
       LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
+      LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
     ) ON (b.nid = bfs.biosample)
+    LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
   ) ON (f.nid = fdb.file)
+  LEFT JOIN assay_type "at" ON (f.assay_type = "at".nid OR b.assay_type = "at".nid)
   GROUP BY f.nid
 ;
 CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
@@ -46,6 +51,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     mime_type,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -75,6 +81,7 @@ INSERT INTO core_fact (
     mime_type_row,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -104,6 +111,7 @@ INSERT INTO core_fact (
     json_object('nid', mt.nid, 'name', mt.name, 'description', mt.description) AS mime_type_row,
     ff.projects,
     ff.dccs,
+    ff.diseases,
     ff.subject_roles,
     ff.subject_granularities,
     ff.subject_species,
@@ -140,6 +148,7 @@ WHERE u.nid = ff.nid
   AND ff.mime_type IS cf.mime_type
   AND ff.projects = cf.projects
   AND ff.dccs = cf.dccs
+  AND ff.diseases = cf.diseases
   AND ff.subject_roles = cf.subject_roles
   AND ff.subject_granularities = cf.subject_granularities
   AND ff.subject_species = cf.subject_species
@@ -158,34 +167,39 @@ CREATE TEMPORARY TABLE biosample_facts AS
     b.project,
     CASE WHEN count(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL) = 1 THEN s.granularity ELSE NULL END AS subject_granularity,
     b.anatomy,
-    CASE WHEN count(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL) = 1 THEN f.assay_type ELSE NULL END AS assay_type,
+    b.assay_type,
     CASE WHEN count(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL) = 1 THEN f.file_format ELSE NULL END AS file_format,
     CASE WHEN count(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL) = 1 THEN f.data_type ELSE NULL END AS data_type,
     CASE WHEN count(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL) = 1 THEN f.mime_type ELSE NULL END AS mime_type,
     json_array(b.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
     CASE WHEN b.anatomy IS NOT NULL THEN json_array(b.anatomy) ELSE '[]' END AS anatomies,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL), '[]')) AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT "at".nid) FILTER (WHERE "at".nid IS NOT NULL), '[]')) AS assay_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
   FROM biosample b
   JOIN project_in_project_transitive pipt ON (b.project = pipt.member_project)
   JOIN dcc d ON (pipt.leader_project = d.project)
+  LEFT JOIN biosample_disease bd ON (b.nid = bd.biosample)
   LEFT JOIN (
     file_describes_biosample fdb
     JOIN file f ON (fdb.file = f.nid)
   ) ON (b.nid = fdb.biosample)
+  LEFT JOIN assay_type "at" ON (b.assay_type = "at".nid OR f.assay_type = "at".nid)
   LEFT JOIN (
     biosample_from_subject bfs
     JOIN subject s ON (bfs.subject = s.nid)
     LEFT JOIN subject_species ss ON (ss.subject = s.nid)
     LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
+    LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
   ) ON (b.nid = bfs.biosample)
+  LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
   GROUP BY b.nid
 ;
 CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
@@ -199,6 +213,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     mime_type,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -228,6 +243,7 @@ INSERT INTO core_fact (
     mime_type_row,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -257,6 +273,7 @@ INSERT INTO core_fact (
     json_object('nid', mt.nid, 'name', mt.name, 'description', mt.description) AS mime_type_row,
     bf.projects,
     bf.dccs,
+    bf.diseases,
     bf.subject_roles,
     bf.subject_granularities,
     bf.subject_species,
@@ -293,6 +310,7 @@ WHERE u.nid = bf.nid
   AND bf.mime_type IS cf.mime_type
   AND bf.projects = cf.projects
   AND bf.dccs = cf.dccs
+  AND bf.diseases = cf.diseases
   AND bf.subject_roles = cf.subject_roles
   AND bf.subject_granularities = cf.subject_granularities
   AND bf.subject_species = cf.subject_species
@@ -311,18 +329,21 @@ CREATE TEMPORARY TABLE subject_facts AS
     s.project,
     s.granularity AS subject_granularity,
     CASE WHEN count(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL) = 1 THEN b.anatomy ELSE NULL END AS anatomy,
-    CASE WHEN count(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL) = 1 THEN f.assay_type ELSE NULL END AS assay_type,
+    CASE WHEN count(DISTINCT "at".nid) FILTER (WHERE "at".nid IS NOT NULL) = 1
+        THEN json_extract(json_group_array(DISTINCT "at".nid) FILTER (WHERE "at".nid IS NOT NULL), '$[0]')
+        ELSE NULL END AS assay_type,
     CASE WHEN count(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL) = 1 THEN f.file_format ELSE NULL END AS file_format,
     CASE WHEN count(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL) = 1 THEN f.data_type ELSE NULL END AS data_type,
     CASE WHEN count(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL) = 1 THEN f.mime_type ELSE NULL END AS mime_type,
     json_array(s.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
+    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     CASE WHEN s.granularity IS NOT NULL THEN json_array(s.granularity) ELSE '[]' END AS subject_granularities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
     json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.assay_type) FILTER (WHERE f.assay_type IS NOT NULL), '[]')) AS assay_types,
+    json_sorted(COALESCE(json_group_array(DISTINCT "at".nid) FILTER (WHERE "at".nid IS NOT NULL), '[]')) AS assay_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
@@ -331,14 +352,18 @@ CREATE TEMPORARY TABLE subject_facts AS
   JOIN dcc d ON (pipt.leader_project = d.project)
   LEFT JOIN subject_species ss ON (ss.subject = s.nid)
   LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
+  LEFT JOIN subject_disease sd ON (sd.subject = s.nid)
   LEFT JOIN (
     biosample_from_subject bfs
     JOIN biosample b ON (bfs.biosample = b.nid)
+    LEFT JOIN biosample_disease bd ON (bd.biosample = b.nid)
     LEFT JOIN (
       file_describes_biosample fdb
       JOIN file f ON (fdb.file = f.nid)
     ) ON (b.nid = fdb.biosample)
+    LEFT JOIN assay_type "at" ON (b.assay_type = "at".nid OR f.assay_type = "at".nid)
   ) ON (s.nid = bfs.subject)
+  LEFT JOIN disease dis ON (sd.disease = dis.nid OR bd.disease = dis.nid)
   GROUP BY s.nid, s.id_namespace, json_array(s.project)
 ;
 CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
@@ -352,6 +377,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     mime_type,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -381,6 +407,7 @@ INSERT INTO core_fact (
     mime_type_row,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -410,6 +437,7 @@ INSERT INTO core_fact (
     json_object('nid', mt.nid, 'name', mt.name, 'description', mt.description) AS mime_type_row,
     sf.projects,
     sf.dccs,
+    sf.diseases,
     sf.subject_roles,
     sf.subject_granularities,
     sf.subject_species,
@@ -441,6 +469,7 @@ WHERE u.nid = sf.nid
   AND sf.subject_granularity IS cf.subject_granularity
   AND sf.projects = cf.projects
   AND sf.dccs = cf.dccs
+  AND sf.diseases = cf.diseases
   AND sf.anatomy IS cf.anatomy
   AND sf.assay_type IS cf.assay_type
   AND sf.file_format IS cf.file_format
@@ -470,6 +499,7 @@ SELECT
   CASE WHEN (SELECT count(*) FROM json_each(s.mime_types)) = 1 THEN (SELECT j.value FROM json_each(s.mime_types) j) ELSE NULL END AS mime_type,
   projects,
   dccs,
+  diseases,
   subject_roles,
   subject_granularities,
   subject_species,
@@ -491,6 +521,16 @@ FROM (
      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
      JOIN dcc d ON (pipt.leader_project = d.project)
      WHERE cdbp.collection = col.nid) AS dccs,
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
+     FROM (
+       SELECT j.value
+       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.diseases) j
+       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+     UNION
+       SELECT j.value
+       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.diseases) j
+       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+     ) s) AS diseases,
     (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
@@ -631,6 +671,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     mime_type,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -660,6 +701,7 @@ INSERT INTO core_fact (
     mime_type_row,
     projects,
     dccs,
+    diseases,
     subject_roles,
     subject_granularities,
     subject_species,
@@ -689,6 +731,7 @@ INSERT INTO core_fact (
     json_object('nid', mt.nid, 'name', mt.name, 'description', mt.description) AS mime_type_row,
     colf.projects,
     colf.dccs,
+    colf.diseases,
     colf.subject_roles,
     colf.subject_granularities,
     colf.subject_species,
@@ -724,6 +767,7 @@ WHERE u.nid = colf.nid
   AND colf.mime_type IS cf.mime_type
   AND colf.projects = cf.projects
   AND colf.dccs = cf.dccs
+  AND colf.diseases = cf.diseases
   AND colf.subject_roles = cf.subject_roles
   AND colf.subject_granularities = cf.subject_granularities
   AND colf.subject_species = cf.subject_species

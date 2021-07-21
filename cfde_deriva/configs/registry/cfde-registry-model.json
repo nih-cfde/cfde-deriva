@@ -1928,6 +1928,66 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "mime_type",
+         "title": "MIME Type",
+         "description": "List of MIME types used to describe files in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An MIME type string",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true,
+                     "pattern": "^data:[0-9]+$"
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this MIME type",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this MIME type",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "file_format",
          "title": "File Format",
          "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
@@ -2032,6 +2092,70 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease",
+         "title": "Disease",
+         "description": "List of Disease Ontology terms used to characterize C2M2 subjects or biosamples.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Disease Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
                   "type": "array"
                }
             ],
@@ -2259,6 +2383,78 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "datapackage_disease",
+         "title": "Datapackage Disease",
+         "description": "An association of an disease term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The referenced disease term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "disease"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_disease_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "datapackage_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_disease_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "datapackage_assay_type",
          "title": "Datapackage Assay Type",
          "description": "An association of an assay type term used by a datapackage submission.",
@@ -2390,6 +2586,78 @@
                   "types": ["select"],
                   "projection": [
                      {"outbound": ["CFDE", "datapackage_data_type_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_mime_type",
+         "title": "Datapackage MIME Type",
+         "description": "An association of a MIME type term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The referenced MIME type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "mime_type"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_mime_type_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "data_type",
+                  "constraint_name": "datapackage_mime_type_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_mime_type_datapackage_fkey"]},
                      {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
                      {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
                      {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
@@ -3248,6 +3516,98 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "favorite_disease",
+         "title": "Favorite Disease",
+         "description": "An association of a favorited disease term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The favorited disease term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "disease"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_disease_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "favorite_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "favorite_assay_type",
          "title": "Favorite Assay Type",
          "description": "An association of a favorited assay type term in a specific user profile.",
@@ -3404,6 +3764,98 @@
                   "constraint_name": "favorite_data_type_data_type_fkey",
                   "reference": {
                      "resource": "data_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_community", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_mime_type",
+         "title": "Favorite Data Type",
+         "description": "An association of a favorited MIME type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "mime_type",
+                  "description": "The favorited data type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "mime_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_mime_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acl_bindings": {
+                        "acls": {
+                           "insert": [ "cfde_portal_admin" ]
+                        },
+                        "acl_bindings": {
+                           "self": {
+                              "types": ["insert"],
+                              "projection": [ "id" ],
+                              "projection_type": "acl",
+                              "scope_acl": ["*"]
+                           }
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "mime_type",
+                  "constraint_name": "favorite_mime_type_mime_type_fkey",
+                  "reference": {
+                     "resource": "mime_type",
                      "fields": "id"
                   },
                   "on_update": "CASCADE",
