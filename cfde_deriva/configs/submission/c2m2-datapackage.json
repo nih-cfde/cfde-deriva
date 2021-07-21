@@ -1574,7 +1574,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this UBERON term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
+                     "required": false,
                      "unique": true
                   }
                },
