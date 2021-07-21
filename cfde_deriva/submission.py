@@ -826,6 +826,15 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             def finalize(self):
                 return json.dumps(sorted(self.kw), separators=(',',':'))
 
+        class cfde_keywords_merge_agg(object):
+            """Like cfde_keywords_merge() but merge each call in aggregate"""
+            def __init__(self):
+                self.kw = set()
+            def step(self, *arrays):
+                self.kw.update(cfde_keywords_merge_set(*arrays))
+            def finalize(self):
+                return json.dumps(sorted(self.kw), separators=(',',':'))
+
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
@@ -835,6 +844,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             conn.create_function('cfde_keywords', -1, cfde_keywords)
             conn.create_function('cfde_keywords_merge', -1, cfde_keywords_merge)
             conn.create_aggregate('cfde_keywords_agg', -1, cfde_keywords_agg)
+            conn.create_aggregate('cfde_keywords_merge_agg', -1, cfde_keywords_merge_agg)
             conn.set_trace_callback(logger.debug)
             dp.sqlite_do_etl(conn, progress=progress)
 
