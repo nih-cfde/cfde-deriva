@@ -327,7 +327,12 @@
                   },
                   "S_assay_type": {
                      "comment": "Assay type used to generate the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_assay_type_fkey"]}, "nid"]
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_subject_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
@@ -352,6 +357,16 @@
                      "source": [
                         {"inbound": ["CFDE", "file_describes_subject_file_fkey"]},
                         {"outbound": ["CFDE", "file_describes_subject_subject_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked to the described biosample or subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
                      ]
                   },
@@ -424,6 +439,43 @@
                   },
                   {"sourcekey": "S_creation_time"}
                ],
+               "compact/brief": [
+                  "filename",
+                  {
+                     "markdown_name": "Project",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                     }
+                  },
+                  "size_in_bytes",
+                  {
+                     "markdown_name": "File Format",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Data Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Assay Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                     }
+                  },
+                  {"sourcekey": "S_creation_time"}
+               ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
                   "local_id",
@@ -445,6 +497,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy", "open": true},
                   {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularity"},
@@ -454,10 +507,7 @@
                      "sourcekey": "S_creation_time"
                   },
                   {"source": "size_in_bytes"},
-                  {"source": "uncompressed_size_in_bytes"},
-                  {"sourcekey": "S_part_of_collections"},
-                  {"sourcekey": "S_described_biosamples"},
-                  {"sourcekey": "S_described_subjects"}
+                  {"source": "uncompressed_size_in_bytes"}
                ]}
             }
          }
@@ -659,7 +709,7 @@
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
                   },
                   "S_assay_type": {
-                     "comment": "The assay type(s) of files describing the biosample.",
+                     "comment": "The assay type(s) of biosample or related files.",
                      "source": [
                         {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -667,9 +717,37 @@
                         "nid"
                      ]
                   },
+                  "S_assay_type_local": {
+                     "markdown_name": "Assay Type",
+                     "comment": "The assay-type which prepared the biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_anatomy": {
                      "comment": "The anatomy from which the biosample is derived.",
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_anatomy_fkey"]}, "nid"]
+                  },
+                  "S_disease_search": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked to the biosample or subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked to the biosample.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_disease_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_disease_disease_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
@@ -766,6 +844,14 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._anatomy_row.name}}{{/with}}"
                      }
                   },
+                  {
+                     "markdown_name": "Assay Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                     }
+                  },
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -773,20 +859,19 @@
                   "local_id",
                   "persistent_id",
                   {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_assay_type_local"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_assay_type", "open": true},
                   {"sourcekey": "S_anatomy", "open": true},
                   {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
-                  {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_subjects"},
-                  {"sourcekey": "S_described_by_file"},
-                  {"sourcekey": "S_part_of_collections"}
+                  {"sourcekey": "S_creation_time"}
                ]}
             }
          }
@@ -980,40 +1065,96 @@
                         "nid"
                      ]
                   },
+                  "S_disease_search": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked to the biosample or subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked to the subject or a related biosample.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_disease_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
-                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_subject_granularity_fkey"]}, "nid"]
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_role": {
                      "markdown_name": "Taxonomic Role",
                      "comment": "The taxonomic role concept(s) characterizing the subject.",
                      "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
-                        "name"
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subect_role_subject_role_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject.",
                      "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        "name"
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "markdown_name": "Anatomy",
+                     "comment": "An anatomy term linked to a related biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "markdown_name": "Assay Type",
+                     "comment": "An assay-type linked to a file or biosample related to the subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type": {
+                     "markdown_name": "Data Type",
+                     "comment": "An data-type linked to a file related to the subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format": {
+                     "markdown_name": "File Format",
+                     "comment": "An data-type linked to a file related to the subject.",
+                     "source": [
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        "nid"
                      ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the subject record created.",
                      "source": "creation_time"
-                  },
-                  "S_role_taxonomy": {
-                     "markdown_name": "Role Taxonomy",
-                     "comment": "Taxonomic characterizations of the subject.",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        "nid"
-                     ],
-                     "entity": true
                   },
                   "S_biosamples": {
                      "comment": "Biosamples derived from the subject.",
@@ -1073,7 +1214,10 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._subject_granularity_row.name}}{{/with}}"
                      }
                   },
-                  {"sourcekey": "S_taxonomy"},
+                  {
+                     "sourcekey": "S_taxonomy",
+                     "aggregate": "array_d"
+                  },
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -1083,27 +1227,31 @@
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_granularity"},
                   {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_taxonomy", "open": true},
                   {"sourcekey": "S_granularity", "open": true},
+                  {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_role"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_dcc"},
                   {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_project_fkey"]},
+                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         "nid"
                      ]
                   },
-                  {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_biosamples"},
-                  {"sourcekey": "S_files"},
-                  {"sourcekey": "S_part_of_collections"}
+                  {"sourcekey": "S_creation_time"}
                ]}
             }
          }
@@ -1360,6 +1508,80 @@
                         {"outbound": ["CFDE", "project_in_project_parent_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_granularity": {
+                     "comment": "A subject granularity observed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject_role": {
+                     "comment": "A taxonomic role observed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_taxonomy": {
+                     "markdown_name": "Subject Taxonomy",
+                     "comment": "A subject taxon observed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "comment": "A disease observed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "comment": "An anatomical source observed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "An assay type performed by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format": {
+                     "comment": "A file format generated by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type": {
+                     "comment": "A data type generated by the project.",
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -1421,6 +1643,12 @@
                "filter": {"and": [
                   {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease"},
                   {
                      "markdown_name": "Super-Project",
                      "comment": "Direct or indirect ancestor of the project.",
@@ -1432,7 +1660,6 @@
                         "nid"
                      ]
                   },
-                  {"sourcekey": "S_parent_project"},
                   {
                      "markdown_name": "Sub-Project",
                      "comment": "Direct or indirect sub-projects of the project.",
@@ -1441,65 +1668,6 @@
                         {"outbound": ["CFDE", "project_in_project_child_fkey"]},
                         {"inbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The granularity of a subject attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_project_fkey"]},
-                        {"outbound": ["CFDE", "subject_granularity_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The taxonomic role of a subject attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_project_fkey"]},
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_role_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The taxonomy of a subject attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_project_fkey"]},
-                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The anatomy of a biosample attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "biosample_project_fkey"]},
-                        {"outbound": ["CFDE", "biosample_anatomy_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The assay type of a file attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_project_fkey"]},
-                        {"outbound": ["CFDE", "file_assay_type_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The content format of a file attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_project_fkey"]},
-                        {"outbound": ["CFDE", "file_file_format_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "The type of data represented by a file attributed to the project.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_project_fkey"]},
-                        {"outbound": ["CFDE", "file_data_type_fkey"]},
                         "nid"
                      ]
                   }
@@ -1870,18 +2038,18 @@
                   "S_file_format": {
                      "comment": "The content format of a constituent file.",
                      "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        {"outbound": ["CFDE", "file_file_format_fkey"]},
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
                      ]
                   },
                   "S_data_type": {
                      "comment": "The type of data represented by a constituent file.",
                      "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        {"outbound": ["CFDE", "file_data_type_fkey"]},
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
                      ]
                   },
@@ -1896,8 +2064,8 @@
                      ]
                   },
                   "S_ncbi_taxons": {
-                     "markdown_name": "Subject Taxonomy",
-                     "comment": "The assay type of a directly or indirectly constituent biosample.",
+                     "markdown_name": "Taxonomy",
+                     "comment": "The taxonomic classification of a subject.",
                      "source": [
                         {"outbound": ["CFDE", "collection_core_fact_fkey"]},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
@@ -1927,7 +2095,17 @@
                   },
                   "S_anatomy": {
                      "markdown_name": "Anatomy",
-                     "comment": "The anatomical source of a directly or indirectly constituent biosample.",
+                     "comment": "The anatomical source of a biosample.",
+                     "source": [
+                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "The disease terms qulifying a biosample or subject.",
                      "source": [
                         {"outbound": ["CFDE", "collection_core_fact_fkey"]},
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
@@ -1944,10 +2122,9 @@
             "visible_foreign_keys": {
                "*": [
                   {
-                     "markdown_name": "Part of Collection",
                      "source": [
-                        {"inbound": ["CFDE", "collection_in_collection_child_fkey"]},
-                        {"outbound": ["CFDE", "collection_in_collection_parent_fkey"]},
+                        {"inbound": ["CFDE", "collection_in_collection_superset_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_subset_fkey"]},
                         "nid"
                      ]
                   },
@@ -1976,7 +2153,6 @@
             },
             "visible_columns": {
                "compact": [
-                  {"sourcekey": "S_id_namespace"},
                   "local_id",
                   {"sourcekey": "S_project"},
                   "name",
@@ -1990,14 +2166,22 @@
                   {"sourcekey": "S_projects"},
                   "name",
                   "description",
-                  {"sourcekey": "S_creation_time"}
+                  {"sourcekey": "S_creation_time"},
+                  {
+                     "source": [
+                        {"inbound": ["CFDE", "collection_in_collection_subset_fkey"]},
+                        {"outbound": ["CFDE", "collection_in_collection_superset_fkey"]},
+                        "nid"
+                     ]
+                  }
                ],
                "filter": {"and": [
                   {"sourcekey": "S_data_type", "open": true},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy", "open": true},
-                  {"sourceKey": "S_ncbi_taxons"},
+                  {"sourcekey": "S_ncbi_taxons"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularities"},
@@ -2022,39 +2206,6 @@
                         {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
                         {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
                         "creation_time"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Part of Collection",
-                     "comment": "Collections directly or indirectly containing the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_in_collection_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "collection_in_collection_transitive_leader_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "Constituent subjects of the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "subject_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "subject_in_collection_subject_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "Constituent biosamples of the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  {
-                     "comment": "Constituent files of the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        "nid"
                      ]
                   }
                ]}
@@ -2094,7 +2245,7 @@
                   "fields": [ "superset_collection" ],
                   "constraint_name": "collection_in_collection_superset_fkey",
                   "reference": {
-                     "title": "Superset Collection",
+                     "title": "Part of Collection",
                      "resource": "collection",
                      "fields": [ "nid" ]
                   }
@@ -2103,7 +2254,7 @@
                   "fields": [ "subset_collection" ],
                   "constraint_name": "collection_in_collection_subset_fkey",
                   "reference": {
-                     "title": "Subset Collection",
+                     "title": "Sub-Collection",
                      "resource": "collection",
                      "fields": [ "nid" ]
                   }
@@ -2511,6 +2662,114 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "biosample_disease",
+         "title": "biosample_disease",
+         "description": "Association between a C2M2 biosample and a disease known to be associated with that biosample",
+         "schema": {
+            "fields": [
+               {
+                  "name": "biosample",
+                  "description": "The numeric ID of this biosample",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "biosample",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "biosample" ],
+                  "constraint_name": "biosample_disease_biosample_fkey",
+                  "reference": {
+                     "resource": "biosample",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "biosample_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_disease",
+         "title": "subject_disease",
+         "description": "Association between a C2M2 subject and a disease positively identified in that subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID of this subject",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "constraint_name": "subject_disease_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "subject_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_role_taxonomy",
          "title": "Subject Role Taxonomy",
          "description": "Trinary association linking IDs representing (1) a subject, (2) a subject_role (a named organism-level constituent component of a subject, like 'host', 'pathogen', 'endosymbiont', 'taxon detected inside a microbiome subject', etc.) and (3) a taxonomic label (which is hereby assigned to this particular subject_role within this particular subject)",
@@ -2796,6 +3055,99 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_subject"}
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease",
+         "title": "Disease",
+         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects, biosamples or projects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease term in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Disease Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": false,
+               "trgm": false
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "List of biosamples linked to this disease term.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "biosample_disease_biosample_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "List of files linked to this anatomical term.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "file_disease_file_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_file"}
                ]
             }
          }
@@ -3625,6 +3977,15 @@
                },
                
                {
+                  "name": "diseases",
+                  "description": "The numeric ID of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
                   "name": "subject_roles",
                   "description": "The numeric ID of subject_role terms qualifying the described entities.",
                   "type": "array",
@@ -3813,7 +4174,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "project", "subject_granularity", "anatomy", "assay_type", "file_format", "data_type", "mime_type", "projects", "dccs", "diseases", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -3899,6 +4260,10 @@
                      "comment": "A particular project to which a set of C2M2 entities is explicitly attributed.",
                      "source": [{"inbound": ["CFDE", "core_fact_project_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_project_fkey"]}, "nid"]
                   },
+                  "S_disease_search": {
+                     "comment": "A disease CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]}, "nid"]
+                  },
                   "S_assay_types": {
                      "comment": "An assay-type CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]}, "nid"]
@@ -3942,6 +4307,7 @@
                "*": [
                   {"sourcekey": "S_dccs"},
                   {"sourcekey": "S_projects"},
+                  {"sourcekey": "S_diseases"},
                   {"sourcekey": "S_assay_types"},
                   {"sourcekey": "S_data_types"},
                   {"sourcekey": "S_file_formats"},
@@ -4003,6 +4369,15 @@
                      }
                   },
                   {
+                     "markdown_name": "Disease",
+                     "source": "diseases",
+                     "comment": "Disease term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _diseases.length \"0\")}}{{_diseases.length}} values{{/if}}"
+                     }
+                  },
+                  {
                      "markdown_name": "Granularity",
                      "source": "subject_granularities",
                      "comment": "Subject granularity term qualifying the set of C2M2 entities.",
@@ -4027,6 +4402,7 @@
                   {"sourcekey": "S_data_types"},
                   {"sourcekey": "S_file_formats"},
                   {"sourcekey": "S_anatomies"},
+                  {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_granularities"},
                   {"sourcekey": "S_species"},
                   {"sourcekey": "S_ncbi_taxons"},
@@ -4142,6 +4518,51 @@
                   "constraint_name": "core_fact_dcc_dcc_fkey",
                   "reference": {
                      "resource": "dcc",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_disease",
+         "description": "An exploded representation of the core_fact.diseases array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a term found in the core_fact.anatomies array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "disease"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_disease_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "constraint_name": "core_fact_disease_disease_fkey",
+                  "reference": {
+                     "resource": "disease",
                      "fields": "nid"
                   }
                }
