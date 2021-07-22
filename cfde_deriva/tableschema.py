@@ -237,6 +237,7 @@ class CatalogConfigurator (object):
                                     { "name": "Anatomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:anatomy" },
                                     { "name": "Assay Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:assay_type" },
                                     { "name": "Data Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:data_type" },
+                                    { "name": "Disease", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:disease" },
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
                                     { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
