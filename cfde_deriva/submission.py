@@ -288,7 +288,7 @@ class Submission (object):
 
             def dpt_error2(name, path, diagnostics):
                 try:
-                    pos = self.rname_to_pos[name],
+                    pos = self.rname_to_pos[name]
                     self.registry.update_datapackage_table(
                         self.datapackage_id,
                         pos,
@@ -303,7 +303,7 @@ class Submission (object):
             }:
                 next_error_state = terms.cfde_registry_dp_status.check_error
                 self.datapackage_model_check(self.content_path, pre_process=dpt_register)
-                #self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
+                self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.provision_sqlite(submission_schema_json, self.ingest_sqlite_filename)
@@ -313,6 +313,7 @@ class Submission (object):
 
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
+            self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
@@ -694,6 +695,15 @@ class Submission (object):
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback, progress=progress)
+
+    @classmethod
+    def sqlite_datapackage_check(cls, schema_json, content_path, sqlite_filename, table_error_callback=None, tablenames=None, progress=None):
+        canonical_dp = CfdeDataPackage(schema_json)
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Checking database %s for submission %r against schema %r constraints' % (sqlite_filename, content_path, schema_json))
+            canonical_dp.check_sqlite_tables(conn, submitted_dp, table_error_callback, tablenames, progress)
 
     @classmethod
     def transitional_etl_dcc_table(cls, content_path, sqlite_filename, submitting_dcc):

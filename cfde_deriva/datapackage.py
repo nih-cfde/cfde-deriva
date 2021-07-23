@@ -818,6 +818,115 @@ class CfdeDataPackage (object):
                     table_error_callback(resource["name"], resource["path"], str(e))
                 raise InvalidDatapackage('Resource file "%s" is not valid UTF-8 data: %s' % (resource["path"], e))
 
+    def check_sqlite_tables(self, conn, source=None, table_error_callback=None, tablenames=None, progress=None):
+        """Validate tabular data from sqlite table according to model.
+
+        :param conn: Existing sqlite3 connection to use as data source.
+        :param source: Another CfdeDatapackage representing source data, otherwise use self.
+        :param table_error_callback: Optional callback to signal error for one table, lambda tname, tpath, msg: ...
+        :param tablenames: Optional set of tablenames to check (default None means check all tables)
+        :param progress: Optional, mutable progress/restart-marker dictionary
+        """
+        if progress is None:
+            progress = dict()
+        if not self.package_filename in (submission_schema_json, portal_schema_json):
+            raise ValueError('check_sqlite_tables() is only valid for built-in datapackages')
+        if source is None:
+            source = self
+        tables_doc = source.model_doc['schemas']['CFDE']['tables']
+        if tablenames is None:
+            tablenames = set(tables_doc.keys())
+
+        # collect errors and defer exception so we can give more detailed feedback
+        errors_by_tname = {}
+        first_error_mesg = None
+
+        cur = None
+        try:
+            cur = conn.cursor()
+            for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+                if tname not in tablenames:
+                    continue
+
+                table = self.doc_cfde_schema.tables[tname]
+                resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+
+                progress.setdefault(tname, {})
+                if table.foreign_keys:
+                    logger.info('Checking foreign keys for table %r' % (tname,))
+                for fkey in table.foreign_keys:
+                    if fkey.pk_table.schema.name != table.schema.name:
+                        # only consider single schema in this sqite db
+                        progress[tname][fkey.constraint_name] = 'skip'
+                        logger.info("Skipping foreign key %r which references outside schema %r" % (fkey.constraint_name, table.schema.name))
+                        continue
+                    progress[tname].setdefault(fkey.constraint_name, None)
+                    if progress[tname][fkey.constraint_name] is not None:
+                        logger.info("Skipping foreign key %r due to progress marker" % (fkey.constraint_name,))
+                        continue
+                    col_map = list(fkey.column_map.items())
+                    sql = """
+WITH fk AS (
+  SELECT fk.nid, %(fkcols)s
+  FROM %(fk_table)s fk
+  LEFT JOIN %(pk_table)s pk ON ( %(on)s )
+  WHERE (%(nonnulls)s) AND (%(nulls)s)
+)
+SELECT
+  (SELECT count(*) FROM fk) AS num_errors,
+  nid,
+  %(fkcols)s
+FROM fk
+ORDER BY nid
+LIMIT 1;
+""" % {
+    "fk_table": sql_identifier(table.name),
+    "fkcols": ", ".join([
+        'fk.%s' % (sql_identifier(fkc.name),)
+        for fkc, pkc in col_map
+    ]),
+    "pk_table": sql_identifier(fkey.pk_table.name),
+    "on": " AND ".join([
+        'fk.%s = pk.%s' % (sql_identifier(fkc.name), sql_identifier(pkc.name))
+        for fkc, pkc in col_map
+    ]),
+    "nonnulls": " AND ".join([
+        "fk.%s IS NOT NULL" % (sql_identifier(fkc.name),)
+        for fkc, pkc in col_map
+    ]),
+    "nulls": " OR ".join([
+        "pk.%s IS NULL" % (sql_identifier(pkc.name),)
+        for fkc, pkc in col_map
+    ]),
+}
+                    cur.execute(sql)
+                    row = cur.fetchone()
+                    if row:
+                        mesg = 'foreign key %r in row %s%s not present in referenced table %r' % (
+                            dict(zip([ fkc.name for fkc, pkc in col_map ], row[2:])), # first bad fkey
+                            row[1], # nid for first bad row
+                            (' (and %s others...)' % (row[0] - 1)) if row[0] > 1 else '',
+                            fkey.pk_table.name,
+                        )
+                        errors_by_tname.setdefault(tname, []).append(mesg)
+                        if first_error_mesg is None:
+                            first_error_mesg = 'Table %s %s' % (tname, mesg)
+                        logger.error('foreign key %r ERROR: %s' % (fkey.constraint_name, mesg))
+                        progress[tname][fkey.constraint_name] = False
+                    else:
+                        logger.info("foreign key %r OK" % (fkey.constraint_name,))
+                        progress[tname][fkey.constraint_name] = True
+
+                if tname in errors_by_tname:
+                    if table_error_callback:
+                        table_error_callback(tname, resource.get('path'), '; '.join(errors_by_tname[tname]))
+
+            if errors_by_tname:
+                raise InvalidDatapackage('Errors found in %s tables %r. First error: %s' % (len(errors_by_tname), list(errors_by_tname), first_error_mesg))
+        finally:
+            if cur is not None:
+                cur.close()
+
     def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None):
         """Load tabular data from sqlite table into corresponding catalog table.
 
