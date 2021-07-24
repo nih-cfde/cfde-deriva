@@ -2,6 +2,12 @@
    "profile": "tabular-data-package",
    "name": "c2m2_portal_etl_specs",
    "title": "Subset of transformed C2M2 model with basic data-warehouse techniques and portal UI hints",
+   "deriva": {
+      "indexing_preferences": {
+         "btree": false,
+         "trgm": false
+      }
+   },
    "resources": [
 
       {
@@ -25,13 +31,7 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": true,
-                        "trgm": false
-                     }
-                  }
+                  "type": "integer"
                },
                {
                   "name": "local_id",
@@ -109,10 +109,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "export_2019_disable": {
                "*": {
                   "templates": [
@@ -554,13 +550,7 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": true,
-                        "trgm": false
-                     }
-                  }
+                  "type": "integer"
                },
                {
                   "name": "creation_time",
@@ -609,10 +599,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "export_2019_disable": {
                "*": {
                   "templates": [
@@ -942,13 +928,7 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": true,
-                        "trgm": false
-                     }
-                  }
+                  "type": "integer"
                },
                {
                   "name": "creation_time",
@@ -996,10 +976,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "export_2019_disable": {
                "*": {
                   "templates": [
@@ -1525,10 +1501,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": false,
@@ -1774,12 +1746,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -1803,13 +1769,7 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": true,
-                        "trgm": false
-                     }
-                  }
+                  "type": "integer"
                },
                {
                   "name": "creation_time",
@@ -1878,10 +1838,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "export_2019_disable": {
                "*": {
                   "templates": [
@@ -2317,12 +2273,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2373,12 +2323,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2429,12 +2373,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2485,12 +2423,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2541,12 +2473,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2597,12 +2523,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2653,12 +2573,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2709,12 +2623,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2763,12 +2671,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2817,12 +2719,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2868,12 +2764,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2919,12 +2809,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -2993,10 +2877,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            },
             "visible_columns": {
                "compact": [
                   {"source": [{"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]}, "nid"]},
@@ -3053,10 +2933,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3165,10 +3041,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3268,10 +3140,6 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3361,10 +3229,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3465,10 +3329,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3559,10 +3419,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3648,10 +3504,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3747,10 +3599,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3848,12 +3696,6 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "nid"
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
          }
       },
       {
@@ -3897,10 +3739,6 @@
             "primaryKey": "nid"
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3990,12 +3828,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4028,12 +3860,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            }
          }
       },
       {
@@ -4084,12 +3910,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
 
@@ -4408,10 +4228,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -4642,12 +4458,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4693,12 +4503,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4744,12 +4548,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4795,12 +4593,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4846,12 +4638,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4897,12 +4683,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4948,12 +4728,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -4999,12 +4773,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -5050,12 +4818,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -5101,12 +4863,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -5152,12 +4908,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
       {
@@ -5203,12 +4953,6 @@
                   }
                }
             ]
-         },
-         "deriva": {
-            "indexing_preferences": {
-               "btree": true,
-               "trgm": false
-            }
          }
       },
 
@@ -5443,10 +5187,6 @@
             ]
          },
          "deriva": {
-            "indexing_preferences": {
-               "btree": false,
-               "trgm": false
-            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{nid}}"

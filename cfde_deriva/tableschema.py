@@ -793,6 +793,7 @@ def make_model(tableschema, configurator, trusted=False):
 
     pre_annotations = tableschema.get("deriva", {})
     history_capture = pre_annotations.pop('history_capture', False) if trusted else False
+    indexing_preferences = pre_annotations.pop('indexing_preferences', {})
     annotations = {
         schema_tag: tableschema,
     }
@@ -812,6 +813,12 @@ def make_model(tableschema, configurator, trusted=False):
                 "tables": {},
                 "acls": configurator.schema_acls.get(schema_name, {}),
             }
+            if sname == schema_name and indexing_preferences:
+                schemas[sname].update({
+                    "annotations": {
+                        tag["indexing_preferences"]: indexing_preferences
+                    }
+                })
         schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
     return {
         "schemas": schemas,
