@@ -25,7 +25,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "local_id",
@@ -317,11 +323,25 @@
                      ]
                   },
                   "S_anatomy": {
-                     "comment": "Anatomy for biosamples described by file.",
+                     "comment": "Anatomy for biosamples, offering original terms and corresponding \"slim\" terms.",
                      "source": [
                         {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_slim": {
+                     "markdown_name": "Anatomy (slim)",
+                     "comment": "Anatomy for biosamples, oferring only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -495,7 +515,8 @@
                   {"sourcekey": "S_data_type", "open": true},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_anatomy", "open": true},
+                  {"sourcekey": "S_anatomy_slim", "open": true},
+                  {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_dcc"},
@@ -533,7 +554,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -727,8 +754,25 @@
                      ]
                   },
                   "S_anatomy": {
-                     "comment": "The anatomy from which the biosample is derived.",
-                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_anatomy_fkey"]}, "nid"]
+                     "comment": "The anatomy from which the biosample is derived, offering original and corresponding \"slim\" terms.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
+                        {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_slim": {
+                     "markdown_name": "Anatomy (slim)",
+                     "comment": "The anatomy from which the biosample is derived, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
+                        {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_disease_search": {
                      "markdown_name": "Disease",
@@ -866,7 +910,8 @@
                ],
                "filter": {"and": [
                   {"sourcekey": "S_assay_type", "open": true},
-                  {"sourcekey": "S_anatomy", "open": true},
+                  {"sourcekey": "S_anatomy_slim", "open": true},
+                  {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_dcc"},
@@ -897,7 +942,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -1726,7 +1777,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -1752,7 +1803,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -2263,7 +2320,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2319,7 +2376,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2375,7 +2432,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2431,7 +2488,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2487,7 +2544,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2543,7 +2600,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2599,7 +2656,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2655,7 +2712,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2709,7 +2766,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -2763,7 +2820,109 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
+               "trgm": false
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "anatomy_slim_original_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "anatomy_slim_slim_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "anatomy_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "anatomy_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
                "trgm": false
             }
          }
@@ -2835,7 +2994,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             },
             "visible_columns": {
@@ -3834,7 +3993,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -3928,7 +4087,7 @@
          },
          "deriva": {
             "indexing_preferences": {
-               "btree": false,
+               "btree": true,
                "trgm": false
             }
          }
@@ -4140,7 +4299,13 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                },
 
                {
@@ -4477,6 +4642,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4522,6 +4693,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4567,6 +4744,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4612,6 +4795,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4657,6 +4846,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4702,6 +4897,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4747,6 +4948,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4792,6 +4999,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4837,6 +5050,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4882,6 +5101,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4927,6 +5152,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
       {
@@ -4972,6 +5203,12 @@
                   }
                }
             ]
+         },
+         "deriva": {
+            "indexing_preferences": {
+               "btree": true,
+               "trgm": false
+            }
          }
       },
 

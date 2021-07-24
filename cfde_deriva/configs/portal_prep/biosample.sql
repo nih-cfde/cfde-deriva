@@ -23,5 +23,5 @@ FROM submission.biosample b
 JOIN submission.id_namespace i ON (b.id_namespace = i.id)
 JOIN submission.project p ON (b.project_id_namespace = p.id_namespace AND b.project_local_id = p.local_id)
 LEFT JOIN submission.assay_type "at" ON (b.assay_type = "at".id)
-LEFT JOIN submission.anatomy a ON (b.anatomy = a.id)
+LEFT JOIN anatomy a ON (b.anatomy = a.id)
 ;

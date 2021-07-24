@@ -6,6 +6,445 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "id_namespace",
+         "title": "ID Namespace",
+         "description": "INTERNAL CV: Dictionary of CFDE-generated identifier namespaces corresponding to top-level C2M2 metadatasets",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this identifier namespace in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this identifier namespace",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "abbreviation",
+                  "description": "A very short display label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this identifier namespace",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "id_namespace.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_canonical",
+         "description": "Canonical anatomy terms known by CFDE, imported from TSV.",
+         "path": "anatomy.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An Uberon CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Uberon term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_slim_raw",
+         "path": "anatomy_slim.tsv",
+         "description": "The anatomy slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "anatomy_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "anatomy_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type",
+         "title": "Assay Type",
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used in this dataset to describe types of experiment that generate results stored in files",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this assay_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "assay_type.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy",
+         "title": "NCBI Taxonomy",
+         "description": "List of NCBI Taxonomy Database IDs identifying taxa used to describe subjects in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this taxon in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "clade",
+                  "description": "The phylogenetic level (e.g. species, genus) assigned to this taxon (use 'no rank' if not defined)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this taxon",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this taxon",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "ncbi_taxonomy.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy",
+         "title": "Anatomy",
+         "description": "List of Uber-anatomy ontology (Uberon) CV terms used in this dataset to locate the origin of a biosample within the physiology of its source or host organism",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this anatomy in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An Uberon CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Uberon term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "anatomy.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format",
+         "title": "File Format",
+         "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this file_format in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An EDAM CV format term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this EDAM format term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "file_format.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type",
+         "title": "Data Type",
+         "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this data_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An EDAM CV data term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this EDAM data term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "data_type.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease",
+         "title": "disease",
+         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects, biosamples or projects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease term in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Disease Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "disease.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "mime_type",
          "title": "MIME Type",
          "description": "Dimension table of each distinct MIME type referenced by C2M2 files.",
@@ -45,6 +484,185 @@
             "primaryKey": "nid"
          },
          "derivation_sql_path": "mime_type.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_role",
+         "title": "Subject Role",
+         "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_role in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this subject_role",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this subject_role",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this subject_role",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "subject_role.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_granularity",
+         "title": "Subject Granularity",
+         "description": "INTERNAL CV: The category of a subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this subject_granularity in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this subject_granularity",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this subject_granularity",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "subject_granularity.sql"
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "anatomy_slim.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "anatomy_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "anatomy_slim_union.sql"
       },
 
       {
@@ -152,10 +770,7 @@
                {
                   "name": "filename",
                   "description": "A filename with no prepended PATH information.",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[^\/\\:]+$"
-                  }
+                  "type": "string"
                },
                {
                   "name": "kw",
@@ -506,8 +1121,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^[a-zA-Z0-9_]+$"
+                     "unique": true
                   }
                },
                {
@@ -608,10 +1222,7 @@
                {
                   "name": "abbreviation",
                   "description": "A very short display label for this project",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[a-zA-Z0-9_]+$"
-                  }
+                  "type": "string"
                },
                {
                   "name": "name",
@@ -748,10 +1359,7 @@
                {
                   "name": "abbreviation",
                   "description": "A very short display label for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[a-zA-Z0-9_]+$"
-                  }
+                  "type": "string"
                },
                {
                   "name": "name",
@@ -1411,457 +2019,6 @@
             ]
          },
          "derivation_sql_path": "subject_role_taxonomy.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "assay_type",
-         "title": "Assay Type",
-         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used in this dataset to describe types of experiment that generate results stored in files",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this assay_type in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "An OBI CV term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true,
-                     "pattern": "^OBI:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
-                  "type": "string"
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this OBI term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "assay_type.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "ncbi_taxonomy",
-         "title": "NCBI Taxonomy",
-         "description": "List of NCBI Taxonomy Database IDs identifying taxa used to describe subjects in this dataset",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this taxon in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true,
-                     "pattern": "^NCBI:txid[0-9]+$"
-                  }
-               },
-               {
-                  "name": "clade",
-                  "description": "The phylogenetic level (e.g. species, genus) assigned to this taxon (use 'no rank' if not defined)",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this taxon",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this taxon",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "ncbi_taxonomy.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "anatomy",
-         "title": "Anatomy",
-         "description": "List of Uber-anatomy ontology (Uberon) CV terms used in this dataset to locate the origin of a biosample within the physiology of its source or host organism",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this anatomy in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "An Uberon CV term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true,
-                     "pattern": "^UBERON:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this Uberon term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "anatomy.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "file_format",
-         "title": "File Format",
-         "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this file_format in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "An EDAM CV format term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true,
-                     "pattern": "^format:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this EDAM format term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "file_format.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "data_type",
-         "title": "Data Type",
-         "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this data_type in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "An EDAM CV data term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true,
-                     "pattern": "^data:[0-9]+$"
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this EDAM data term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "data_type.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "disease",
-         "title": "disease",
-         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects, biosamples or projects",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this disease term in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "A Disease Ontology term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this Disease Ontology term",
-                  "type": "string"
-               },
-               {
-                  "name": "synonyms",
-                  "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
-                  "type": "array"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "id"
-         },
-         "derivation_sql_path": "disease.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "subject_role",
-         "title": "Subject Role",
-         "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this subject_role in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "A globally unique ID representing this subject_role",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this subject_role",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this subject_role",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "subject_role.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "subject_granularity",
-         "title": "Subject Granularity",
-         "description": "INTERNAL CV: The category of a subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this subject_granularity in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "A globally unique ID representing this subject_granularity",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
-                  "type": "string",
-                  "constraint": {
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this subject_granularity",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "subject_granularity.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "id_namespace",
-         "title": "ID Namespace",
-         "description": "INTERNAL CV: Dictionary of CFDE-generated identifier namespaces corresponding to top-level C2M2 metadatasets",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this identifier namespace in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "id",
-                  "description": "A globally unique ID representing this identifier namespace",
-                  "type": "string",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "abbreviation",
-                  "description": "A very short display label for this identifier namespace",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[a-zA-Z0-9_]+$"
-                  }
-               },
-               {
-                  "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
-                  "type": "string"
-               },
-               {
-                  "name": "description",
-                  "description": "A human-readable description of this identifier namespace",
-                  "type": "string"
-               }
-            ],
-            "missingValues": [ "" ],
-            "primaryKey": "nid"
-         },
-         "derivation_sql_path": "id_namespace.sql"
       },
 
       {

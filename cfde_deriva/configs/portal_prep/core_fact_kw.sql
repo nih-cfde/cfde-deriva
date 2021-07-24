@@ -21,7 +21,9 @@ FROM (
       cfde_keywords_merge_agg(ff.synonyms),
       cfde_keywords_agg(dt.id, dt.name, dt.description),
       cfde_keywords_merge_agg(dt.synonyms),
-      cfde_keywords_agg(mt.id, mt.name, mt.description)
+      cfde_keywords_agg(mt.id, mt.name, mt.description),
+      cfde_keywords_agg(a2.id, a2.name, a2.description),
+      cfde_keywords_merge_agg(a2.synonyms)
     ) AS kw
   FROM core_fact cf
   JOIN id_namespace n ON (cf.id_namespace = n.nid)
@@ -39,6 +41,8 @@ FROM (
   LEFT JOIN ncbi_taxonomy t ON (tj.value = t.nid)
   LEFT JOIN json_each(cf.anatomies) aj
   LEFT JOIN anatomy a ON (aj.value = a.nid)
+  LEFT JOIN anatomy_slim a_slim ON (a.nid = a_slim.original_term)
+  LEFT JOIN anatomy a2 ON (a_slim.slim_term = a2.nid)
   LEFT JOIN json_each(cf.assay_types) atj
   LEFT JOIN assay_type "at" ON (atj.value = "at".nid)
   LEFT JOIN json_each(cf.file_formats) ffj
