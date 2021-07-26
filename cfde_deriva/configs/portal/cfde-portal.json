@@ -31,7 +31,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "local_id",
@@ -550,7 +556,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -928,7 +940,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -1719,6 +1737,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["child_project", "parent_project"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -1769,7 +1793,13 @@
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -2246,6 +2276,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subset_collection", "superset_collection"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2296,6 +2332,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["project", "collection"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2346,6 +2388,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["collection", "file"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2396,6 +2444,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["collection", "biosample"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2446,6 +2500,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["collection", "subject"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2496,6 +2556,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["biosample", "file"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2546,6 +2612,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject", "file"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2596,6 +2668,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject", "biosample"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2646,6 +2724,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["disease", "biosample"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2694,6 +2778,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["disease", "subject"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2741,6 +2831,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2786,6 +2882,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -2832,6 +2934,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["role", "subject"],
+                        "trgm": false
+                     }
                   }
                },
                {
@@ -2840,6 +2948,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["taxon", "subject"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -3801,6 +3915,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["member_project", "leader_project"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -3883,6 +4003,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["member_collection", "leader_collection"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4042,37 +4168,79 @@
                {
                   "name": "project",
                   "description": "The numeric ID of the project attributed as source for the described entities.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["project", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "subject_granularity",
                   "description": "The numeric ID of the subject_granularity term qualifying the described subjects.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject_granularity", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "anatomy",
                   "description": "The numeric ID of the anatomy term qualifying the described biosamples.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["anatomy", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "assay_type",
                   "description": "The numeric ID of the assay_type term qualifying the described files.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["assay_type", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "file_format",
                   "description": "The numeric ID of the file_format term qualifying the described files.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["file_format", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "data_type",
                   "description": "The numeric ID of the data_type term qualifying the described files.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["data_type", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "mime_type",
                   "description": "The numeric ID of the mime_type term qualifying the described files.",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["mime_type", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
 
                {
@@ -4436,6 +4604,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["project", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4481,6 +4655,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["dcc", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4526,6 +4706,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["disease", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4571,6 +4757,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject_role", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4616,6 +4808,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject_granularity", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4661,6 +4859,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["subject_species", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4706,6 +4910,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["ncbi_taxon", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4751,6 +4961,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["anatomy", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4796,6 +5012,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["assay_type", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4841,6 +5063,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["file_format", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4886,6 +5114,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["data_type", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -4931,6 +5165,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["mime_type", "core_fact"],
+                        "trgm": false
+                     }
                   }
                }
             ],
