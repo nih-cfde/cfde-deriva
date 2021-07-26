@@ -682,8 +682,9 @@ def make_fkey(tname, fkdef):
         annotations=annotations
     )
 
-def make_table(tdef, configurator, trusted=False, history_capture=False):
-    provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
+def make_table(tdef, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
+    if provide_system is None:
+        provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
     tname = tdef["name"]
     if provide_system:
         system_columns = Table.system_column_defs()
@@ -720,9 +721,9 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         system_keys = []
         system_fkeys = []
 
-    # always add "nid" we use for batched transfer
-    system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
-    system_keys.append(make_key(tname, ['nid']))
+    if provide_nid:
+        system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
+        system_keys.append(make_key(tname, ['nid']))
     tcomment = tdef.get("description")
     tdef_resource = tdef
     tdef = tdef_resource.pop("schema")
@@ -768,7 +769,7 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         column_defs=system_columns + [
             make_column(tname, cdef, configurator)
             for cdef in tdef_fields
-            if cdef.get("name") not in {"nid", "RID", "RCT", "RMT", "RCB", "RMB"}
+            if cdef.get("name") not in { cdef['name'] for cdef in system_columns }
         ],
         key_defs=keys,
         fkey_defs=system_fkeys + [
@@ -792,6 +793,8 @@ def make_model(tableschema, configurator, trusted=False):
         rnames.add(np)
 
     pre_annotations = tableschema.get("deriva", {})
+    provide_system = pre_annotations.pop('provide_system', None) if trusted else False
+    provide_nid = pre_annotations.pop('provide_nid', True) if trusted else True
     history_capture = pre_annotations.pop('history_capture', False) if trusted else False
     indexing_preferences = pre_annotations.pop('indexing_preferences', {})
     annotations = {
@@ -819,7 +822,7 @@ def make_model(tableschema, configurator, trusted=False):
                         tag["indexing_preferences"]: indexing_preferences
                     }
                 })
-        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
+        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
     return {
         "schemas": schemas,
         "annotations": annotations,

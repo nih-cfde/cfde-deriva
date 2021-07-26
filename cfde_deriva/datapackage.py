@@ -579,20 +579,30 @@ class CfdeDataPackage (object):
             # dump the same TSV columns included in package def (not extra DERIVA fields)
             cnames = [ field['name'] for field in resource['schema']['fields'] ]
 
+            table = self.cat_cfde_schema.tables[resource['name']]
+            if 'nid' in table.columns.elements:
+                kcol = 'nid'
+            elif 'RID' in table.columns.elements:
+                kcol = 'RID'
+            else:
+                raise ValueError('Cannot dump data for table %s with neither "nid" nor "RID" key columns!' % (table.name,))
+
             def get_data():
                 r = self.catalog.get(
-                    '/entity/CFDE:%s@sort(nid)?limit=%d' % (
+                    '/entity/CFDE:%s@sort(%s)?limit=%d' % (
                         urlquote(resource['name']),
+                        kcol,
                         self.batch_size,
                     ))
                 rows = r.json()
                 yield rows
 
                 while rows:
-                    last = rows[-1]['nid']
+                    last = rows[-1][kcol]
                     r = self.catalog.get(
-                        '/entity/CFDE:%s@sort(nid)@after(%s)?limit=%d' % (
+                        '/entity/CFDE:%s@sort(%s)@after(%s)?limit=%d' % (
                             urlquote(resource['name']),
+                            kcol,
                             urlquote(last),
                             self.batch_size,
                     ))
