@@ -38,10 +38,16 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
     if 'anatomy' in queryobj.path.table_instances:
         return
+    anatomy_slim = queryobj.helper.builder.CFDE.anatomy_slim
     anatomy = queryobj.helper.builder.CFDE.anatomy
     queryobj.path = queryobj.path.link(
+        anatomy_slim,
+        on=( queryobj.path.level1_stats.anatomy_nid == anatomy_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
         anatomy,
-        on=( queryobj.path.level1_stats.anatomy_id == anatomy.id ),
+        on=( queryobj.path.anatomy_slim.slim_term == anatomy.nid ),
         join_type= 'left' if show_nulls else ''
     )
 
@@ -165,7 +171,7 @@ class StatsQuery (object):
     supported_dimensions = {
         'anatomy': (
             _add_anatomy_leaf, [
-                lambda path: path.level1_stats.anatomy_id,
+                lambda path: path.anatomy.column_definitions['id'].alias('anatomy_id'),
             ], [
                 lambda path: path.anatomy.column_definitions['name'].alias('anatomy_name'),
             ]
@@ -306,7 +312,7 @@ class DashboardQueryHelper (object):
             for row in self.list_projects(use_root_projects=True)
         }
 
-        nid_for_parent_proj = projects[('http://www.lincsproject.org/', 'LINCS')]['nid']
+        nid_for_parent_proj = projects[('https://www.lincsproject.org/', 'LINCS')]['nid']
 
         # use list() to convert each ResultSet
         # for easier JSON serialization...
