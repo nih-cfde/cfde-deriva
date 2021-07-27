@@ -317,9 +317,9 @@ class Submission (object):
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.record_vocab_usage(self.registry, self.ingest_sqlite_filename, self.datapackage_id)
             self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
             self.prepare_sqlite_derived_data(portal_prep_schema_json, self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
+            self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
 
             # this needs project_root from prepare_sqlite_derived_data...
             next_error_state = terms.cfde_registry_dp_status.content_error
@@ -929,11 +929,11 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
-    def record_vocab_usage(cls, registry, sqlite_filename, id):
+    def record_vocab_usage(cls, registry, portal_prep_filename, id):
         """Upload vocabulary information to registry.
 
         :param registry: The Registry instance for the submission system
-        :param sqlite_filename: The sqlite3 file for the loaded submission content.
+        :param portal_prep_filename: The sqlite3 file for the loaded and ETL'd submission content.
         :param id: The submission id.
         """
         def get_batches(cur):
@@ -947,29 +947,53 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
         canon_dp = CfdeDataPackage(portal_schema_json)
         canon_dp.set_catalog(catalog)
 
-        with sqlite3.connect(sqlite_filename) as conn:
+        with sqlite3.connect(portal_prep_filename) as conn:
             logger.info('Augmenting registry vocabulary tables...')
-            canon_dp.load_sqlite_tables(conn, onconflict='skip', tablenames={'anatomy', 'assay_type', 'data_type', 'file_format', 'ncbi_taxonomy'})
+            canon_dp.load_sqlite_tables(
+                conn,
+                onconflict='skip',
+                tablenames={
+                    'anatomy',
+                    'assay_type',
+                    'data_type',
+                    'disease',
+                    'file_format',
+                    'mime_type',
+                    'ncbi_taxonomy',
+                    # don't need to update subject_role/subject_granularity which are closed enums for the DCCs...
+                }
+            )
             logger.info('Recording submission vocabulary usage in registry...')
             cur = conn.cursor()
             cur.arraysize = CfdeDataPackage.batch_size
-            for src_tname, src_cname, dst_tname, dst_cname in [
-                    ('biosample', 'anatomy', 'datapackage_anatomy', 'anatomy'),
-                    ('file', 'assay_type', 'datapackage_assay_type', 'assay_type'),
-                    ('file', 'data_type', 'datapackage_data_type', 'data_type'),
-                    ('file', 'file_format', 'datapackage_file_format', 'file_format'),
-                    ('subject_role_taxonomy', 'taxonomy_id', 'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
-                    ('subject', 'granularity', 'datapackage_subject_granularity', 'subject_granularity'),
-                    ('subject_role_taxonomy', 'role_id', 'datapackage_subject_role', 'subject_role'),
+            for src_sql, dst_tname, dst_cname in [
+                    ('SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN anatomy v ON (cf.anatomy = v.nid)',
+                     'datapackage_anatomy', 'anatomy'),
+                    ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)
+                    UNION SELECT v.id FROM file e      JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)""",
+                     'datapackage_assay_type', 'assay_type'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN data_type v ON (cf.data_type = v.nid)',
+                     'datapackage_data_type', 'data_type'),
+                    ("""  SELECT v.id FROM subject_disease a   JOIN disease v ON (a.disease = v.nid)
+                    UNION SELECT v.id FROM biosample_disease a JOIN disease v ON (a.disease = v.nid)""",
+                     'datapackage_disease', 'disease'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)',
+                     'datapackage_file_format', 'file_format'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN mime_type v ON (cf.mime_type = v.nid)',
+                     'datapackage_mime_type', 'mime_type'),
+                    ('SELECT v.id FROM subject_role_taxonomy a JOIN ncbi_taxonomy v ON (a.taxon = v.nid)',
+                     'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
+                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN subject_granularity v ON (cf.subject_granularity = v.nid)',
+                     'datapackage_subject_granularity', 'subject_granularity'),
+                    ('SELECT v.id FROM subject_role_taxonomy a JOIN subject_role v ON (a.role = v.nid)',
+                     'datapackage_subject_role', 'subject_role'),
             ]:
                 try:
                     cur.execute("""
-SELECT DISTINCT %(cname)s
-FROM %(tname)s
-WHERE %(cname)s IS NOT NULL
+SELECT DISTINCT id FROM (%(src_sql)s) s
+WHERE id IS NOT NULL
 """ % {
-    "tname": src_tname,
-    "cname": src_cname,
+    "src_sql": src_sql,
 })
                     for batch in get_batches(cur):
                         batch = [ { "datapackage": id, dst_cname: row[0] } for row in batch ]
@@ -1043,7 +1067,8 @@ def main(subcommand, *args):
             server, registry,
             submission_id, dcc_id, archive_url,
             submitting_user if submitting_user.webauthn_id == row['submitting_user'] else registry.get_user(row['submitting_user']),
-            archive_headers_map=archive_headers_map
+            archive_headers_map=archive_headers_map,
+            skip_dcc_check=True,
         )
         submission.ingest()
 
