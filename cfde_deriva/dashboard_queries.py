@@ -250,7 +250,7 @@ class StatsQuery (object):
 
         Dimension-specific keyword arguments:
 
-        :param parent_project_RID: Use sub-projects of specified parent project RID for "subproject" dimension (required)
+        :param parent_project_nid: Use sub-projects of specified parent project nid for "subproject" dimension (required)
 
         """
         if self.path is None:
