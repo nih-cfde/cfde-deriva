@@ -4882,7 +4882,7 @@
                   "fields": "subject_species",
                   "constraint_name": "core_fact_subject_species_subject_species_fkey",
                   "reference": {
-                     "resource": "subject_species",
+                     "resource": "ncbi_taxonomy",
                      "fields": "nid"
                   }
                }
