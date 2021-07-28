@@ -651,7 +651,7 @@ class Submission (object):
         if os.getenv('CFDE_SKIP_FRICTIONLESS', 'false').lower() == 'true':
             logger.info('SKIPPING validation of frictionless datapackage at "%s" due to CFDE_SKIP_FRICTIONLESS environment variable!' % packagefile)
             return
-        logger.debug('Validating frictionless datapackage at "%s"' % packagefile)
+        logger.info('Validating frictionless datapackage at "%s"' % packagefile)
 
         package = frictionless.Package(packagefile, trusted=False)
         for resource in package.resources:
