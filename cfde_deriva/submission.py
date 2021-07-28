@@ -661,6 +661,17 @@ class Submission (object):
                 resource.schema.pop('primaryKey', None)
                 for field in resource.schema.fields:
                     field.constraints.pop('unique', None)
+            # frictionless-py 4.14.0 doesn't like if we skip the CSV dialect...
+            resource.setdefault(
+                'dialect',
+                {
+                    "delimiter": "\t",
+                    "doubleQuote": False,
+                    "lineTerminator": "\n",
+                    "skipInitialSpace": True,
+                    "header": True
+                },
+            )
 
         report = frictionless.validate_package(package, trusted=False, original=True, parallel=False)
         if post_process:
@@ -676,6 +687,7 @@ class Submission (object):
                     os.path.basename(packagefile),
                     message,
             ))
+        logger.info('Frictionless package valid.')
 
     @classmethod
     def provision_sqlite(cls, schema_json, sqlite_filename):
