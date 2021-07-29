@@ -93,10 +93,11 @@ action to enable per-user profile features.  The profile record will
 store any scalar settings for the user, as a single column for each
 named setting.
 
-The `saved_query` table is keyed by a composite key consisting of two
-parts:
+The `saved_query` table is keyed by a composite key consisting of
+three parts:
 
 - `user_id`: the user saving the query, also a foreign key to the profile
+- `table_name`: the C2M2 table being searched by the query
 - `query_id`: a client-generated key for the query, unique among all queries saved by the user
 
 Each user can have zero or more saved query records associated with

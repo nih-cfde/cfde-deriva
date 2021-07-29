@@ -3192,8 +3192,8 @@
          "schema": {
             "fields": [
                {
-                  "name": "id",
-                  "description": "The client-generated unique ID for the query (i.e. UUID or hash).",
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user who saved the query.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -3210,8 +3210,8 @@
                   }
                },
                {
-                  "name": "user_id",
-                  "description": "The authentication system ID for the user who saved the query.",
+                  "name": "query_id",
+                  "description": "The client-generated unique ID for the user's query (i.e. UUID or hash).",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -3281,7 +3281,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": ["id"],
+            "primaryKey": ["user_id", "table_name", "query_id"],
             "foreignKeys": [
                {
                   "fields": "user_id",
