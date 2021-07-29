@@ -34,14 +34,19 @@ submission system activity, representing known C2M2 vocabulary concepts:
 - `anatomy`
 - `assay_type`
 - `data_type`
+- `disease`
 - `file_format`
+- `mime_type` (C2M2 raw string column)
 - `ncbi_taxonomy`
-- `subject_granularity`
-- `subject_role`
+- `subject_granularity` (C2M2 enum column)
+- `subject_role` (C2M2 enum column)
 
 Generally, these share structure with C2M2 vocabulary tables present
 in submissions, review catalogs, and release catalogs. However, we may
-introduce additional columns relevant to registry functionality.
+introduce additional columns relevant to registry functionality. We
+also promote several non-vocabulary columns into quasi-vocabulary
+tables for the purpose of tracking usage of distinct values for those
+columns.
 
 It is expected that CFDE-CC and/or DCC staff may pre-populate these
 tables with terms intended for common use.  Additionally, the tables
@@ -75,6 +80,7 @@ personalization of CFDE service features:
 - `favorite_anatomy`: each row represents one favorited vocabulary term for a user
 - `favorite_assay_type`: each row represents one favorited vocabulary term for a user
 - `favorite_data_type`: each row represents one favorited vocabulary term for a user
+- `favorite_disease`: each row represents one favorited vocabulary term for a user
 - `favorite_file_format`: each row represents one favorited vocabulary term for a user
 - `favorite_ncbi_taxonomy`: each row represents one favorited vocabulary term for a user
 
@@ -82,23 +88,69 @@ The `user_profile` table is keyed by authenticated user ID which is
 also a foreign key to the built-in `ERMrest_Client` table. Each user
 can have at most one profile record associated with their
 identity. The latter table is automatically populated by the DERIVA
-system, while the former will be populated by an explicit user action
-requesting that a profile be created.  The profile record will store
-any scalar settings for the user, as a single column for each named
-setting.
+system, while the former will be populated by a user or user agent
+action to enable per-user profile features.  The profile record will
+store any scalar settings for the user, as a single column for each
+named setting.
 
-The `saved_query` table is keyed by a client-generated `id` column. To
-avoid collisions between users of the system, the client SHOULD use a
-UUID scheme which includes randomness or a hashing scheme which
-includes the `user_id` as well as other query identity information in
-the hash input. Each user can have zero or more saved query records
-associated with their identity. Each record will store necessary
-information to reconstitute a query in Chaise, to name/describe the
-query in a query listing UI, and other system metadata TBD.
+The `saved_query` table is keyed by a composite key consisting of two
+parts:
+
+- `user_id`: the user saving the query, also a foreign key to the profile
+- `query_id`: a client-generated key for the query, unique among all queries saved by the user
+
+Each user can have zero or more saved query records associated with
+their identity. Each record will store necessary information to
+reconstitute a query in Chaise, to name/describe the query in a query
+listing UI, and other system metadata TBD.
+
+The Chaise user agent (client) should produce per-user `query_id`
+values with a strategy appropriate to the desired UX. For example:
+
+1. A random UUID (or similar) to allow every save event to produce a new query, regardless of what other queries are already saved.
+2. A hashed UUID (or similar) to detect and prevent saving a structurally identical query more than once for the user.
 
 Generally, the various `favorite_*` tables form binary associations to
 link a subset of vocabulary concepts from a given vocabulary table to
 a given user's profile.
+
+#### User Profile Content Lifecycle
+
+There are several possible phases to the profile content (and related
+UX capabilities) for a user.
+
+The following descriptions are based on the assumption that a
+Globus Group will be use to represent the community of CFDE profile
+users. To enroll, a user must join this new group (group name TBD).
+
+1. An anonymous (non-logged-in) user
+    - has no `user_id`
+    - no profile storage possible
+    - prompt to login and join community?
+2. A logged-in user (not yet onboarded to community...)
+    - not yet enrolled in the profile users' group
+    - has a `user_id`
+    - no profile storage possible
+    - promot to join community?
+3. A logged-in user (transitional phase...)
+    - enrolled in the profile user's group
+    - has a `user_id`
+    - `user_profile` can be created on-demand, transitioning to next phase
+4. A logged-in user (full profile functionality...)
+    - continues to belong to profile users' group
+    - has a `user_id`
+    - has a `user_profile` record
+    - has permission to read/update profile
+    - has permission to read/add/delete sub-records (saved queries, favorite terms)
+    - has permission to delete profile (transition back to phase 3)?
+5. A logged-in user (degraded function...)
+    - has been removed from the profile users' group!?
+    - has a `user_id`
+    - has a `user_profile` record
+    - no longer permitted to add sub-records to profile
+    - has permission to read/update profile
+    - has permission to read/delete sub-records (saved queries, favorite terms)
+    - has permission to deleted profile (transition back to phase 2)?
 
 ### Client Roles
 
