@@ -94,9 +94,10 @@ store any scalar settings for the user, as a single column for each
 named setting.
 
 The `saved_query` table is keyed by a composite key consisting of
-three parts:
+several parts:
 
 - `user_id`: the user saving the query, also a foreign key to the profile
+- `schema_name`: will always be `CFDE`, needed by DERIVA mechanism
 - `table_name`: the C2M2 table being searched by the query
 - `query_id`: a client-generated key for the query, unique among all queries saved by the user
 
@@ -106,10 +107,37 @@ reconstitute a query in Chaise, to name/describe the query in a query
 listing UI, and other system metadata TBD.
 
 The Chaise user agent (client) should produce per-user `query_id`
-values with a strategy appropriate to the desired UX. For example:
+values to detect/prevent duplicate saved queries for the user:
 
-1. A random UUID (or similar) to allow every save event to produce a new query, regardless of what other queries are already saved.
-2. A hashed UUID (or similar) to detect and prevent saving a structurally identical query more than once for the user.
+1. Generate the stable form of the facet config document
+2. Generate a UUIDv5 hashed UUID of the config document
+
+For UUIDv5 hashing, we need a "namespace" UUID as an input to the
+algorithm. We'll generate it ahead of time as follows,
+using this reference Python code:
+
+```
+import uuid
+namespace_url = 'tag:isrd.isi.edu,2021:saved-query-ns'
+saved_query_ns = uuid.uuid5(uuid.NAMESPACE_URL, namespace_url)
+assert saved_query_ns == UUID('0c2bd08b-b1d2-5507-8f8a-a5c6a2b9dbee')
+```
+
+Then, to produce a `query_id` for a given facet configuration, we
+might perform the equivalent of this pseudocode:
+
+```
+# magic constant from above
+saved_query_ns = UUID('0c2bd08b-b1d2-5507-8f8a-a5c6a2b9dbee')
+
+# get the canonicalized facet config string
+facet_config = get_filtering_state()
+facet_config = rewrite_stable_filter(facet_config)
+facet_bytes = canonical_encoding(facet_config)
+
+# hash it
+query_id = uuid5(saved_query_ns, facet_bytes)
+```
 
 Generally, the various `favorite_*` tables form binary associations to
 link a subset of vocabulary concepts from a given vocabulary table to

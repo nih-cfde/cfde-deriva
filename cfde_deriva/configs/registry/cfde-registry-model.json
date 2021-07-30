@@ -3228,8 +3228,26 @@
                   }
                },
                {
+                  "name": "schema_name",
+                  "description": "The name of the schema containing the table being queried.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     },
+                     "generated": true
+                  }
+               },
+               {
                   "name": "table_name",
-                  "description": "The name of the CFDE inventory table being queried.",
+                  "description": "The name of the table being queried.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -3281,7 +3299,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": ["user_id", "table_name", "query_id"],
+            "primaryKey": ["user_id", "schema_name", "table_name", "query_id"],
             "foreignKeys": [
                {
                   "fields": "user_id",
