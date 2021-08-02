@@ -1878,7 +1878,7 @@
             ]
          },
          "deriva": {
-            "export_2019_disable": {
+            "export_2019": {
                "*": {
                   "templates": [
                      {
@@ -1888,7 +1888,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "cf:=(core_fact)/i:=(id_namespace)/$M/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "collection",
@@ -1898,7 +1898,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:collection_defined_by_project:collection_id_namespace,collection_local_id)/(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "(CFDE:collection_defined_by_project:collection)/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -1908,7 +1908,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:collection_defined_by_project:collection_id_namespace,collection_local_id)/(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                                 "path": "(CFDE:collection_defined_by_project:collection)/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -1918,7 +1918,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format,data_type,assay_type,mime_type"
+                                 "path": "(CFDE:file_in_collection:collection)/f:=(file)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/dt:=(cf:data_type)=(CFDE:data_type:nid)/at:=(cf:assay_type)=(CFDE:assay_type:nid)/mt:=(cf:mime_type)=(CFDE:mime_type:nid)/$f/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id"
                               },
                               "destination": {
                                  "name": "file",
@@ -1928,7 +1928,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(file_format)=(CFDE:file_format:id)/id,name,description"
+                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)/(file_format)/id,name,description"
                               },
                               "destination": {
                                  "name": "file_format",
@@ -1938,7 +1938,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(data_type)=(CFDE:data_type:id)/id,name,description"
+                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)/(data_type)/id,name,description"
                               },
                               "destination": {
                                  "name": "data_type",
@@ -1948,7 +1948,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:file_in_collection:collection_id_namespace,collection_local_id)/(file_id_namespace,file_local_id)=(CFDE:file:id_namespace,local_id)/(assay_type)=(CFDE:assay_type:id)/id,name,description"
+                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)=(CFDE:core_fact_assay_type:core_fact)/(assay_type)/id,name,description"
                               },
                               "destination": {
                                  "name": "assay_type",
@@ -1958,7 +1958,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_in_collection:collection_id_namespace,collection_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,anatomy"
+                                 "path": "(CFDE:biosample_in_collection:collection)/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/an:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=an:id,assay_type:=at:id"
                               },
                               "destination": {
                                  "name": "biosample",
@@ -1968,7 +1968,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_in_collection:collection_id_namespace,collection_local_id)/(biosample_id_namespace,biosample_local_id)=(CFDE:biosample:id_namespace,local_id)/(anatomy)=(CFDE:anatomy:id)/id,name,description"
+                                 "path": "(CFDE:biosample_in_collection:collection)/(biosample)/(core_fact)/(anatomy)/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
@@ -1978,7 +1978,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
                               },
                               "destination": {
                                  "name": "subject",
@@ -1988,7 +1988,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                                 "path": "(CFDE:subject_in_collection:collection)/(subject)/(core_fact)/(subject_granularity)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -1999,7 +1999,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_role_taxonomy:subject)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -2010,7 +2010,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                                 "path": "(CFDE:subject_in_collection:collection)/(subject)=(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -2021,7 +2021,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_in_collection:collection_id_namespace,collection_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                                 "path": "(CFDE:subject_in_collection:collection)/(subject)=(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
