@@ -175,7 +175,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(assay_type)/id,name,description"
+                                 "path": "(core_fact)=(CFDE:core_fact_assay_type:core_fact)/(assay_type)/id,name,description"
                               },
                               "destination": {
                                  "name": "assay_type",
