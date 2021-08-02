@@ -185,7 +185,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_biosample:file)/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/a:=left(cf:anatomy)=(CFDE:anatomy:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=a:id"
+                                 "path": "(nid)=(CFDE:file_describes_biosample:file)/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/a:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=a:id,assay_type:=at:id"
                               },
                               "destination": {
                                  "name": "biosample",
