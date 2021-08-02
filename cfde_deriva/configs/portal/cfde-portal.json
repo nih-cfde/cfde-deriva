@@ -611,7 +611,7 @@
             ]
          },
          "deriva": {
-            "export_2019_disable": {
+            "export_2019": {
                "*": {
                   "templates": [
                      {
@@ -621,7 +621,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,anatomy"
+                                 "path": "cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/an:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$M/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=an:id,assay_type:=at:id"
                               },
                               "destination": {
                                  "name": "biosample",
@@ -631,7 +631,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -641,7 +641,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(a:parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -651,7 +651,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(anatomy)=(CFDE:anatomy:id)/id,name,description"
+                                 "path": "(core_fact)/(anatomy)/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
@@ -661,7 +661,17 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                                 "path": "(core_fact)/(assay_type)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "assay_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(p:id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
                               },
                               "destination": {
                                  "name": "subject",
@@ -671,7 +681,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject:id_namespace,local_id)/(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)/(core_fact)/(subject_granularity)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -682,7 +692,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/a:=(CFDE:subject_role_taxonomy:subject)/(s:core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -693,7 +703,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)=(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -704,7 +714,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:biosample_from_subject:biosample_id_namespace,biosample_local_id)/(subject_id_namespace,subject_local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)=(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
@@ -994,7 +1004,7 @@
             ]
          },
          "deriva": {
-            "export_2019_disable": {
+            "export_2019": {
                "*": {
                   "templates": [
                      {
@@ -1004,7 +1014,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "id_namespace,local_id,project_id_namespace,project_local_id,persistent_id,creation_time,granularity"
+                                 "path": "cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$M/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
                               },
                               "destination": {
                                  "name": "subject",
@@ -1014,7 +1024,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project:id_namespace,local_id)/id_namespace,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -1024,7 +1034,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(project_id_namespace,project_local_id)=(CFDE:project_in_project_transitive:member_project_id_namespace,member_project_local_id)/(leader_project_id_namespace,leader_project_local_id)=(CFDE:project_in_project:child_project_id_namespace,child_project_local_id)/parent_project_id_namespace,parent_project_local_id,child_project_id_namespace,child_project_local_id"
+                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -1034,7 +1044,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(granularity)=(CFDE:subject_granularity:id)/id,name,description"
+                                 "path": "(core_fact)/(subject_granularity)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -1045,7 +1055,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/subject_id_namespace,subject_local_id,role_id,taxonomy_id"
+                                 "path": "a:=(CFDE:subject_role_taxonomy:subject)/s:=(subject)/(core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -1056,7 +1066,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(role_id)=(CFDE:subject_role:id)/id,name,description"
+                                 "path": "(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -1067,7 +1077,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(id_namespace,local_id)=(CFDE:subject_role_taxonomy:subject_id_namespace,subject_local_id)/(taxonomy_id)=(CFDE:ncbi_taxonomy:id)/id,name,description"
+                                 "path": "(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
