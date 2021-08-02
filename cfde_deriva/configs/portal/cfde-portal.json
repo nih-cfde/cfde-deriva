@@ -195,10 +195,30 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_biosample:file)/b:=(biosample)/(core_fact)/a:=(anatomy)/id,name,description"
+                                 "path": "(CFDE:file_describes_biosample:file)/b:=(biosample)/(core_fact)/a:=(anatomy)/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(CFDE:file_describes_biosample:file)/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "disease",
                                  "type": "csv"
                               }
                            },
@@ -252,6 +272,16 @@
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(CFDE:file_describes_subject:file)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "subject_disease",
                                  "type": "csv"
                               }
                            }
@@ -671,6 +701,26 @@
                            {
                               "source": {
                                  "api": "attribute",
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=M:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
                                  "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(p:id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
                               },
                               "destination": {
@@ -718,6 +768,16 @@
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "subject_disease",
                                  "type": "csv"
                               }
                            }
@@ -1081,6 +1141,26 @@
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=M:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "subject_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "disease",
                                  "type": "csv"
                               }
                            }
@@ -1978,6 +2058,26 @@
                            {
                               "source": {
                                  "api": "attribute",
+                                 "path": "(CFDE:biosample_in_collection:collection)/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
                                  "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
                               },
                               "destination": {
@@ -2025,6 +2125,16 @@
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "subject_disease",
                                  "type": "csv"
                               }
                            }
