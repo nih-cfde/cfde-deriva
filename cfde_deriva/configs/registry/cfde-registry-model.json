@@ -3112,6 +3112,21 @@
                         "profile_owner": false
                      }
                   }
+               },
+               {
+                  "name": "dashboard_state",
+                  "description": "The serialized state of the dashboard for this user",
+                  "type": "object",
+                  "deriva": {
+                     "acls": {
+                        "select": [],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                     },
+                     "generated": true,
+                     "immutable": true
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -3206,31 +3221,15 @@
                      "acl_bindings": {
                         "profile_owner": false
                      },
-                     "generated": true
-                  }
-               },
-               {
-                  "name": "query_id",
-                  "description": "The client-generated unique ID for the user's query (i.e. UUID or hash).",
-                  "type": "string",
-                  "constraints": {
-                     "required": true
-                  },
-                  "deriva": {
-                     "acls": {
-                        "select": ["*"],
-                        "update": []
-                     },
-                     "acl_bindings": {
-                        "profile_owner": false
-                     },
-                     "generated": true
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
                   "name": "schema_name",
                   "description": "The name of the schema containing the table being queried.",
                   "type": "string",
+                  "default": "CFDE",
                   "constraints": {
                      "required": true
                   },
@@ -3242,7 +3241,8 @@
                      "acl_bindings": {
                         "profile_owner": false
                      },
-                     "generated": true
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -3260,7 +3260,27 @@
                      "acl_bindings": {
                         "profile_owner": false
                      },
-                     "generated": true
+                     "generated": true,
+                     "immutable": true
+                  }
+               },
+               {
+                  "name": "query_id",
+                  "description": "The client-generated unique ID for the user's query (i.e. UUID or hash).",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     },
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -3278,7 +3298,8 @@
                      "acl_bindings": {
                         "profile_owner": false
                      },
-                     "generated": true
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -3344,6 +3365,14 @@
                   "projection_type": "acl",
                   "scope_acl": ["*"]
                }
+            },
+            "visible_columns": {
+               "*": [
+                  "user_id",
+                  "schema_name",
+                  "table_name",
+                  "query_id"
+               ]
             }
          }
       },

@@ -296,11 +296,14 @@ This table summarizes these in more detail:
 | registry `CFDE`.`user_profile`.`id` | update | none | N/A | fkey ACL | user id is immutable |
 | registry `CFDE`.`user_profile`.`id` fkey | insert | CFDE admin | N/A | fkey ACL | only CFDE-CC admin can set other profile users |
 | registry `CFDE`.`user_profile`.`id` fkey | insert | user-self | N/A | fkey ACL binding | user can only set profile user `id` to self |
+| registry `CFDE`.`user_profile`.`dashboard_state` | select, update, delete | owner | N/A | table ACL-binding | profile owner can read/write dashboard state |
 | registry `CFDE`.`saved_query` | insert | CFDE community | N/A | table ACL | Community members can create |
 | registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read and modify all|
 | registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | user `user_id` matches client | table ACL binding | user can view and edit their own |
 | registry `CFDE`.`saved_query`.`user_id` | update | none | N/A | user_id is immutable |
+| registry `CFDE`.`saved_query`.`schema_name` | update | none | N/A | column ACL | schema name is immutable |
 | registry `CFDE`.`saved_query`.`table_name` | update | none | N/A | column ACL | table name is immutable |
+| registry `CFDE`.`saved_query`.`query_id` | update | none | N/A | column ACL | query id (hash) is immutable |
 | registry `CFDE`.`saved_query`.`facets` | update | none | N/A | column ACL | facets blob is immutable |
 | registry `CFDE`.`saved_query`.`user_id` fkey | insert | profile owner | user_id matches client | user can set own user ID in profile related records |
 | registry `CFDE`.`favorite_*` | insert | CFDE community | N/A | table ACL | Community members can create |
