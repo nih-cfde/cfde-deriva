@@ -3266,7 +3266,7 @@
                },
                {
                   "name": "query_id",
-                  "description": "The client-generated unique ID for the user's query (i.e. UUID or hash).",
+                  "description": "The client-generated unique ID for the saved query's filters (i.e. hash).",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -3304,6 +3304,7 @@
                },
                {
                   "name": "name",
+                  "title": "Query Name",
                   "description": "A short, human-readable title for the saved query.",
                   "type": "string",
                   "constraints": {
@@ -3316,6 +3317,16 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  }
+               },
+               {
+                  "name": "last_execution_time",
+                  "description": "A timestamp for when the saved query was most recently executed by the user.",
+                  "type": "datetime",
+                  "format": "any",
+                  "deriva": {
+                     "generated": true,
+                     "immutable": true
                   }
                }
             ],
@@ -3366,12 +3377,30 @@
                   "scope_acl": ["*"]
                }
             },
+            "source_definitions": {
+               "sources": {
+                  "S_user": {
+                     "markdown_name": "User",
+                     "source": [{"outbound": ["CFDE", "saved_query_user_id_fkey"]}, "RID"]
+                  }
+               }
+            },
             "visible_columns": {
-               "*": [
-                  "user_id",
-                  "schema_name",
+               "compact": [
+                  "last_execution_time",
+                  {"sourcekey": "S_user"},
                   "table_name",
-                  "query_id"
+                  "name",
+                  "description"
+               ],
+               "*": [
+                  "last_execution_time",
+                  {"sourcekey": "S_user"},
+                  "table_name",
+                  "name",
+                  "description",
+                  "query_id",
+                  "facets"
                ]
             }
          }

@@ -101,6 +101,15 @@ several parts:
 - `table_name`: the C2M2 table being searched by the query
 - `query_id`: a client-generated key for the query, unique among all queries saved by the user
 
+Each `saved_query` has these additional columns which
+are not part of the composite key:
+
+- `RID`: system-assigned record ID, useful for API access
+- `RCT`: system-maintained record creation time, when the query was saved
+- `name`: a human-readable name for the saved query
+- `description`: a longer, human-readable summary of the query
+- `last_executon_time`: a client maintained timestamp, updated when the query is performed
+
 Each user can have zero or more saved query records associated with
 their identity. Each record will store necessary information to
 reconstitute a query in Chaise, to name/describe the query in a query
@@ -110,34 +119,7 @@ The Chaise user agent (client) should produce per-user `query_id`
 values to detect/prevent duplicate saved queries for the user:
 
 1. Generate the stable form of the facet config document
-2. Generate a UUIDv5 hashed UUID of the config document
-
-For UUIDv5 hashing, we need a "namespace" UUID as an input to the
-algorithm. We'll generate it ahead of time as follows,
-using this reference Python code:
-
-```
-import uuid
-namespace_url = 'tag:isrd.isi.edu,2021:saved-query-ns'
-saved_query_ns = uuid.uuid5(uuid.NAMESPACE_URL, namespace_url)
-assert saved_query_ns == UUID('0c2bd08b-b1d2-5507-8f8a-a5c6a2b9dbee')
-```
-
-Then, to produce a `query_id` for a given facet configuration, we
-might perform the equivalent of this pseudocode:
-
-```
-# magic constant from above
-saved_query_ns = UUID('0c2bd08b-b1d2-5507-8f8a-a5c6a2b9dbee')
-
-# get the canonicalized facet config string
-facet_config = get_filtering_state()
-facet_config = rewrite_stable_filter(facet_config)
-facet_bytes = canonical_encoding(facet_config)
-
-# hash it
-query_id = uuid5(saved_query_ns, facet_bytes)
-```
+2. Generate an MD5 hexadecimal format hash of the config document
 
 Generally, the various `favorite_*` tables form binary associations to
 link a subset of vocabulary concepts from a given vocabulary table to
