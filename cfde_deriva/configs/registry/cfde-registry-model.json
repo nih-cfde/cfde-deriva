@@ -3321,6 +3321,7 @@
                },
                {
                   "name": "last_execution_time",
+                  "title": "Last Searched",
                   "description": "A timestamp for when the saved query was most recently executed by the user.",
                   "type": "datetime",
                   "format": "any",
@@ -3389,32 +3390,33 @@
             "visible_columns": {
                "compact": [
                   {
-                     "markdown_name": "Apply Query",
+                     "markdown_name": "Query Name",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{schema_name}}}:{{{table_name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
                      }
                   },
-                  "last_execution_time",
-                  {"sourcekey": "S_user"},
                   "table_name",
-                  "name",
-                  "description"
+                  "description",
+                  "last_execution_time"
                ],
                "compact/select": [
                   {
-                     "markdown_name": "Apply Query",
+                     "markdown_name": "Query Name",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{schema_name}}}:{{{table_name}}}](/chaise/recordset/#{{{$catalog.snapshot}}}/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#{{{$catalog.snapshot}}}/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
                      }
                   },
-                  "last_execution_time",
-                  {"sourcekey": "S_user"},
+                  "table_name",
+                  "description",
+                  "last_execution_time"
+               ],
+               "entry/create": [
                   "table_name",
                   "name",
                   "description"
-               ],
+               ]
                "*": [
                   "last_execution_time",
                   {"sourcekey": "S_user"},
