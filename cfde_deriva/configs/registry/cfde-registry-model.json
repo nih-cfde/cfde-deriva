@@ -3416,7 +3416,7 @@
                   "table_name",
                   "name",
                   "description"
-               ]
+               ],
                "*": [
                   "last_execution_time",
                   {"sourcekey": "S_user"},
