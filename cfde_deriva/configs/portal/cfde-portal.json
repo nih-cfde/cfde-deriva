@@ -305,19 +305,26 @@
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_project": {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_super_projects": {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_project"},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         "nid"
@@ -327,7 +334,7 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The data coordinating center attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
@@ -336,11 +343,19 @@
                   },
                   "S_file_format": {
                      "comment": "The content format of the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_file_format_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_file_format_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_data_type": {
                      "comment": "The type of data represented by the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_data_type_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_data_type_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the file was created.",
@@ -354,12 +369,18 @@
                         "nid"
                      ]
                   },
+                  "S_anatomy_core": {
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]}
+                        "nid"
+                     ]
+                  },
                   "S_anatomy": {
                      "comment": "Anatomy for biosamples, offering original terms and corresponding \"slim\" terms.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
                         "nid"
@@ -369,9 +390,7 @@
                      "markdown_name": "Anatomy (slim)",
                      "comment": "Anatomy for biosamples, oferring only \"slim\" terms corresponding to original metadata.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
@@ -380,7 +399,7 @@
                   "S_assay_type": {
                      "comment": "Assay type used to generate the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -389,17 +408,23 @@
                   "S_subject_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject_srt": {
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_subject_role": {
                      "comment": "The taxonomy role(s) of subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"sourcekey": "S_subject_srt"},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
                      ]
@@ -416,7 +441,7 @@
                      "markdown_name": "Disease",
                      "comment": "A disease linked to the described biosample or subject.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
@@ -437,8 +462,7 @@
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"sourcekey": "S_subject_srt"},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
                      ]
