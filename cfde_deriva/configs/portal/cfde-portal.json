@@ -6,6 +6,11 @@
       "indexing_preferences": {
          "btree": false,
          "trgm": false
+      },
+      "display": {
+         "hide_row_count": {
+            "*": true
+         }
       }
    },
    "resources": [
