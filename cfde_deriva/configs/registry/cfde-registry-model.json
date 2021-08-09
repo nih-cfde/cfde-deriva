@@ -355,7 +355,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "id_namespace_role",
@@ -400,7 +400,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "datapackage_status",
@@ -445,7 +445,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "release_status",
@@ -490,7 +490,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "approval_status",
@@ -535,7 +535,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "datapackage_table_status",
@@ -580,7 +580,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "datapackage",
@@ -1108,7 +1108,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "datapackage_table",
@@ -1297,7 +1297,7 @@
                   "default": "cfde_registry_rel_status:planning",
                   "constraints": {
                      "required": true
-                  }               
+                  }
                },
                {
                   "name": "description",
@@ -1467,7 +1467,7 @@
             }
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "dcc_group_role",
@@ -3321,6 +3321,7 @@
                },
                {
                   "name": "last_execution_time",
+                  "title": "Last Searched",
                   "description": "A timestamp for when the saved query was most recently executed by the user.",
                   "type": "datetime",
                   "format": "any",
@@ -3378,6 +3379,7 @@
                }
             },
             "source_definitions": {
+               "columns": true,
                "sources": {
                   "S_user": {
                      "markdown_name": "User",
@@ -3387,8 +3389,30 @@
             },
             "visible_columns": {
                "compact": [
-                  "last_execution_time",
-                  {"sourcekey": "S_user"},
+                  {
+                     "markdown_name": "Query Name",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
+                     }
+                  },
+                  "table_name",
+                  "description",
+                  "last_execution_time"
+               ],
+               "compact/select": [
+                  {
+                     "markdown_name": "Query Name",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#{{{$catalog.snapshot}}}/{{{schema_name}}}:{{{table_name}}}/*::facets::{{#encodeFacet}}{{{facets}}}{{/encodeFacet}}?savedQueryRid={{{RID}}})"
+                     }
+                  },
+                  "table_name",
+                  "description",
+                  "last_execution_time"
+               ],
+               "entry/create": [
                   "table_name",
                   "name",
                   "description"
