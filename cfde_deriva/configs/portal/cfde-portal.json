@@ -460,78 +460,45 @@
             },
             "visible_columns": {
                "compact": [
+                  {
+                     "sourcekey": "S_dcc",
+                     "aggregate": "array_d"
+                  },
+                  {
+                     "markdown_name": "Project",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "File Format",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Data Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Assay Type",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                     }
+                  },
+                  "size_in_bytes",
                   "filename",
                   "persistent_id",
-                  {
-                     "markdown_name": "Project",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
-                     }
-                  },
-                  "size_in_bytes",
-                  {
-                     "markdown_name": "File Format",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Data Type",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Assay Type",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
-                     }
-                  },
-                  {"sourcekey": "S_creation_time"}
-               ],
-               "compact/brief": [
-                  "filename",
-                  {
-                     "markdown_name": "Project",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
-                     }
-                  },
-                  "size_in_bytes",
-                  {
-                     "markdown_name": "File Format",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Data Type",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Assay Type",
-                     "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
-                     }
-                  },
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -944,8 +911,10 @@
             },
             "visible_columns": {
                "compact": [
-                  "local_id",
-                  "persistent_id",
+                  {
+                     "sourcekey": "S_dcc",
+                     "aggregate": "array_d"
+                  },
                   {
                      "markdown_name": "Project",
                      "display": {
@@ -970,6 +939,8 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
                      }
                   },
+                  "local_id",
+                  "persistent_id",
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -1336,8 +1307,10 @@
             },
             "visible_columns": {
                "compact": [
-                  "local_id",
-                  "persistent_id",
+                  {
+                     "sourcekey": "S_dcc",
+                     "aggregate": "array_d"
+                  },
                   {
                      "markdown_name": "Project",
                      "display": {
@@ -1346,7 +1319,10 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
                      }
                   },
-                  "size_in_bytes",
+                  {
+                     "sourcekey": "S_taxonomy",
+                     "aggregate": "array_d"
+                  },
                   {
                      "markdown_name": "Granularity",
                      "display": {
@@ -1355,10 +1331,8 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._subject_granularity_row.name}}{{/with}}"
                      }
                   },
-                  {
-                     "sourcekey": "S_taxonomy",
-                     "aggregate": "array_d"
-                  },
+                  "local_id",
+                  "persistent_id",
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
@@ -1773,6 +1747,10 @@
             },
             "visible_columns": {
                "compact": [
+                  {
+                     "sourcekey": "S_dcc",
+                     "aggregate": "array_d"
+                  },
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
@@ -2331,8 +2309,14 @@
             },
             "visible_columns": {
                "compact": [
-                  "local_id",
-                  {"sourcekey": "S_project"},
+                  {
+                     "sourcekey": "S_dcc",
+                     "aggregate": "array_d"
+                  },
+                  {
+                     "sourcekey": "S_project",
+                     "aggregate": "array_d"
+                  },
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
