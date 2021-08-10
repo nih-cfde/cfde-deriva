@@ -2261,11 +2261,11 @@
                   },
                   "S_disease": {
                      "markdown_name": "Disease",
-                     "comment": "The disease terms qulifying a biosample or subject.",
+                     "comment": "The disease terms qualifying a biosample or subject.",
                      "source": [
                         {"outbound": ["CFDE", "collection_core_fact_fkey"]},
-                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
                      ]
                   },
