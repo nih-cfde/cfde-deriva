@@ -33,6 +33,7 @@ authn_id = AttrDict({
     "cfde_infrastructure_ops": "https://auth.globus.org/7116589f-3a72-11eb-86d2-0aa357bce76b",
     "cfde_submission_pipeline": "https://auth.globus.org/1fd07875-3f06-11eb-8761-0ece49b2bd8d",
     "cfde_action_provider": "https://auth.globus.org/21017803-059f-4a9b-b64c-051ab7c1d05d",
+    "cfde_portal_members": "https://auth.globus.org/96a2546e-fa0f-11eb-be15-b7f12332d0e5",
 })
 
 cfde_portal_viewers = {
