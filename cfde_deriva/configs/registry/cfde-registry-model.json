@@ -3363,17 +3363,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3526,17 +3524,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3618,17 +3614,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3710,17 +3704,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3802,17 +3794,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3894,17 +3884,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -3986,17 +3974,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -4078,17 +4064,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -4170,17 +4154,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -4262,17 +4244,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
@@ -4354,17 +4334,15 @@
                   "on_update": "CASCADE",
                   "on_delete": "CASCADE",
                   "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
                      "acl_bindings": {
-                        "acls": {
-                           "insert": [ "cfde_portal_admin" ]
-                        },
-                        "acl_bindings": {
-                           "self": {
-                              "types": ["insert"],
-                              "projection": [ "id" ],
-                              "projection_type": "acl",
-                              "scope_acl": ["*"]
-                           }
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
                         }
                      }
                   }
