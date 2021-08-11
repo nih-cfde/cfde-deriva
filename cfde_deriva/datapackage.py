@@ -455,6 +455,15 @@ class CfdeDataPackage (object):
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             logger.info('Dropping %s' % fkey.uri_path)
                             fkey.drop()
+                    for fkey in table.foreign_keys:
+                        doc_fkey = doc_table.foreign_keys.elements.get( (doc_schema, fkey.name[1]) )
+                        if doc_fkey is None:
+                            continue
+                        fkey.annotations.update(doc_fkey.annotations)
+                        fkey.acls.clear()
+                        fkey.acl_bindings.clear()
+                        fkey.acls.update(doc_fkey.acls)
+                        fkey.acl_bindings.update(doc_fkey.acl_bindings)
 
         def compact_visible_columns(table):
             """Emulate Chaise heuristics while hiding system metadata"""

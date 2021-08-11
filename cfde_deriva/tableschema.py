@@ -667,11 +667,17 @@ def make_fkey(tname, fkdef):
             raise ValueError('unknown action "%s" for foreign key %s %s clause' % (e, constraint_name, clause))
     on_delete = get_action('on_delete')
     on_update = get_action('on_update')
+    pre_annotations = fkdef.get("deriva", {})
     annotations = {
         schema_tag: fkdef,
     }
     if to_name is not None:
         annotations[tag.foreign_key] = {"to_name": to_name}
+    for k, t in tag.items():
+        if k in pre_annotations and trusted:
+            annotations[t] = pre_annotations.pop(k)
+    acls = pre_annotations.pop('acls', {})
+    acl_bindings = pre_annotations.pop('acl_bindings', {})
     return ForeignKey.define(
         fkcols,
         pkschema,
@@ -680,7 +686,9 @@ def make_fkey(tname, fkdef):
         constraint_names=[[ schema_name, constraint_name ]],
         on_delete=on_delete,
         on_update=on_update,
-        annotations=annotations
+        annotations=annotations,
+        acls=acls,
+        acl_bindings=acl_bindings,
     )
 
 def make_table(tdef, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
