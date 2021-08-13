@@ -1236,6 +1236,15 @@
                   "name": "description",
                   "description": "A human-readable description of this project",
                   "type": "string"
+               },
+               {
+                  "name": "id",
+                  "description": "The concatenated, namespace-qualified id for this project.",
+                  "type": "string",
+                  "constraints": {
+                     "unique": true
+                  },
+                  "derivation_sql_path": "project_id.sql"
                }
             ],
             "missingValues": [ "" ],

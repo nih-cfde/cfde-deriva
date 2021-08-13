@@ -106,7 +106,7 @@ class CfdeDataPackage (object):
     # (i.e. stuff that perhaps wasn't translated to deriva equivalents)
     schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 
-    batch_size = 1000 # how may rows we'll send to ermrest
+    batch_size = 4000 # how may rows we'll send to ermrest
 
     def __init__(self, package_filename, configurator=None):
         """Construct CfdeDataPackage from given package definition filename.
@@ -455,6 +455,15 @@ class CfdeDataPackage (object):
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
                             logger.info('Dropping %s' % fkey.uri_path)
                             fkey.drop()
+                    for fkey in table.foreign_keys:
+                        doc_fkey = doc_table.foreign_keys.elements.get( (doc_schema, fkey.name[1]) )
+                        if doc_fkey is None:
+                            continue
+                        fkey.annotations.update(doc_fkey.annotations)
+                        fkey.acls.clear()
+                        fkey.acl_bindings.clear()
+                        fkey.acls.update(doc_fkey.acls)
+                        fkey.acl_bindings.update(doc_fkey.acl_bindings)
 
         def compact_visible_columns(table):
             """Emulate Chaise heuristics while hiding system metadata"""
