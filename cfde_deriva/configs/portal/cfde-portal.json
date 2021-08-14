@@ -311,19 +311,26 @@
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_project": {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_super_projects": {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_project"},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         "nid"
@@ -333,7 +340,7 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The data coordinating center attributed as source of the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
@@ -342,11 +349,19 @@
                   },
                   "S_file_format": {
                      "comment": "The content format of the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_file_format_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_file_format_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_data_type": {
                      "comment": "The type of data represented by the file.",
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_data_type_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_data_type_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the file was created.",
@@ -360,12 +375,18 @@
                         "nid"
                      ]
                   },
+                  "S_anatomy_core": {
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_anatomy": {
                      "comment": "Anatomy for biosamples, offering original terms and corresponding \"slim\" terms.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
                         "nid"
@@ -375,9 +396,7 @@
                      "markdown_name": "Anatomy (slim)",
                      "comment": "Anatomy for biosamples, oferring only \"slim\" terms corresponding to original metadata.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
-                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
@@ -386,7 +405,7 @@
                   "S_assay_type": {
                      "comment": "Assay type used to generate the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -395,7 +414,7 @@
                   "S_subject_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         "nid"
@@ -404,7 +423,7 @@
                   "S_subject_role": {
                      "comment": "The taxonomy role(s) of subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
@@ -422,7 +441,7 @@
                      "markdown_name": "Disease",
                      "comment": "A disease linked to the described biosample or subject.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
@@ -443,7 +462,7 @@
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]}, 
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
@@ -774,12 +793,16 @@
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
-                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_assay_type": {
                      "comment": "The assay type(s) of biosample or related files.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -789,16 +812,22 @@
                      "markdown_name": "Assay Type",
                      "comment": "The assay-type which prepared the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_core": {
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
                         "nid"
                      ]
                   },
                   "S_anatomy": {
                      "comment": "The anatomy from which the biosample is derived, offering original and corresponding \"slim\" terms.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
                         "nid"
@@ -808,8 +837,7 @@
                      "markdown_name": "Anatomy (slim)",
                      "comment": "The anatomy from which the biosample is derived, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
+                        {"sourcekey": "S_anatomy_core"},
                         {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
@@ -819,7 +847,7 @@
                      "markdown_name": "Disease",
                      "comment": "A disease linked to the biosample or subject.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
@@ -838,7 +866,7 @@
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject of the biosampling.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
@@ -846,13 +874,17 @@
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
-                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The data coordinating center attributed as source of the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
@@ -862,8 +894,7 @@
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "biosample_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_project"},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         "nid"
@@ -1161,17 +1192,35 @@
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
-                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the subject.",
-                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_project_fkey"]}, "nid"]
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_super_projects": {
+                     "markdown_name": "Project",
+                     "comment": "The project (or any super-projects) attributed as source of the subject.",
+                     "source": [
+                        {"sourcekey": "S_project"},
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        "nid"
+                     ]
                   },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program attributed as source of the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
@@ -1181,7 +1230,7 @@
                      "markdown_name": "Disease",
                      "comment": "A disease linked to the biosample or subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
@@ -1199,7 +1248,7 @@
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_fkey"]},
                         "nid"
                      ]
@@ -1208,7 +1257,7 @@
                      "markdown_name": "Taxonomic Role",
                      "comment": "The taxonomic role concept(s) characterizing the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subect_role_subject_role_fkey"]},
                         "nid"
@@ -1218,19 +1267,36 @@
                      "markdown_name": "Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
                      ]
                   },
-                  "S_anatomy": {
-                     "markdown_name": "Anatomy",
-                     "comment": "An anatomy term linked to a related biosample.",
+                  "S_anatomy_core": {
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "comment": "Anatomy for related biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core"},
+                        {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_slim": {
+                     "markdown_name": "Anatomy (slim)",
+                     "comment": "Anatomy for related biosamples, oferring only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core"},
+                        {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -1238,7 +1304,7 @@
                      "markdown_name": "Assay Type",
                      "comment": "An assay-type linked to a file or biosample related to the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -1248,7 +1314,7 @@
                      "markdown_name": "Data Type",
                      "comment": "An data-type linked to a file related to the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
@@ -1258,7 +1324,7 @@
                      "markdown_name": "File Format",
                      "comment": "An data-type linked to a file related to the subject.",
                      "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
@@ -1350,22 +1416,13 @@
                   {"sourcekey": "S_granularity", "open": true},
                   {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_role"},
+                  {"sourcekey": "S_anatomy_slim"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_dcc"},
-                  {
-                     "markdown_name": "Project",
-                     "comment": "The project (or any super-projects) attributed as source of the subject.",
-                     "source": [
-                        {"outbound": ["CFDE", "subject_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_project_fkey"]},
-                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
-                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
-                        "nid"
-                     ]
-                  },
+                  {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_creation_time"}
                ]}
             }
@@ -1629,11 +1686,16 @@
                         "nid"
                      ]
                   },
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_granularity": {
                      "comment": "A subject granularity observed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         "nid"
@@ -1642,7 +1704,7 @@
                   "S_subject_role": {
                      "comment": "A taxonomic role observed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
@@ -1652,7 +1714,7 @@
                      "markdown_name": "Subject Taxonomy",
                      "comment": "A subject taxon observed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
@@ -1661,25 +1723,44 @@
                   "S_disease": {
                      "comment": "A disease observed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
                      ]
                   },
-                  "S_anatomy": {
+                  "S_anatomy_core": {
                      "comment": "An anatomical source observed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "comment": "Anatomy for biosamples of the project, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core"},
+                        {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_slim": {
+                     "markdown_name": "Anatomy (slim)",
+                     "comment": "Anatomy for biosamples of the project, oferring only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core"},
+                        {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
                   "S_assay_type": {
                      "comment": "An assay type performed by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -1688,7 +1769,7 @@
                   "S_file_format": {
                      "comment": "A file format generated by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
@@ -1697,7 +1778,7 @@
                   "S_data_type": {
                      "comment": "A data type generated by the project.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
@@ -1770,6 +1851,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_anatomy_slim"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease"},
@@ -2145,28 +2227,24 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_core_fact": {
+                     "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_id_namespace_fkey"]},
                         "nid"
                      ]
                   },
                   "S_project": {
-                     "comment": "The project which defined the collection.",
-                     "source": [
-                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
-                        "nid"
-                     ]
-                  },
-                  "S_projects": {
                      "markdown_name": "Project",
                      "comment": "A project which defined the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_project_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_project_project_fkey"]},
                         "nid"
                      ]
                   },
@@ -2174,7 +2252,7 @@
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program which defined the collection.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
@@ -2184,8 +2262,7 @@
                      "markdown_name": "Project",
                      "comment": "A project (or super-project) which defined the collection.",
                      "source": [
-                        {"inbound": ["CFDE", "collection_defined_by_project_collection_fkey"]},
-                        {"outbound": ["CFDE", "collection_defined_by_project_project_fkey"]},
+                        {"sourcekey": "S_project"},
                         {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
                         {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
                         "nid"
@@ -2194,7 +2271,7 @@
                   "S_file_format": {
                      "comment": "The content format of a constituent file.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
@@ -2203,7 +2280,7 @@
                   "S_data_type": {
                      "comment": "The type of data represented by a constituent file.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
@@ -2213,7 +2290,7 @@
                      "markdown_name": "Assay Type",
                      "comment": "The assay type of a directly or indirectly constituent biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
@@ -2223,7 +2300,7 @@
                      "markdown_name": "Taxonomy",
                      "comment": "The taxonomic classification of a subject.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
@@ -2233,7 +2310,7 @@
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of a directly or indirectly constituent subject.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         "nid"
@@ -2243,7 +2320,7 @@
                      "markdown_name": "Subject Role",
                      "comment": "The role of a directly or indirectly constituent subject.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
@@ -2253,7 +2330,7 @@
                      "markdown_name": "Anatomy",
                      "comment": "The anatomical source of a biosample.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         "nid"
@@ -2263,7 +2340,7 @@
                      "markdown_name": "Disease",
                      "comment": "The disease terms qualifying a biosample or subject.",
                      "source": [
-                        {"outbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
@@ -2325,7 +2402,7 @@
                   {"sourcekey": "S_id_namespace"},
                   "local_id",
                   "persistent_id",
-                  {"sourcekey": "S_projects"},
+                  {"sourcekey": "S_project"},
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"},
@@ -2351,24 +2428,6 @@
                   {
                      "markdown_name": "Collection Creation Time",
                      "sourcekey": "S_creation_time"
-                  },
-                  {
-                     "markdown_name": "File Creation Time",
-                     "comment": "The time when a constituent file was created.",
-                     "source": [
-                        {"inbound": ["CFDE", "file_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "file_in_collection_file_fkey"]},
-                        "creation_time"
-                     ]
-                  },
-                  {
-                     "markdown_name": "Biosample Creation Time",
-                     "comment": "The time when a constituent biosample was created.",
-                     "source": [
-                        {"inbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
-                        {"outbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
-                        "creation_time"
-                     ]
                   }
                ]}
             }
@@ -3170,32 +3229,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_biosample": {
-                     "markdown_name": "Biosample",
-                     "comment": "List of biosamples referencing this assay type.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this assay type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this assay type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this assay type.",
+                     "comment": "Cllections referencing this assay type.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this assay type.",
+                     "comment": "Files referencing this assay type.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                      ]
@@ -3207,7 +3279,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3278,31 +3358,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_subject": {
                      "markdown_name": "Subject",
-                     "comment": "List of subjects referencing this taxon.",
+                     "comment": "Subjects referencing this taxon.",
                      "source": [
-                        {"inbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
-                        {"outbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this taxon.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this taxon.",
+                     "comment": "Collections referencing this taxon.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this taxon.",
+                     "comment": "Files referencing this taxon.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                      ]
@@ -3314,7 +3408,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3377,21 +3479,46 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects linked to this disease term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_biosample": {
                      "markdown_name": "Biosample",
-                     "comment": "List of biosamples linked to this disease term.",
+                     "comment": "Biosamples linked to this disease term.",
                      "source": [
-                        {"inbound": ["CFDE", "biosample_disease_disease_fkey"]},
-                        {"outbound": ["CFDE", "biosample_disease_biosample_fkey"]},
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files linked to this anatomical term.",
+                     "comment": "Files linked to this disease term.",
                      "source": [
-                        {"inbound": ["CFDE", "file_disease_disease_fkey"]},
-                        {"outbound": ["CFDE", "file_disease_file_fkey"]},
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections linked to this disease term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   }
@@ -3402,12 +3529,21 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
-                  {"sourcekey": "S_file"}
+                  {"sourcekey": "S_subject"}
                ]
             }
          }
@@ -3466,35 +3602,54 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_biosample": {
-                     "markdown_name": "Biosample",
-                     "comment": "List of biosamples referencing this anatomical term.",
+                  "S_core_fact": {
                      "source": [
+                        {"inbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
                         {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
-                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this anatomical term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ],
+                     "entity": true
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this anatomical term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ],
+                     "entity": true
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this anatomical term.",
+                     "comment": "Collections referencing this anatomical term.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "entity": true
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this anatomical term.",
+                     "comment": "Files referencing this anatomical term.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "entity": true
                   }
                }
             },
@@ -3503,7 +3658,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3566,22 +3729,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_file": {
-                     "markdown_name": "File",
-                     "comment": "List of files referencing this format.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this format.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this format.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files referencing this format.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this format.",
+                     "comment": "Collections referencing this format.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
@@ -3593,7 +3779,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3656,22 +3850,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_file": {
-                     "markdown_name": "File",
-                     "comment": "List of files referencing this data type.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files referencing this data type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this data type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this data type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this format.",
+                     "comment": "Collections referencing this data type.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
@@ -3683,7 +3900,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3741,32 +3966,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_subject": {
-                     "markdown_name": "Subject",
-                     "comment": "List of subjects referencing this subject role.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this subject role.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this subject role.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this subject role.",
+                     "comment": "Collections referencing this subject role.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this subject role.",
+                     "comment": "Files referencing this subject role.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                      ]
@@ -3778,7 +4016,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3836,32 +4082,45 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_subject": {
-                     "markdown_name": "Subject",
-                     "comment": "List of subjects referencing this subject granularity.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this subject granularity.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this subject granularity.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "List of collections referencing this subject granularity.",
+                     "comment": "Collections referencing this subject granularity.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this subject granularity.",
+                     "comment": "Files referencing this subject granularity.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                       ]
@@ -3873,7 +4132,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
@@ -3929,6 +4196,80 @@
             ],
             "missingValues": [ "" ],
             "primaryKey": "nid"
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_id_namespace_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files defined in this ID namespace.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples defined in this ID namespace.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects defined in this ID namespace.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections defined in this ID namespace.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "abbreviation",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]
+            }
          }
       },
       {
@@ -3976,23 +4317,46 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_collection": {
-                     "markdown_name": "Collection",
-                     "comment": "List of collections referencing this MIME type.",
+                  "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_mime_type_mime_type_fkey"]},
                         {"outbound": ["CFDE", "core_fact_mime_type_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections referencing this MIME type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
                   },
                   "S_file": {
                      "markdown_name": "File",
-                     "comment": "List of files referencing this MIME type.",
+                     "comment": "Files referencing this MIME type.",
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_mime_type_mime_type_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_mime_type_core_fact_fkey"]},
+                        {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this MIME type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this MIME type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
                         "nid"
                      ]
                   }
@@ -4003,7 +4367,15 @@
                   "id",
                   "name",
                   "description"
-               ]
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
             },
             "visible_foreign_keys": {
                "*": [
