@@ -5,12 +5,13 @@ import uuid
 import logging
 import json
 import traceback
+import requests
 
-from deriva.core import DerivaServer, get_credential, init_logging
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote, urlunquote
 
 from . import exception
 from .cfde_login import get_archive_headers_map
-from .tableschema import ReleaseConfigurator
+from .tableschema import ReleaseConfigurator, authn_id
 from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, make_session_config
 from .registry import Registry, nochange, terms
 from .submission import Submission
@@ -29,6 +30,13 @@ class Release (object):
 
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
+
+    @classmethod
+    def by_id(cls, server, registry, release_id, archive_headers_map=None):
+        """Construct an instance bound to an existing entry in the registry"""
+        rel_row, dcc_datapackages = registry.get_release(release_id)
+        release = cls(server, registry, rel_row['id'], dcc_datapackages=dcc_datapackages, archive_headers_map=archive_headers_map)
+        return release
 
     def __init__(self, server, registry, id, dcc_datapackages=None, archive_headers_map=None):
         """Represent a stateful processing flow for a C2M2 release.
@@ -120,6 +128,76 @@ class Release (object):
                 diagnostics=str(e),
             )
             raise
+
+    @property
+    def rel_row(self):
+        rel_row, dcc_datapackages = self.registry.get_release(self.release_id)
+        return rel_row
+
+    @property
+    def catalog_id(self):
+        rel_row = self.rel_row
+        if rel_row['ermrest_url'] is None:
+            raise exception.StateError('Catalog %(id)s ermrest_url=%(ermrest_url)r does not have a catalog_id' % rel_row)
+        return urlunquote(rel_row['ermrest_url'].split('/')[-1])
+
+    def publish(self, publish_id='1'):
+        """Adjust ermrest catalog alias to publish this release"""
+        rel_row = self.rel_row
+
+        if rel_row.get('status') not in {
+                terms.cfde_registry_rel_status.content_ready,
+                terms.cfde_registry_rel_status.obsoleted, # allow rollback to prior release
+                terms.cfde_registry_rel_status.public_release, # eventual consistency/idempotence
+        } or rel_row['ermrest_url'] is None:
+            raise exception.StateError('Release %(id)s cannot be published with status=%(status)r ermrest_url=%(ermrest_url)r' % rel_row)
+
+        res = self.server.get('/ermrest/')
+        if not res.json().get('features', {}).get('catalog_alias', False):
+            raise exception.StateError('The server does not support catalog aliasing features!')
+
+        prev_release = None
+        try:
+            # find previous release currently bound to publish_id
+            res = self.server.get('/ermrest/alias/%s' % urlquote(publish_id))
+            aliasdoc = res.json()
+            if aliasdoc.get('alias_target') is not None:
+                # HACK: search release by pattern-match on ermrest_url
+                pattern = '/%s$' % urlquote(aliasdoc['alias_target'])
+                rows = self.registry._catalog.get('/entity/CFDE:release/ermrest_url::regexp::%s' % (urlquote(pattern),)).json()
+                if len(rows) > 1:
+                    raise NotImplementedError('Found more than one release matching ermrest_url ::regexp:: %r:\n%r' % (pattern, rows))
+                logger.info(rows)
+                if rows:
+                    prev_release = Release.by_id(self.server, self.registry, rows[0]['id'])
+                    if prev_release.release_id == self.release_id:
+                        prev_release = None
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == requests.codes.not_found:
+                # maybe we are creating a new publish_id?
+                pass
+            else:
+                raise
+
+        res = self.server.put(
+            '/ermrest/alias/%s' % urlquote(publish_id),
+            json={
+                "id": publish_id,
+                "owner": [
+                    authn_id.cfde_portal_admin,
+                    authn_id.cfde_infrastructure_ops,
+                ],
+                "alias_target": self.catalog_id
+            }
+        )
+        res.raise_for_status()
+        aliasdoc = res.json()
+        self.registry.update_release(self.release_id, status=terms.cfde_registry_rel_status.public_release)
+
+        if prev_release is not None and prev_release.rel_row['status'] == terms.cfde_registry_rel_status.public_release:
+            self.registry.update_release(prev_release.release_id, status=terms.cfde_registry_rel_status.obsoleted)
+
+        return aliasdoc
 
     def build(self):
         """Idempotently run release-build processing lifecycle.
@@ -306,8 +384,10 @@ def main(subcommand, *args):
        - Create new, empty release catalog
     - 'build' release_id
        - Build content based on release definition
-    - 'reconfigure' catalog_id
+    - 'reconfigure' release_id
        - Revise policy/presentation config on existing catalog
+    - 'publish' release_id
+       - Adjust the /ermrest/catalog/1 alias to point to the identified release's catalog
 
     This client uses default DERIVA credentials for server.
 
@@ -348,31 +428,29 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand == 'provision':
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish'}:
         if len(args) < 1:
-            raise TypeError('"provision" requires one positional argument: release_id')
-        rel_id = args[0]
-        release = Release(server, registry, rel_id)
-        rel = release.provision()
-        print('Release %(id)s has catalog %(ermrest_url)s' % rel)
-    elif subcommand == 'build':
-        if len(args) < 1:
-            raise TypeError('"build" requires one positional argument: release_id')
+            raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
         rel_id = args[0]
-        rel_row, dcc_datapackages = registry.get_release(rel_id)
-        release = Release(server, registry, rel_id, dcc_datapackages=dcc_datapackages, archive_headers_map=archive_headers_map)
-        rel = release.build()
-        print('Release %(id)s has been built in %(ermrest_url)s' % rel)
-    elif subcommand == 'reconfigure':
-        if len(args) == 1:
-            catalog_id = args[0]
+        release = Release.by_id(server, registry, rel_id, archive_headers_map=archive_headers_map)
+
+        if subcommand == 'provision':
+            rel_row = release.provision()
+            print('Release %(id)s has catalog %(ermrest_url)r' % rel_row)
+        elif subcommand == 'build':
+            rel_row = release.build()
+            print('Release %(id)s has been built in %(ermrest_url)s' % rel_row)
+        elif subcommand == 'reconfigure':
+            catalog_id = release.catalog_id
             catalog = server.connect_ermrest(catalog_id)
             reprovision = os.getenv('REPROVISION_MODEL', 'false').lower() in {'t', 'y', 'true', 'yes'}
+            Release.configure_release_catalog(registry, catalog, catalog_id, provision=reprovision)
+        elif subcommand == 'publish':
+            aliasdoc = release.publish()
+            print("Publishing alias %(id)r now bound to target %(alias_target)r" % aliasdoc)
         else:
-            raise TypeError('"reconfigure" requires exactly one positional argument: catalog_id')
-
-        Release.configure_release_catalog(registry, catalog, catalog_id, provision=reprovision)
+            assert(False)
     else:
         raise ValueError('unknown sub-command "%s"' % subcommand)
 
