@@ -1484,7 +1484,6 @@
          "name": "dcc_group_role",
          "title": "DCC Group Role",
          "description": "Trinary association linking IDs representing (1) a DCC, (2) a group (a Globus Group registered for use with the submission system), (2) a group role (a coded value for the purpose of a group within the submission system)",
-         "path": "dcc_group_role.tsv",
          "schema": {
             "fields": [
                {
@@ -1571,7 +1570,6 @@
          "name": "dcc_id_namespace_role",
          "title": "DCC Namespace Role",
          "description": "Trinary association linking IDs representing (1) a DCC, (2) an identifier namespace, (2) a namespace role (a coded value for how the namespace is related to the DCC)",
-         "path": "dcc_id_namespace_role.tsv",
          "schema": {
             "fields": [
                {
@@ -1661,7 +1659,6 @@
          "name": "dcc_release_datapackage",
          "title": "DCC Release Datapackage",
          "description": "Trinary association linking IDs representing (1) a DCC, (2) a planned release, (2) a submitted datapackage constituent of the release.",
-         "path": "dcc_release_datapackage.tsv",
          "schema": {
             "fields": [
                {
