@@ -307,11 +307,70 @@ class CfdeDataPackage (object):
                     elif ncolumn.name not in table.columns.elements:
                         cdoc = ncolumn.prejson()
                         cdoc.pop('acl_bindings')
+                        
+                        # HACK: prepare to allow registry upgrades w/ new non-null columns
+                        cdoc_orig = dict(cdoc)
+                        upgrade_data_path = cdoc.get('annotations', {}).get(self.schema_tag, {}).get('schema_upgrade_data_path')
+                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                            cdoc['nullok'] = True
+
                         self.catalog.post(
                             '/schema/%s/table/%s/column' % (urlquote(nschema.name), urlquote(ntable.name)),
                             json=cdoc
                         ).raise_for_status()
                         logger.info("Added column %s.%s.%s" % (nschema.name, ntable.name, ncolumn.name))
+
+                        # apply built-in upgrade data to new column
+                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                            with self.package_filename.get_data_stringio(upgrade_data_path) as upgrade_tsv:
+                                reader = csv.reader(upgrade_tsv, delimiter='\t')
+                                header = next(reader)
+                                # we expect TSV to have key column(s) and then this new target column
+                                if header[-1] != ncolumn.name:
+                                    raise ValueError('New column %s.%s.%s upgrade data final column %r should be %r' % (
+                                        nschema.name, ntable.name, ncolumn.name, header[-1], ncolumn.name,
+                                    ))
+                                for cname in header[0:-1]:
+                                    if cname not in table.column_definitions.elements:
+                                        raise ValueError('Unexpected column %s in new column %s.%s.%s upgrade data' % (
+                                            cname, nschema.name, ntable.name, ncolumn.name,
+                                        ))
+                                # allow upgrade data to include extra rows not present in target catalog
+                                # e.g. for single source to work on dev/staging/prod VPC w/ data variations
+                                def key_exists(row):
+                                    r = self.catalog.get(
+                                        '/entity/%s:%s/%s' % (
+                                            urlquote(nschema.name),
+                                            urlquote(ntable.name),
+                                            '/'.join([ '%s=%s' % (urlquote(cname), urlquote(value)) for cname, value in zip(header[0:-1], row[0:-1]) ]),
+                                        )
+                                    )
+                                    return len(r.json()) > 0
+                                upgrade_data = [
+                                    dict(zip(header, row))
+                                    for row in reader
+                                    if key_exists(row)
+                                ]
+                                self.catalog.put(
+                                    '/attributegroup/%s:%s/%s;%s' % (
+                                        urlquote(nschema.name),
+                                        urlquote(ntable.name),
+                                        ','.join([ urlquote(cname) for cname in header[0:-1] ]),
+                                        urlquote(header[-1]),
+                                    ),
+                                    json=upgrade_data,
+                                )
+                                logger.info("Applied new column %s.%s.%s upgrade data" % (nschema.name, ntable.name, ncolumn.name))
+                                if cdoc_orig.get('nullok', True) is False:
+                                    self.catalog.put(
+                                        '/schema/%s/table/%s/column/%s' % (
+                                            urlquote(nschema.name),
+                                            urlquote(ntable.name),
+                                            urlquote(ncolumn.name),
+                                        ),
+                                        json={'nullok': False},
+                                    )
+                                    logger.info("Altered new column %s.%s.%s to nullok=false" % (nschema.name, ntable.name, ncolumn.name))
                     else:
                         # consider column upgrade
                         column = table.columns[ncolumn.name]

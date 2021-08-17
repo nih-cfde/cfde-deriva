@@ -9,7 +9,6 @@
          "name": "dcc",
          "title": "Onboarded DCC",
          "description": "Each onboarded DCC who may submit datapackages to the CFDE-CC.",
-         "path": "dcc.tsv",
          "schema": {
             "fields": [
                {
@@ -30,6 +29,17 @@
                      "required": true,
                      "unique": true
                   }
+               },
+               {
+                  "name": "dcc_abbreviation",
+                  "title": "Abbreviation",
+                  "description": "A very short display label for this contact's DCC",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  },
+                  "schema_upgrade_data_path": "dcc_abbreviation.tsv"
                },
                {
                   "name": "description",
@@ -119,9 +129,10 @@
                "*": [
                   "id",
                   "dcc_name",
-                  "dcc_url",
+                  "dcc_abbreviation",
                   "contact_name",
                   "contact_email",
+                  "dcc_url",
                   "description"
                ],
                "compact": [
