@@ -223,15 +223,16 @@ class CatalogConfigurator (object):
             "disableDefaultExport": True,
             "navbarMenu": {
                 "children": [
+                    { "name": "My Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Browse All Data",
+                        "name": "Data Brower",
                         "children": [
                             { "name": "Collection", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:collection" },
                             { "name": "File", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file" },
                             { "name": "Biosample", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:biosample" },
                             { "name": "Subject", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject" },
                             { "name": "Project", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:project" },
-                            { "name": "DCC", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
+                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
                             {
                                 "name": "Vocabulary",
                                 "children": [
@@ -242,24 +243,36 @@ class CatalogConfigurator (object):
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
                                     { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
-                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity"  },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
                                 ]
                             },
-                            { "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
+                            {
+                                "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
                         ]
                     },
-                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
-                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/"},
-                    { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Data Review",
-                        "url": "/chaise/recordset/#registry/CFDE:datapackage",
-                        "acls": {
-                            "enable": self.get_review_acl(),
-                        }
+                        "name": "For Submitters",
+                        "children": [
+                            { "name": "QuickStart Guide", "markdownName": ":span:QuickStart Guide:/span:{.external-link-icon}", "url": "" },
+                            { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "" },
+                            { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "" },
+                            {
+                                "name": "My Submissions",
+                                "url": "/chaise/recordset/#registry/CFDE:datapackage",
+                                "acls": {
+                                    "enable": self.get_review_acl(),
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "User Help",
+                        "children": [
+                            { "name": "Portal User Guide", "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
+                            { "name": "Cohort Building Tutorial", "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}", "url": "" },
+                            { "name": "About the CFDE", "markdownName": ":span:About the CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/" }
+                        ]
                     }
                 ]
             }
@@ -396,9 +409,9 @@ class ReviewConfigurator (CatalogConfigurator):
         datapackage = self.registry.get_datapackage(self.submission_id)
         dcc = self.registry.get_dcc(datapackage['submitting_dcc'])[0]
 
-        def registry_record_page(tname, rid=None):
+        def registry_chaise_app_page(tname, appname, rid=None):
             url = self.registry._catalog.get_server_uri()
-            url= url.replace('/ermrest/catalog/', '/chaise/record/#')
+            url= url.replace('/ermrest/catalog/', '/chaise/' + appname + '/#')
             if url[-1] != '/':
                 url += '/'
             url += 'CFDE:%s' % (tname,)
@@ -413,24 +426,32 @@ class ReviewConfigurator (CatalogConfigurator):
             },
         })
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
-            "name": "In-Review Submission",
+            "name": "Review Options",
             "acls": {
                 "enable": self.get_review_acl(),
             },
             "children": [
                 {
-                    "name": "Content Summary Charts",
+                    # header, not linkable
+                    "name": "Submission %s" % datapackage['id']
+                },
+                {
+                    "name": "View Summary Page",
                     # we need to fake this since we configure before the review_summary_url is populated
                     "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
                 },
                 {
-                    "name": "Submission %s" % datapackage['id'],
-                    "url": registry_record_page('datapackage', datapackage['RID']),
+                    "name": "Browse This Datapackage",
+                    "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
                 },
                 {
-                    "name": dcc["dcc_name"],
-                    "url": registry_record_page('dcc', dcc['RID']),
+                    "name": "Approve This Datapackage",
+                    "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
                 },
+                {
+                    "name": "View My Submissions",
+                    "url": "/chaise/recordset/#registry/CFDE:datapackage"
+                }
             ]
         })
 
