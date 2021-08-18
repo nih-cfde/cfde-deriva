@@ -247,8 +247,7 @@ class CatalogConfigurator (object):
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
                                 ]
                             },
-                            {
-                                "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
+                            { "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
                         ]
                     },
                     {
@@ -258,7 +257,7 @@ class CatalogConfigurator (object):
                             { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "" },
                             { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "" },
                             {
-                                "name": "My Submissions",
+                                "name": "List All Submissions",
                                 "url": "/chaise/recordset/#registry/CFDE:datapackage",
                                 "acls": {
                                     "enable": self.get_review_acl(),
@@ -429,25 +428,27 @@ class ReviewConfigurator (CatalogConfigurator):
             "children": [
                 {
                     # header, not linkable
-                    "name": "Submission %s" % datapackage['id']
+                    "name": "Submission %s" % datapackage['id'],
+                    "children": [
+                        {
+                            "name": "View Datapackage Charts",
+                            # we need to fake this since we configure before the review_summary_url is populated
+                            "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
+                        },
+                        {
+                            "name": "Browse Datapackage Content",
+                            "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
+                        },
+                        {
+                            "name": "Approve Datapackage Content",
+                            "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
+                        },
+                    ]
                 },
                 {
-                    "name": "View Summary Page",
-                    # we need to fake this since we configure before the review_summary_url is populated
-                    "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
-                },
-                {
-                    "name": "Browse This Datapackage",
-                    "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
-                },
-                {
-                    "name": "Approve This Datapackage",
-                    "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
-                },
-                {
-                    "name": "View My Submissions",
+                    "name": "List All Submissions",
                     "url": "/chaise/recordset/#registry/CFDE:datapackage"
-                }
+                },
             ]
         })
 
