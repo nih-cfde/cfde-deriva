@@ -416,7 +416,7 @@ class ReviewConfigurator (CatalogConfigurator):
             return url
 
         model.annotations[tag.chaise_config]['navbarMenu']['children'][1].update({
-            "name": "Review Data Browser",
+            "name": "Submitted Data Browser",
             "acls": {
                 "enable": self.get_review_acl(),
             },
