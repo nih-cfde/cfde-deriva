@@ -225,7 +225,7 @@ class CatalogConfigurator (object):
                 "children": [
                     { "name": "My Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Data Brower",
+                        "name": "Data Browser",
                         "children": [
                             { "name": "Collection", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:collection" },
                             { "name": "File", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file" },
@@ -401,10 +401,6 @@ class ReviewConfigurator (CatalogConfigurator):
         """Apply custom chaise config for review content by adjusting the standard config"""
         super(ReviewConfigurator, self).apply_chaise_config(model)
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
-
         # add custom navbar info
         datapackage = self.registry.get_datapackage(self.submission_id)
         dcc = self.registry.get_dcc(datapackage['submitting_dcc'])[0]
@@ -419,8 +415,8 @@ class ReviewConfigurator (CatalogConfigurator):
                 url += '/RID=%s' % (rid,)
             return url
 
-        model.annotations[tag.chaise_config]['navbarMenu']['children'][0].update({
-            "name": "Browse Submitted Data",
+        model.annotations[tag.chaise_config]['navbarMenu']['children'][1].update({
+            "name": "Review Data Browser",
             "acls": {
                 "enable": self.get_review_acl(),
             },
@@ -504,10 +500,6 @@ class RegistryConfigurator (CatalogConfigurator):
         # custom config for submission listings
         model.annotations[tag.chaise_config]['maxRecordsetRowHeight'] = 350
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
-
         # fixup incorrectly generated "Browse All Data" links
         def fixup(*entries):
             for entry in entries:
@@ -516,7 +508,7 @@ class RegistryConfigurator (CatalogConfigurator):
                 elif 'children' in entry:
                     fixup(*entry['children'])
 
-        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][0])
+        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][1])
 
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "Submission System",
