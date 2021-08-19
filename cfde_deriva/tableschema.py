@@ -393,8 +393,20 @@ class ReviewConfigurator (CatalogConfigurator):
         return acls
 
     def get_review_acl(self):
-        # restrict navbar ACL to match our content
+        # restrict navbar ACL to match our content/user
         return self.schema_acls["CFDE"]["select"]
+
+    def get_approval_acl(self):
+        # restrict navbar ACL to those who can edit approval status
+        acl = {authn_id.cfde_portal_admin, authn_id.cfde_portal_curator }
+        if self.registry is not None and self.submission_id is not None:
+            metadata = self.registry.get_datapackage(self.submission_id)
+            acl = acl.union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.review_decider)
+            ).union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.admin)
+            )
+        return sorted(acl)
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for review content by adjusting the standard config"""
@@ -442,6 +454,7 @@ class ReviewConfigurator (CatalogConfigurator):
                         },
                         {
                             "name": "Approve Datapackage Content (requires approver status)",
+                            "acl": self.get_approval_acl(),
                             "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
                         },
                     ]
