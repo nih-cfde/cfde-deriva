@@ -303,10 +303,16 @@
                   ]
                }
             },
+            "display": {
+               "show_saved_query": true
+            },
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "table_display": {
                "row_name": {
-                  "wait-for": ["persistent_id", "local_id"],
-                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{local_id}}{{/persistent_id}}"
+                  "wait-for": ["persistent_id", "id"],
+                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
                }
             },
             "source_definitions": {
@@ -486,6 +492,7 @@
                ]
             },
             "visible_columns": {
+               "export": [],
                "compact": [
                   {
                      "sourcekey": "S_dcc",
@@ -793,9 +800,16 @@
                   ]
                }
             },
+            "display": {
+               "show_saved_query": true
+            },
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
+                  "wait-for": ["persistent_id", "id"],
+                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
                }
             },
             "source_definitions": {
@@ -956,6 +970,7 @@
                ]
             },
             "visible_columns": {
+               "export": [],
                "compact": [
                   {
                      "sourcekey": "S_dcc",
@@ -1199,10 +1214,17 @@
                      }
                   ]
                }
-             },
+            },
+            "display": {
+               "show_saved_query": true
+            },
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
+                  "wait-for": ["persistent_id", "id"],
+                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
                }
             },
             "source_definitions": {
@@ -1395,6 +1417,7 @@
                ]
             },
             "visible_columns": {
+               "export": [],
                "compact": [
                   {
                      "sourcekey": "S_dcc",
@@ -1553,6 +1576,18 @@
             ]
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_dcc",
+                     "favorited_key_columns": ["dcc"],
+                     "user_id_column": "user_id"
+                  }
+               }
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{{dcc_abbreviation}}}: {{{dcc_name}}}"
@@ -1678,6 +1713,9 @@
             ]
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": false,
@@ -2249,9 +2287,16 @@
                   ]
                }
             },
+            "display": {
+               "show_saved_query": true
+            },
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "table_display": {
                "row_name": {
-                  "row_markdown_pattern": "{{_id_namespace}}{{_local_id}}"
+                  "wait-for": ["persistent_id", "id"],
+                  "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
                }
             },
             "source_definitions": {
@@ -2416,6 +2461,7 @@
                ]
             },
             "visible_columns": {
+               "export": [],
                "compact": [
                   {
                      "sourcekey": "S_dcc",
@@ -3256,6 +3302,18 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_assay_type",
+                     "favorited_key_columns": ["assay_type"],
+                     "user_id_column": "user_id"
+                  }
+               }
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3385,6 +3443,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3506,6 +3567,9 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3629,6 +3693,18 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_anatomy",
+                     "favorited_key_columns": ["anatomy"],
+                     "user_id_column": "user_id"
+                  }
+               }
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3756,6 +3832,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3877,6 +3956,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -3993,6 +4075,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -4109,6 +4194,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -4229,6 +4317,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
@@ -4344,6 +4435,9 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
             "source_definitions": {
                "columns": true,
                "fkeys": true,

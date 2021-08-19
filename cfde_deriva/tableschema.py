@@ -21,6 +21,9 @@ if 'source_definitions' not in tag:
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
+if 'table_config' not in tag:
+    tag['table_config'] = 'tag:isrd.isi.edu,2021:table-config'
+
 # some useful authentication IDs to use in preparing ACLs...
 authn_id = AttrDict({
     # CFDE roles
@@ -221,6 +224,18 @@ class CatalogConfigurator (object):
             "SystemColumnsDisplayCompact": [],
             "SystemColumnsDisplayDetailed": [],
             "disableDefaultExport": True,
+            "savedQueryConfig": {
+                "storageTable": {
+                    "catalog": "registry",
+                    "schema": "CFDE",
+                    "table": "saved_query"
+                }
+            },
+            "termsAndConditionsConfig": {
+                "groupId": "https://auth.globus.org/96a2546e-fa0f-11eb-be15-b7f12332d0e5",
+                "joinUrl": "https://app.globus.org/groups/96a2546e-fa0f-11eb-be15-b7f12332d0e5/join",
+                "groupName": "NIH CFDE Portal Members"
+            },
             "navbarMenu": {
                 "children": [
                     { "name": "My Dashboard", "url": "/dashboard.html" },
@@ -514,6 +529,9 @@ class RegistryConfigurator (CatalogConfigurator):
 
         # custom config for submission listings
         model.annotations[tag.chaise_config]['maxRecordsetRowHeight'] = 350
+
+        # we only want to use our savedQueryConfig for release + review catalogs w/ C2M2 portal model
+        model.annotations[tag.chaise_config]["savedQueryConfig"] = False
 
         # fixup incorrectly generated "Browse All Data" links
         def fixup(*entries):
