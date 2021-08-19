@@ -223,15 +223,16 @@ class CatalogConfigurator (object):
             "disableDefaultExport": True,
             "navbarMenu": {
                 "children": [
+                    { "name": "My Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Browse All Data",
+                        "name": "Data Browser",
                         "children": [
                             { "name": "Collection", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:collection" },
                             { "name": "File", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file" },
                             { "name": "Biosample", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:biosample" },
                             { "name": "Subject", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject" },
                             { "name": "Project", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:project" },
-                            { "name": "DCC", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
+                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
                             {
                                 "name": "Vocabulary",
                                 "children": [
@@ -242,24 +243,35 @@ class CatalogConfigurator (object):
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
                                     { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
-                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity"  },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
                                 ]
                             },
                             { "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
                         ]
                     },
-                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
-                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/"},
-                    { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Data Review",
-                        "url": "/chaise/recordset/#registry/CFDE:datapackage",
-                        "acls": {
-                            "enable": self.get_review_acl(),
-                        }
+                        "name": "For Submitters",
+                        "children": [
+                            { "name": "QuickStart Guide", "markdownName": ":span:QuickStart Guide:/span:{.external-link-icon}", "url": "https://github.com/nih-cfde/published-documentation/wiki/Quickstart" },
+                            { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/cfde-submit/docs/index.html" },
+                            { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/c2m2/draft-C2M2_specification/index.html" },
+                            {
+                                "name": "List All Submissions (requires login)",
+                                "url": "/chaise/recordset/#registry/CFDE:datapackage",
+                                "acls": {
+                                    "enable": self.get_review_acl(),
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "User Help",
+                        "children": [
+                            { "name": "Portal User Guide", "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
+                            { "name": "Cohort Building Tutorial", "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}", "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/" },
+                            { "name": "About the CFDE", "markdownName": ":span:About the CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/" }
+                        ]
                     }
                 ]
             }
@@ -381,24 +393,32 @@ class ReviewConfigurator (CatalogConfigurator):
         return acls
 
     def get_review_acl(self):
-        # restrict navbar ACL to match our content
+        # restrict navbar ACL to match our content/user
         return self.schema_acls["CFDE"]["select"]
+
+    def get_approval_acl(self):
+        # restrict navbar ACL to those who can edit approval status
+        acl = {authn_id.cfde_portal_admin, authn_id.cfde_portal_curator }
+        if self.registry is not None and self.submission_id is not None:
+            metadata = self.registry.get_datapackage(self.submission_id)
+            acl = acl.union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.review_decider)
+            ).union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.admin)
+            )
+        return sorted(acl)
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for review content by adjusting the standard config"""
         super(ReviewConfigurator, self).apply_chaise_config(model)
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
-
         # add custom navbar info
         datapackage = self.registry.get_datapackage(self.submission_id)
         dcc = self.registry.get_dcc(datapackage['submitting_dcc'])[0]
 
-        def registry_record_page(tname, rid=None):
+        def registry_chaise_app_page(tname, appname, rid=None):
             url = self.registry._catalog.get_server_uri()
-            url= url.replace('/ermrest/catalog/', '/chaise/record/#')
+            url= url.replace('/ermrest/catalog/', '/chaise/' + appname + '/#')
             if url[-1] != '/':
                 url += '/'
             url += 'CFDE:%s' % (tname,)
@@ -406,30 +426,42 @@ class ReviewConfigurator (CatalogConfigurator):
                 url += '/RID=%s' % (rid,)
             return url
 
-        model.annotations[tag.chaise_config]['navbarMenu']['children'][0].update({
-            "name": "Browse Submitted Data",
+        model.annotations[tag.chaise_config]['navbarMenu']['children'][1].update({
+            "name": "Submitted Data Browser",
             "acls": {
                 "enable": self.get_review_acl(),
             },
         })
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
-            "name": "In-Review Submission",
+            "name": "Review Options",
             "acls": {
                 "enable": self.get_review_acl(),
             },
             "children": [
                 {
-                    "name": "Content Summary Charts",
-                    # we need to fake this since we configure before the review_summary_url is populated
-                    "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
+                    # header, not linkable
+                    #"name": "Submission %s" % datapackage['id'],
+                    "name": "For This Submission",
+                    "children": [
+                        {
+                            "name": "View Datapackage Charts",
+                            # we need to fake this since we configure before the review_summary_url is populated
+                            "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
+                        },
+                        {
+                            "name": "Browse Datapackage Content",
+                            "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
+                        },
+                        {
+                            "name": "Approve Datapackage Content (requires approver status)",
+                            "acl": self.get_approval_acl(),
+                            "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
+                        },
+                    ]
                 },
                 {
-                    "name": "Submission %s" % datapackage['id'],
-                    "url": registry_record_page('datapackage', datapackage['RID']),
-                },
-                {
-                    "name": dcc["dcc_name"],
-                    "url": registry_record_page('dcc', dcc['RID']),
+                    "name": "List All Submissions",
+                    "url": "/chaise/recordset/#registry/CFDE:datapackage"
                 },
             ]
         })
@@ -483,10 +515,6 @@ class RegistryConfigurator (CatalogConfigurator):
         # custom config for submission listings
         model.annotations[tag.chaise_config]['maxRecordsetRowHeight'] = 350
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
-
         # fixup incorrectly generated "Browse All Data" links
         def fixup(*entries):
             for entry in entries:
@@ -495,7 +523,7 @@ class RegistryConfigurator (CatalogConfigurator):
                 elif 'children' in entry:
                     fixup(*entry['children'])
 
-        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][0])
+        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][1])
 
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "Submission System",
