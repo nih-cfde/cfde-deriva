@@ -428,7 +428,8 @@ class ReviewConfigurator (CatalogConfigurator):
             "children": [
                 {
                     # header, not linkable
-                    "name": "Submission %s" % datapackage['id'],
+                    #"name": "Submission %s" % datapackage['id'],
+                    "name": "For This Submission",
                     "children": [
                         {
                             "name": "View Datapackage Charts",
