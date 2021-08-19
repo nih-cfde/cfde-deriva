@@ -258,7 +258,7 @@ class CatalogConfigurator (object):
                             { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "" },
                             { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "" },
                             {
-                                "name": "My Submissions",
+                                "name": "My Submissions (requires login)",
                                 "url": "/chaise/recordset/#registry/CFDE:datapackage",
                                 "acls": {
                                     "enable": self.get_review_acl(),
@@ -445,7 +445,7 @@ class ReviewConfigurator (CatalogConfigurator):
                     "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
                 },
                 {
-                    "name": "Approve This Datapackage",
+                    "name": "Approve This Datapackage (requires approver status)",
                     "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
                 },
                 {
