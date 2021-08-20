@@ -3439,14 +3439,7 @@
                   "last_execution_time"
                ],
                "compact/select": [
-                  {
-                     "markdown_name": "Query Name",
-                     "display": {
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#{{{$catalog.id}}}/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
-                     }
-                  },
-                  "table_name",
+                  "name",
                   "description",
                   "last_execution_time"
                ],
