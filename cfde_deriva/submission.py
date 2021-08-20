@@ -19,11 +19,14 @@ from glob import glob
 from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
-from deriva.core import DerivaServer, get_credential, init_logging
+
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, portal_schema_json, make_session_config
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, sql_literal, sql_identifier, make_session_config
+from .cfde_login import get_archive_headers_map
+
 
 logger = logging.getLogger(__name__)
 
@@ -131,8 +134,14 @@ class Submission (object):
         # check filesystem config early to abort ASAP on errors
         # TBD: check permissions for safe service config?
         os.makedirs(os.path.dirname(self.download_filename), exist_ok=True)
-        os.makedirs(os.path.dirname(self.sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.ingest_sqlite_filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.portal_prep_sqlite_filename), exist_ok=True)
         os.makedirs(os.path.dirname(self.content_path), exist_ok=True)
+
+    def dump_progress(self, progress):
+        with open(self.restart_marker_filename, 'w') as f:
+            json.dump(progress, f, indent=2)
+        logger.info("Dumped restart marker file %s" % self.restart_marker_filename)
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -170,6 +179,14 @@ class Submission (object):
         except Exception as e:
             logger.error('Got exception %s when registering datapackage %s, aborting!' % (e, self.datapackage_id,))
             raise exception.RegistrationError(e)
+
+        try:
+            os.makedirs(os.path.dirname(self.restart_marker_filename), exist_ok=True)
+            with open(self.restart_marker_filename, 'r') as f:
+                progress = json.load(f)
+            logger.info("Loaded restart marker file %s" % self.restart_marker_filename)
+        except:
+            progress = dict()
 
         # general sequence (with many idempotent steps)
         failed = True
@@ -271,7 +288,7 @@ class Submission (object):
 
             def dpt_error2(name, path, diagnostics):
                 try:
-                    pos = self.rname_to_pos[name],
+                    pos = self.rname_to_pos[name]
                     self.registry.update_datapackage_table(
                         self.datapackage_id,
                         pos,
@@ -289,17 +306,27 @@ class Submission (object):
                 self.datapackage_validate(self.content_path, post_process=dpt_update1, check_fkeys=False, check_keys=False)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.provision_sqlite(self.content_path, self.sqlite_filename)
+            self.provision_sqlite(submission_schema_json, self.ingest_sqlite_filename)
+            self.provision_sqlite(portal_prep_schema_json, self.portal_prep_sqlite_filename)
             if self.review_catalog is None:
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.load_sqlite(self.content_path, self.sqlite_filename, table_error_callback=dpt_error2)
+            self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
+            self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.prepare_sqlite_derived_data(self.sqlite_filename)
-            self.upload_sqlite_content(self.review_catalog, self.sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
+            self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
+            self.prepare_sqlite_derived_data(portal_prep_schema_json, self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
+            self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
+
+            # this needs project_root from prepare_sqlite_derived_data...
+            next_error_state = terms.cfde_registry_dp_status.content_error
+            self.validate_submission_dcc_table(self.portal_prep_sqlite_filename, self.submitting_dcc_id)
+
+            next_error_state = terms.cfde_registry_dp_status.ops_error
+            self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
@@ -379,18 +406,36 @@ class Submission (object):
         return '%s/unpacked/%s' % (self.content_path_root, self.datapackage_id)
 
     @property
-    def sqlite_filename(self):
-        """Return sqlite_filename scratch C2M2 DB target name for given submssion id.
+    def ingest_sqlite_filename(self):
+        """Return ingest_sqlite_filename scratch C2M2 DB target name for given submssion id.
 
         We use a deterministic mapping of submission id to
-        sqlite_filename so that we can do reentrant processing.
+        ingest_sqlite_filename so that we can do reentrant processing.
 
         """
         # TBD: check or remap id character range?
         # naive mapping should be OK for UUIDs...
-        return '%s/databases/%s.sqlite3' % (self.content_path_root, self.datapackage_id)
+        return '%s/databases/%s_submission.sqlite3' % (self.content_path_root, self.datapackage_id)
+
+    @property
+    def portal_prep_sqlite_filename(self):
+        """Return portal_prep_sqlite_filename scratch C2M2 DB target name for given submssion id.
+
+        We use a deterministic mapping of submission id to
+        portal_prep_sqlite_filename so that we can do reentrant processing.
+
+        """
+        # TBD: check or remap id character range?
+        # naive mapping should be OK for UUIDs...
+        return '%s/databases/%s_portal_prep.sqlite3' % (self.content_path_root, self.datapackage_id)
 
     ## utility functions to help with various processing and validation tasks
+
+    @property
+    def restart_marker_filename(self):
+        """Return restart_marker JSON file name for given submission id.
+        """
+        return '%s/progress/%s.json' % (self.content_path_root, self.datapackage_id)
 
     @classmethod
     def report_external_ops_error(cls, registry, id, diagnostics=None, status=terms.cfde_registry_dp_status.ops_error):
@@ -582,7 +627,7 @@ class Submission (object):
         introduce any undesired deviations in the model definition.
 
         """
-        canon_dp = CfdeDataPackage(portal_schema_json)
+        canon_dp = CfdeDataPackage(submission_schema_json)
         packagefile = cls.datapackage_name_from_path(content_path)
         if pre_process:
             pre_process(content_path, packagefile)
@@ -603,7 +648,10 @@ class Submission (object):
         specification.
         """
         packagefile = cls.datapackage_name_from_path(content_path)
-        logger.debug('Validating frictionless datapackage at "%s"' % packagefile)
+        if os.getenv('CFDE_SKIP_FRICTIONLESS', 'false').lower() == 'true':
+            logger.info('SKIPPING validation of frictionless datapackage at "%s" due to CFDE_SKIP_FRICTIONLESS environment variable!' % packagefile)
+            return
+        logger.info('Validating frictionless datapackage at "%s"' % packagefile)
 
         package = frictionless.Package(packagefile, trusted=False)
         for resource in package.resources:
@@ -613,6 +661,17 @@ class Submission (object):
                 resource.schema.pop('primaryKey', None)
                 for field in resource.schema.fields:
                     field.constraints.pop('unique', None)
+            # frictionless-py 4.14.0 doesn't like if we skip the CSV dialect...
+            resource.setdefault(
+                'dialect',
+                {
+                    "delimiter": "\t",
+                    "doubleQuote": False,
+                    "lineTerminator": "\n",
+                    "skipInitialSpace": True,
+                    "header": True
+                },
+            )
 
         report = frictionless.validate_package(package, trusted=False, original=True, parallel=False)
         if post_process:
@@ -628,16 +687,17 @@ class Submission (object):
                     os.path.basename(packagefile),
                     message,
             ))
+        logger.info('Frictionless package valid.')
 
     @classmethod
-    def provision_sqlite(cls, content_path, sqlite_filename):
-        """Idempotently prepare sqlite database containing portal model and base vocab."""
-        canon_dp = CfdeDataPackage(portal_schema_json)
+    def provision_sqlite(cls, schema_json, sqlite_filename):
+        """Idempotently prepare sqlite database, with givem model and base vocab."""
+        dp = CfdeDataPackage(schema_json)
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently provisioning schema in %s' % (sqlite_filename,))
-            canon_dp.provision_sqlite(conn)
-            canon_dp.sqlite_import_data_files(conn, onconflict='skip')
+            dp.provision_sqlite(conn)
+            dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
     def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None):
@@ -652,8 +712,79 @@ class Submission (object):
             submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
-    def prepare_sqlite_derived_data(cls, sqlite_filename, progress=None):
-        """Prepare derived content via SQL queries in the C2M2 portal model.
+    def sqlite_datapackage_check(cls, schema_json, content_path, sqlite_filename, table_error_callback=None, tablenames=None, progress=None):
+        canonical_dp = CfdeDataPackage(schema_json)
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Checking database %s for submission %r against schema %r constraints' % (sqlite_filename, content_path, schema_json))
+            canonical_dp.check_sqlite_tables(conn, submitted_dp, table_error_callback, tablenames, progress)
+
+    @classmethod
+    def transitional_etl_dcc_table(cls, content_path, sqlite_filename, submitting_dcc):
+        """Apply transitional ETL if needed to prepare dcc table"""
+        packagefile = cls.datapackage_name_from_path(content_path)
+        submitted_dp = CfdeDataPackage(packagefile)
+        # this with block produces a transaction in sqlite3
+        with sqlite3.connect(sqlite_filename) as conn:
+            cur = conn.cursor()
+            if 'primary_dcc_contact' in submitted_dp.doc_cfde_schema.tables:
+                if 'dcc' in submitted_dp.doc_cfde_schema.tables:
+                    raise exception.InvalidDatapackage('Submission mixes C2M2 dcc and legacy primary_dcc_contact tables')
+                logger.info('Translating legacy primary_dcc_contact into dcc table...')
+                cur.execute("""
+INSERT INTO dcc (id, dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id)
+SELECT
+  %(dcc_id)s,
+  dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+FROM (
+  SELECT
+    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+  FROM primary_dcc_contact
+  EXCEPT
+  SELECT
+    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
+   FROM dcc
+) s;
+""" % {
+    'dcc_id': sql_literal(submitting_dcc)
+})
+                logger.info('Deleting legacy primary_dcc_contact records...')
+                cur.execute("""DELETE FROM primary_dcc_contact;""")
+
+    @classmethod
+    def validate_submission_dcc_table(cls, sqlite_filename, submitting_dcc):
+        """Validate that the dcc table in sqlite has exactly one row matching the submitting_dcc"""
+        with sqlite3.connect(sqlite_filename) as conn:
+            cur = conn.cursor()
+            cur.execute("""SELECT count(*) FROM dcc;""")
+            cnt = cur.fetchone()[0]
+            if cnt != 1:
+                raise exception.InvalidDatapackage('The CFDE submission must have one entry in the dcc table, not %d.' % cnt)
+            cur.execute("""SELECT id FROM dcc;""")
+            dcc_id = cur.fetchone()[0]
+            if dcc_id != submitting_dcc:
+                raise exception.InvalidDatapackage('Submission dcc.id = %s does not match submitting DCC %s' % (dcc_id, submitting_dcc,))
+            cur.execute("""
+SELECT
+  i.id,
+  p.local_id,
+  pr.nid IS NOT NULL AS is_project_root
+FROM dcc d
+JOIN project p ON (d.project = p.nid)
+JOIN id_namespace i ON (p.id_namespace = i.nid)
+LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
+""")
+            id_namespace, local_id, is_root = cur.fetchone()
+            if not is_root:
+                raise exception.InvalidDatapackage('DCC project identifier (%s, %s) does not designate a root in the project hierarchy' % (
+                    id_namespace,
+                    local_id
+                ))
+
+    @classmethod
+    def prepare_sqlite_derived_data(cls, schema_json, sqlite_filename, progress=None, attach={}):
+        """Prepare derived content via embedded SQL ETL 
 
         This method will clear and recompute the derived results
         each time it is invoked.
@@ -661,11 +792,86 @@ class Submission (object):
         """
         if progress is None:
             progress = dict()
-        canon_dp = CfdeDataPackage(portal_schema_json)
+        dp = CfdeDataPackage(schema_json)
+
+        def json_sorted(j):
+            if j is None:
+                return None
+            try:
+                v = json.loads(j)
+            except Exception as e:
+                logger.error('json_sorted(%r) JSON decode failed: %s' % (j, e))
+                raise
+            if not isinstance(v, list):
+                logger.error('json_sorted unexpected input %r' % (j,))
+                raise ValueError(j)
+            try:
+                v = json.dumps(sorted(v, key=lambda x: (-1 if x is None else x)), separators=(',',':'))
+                return v
+            except Exception as e:
+                logger.error('json_sorted(%r) JSON encode failed: %s' % (j, e))
+                raise
+
+        def cfde_keywords_set(*strings):
+            """Downcase and split strings into tokens, remove common junk tokens, merge into set."""
+            kw = set()
+            for s in strings:
+                if s is None:
+                    continue
+                kw.update([s.strip('-.,;:()"[]') for s in re.split('\s|[/.,;()[\]"_]', s.lower())])
+            kw.difference_update({'', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on', 'or', 'and', 'is', 'by', 'not', 'from', 'are'})
+            return kw
+
+        def cfde_keywords(*strings):
+            """Downcase and split strings into tokens, remove common junk tokens, merge into sorted JSON array."""
+            kw = cfde_keywords_set(*strings)
+            return json.dumps(sorted(kw), separators=(',',':'))
+
+        def cfde_keywords_merge_set(*arrays):
+            """Merge JSON arrays of keywords into one set."""
+            kw = set()
+            for a in arrays:
+                if a is None:
+                    continue
+                kw.update(json.loads(a))
+            kw.difference_update({None,})
+            return kw
+
+        def cfde_keywords_merge(*arrays):
+            """Merge JSON arrays of keywords into one sorted JSON array."""
+            kw = cfde_keywords_merge_set(*arrays)
+            return json.dumps(sorted(kw), separators=(',',':'))
+
+        class cfde_keywords_agg(object):
+            """Like cfde_keywords() but merge each call in aggregate"""
+            def __init__(self):
+                self.kw = set()
+            def step(self, *strings):
+                self.kw.update(cfde_keywords_set(*strings))
+            def finalize(self):
+                return json.dumps(sorted(self.kw), separators=(',',':'))
+
+        class cfde_keywords_merge_agg(object):
+            """Like cfde_keywords_merge() but merge each call in aggregate"""
+            def __init__(self):
+                self.kw = set()
+            def step(self, *arrays):
+                self.kw.update(cfde_keywords_merge_set(*arrays))
+            def finalize(self):
+                return json.dumps(sorted(self.kw), separators=(',',':'))
+
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
-            canon_dp.sqlite_do_etl(conn, progress=progress)
+            for dbname, dbfilename in attach.items():
+                conn.execute("ATTACH DATABASE %s AS %s;" % (sql_literal(dbfilename), sql_identifier(dbname)))
+            conn.create_function('json_sorted', 1, json_sorted)
+            conn.create_function('cfde_keywords', -1, cfde_keywords)
+            conn.create_function('cfde_keywords_merge', -1, cfde_keywords_merge)
+            conn.create_aggregate('cfde_keywords_agg', -1, cfde_keywords_agg)
+            conn.create_aggregate('cfde_keywords_merge_agg', -1, cfde_keywords_merge_agg)
+            conn.set_trace_callback(logger.debug)
+            dp.sqlite_do_etl(conn, progress=progress)
 
     @classmethod
     def extract_catalog_id(cls, server, catalog_url):
@@ -734,6 +940,85 @@ class Submission (object):
             canon_dp.set_catalog(catalog)
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
+    @classmethod
+    def record_vocab_usage(cls, registry, portal_prep_filename, id):
+        """Upload vocabulary information to registry.
+
+        :param registry: The Registry instance for the submission system
+        :param portal_prep_filename: The sqlite3 file for the loaded and ETL'd submission content.
+        :param id: The submission id.
+        """
+        def get_batches(cur):
+            batch = cur.fetchmany()
+            while batch:
+                yield batch
+                batch = cur.fetchmany()
+
+        catalog = registry._catalog
+        # HACK: use portal schema to load same tables that exist in registry
+        canon_dp = CfdeDataPackage(portal_schema_json)
+        canon_dp.set_catalog(catalog)
+
+        with sqlite3.connect(portal_prep_filename) as conn:
+            logger.info('Augmenting registry vocabulary tables...')
+            canon_dp.load_sqlite_tables(
+                conn,
+                onconflict='skip',
+                tablenames={
+                    'anatomy',
+                    'assay_type',
+                    'data_type',
+                    'disease',
+                    'file_format',
+                    'mime_type',
+                    'ncbi_taxonomy',
+                    # don't need to update subject_role/subject_granularity which are closed enums for the DCCs...
+                }
+            )
+            logger.info('Recording submission vocabulary usage in registry...')
+            cur = conn.cursor()
+            cur.arraysize = CfdeDataPackage.batch_size
+            for src_sql, dst_tname, dst_cname in [
+                    ('SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN anatomy v ON (cf.anatomy = v.nid)',
+                     'datapackage_anatomy', 'anatomy'),
+                    ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)
+                    UNION SELECT v.id FROM file e      JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)""",
+                     'datapackage_assay_type', 'assay_type'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN data_type v ON (cf.data_type = v.nid)',
+                     'datapackage_data_type', 'data_type'),
+                    ("""  SELECT v.id FROM subject_disease a   JOIN disease v ON (a.disease = v.nid)
+                    UNION SELECT v.id FROM biosample_disease a JOIN disease v ON (a.disease = v.nid)""",
+                     'datapackage_disease', 'disease'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)',
+                     'datapackage_file_format', 'file_format'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN mime_type v ON (cf.mime_type = v.nid)',
+                     'datapackage_mime_type', 'mime_type'),
+                    ('SELECT v.id FROM subject_role_taxonomy a JOIN ncbi_taxonomy v ON (a.taxon = v.nid)',
+                     'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
+                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN subject_granularity v ON (cf.subject_granularity = v.nid)',
+                     'datapackage_subject_granularity', 'subject_granularity'),
+                    ('SELECT v.id FROM subject_role_taxonomy a JOIN subject_role v ON (a.role = v.nid)',
+                     'datapackage_subject_role', 'subject_role'),
+            ]:
+                try:
+                    cur.execute("""
+SELECT DISTINCT id FROM (%(src_sql)s) s
+WHERE id IS NOT NULL
+""" % {
+    "src_sql": src_sql,
+})
+                    for batch in get_batches(cur):
+                        batch = [ { "datapackage": id, dst_cname: row[0] } for row in batch ]
+                        entity_url = "/entity/CFDE:%s?onconflict=skip" % (urlquote(dst_tname),)
+                        r = catalog.post(entity_url, json=batch)
+                        logger.info("Batch of terms for %s recorded" % dst_tname)
+                        r.json() # consume response
+
+                    logger.info("All terms for table %s recorded" % dst_tname)
+                except Exception as e:
+                    logger.error("Error while recording terms for table %s: %s" % (dst_tname, e))
+                    raise
+
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
 
@@ -742,8 +1027,11 @@ def main(subcommand, *args):
     Sub-commands:
     - 'submit' <dcc_id> <archive_url>
        - Test harness for submission pipeline ingest flow
+    - 'rebuild' <submission id>
+       - Test harness for idempotent ingest flow on existing registered submission
     - 'reconfigure' <submission_id>
        - Revise policy/resentation config on existing review catalog
+    - 'reconfigure-all'
 
     This client uses default DERIVA credentials for server both for
     registry operations and as "submitting user" in CFDE parlance.
@@ -773,6 +1061,8 @@ def main(subcommand, *args):
         ]
     )
 
+    archive_headers_map = get_archive_headers_map(servername)
+
     def reconfigure_submission(row):
         if row["review_ermrest_url"] is None:
             logger.info("Submission %s does not have a catalog to reconfigure." % row["id"])
@@ -780,6 +1070,19 @@ def main(subcommand, *args):
             catalog = server.connect_ermrest(Submission.extract_catalog_id(server, row['review_ermrest_url']))
             Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
             logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
+
+    def rebuild_submission(row):
+        submission_id = row['id']
+        dcc_id = row['submitting_dcc']
+        archive_url = row['datapackage_url']
+        submission = Submission(
+            server, registry,
+            submission_id, dcc_id, archive_url,
+            submitting_user if submitting_user.webauthn_id == row['submitting_user'] else registry.get_user(row['submitting_user']),
+            archive_headers_map=archive_headers_map,
+            skip_dcc_check=True,
+        )
+        submission.ingest()
 
     if subcommand == 'submit':
         # arguments dcc_id and archive_url would come from action provider
@@ -794,16 +1097,19 @@ def main(subcommand, *args):
         registry.validate_dcc_id(dcc_id, submitting_user)
 
         # run the actual submission work if we get this far
-        submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user)
+        submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user, archive_headers_map=archive_headers_map)
         submission.ingest()
-    elif subcommand == 'reconfigure':
+    elif subcommand in {'reconfigure', 'rebuild'}:
         if len(args) == 1:
             submission_id = args[0]
         else:
-            raise TypeError('"reconfigure" requires exactly one positional argument: submission_id')
+            raise TypeError('"%s" requires exactly one positional argument: submission_id' % subcommand)
 
         row = registry.get_datapackage(submission_id)
-        reconfigure_submission(row)
+        if subcommand == 'reconfigure':
+            reconfigure_submission(row)
+        elif subcommand == 'rebuild':
+            rebuild_submission(row)
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
             try:

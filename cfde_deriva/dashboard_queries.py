@@ -38,10 +38,16 @@ from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
     if 'anatomy' in queryobj.path.table_instances:
         return
+    anatomy_slim = queryobj.helper.builder.CFDE.anatomy_slim
     anatomy = queryobj.helper.builder.CFDE.anatomy
     queryobj.path = queryobj.path.link(
+        anatomy_slim,
+        on=( queryobj.path.level1_stats.anatomy_nid == anatomy_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
         anatomy,
-        on=( queryobj.path.level1_stats.anatomy_id == anatomy.id ),
+        on=( queryobj.path.anatomy_slim.slim_term == anatomy.nid ),
         join_type= 'left' if show_nulls else ''
     )
 
@@ -85,19 +91,22 @@ def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
         return
 
     root_project = queryobj.helper.builder.CFDE.project.alias('root_project')
+    root_project_idn = queryobj.helper.builder.CFDE.id_namespace.alias('root_project_idn')
     queryobj.path = queryobj.path.link(
         root_project,
-        on=( (queryobj.path.level1_stats.root_project_id_namespace == root_project.id_namespace)
-             & (queryobj.path.level1_stats.root_project_local_id == root_project.local_id) )
+        on=(queryobj.path.level1_stats.root_project_nid == root_project.nid),
+    ).link(
+        root_project_idn,
+        on=(queryobj.path.root_project.id_namespace == root_project_idn.nid),
     )
 
 def _add_subproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""
     # ignore show_nulls since project is always attributed
     try:
-        parent_project_RID = kwargs['parent_project_RID']
+        parent_project_nid = kwargs['parent_project_nid']
     except KeyError:
-        raise TypeError('Missing required parent_project_RID keyword argument in StatsQuery.dimension("subproject", **kwargs) call')
+        raise TypeError('Missing required parent_project_nid keyword argument in StatsQuery.dimension("subproject", **kwargs) call')
 
     if 'root_project' in queryobj.path.table_instances:
         raise TypeError('Cannot combine subproject and project_root dimensions')
@@ -106,26 +115,26 @@ def _add_subproject_leaf(queryobj, show_nulls=False, **kwargs):
     pipt = queryobj.helper.builder.CFDE.project_in_project_transitive.alias('pipt')
     pip = queryobj.helper.builder.CFDE.project_in_project.alias('pip')
     subproject = queryobj.helper.builder.CFDE.project.alias('subproject')
+    subproject_idn = queryobj.helper.builder.CFDE.id_namespace.alias('subproject_idn')
     parentproj = queryobj.helper.builder.CFDE.project.alias('parentproj')
 
     queryobj.path = queryobj.path.link(
         pipt,
-        on=( (level1_stats.project_id_namespace == pipt.member_project_id_namespace)
-             & (level1_stats.project_local_id == pipt.member_project_local_id) )
+        on=(level1_stats.project_nid == pipt.member_project),
     ).link(
         pip,
-        on=( (queryobj.path.pipt.leader_project_id_namespace == pip.child_project_id_namespace)
-             & (queryobj.path.pipt.leader_project_local_id == pip.child_project_local_id) )
+        on=(queryobj.path.pipt.leader_project == pip.child_project),
     ).link(
         parentproj,
-        on=( (queryobj.path.pip.parent_project_id_namespace == parentproj.id_namespace)
-             & (queryobj.path.pip.parent_project_local_id == parentproj.local_id) )
+        on=(queryobj.path.pip.parent_project == parentproj.nid),
     ).filter(
-        queryobj.path.parentproj.RID == parent_project_RID
+        queryobj.path.parentproj.nid == parent_project_nid
     ).link(
         subproject,
-        on=( (queryobj.path.pipt.leader_project_id_namespace == subproject.id_namespace)
-             & (queryobj.path.pipt.leader_project_local_id == subproject.local_id) )
+        on=(queryobj.path.pipt.leader_project == subproject.nid),
+    ).link(
+        subproject_idn,
+        on=(queryobj.path.subproject.id_namespace == subproject_idn.nid),
     )
 
 class StatsQuery (object):
@@ -162,7 +171,7 @@ class StatsQuery (object):
     supported_dimensions = {
         'anatomy': (
             _add_anatomy_leaf, [
-                lambda path: path.level1_stats.anatomy_id,
+                lambda path: path.anatomy.column_definitions['id'].alias('anatomy_id'),
             ], [
                 lambda path: path.anatomy.column_definitions['name'].alias('anatomy_name'),
             ]
@@ -190,18 +199,18 @@ class StatsQuery (object):
         ),
         'project_root': (
             _add_rootproject_leaf, [
-                lambda path: path.root_project.RID.alias('project_RID'),
+                lambda path: path.root_project.nid.alias('project_nid'),
             ], [
-                lambda path: path.root_project.id_namespace.alias('project_id_namespace'),
+                lambda path: path.root_project_idn.id.alias('project_id_namespace'),
                 lambda path: path.root_project.local_id.alias('project_local_id'),
                 lambda path: path.root_project.column_definitions['name'].alias('project_name'),
             ]
         ),
         'subproject': (
             _add_subproject_leaf, [
-                lambda path: path.subproject.RID.alias('project_RID'),
+                lambda path: path.subproject.nid.alias('project_nid'),
             ], [
-                lambda path: path.subproject.id_namespace.alias('project_id_namespace'),
+                lambda path: path.subproject_idn.id.alias('project_id_namespace'),
                 lambda path: path.subproject.local_id.alias('project_local_id'),
                 lambda path: path.subproject.column_definitions['name'].alias('project_name'),
             ],
@@ -247,7 +256,7 @@ class StatsQuery (object):
 
         Dimension-specific keyword arguments:
 
-        :param parent_project_RID: Use sub-projects of specified parent project RID for "subproject" dimension (required)
+        :param parent_project_nid: Use sub-projects of specified parent project nid for "subproject" dimension (required)
 
         """
         if self.path is None:
@@ -292,6 +301,9 @@ class DashboardQueryHelper (object):
         session_config["allow_retry_on_all_methods"] = True
         self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config)
         self.builder = self.catalog.getPathBuilder()
+        self.cfde_schema = self.catalog.getCatalogModel().schemas['CFDE']
+        if 'core_fact' not in self.cfde_schema.tables:
+            raise ValueError('Target %s catalog %r lacks the required CFDE.core_fact table' % (hostname, catalogid))
 
     def run_demo(self):
         """Run each example query and dump all results as JSON."""
@@ -300,7 +312,7 @@ class DashboardQueryHelper (object):
             for row in self.list_projects(use_root_projects=True)
         }
 
-        rid_for_parent_proj = projects[('cfde_id_namespace:2', '3a51534abc6e1a5ee6d9cc86c4007b56')]['RID']
+        nid_for_parent_proj = projects[('https://www.lincsproject.org/', 'LINCS')]['nid']
 
         # use list() to convert each ResultSet
         # for easier JSON serialization...
@@ -311,7 +323,7 @@ class DashboardQueryHelper (object):
             #'list_formats': list(self.list_formats()),
 
             'root_projects': list(self.list_projects(use_root_projects=True)),
-            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_RID=rid_for_parent_proj).fetch()),
+            'subject_stats_assaytype_subproject': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('subproject', parent_project_nid=nid_for_parent_proj).fetch()),
 
             'file_stats_anatomy_assaytype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
             'file_stats_anatomy_datatype': list(StatsQuery(self).entity('file').dimension('anatomy').dimension('data_type').fetch()),
@@ -346,51 +358,56 @@ class DashboardQueryHelper (object):
         }
         print(json.dumps(results, indent=2))
 
-    def list_projects(self, use_root_projects=False, parent_project_RID=None, headers=DEFAULT_HEADERS):
+    def list_projects(self, use_root_projects=False, parent_project_nid=None, headers=DEFAULT_HEADERS):
         """Return list of projects AKA funded activities
 
         :param use_root_projects: Only consider root projects (default False)
-        :param parent_project_RID: Only consider children of specified project (default None)
+        :param parent_project_nid: Only consider children of specified project (default None)
+
         """
         children = self.builder.CFDE.project.alias("children")
         pip1 = self.builder.CFDE.project_in_project.alias('pip1')
         project = self.builder.CFDE.project
+        idn = self.builder.CFDE.id_namespace
         path = children.path
         path = path.link(
             pip1,
-            on=( (path.children.id_namespace == pip1.child_project_id_namespace)
-                 & (path.children.local_id == pip1.child_project_local_id) )
+            on=( path.children.nid == pip1.child_project ),
         ).link(
             project,
-            on=( (pip1.parent_project_id_namespace == project.id_namespace)
-                 & (pip1.parent_project_local_id == project.local_id) ),
+            on=( pip1.parent_project == project.nid ),
             join_type='right'
+        ).link(
+            idn,
+            on=(project.id_namespace == idn.nid),
         )
 
         if use_root_projects:
-            path = path.link(self.builder.CFDE.project_root)
-        elif parent_project_RID is not None:
+            root = self.builder.CFDE.project_root
+            path = path.link(
+                root,
+                on=(path.project.nid == root.project),
+            )
+        elif parent_project_nid is not None:
             pip2 = self.builder.CFDE.project_in_project.alias('pip2')
             parent = self.builder.CFDE.project.alias("parent")
             path = path.link(
                 pip2,
-                on=( (path.project.id_namespace == pip2.child_project_id_namespace)
-                     & (path.project.local_id == pip2.child_project_local_id) )
+                on=( path.project.nid == pip2.child_project ),
             ).link(
                 parent,
-                on=( (path.pip2.parent_project_id_namespace == parent.id_namespace)
-                     & (path.pip2.parent_project_local_id == parent.local_id) )
-            ).filter(path.parent.RID == parent_project_RID)
+                on=( path.pip2.parent_project == parent.nid ),
+            ).filter(path.parent.nid == parent_project_nid)
 
         return path.groupby(
-            path.project.RID,
+            path.project.nid,
         ).attributes(
-            path.project.id_namespace,
+            path.id_namespace.id.alias('id_namespace'),
             path.project.local_id,
             path.project.column_definitions['name'],
             path.project.abbreviation,
             path.project.description,
-            CntD(path.children.RID).alias('num_subprojects')
+            CntD(path.children.nid).alias('num_subprojects')
         ).fetch(headers=headers)
 
     def list_datatypes(self, headers=DEFAULT_HEADERS):

@@ -159,6 +159,26 @@ class Registry (object):
             path = path.filter(path.table_instances[table_name].column_definitions['id'] == id)
         return list( path.entities().fetch() )
 
+    def get_user(self, client_id):
+        """Get WebauthnUser instance representing existing registry user with client_id.
+
+        :param client_id: The public.ERMrest_Client.ID or CFDE.datapackage.submitting_user key value
+        """
+        path = self._builder.public.ERMrest_Client.path
+        path = path.filter(path.ERMrest_Client.ID == client_id)
+        rows = list(path.entities().fetch())
+        if rows:
+            row = rows[0]
+            return WebauthnUser(
+                row['ID'],
+                row['Display_Name'],
+                row.get('Full_Name'),
+                row.get('Email'),
+                []
+            )
+        else:
+            raise ValueError("Registry user with ID=%r not found." % (client_id,))
+
     def list_datapackages(self):
         """Get a list of all datapackage submissions in the registry
 
@@ -598,8 +618,28 @@ class Registry (object):
         WebauthnUser.acl_authz_test().
         """
         acl = set()
-        for row in self.get_groups_by_dcc_role(role_id, dcc_id):
-            acl.update({ grp['webauthn_id'] for grp in row['groups'] })
+        roles_sufficient = {
+            terms.cfde_registry_grp_role.submitter: {
+                terms.cfde_registry_grp_role.submitter,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.reviewer: {
+                terms.cfde_registry_grp_role.submitter,
+                terms.cfde_registry_grp_role.reviewer,
+                terms.cfde_registry_grp_role.review_decider,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.review_decider: {
+                terms.cfde_registry_grp_role.review_decider,
+                terms.cfde_registry_grp_role.admin,
+            },
+            terms.cfde_registry_grp_role.admin: {
+                terms.cfde_registry_grp_role.admin,
+            }
+        }
+        for sub_role_id in roles_sufficient.get(role_id, {role_id,}):
+            for row in self.get_groups_by_dcc_role(sub_role_id, dcc_id):
+                acl.update({ grp['webauthn_id'] for grp in row['groups'] })
         return list(sorted(acl))
 
     def enforce_dcc_submission(self, dcc_id, submitting_user):
@@ -668,19 +708,6 @@ def main(servername, subcommand, catalog_id=None):
     dp.set_catalog(catalog, registry)
 
     if subcommand == 'provision':
-        # HACK: need to pre-populate ERMrest client w/ identities used in test data for submitting_user
-        catalog.post(
-            '/entity/public:ERMrest_Client?onconflict=skip',
-            json=[
-                {
-                    'ID': 'https://auth.globus.org/ad02dee8-d274-11e5-b4a0-8752ee3cf7eb',
-                    'Display_Name': 'karlcz@globusid.org',
-                    'Full_Name': 'Karl Czajkowski',
-                    'Email': 'karlcz@isi.edu',
-                    'Client_Object': {},
-                }
-            ]
-        ).raise_for_status()
         dp.provision()
         dp.load_data_files()
         # reconnect registry after provisioning

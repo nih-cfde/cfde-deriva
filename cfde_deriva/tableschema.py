@@ -21,6 +21,9 @@ if 'source_definitions' not in tag:
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
+if 'table_config' not in tag:
+    tag['table_config'] = 'tag:isrd.isi.edu,2021:table-config'
+
 # some useful authentication IDs to use in preparing ACLs...
 authn_id = AttrDict({
     # CFDE roles
@@ -33,6 +36,7 @@ authn_id = AttrDict({
     "cfde_infrastructure_ops": "https://auth.globus.org/7116589f-3a72-11eb-86d2-0aa357bce76b",
     "cfde_submission_pipeline": "https://auth.globus.org/1fd07875-3f06-11eb-8761-0ece49b2bd8d",
     "cfde_action_provider": "https://auth.globus.org/21017803-059f-4a9b-b64c-051ab7c1d05d",
+    "cfde_portal_members": "https://auth.globus.org/96a2546e-fa0f-11eb-be15-b7f12332d0e5",
 })
 
 cfde_portal_viewers = {
@@ -220,43 +224,69 @@ class CatalogConfigurator (object):
             "SystemColumnsDisplayCompact": [],
             "SystemColumnsDisplayDetailed": [],
             "disableDefaultExport": True,
+            "savedQueryConfig": {
+                "storageTable": {
+                    "catalog": "registry",
+                    "schema": "CFDE",
+                    "table": "saved_query"
+                }
+            },
+            "termsAndConditionsConfig": {
+                "groupId": "https://auth.globus.org/96a2546e-fa0f-11eb-be15-b7f12332d0e5",
+                "joinUrl": "https://app.globus.org/groups/96a2546e-fa0f-11eb-be15-b7f12332d0e5/join",
+                "groupName": "NIH CFDE Portal Members"
+            },
             "navbarMenu": {
                 "children": [
+                    { "name": "My Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Browse All Data",
+                        "name": "Data Browser",
                         "children": [
                             { "name": "Collection", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:collection" },
                             { "name": "File", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file" },
                             { "name": "Biosample", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:biosample" },
                             { "name": "Subject", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject" },
                             { "name": "Project", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:project" },
-                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:primary_dcc_contact" },
+                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
                             {
                                 "name": "Vocabulary",
                                 "children": [
                                     { "name": "Anatomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:anatomy" },
                                     { "name": "Assay Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:assay_type" },
                                     { "name": "Data Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:data_type" },
+                                    { "name": "Disease", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:disease" },
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
+                                    { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
-                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity"  },
+                                    { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
                                 ]
                             },
                             { "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
                         ]
                     },
-                    { "name": "Technical Documentation", "markdownName": ":span:Technical Documentation:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/" },
-                    { "name": "User Guide", "markdownName": ":span:User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-                    { "name": "About CFDE", "markdownName": ":span:About CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/"},
-                    { "name": "|" },
-                    { "name": "Dashboard", "url": "/dashboard.html" },
                     {
-                        "name": "Data Review",
-                        "url": "/chaise/recordset/#registry/CFDE:datapackage",
-                        "acls": {
-                            "enable": self.get_review_acl(),
-                        }
+                        "name": "For Submitters",
+                        "children": [
+                            { "name": "QuickStart Guide", "markdownName": ":span:QuickStart Guide:/span:{.external-link-icon}", "url": "https://github.com/nih-cfde/published-documentation/wiki/Quickstart" },
+                            { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/cfde-submit/docs/index.html" },
+                            { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/c2m2/draft-C2M2_specification/index.html" },
+                            {
+                                "name": "List All Submissions (requires login)",
+                                "url": "/chaise/recordset/#registry/CFDE:datapackage",
+                                "acls": {
+                                    "enable": self.get_review_acl(),
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "User Help",
+                        "children": [
+                            { "name": "Portal User Guide", "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
+                            { "name": "Cohort Building Tutorial", "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}", "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/" },
+                            { "name": "About the CFDE", "markdownName": ":span:About the CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/" }
+                        ]
                     }
                 ]
             }
@@ -267,14 +297,8 @@ class CatalogConfigurator (object):
         if replace or tag.chaise_config not in model.annotations:
             self.apply_chaise_config(model)
 
-        def _update(parent, key, d):
-            if key not in parent:
-                parent[key] = dict()
-            parent[key].update(d)
-
         # have Chaise display underscores in model element names as whitespace
-        _update(
-            model.schemas['CFDE'].display,
+        model.schemas['CFDE'].display.setdefault(
             "name_style",
             {
                 "underline_space": True,
@@ -282,22 +306,14 @@ class CatalogConfigurator (object):
             }
         )
         # turn off clutter of many links in tabular views
-        _update(
-            model.schemas['CFDE'].display,
+        model.schemas['CFDE'].display.setdefault(
             "show_foreign_key_link",
             {
                 "compact": False
             }
         )
-
-        # prettier display of built-in ERMrest_Client table entries
-        if 'public' in model.schemas \
-           and 'ERMrest_Client' in model.schemas['public'].tables:
-            _update(
-                model.table('public', 'ERMrest_Client').table_display,
-                'row_name',
-                {"row_markdown_pattern": "{{{Full_Name}}} ({{{Display_Name}}})"}
-            )
+        # disable default Chaise (heuristic) bdbag export choices
+        model.schemas['CFDE'].export_2019 = False
 
         # allow augmentation of acl bindings whether we apply class-based overrides or not...
         for schema in model.schemas.values():
@@ -381,15 +397,7 @@ class ReviewConfigurator (CatalogConfigurator):
         )
         if self.registry is not None and self.submission_id is not None:
             metadata = self.registry.get_datapackage(self.submission_id)
-            dcc_read_acl = list(set.union(*[
-                set(self.registry.get_dcc_acl(metadata['submitting_dcc'], role))
-                for role in {
-                        terms.cfde_registry_grp_role.admin,
-                        terms.cfde_registry_grp_role.reviewer,
-                        terms.cfde_registry_grp_role.review_decider,
-                        terms.cfde_registry_grp_role.submitter,
-                }
-            ]))
+            dcc_read_acl = self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.reviewer)
             # review catalogs allow DCC-specific read-access on entire CFDE schema
             acls = multiplexed_acls_union(
                 acls,
@@ -400,24 +408,32 @@ class ReviewConfigurator (CatalogConfigurator):
         return acls
 
     def get_review_acl(self):
-        # restrict navbar ACL to match our content
+        # restrict navbar ACL to match our content/user
         return self.schema_acls["CFDE"]["select"]
+
+    def get_approval_acl(self):
+        # restrict navbar ACL to those who can edit approval status
+        acl = {authn_id.cfde_portal_admin, authn_id.cfde_portal_curator }
+        if self.registry is not None and self.submission_id is not None:
+            metadata = self.registry.get_datapackage(self.submission_id)
+            acl = acl.union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.review_decider)
+            ).union(
+                self.registry.get_dcc_acl(metadata['submitting_dcc'], terms.cfde_registry_grp_role.admin)
+            )
+        return sorted(acl)
 
     def apply_chaise_config(self, model):
         """Apply custom chaise config for review content by adjusting the standard config"""
         super(ReviewConfigurator, self).apply_chaise_config(model)
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
-
         # add custom navbar info
         datapackage = self.registry.get_datapackage(self.submission_id)
         dcc = self.registry.get_dcc(datapackage['submitting_dcc'])[0]
 
-        def registry_record_page(tname, rid=None):
+        def registry_chaise_app_page(tname, appname, rid=None):
             url = self.registry._catalog.get_server_uri()
-            url= url.replace('/ermrest/catalog/', '/chaise/record/#')
+            url= url.replace('/ermrest/catalog/', '/chaise/' + appname + '/#')
             if url[-1] != '/':
                 url += '/'
             url += 'CFDE:%s' % (tname,)
@@ -425,30 +441,42 @@ class ReviewConfigurator (CatalogConfigurator):
                 url += '/RID=%s' % (rid,)
             return url
 
-        model.annotations[tag.chaise_config]['navbarMenu']['children'][0].update({
-            "name": "Browse Submitted Data",
+        model.annotations[tag.chaise_config]['navbarMenu']['children'][1].update({
+            "name": "Submitted Data Browser",
             "acls": {
                 "enable": self.get_review_acl(),
             },
         })
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
-            "name": "In-Review Submission",
+            "name": "Review Options",
             "acls": {
                 "enable": self.get_review_acl(),
             },
             "children": [
                 {
-                    "name": "Content Summary Charts",
-                    # we need to fake this since we configure before the review_summary_url is populated
-                    "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
+                    # header, not linkable
+                    #"name": "Submission %s" % datapackage['id'],
+                    "name": "For This Submission",
+                    "children": [
+                        {
+                            "name": "View Datapackage Charts",
+                            # we need to fake this since we configure before the review_summary_url is populated
+                            "url": "/dcc_review.html?catalogId=%s" % self.catalog.catalog_id
+                        },
+                        {
+                            "name": "Browse Datapackage Content",
+                            "url": registry_chaise_app_page('datapackage', 'record', datapackage['RID'])
+                        },
+                        {
+                            "name": "Approve Datapackage Content (requires approver status)",
+                            "acl": self.get_approval_acl(),
+                            "url": registry_chaise_app_page('datapackage', 'recordedit', datapackage['RID'])
+                        },
+                    ]
                 },
                 {
-                    "name": "Submission %s" % datapackage['id'],
-                    "url": registry_record_page('datapackage', datapackage['RID']),
-                },
-                {
-                    "name": dcc["dcc_name"],
-                    "url": registry_record_page('dcc', dcc['RID']),
+                    "name": "List All Submissions",
+                    "url": "/chaise/recordset/#registry/CFDE:datapackage"
                 },
             ]
         })
@@ -465,46 +493,6 @@ class RegistryConfigurator (CatalogConfigurator):
                 'insert': [ authn_id.cfde_portal_admin ],
                 'update': [ authn_id.cfde_portal_admin ],
                 'delete': [ authn_id.cfde_portal_admin ]
-            }
-        }
-    )
-
-    schema_table_acls = multiplexed_acls_union(
-        CatalogConfigurator.schema_table_acls,
-        {
-            # make client table visible for provenance presentation...
-            ('public', 'ERMrest_Client'): {
-                "select": [ "*" ],
-                "insert": [ authn_id.cfde_portal_admin, authn_id.cfde_submission_pipeline ],
-            },
-        }
-    )
-
-    schema_table_column_acls = multiplexed_acls_union(
-        CatalogConfigurator.schema_table_acls,
-        {
-            # ... but hide sensitive client table cols
-            ('public', 'ERMrest_Client', 'Email'): {
-                "select": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
-                "enumerate": [ authn_id.cfde_portal_admin, authn_id.cfde_portal_curator ],
-            },
-            ('public', 'ERMrest_Client', 'Client_Object'): {
-                "select": [],
-                "enumerate": [ authn_id.cfde_submission_pipeline ],
-            },
-        }
-    )
-
-    schema_table_aclbindings = multiplexed_aclbindings_merge(
-        CatalogConfigurator.schema_table_aclbindings,
-        {
-            ('public', 'ERMrest_Client'): {
-                "self_view": {
-                    "types": ["select"],
-                    "projection": ["ID"],
-                    "projection_type": "acl",
-                    "scope_acl": ["*"],
-                }
             }
         }
     )
@@ -542,9 +530,8 @@ class RegistryConfigurator (CatalogConfigurator):
         # custom config for submission listings
         model.annotations[tag.chaise_config]['maxRecordsetRowHeight'] = 350
 
-        # trim off standard navbar content we want to replace
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Data Review link...
-        del model.annotations[tag.chaise_config]['navbarMenu']['children'][-1] # Dashboard link...
+        # we only want to use our savedQueryConfig for release + review catalogs w/ C2M2 portal model
+        model.annotations[tag.chaise_config]["savedQueryConfig"] = False
 
         # fixup incorrectly generated "Browse All Data" links
         def fixup(*entries):
@@ -554,7 +541,7 @@ class RegistryConfigurator (CatalogConfigurator):
                 elif 'children' in entry:
                     fixup(*entry['children'])
 
-        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][0])
+        fixup(model.annotations[tag.chaise_config]['navbarMenu']['children'][1])
 
         model.annotations[tag.chaise_config]['navbarMenu']['children'].append({
             "name": "Submission System",
@@ -599,9 +586,14 @@ def make_type(type, format):
         return builtin_types.int8
     if type == "number":
         return builtin_types.float8
+    if type == "boolean":
+        return builtin_types.boolean
     if type == "array":
         # assume array is a list of strings for now...
         return builtin_types["text[]"]
+    if type == "object":
+        # revisit if we need raw JSON support as an option...
+        return builtin_types.jsonb
     raise ValueError('no mapping defined yet for type=%s format=%s' % (type, format))
 
 def make_column(tname, cdef, configurator):
@@ -663,6 +655,12 @@ def make_id(*components):
     else:
         # we have to shorten this id
         truncate_threshold = 4
+
+        if len(expanded) > (63 // (truncate_threshold + 1)):
+            # will be too long even if every elemenent is hashed by helper below
+            # so concatenate interior elements and hash as one...
+            expanded = [ expanded[0], '_'.join(expanded[1:-2]), expanded[-1] ]
+
         def helper(e):
             if len(e) <= truncate_threshold:
                 # retain short elements
@@ -715,11 +713,17 @@ def make_fkey(tname, fkdef):
             raise ValueError('unknown action "%s" for foreign key %s %s clause' % (e, constraint_name, clause))
     on_delete = get_action('on_delete')
     on_update = get_action('on_update')
+    pre_annotations = fkdef.get("deriva", {})
     annotations = {
         schema_tag: fkdef,
     }
     if to_name is not None:
         annotations[tag.foreign_key] = {"to_name": to_name}
+    for k, t in tag.items():
+        if k in pre_annotations and trusted:
+            annotations[t] = pre_annotations.pop(k)
+    acls = pre_annotations.pop('acls', {})
+    acl_bindings = pre_annotations.pop('acl_bindings', {})
     return ForeignKey.define(
         fkcols,
         pkschema,
@@ -728,11 +732,14 @@ def make_fkey(tname, fkdef):
         constraint_names=[[ schema_name, constraint_name ]],
         on_delete=on_delete,
         on_update=on_update,
-        annotations=annotations
+        annotations=annotations,
+        acls=acls,
+        acl_bindings=acl_bindings,
     )
 
-def make_table(tdef, configurator, trusted=False, history_capture=False):
-    provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'false').lower() == 'true')
+def make_table(tdef, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
+    if provide_system is None:
+        provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
     tname = tdef["name"]
     if provide_system:
         system_columns = Table.system_column_defs()
@@ -768,24 +775,28 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         system_columns = []
         system_keys = []
         system_fkeys = []
+
+    if provide_nid:
+        system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
+        system_keys.append(make_key(tname, ['nid']))
     tcomment = tdef.get("description")
     tdef_resource = tdef
     tdef = tdef_resource.pop("schema")
-    keys = []
-    keysets = set()
+    # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints
+    keys = {
+        frozenset(kdef["unique_columns"]): kdef
+        for kdef in system_keys
+    }
     pk = tdef.pop("primaryKey", None)
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
-        keys.append(make_key(tname, pk))
-        keysets.add(frozenset(pk))
+        keys.setdefault(frozenset(pk), make_key(tname, pk))
     tdef_fields = tdef.pop("fields", None)
     for cdef in tdef_fields:
         if cdef.get("constraints", {}).pop("unique", False):
-            kcols = [cdef["name"]]
-            if frozenset(kcols) not in keysets:
-                keys.append(make_key(tname, kcols))
-                keysets.add(frozenset(kcols))
+            keys.setdefault(frozenset([cdef["name"]]), make_key(tname, [cdef["name"]]))
+    keys = list(keys.values())
     tdef_fkeys = tdef.pop("foreignKeys", [])
     title = tdef_resource.get("title", None)
     annotations = {
@@ -813,8 +824,9 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
         column_defs=system_columns + [
             make_column(tname, cdef, configurator)
             for cdef in tdef_fields
+            if cdef.get("name") not in { cdef['name'] for cdef in system_columns }
         ],
-        key_defs=system_keys + keys,
+        key_defs=keys,
         fkey_defs=system_fkeys + [
             make_fkey(tname, fkdef)
             for fkdef in tdef_fkeys
@@ -828,12 +840,18 @@ def make_table(tdef, configurator, trusted=False, history_capture=False):
 
 def make_model(tableschema, configurator, trusted=False):
     resources = tableschema.pop('resources')
-    rnames = {}
+    rnames = set()
     for r in resources:
-        if r["name"] in rnames:
-            raise ValueError('Resource name "%s" appears more than once' % (r["name"],))
+        np = (r.get("resourceSchema", schema_name), r["name"])
+        if np in rnames:
+            raise ValueError('Resource name "%r" appears more than once' % (np,))
+        rnames.add(np)
+
     pre_annotations = tableschema.get("deriva", {})
+    provide_system = pre_annotations.pop('provide_system', None) if trusted else False
+    provide_nid = pre_annotations.pop('provide_nid', True) if trusted else True
     history_capture = pre_annotations.pop('history_capture', False) if trusted else False
+    indexing_preferences = pre_annotations.pop('indexing_preferences', {})
     annotations = {
         schema_tag: tableschema,
     }
@@ -843,17 +861,25 @@ def make_model(tableschema, configurator, trusted=False):
             continue
         if k in pre_annotations and trusted:
             annotations[t] = pre_annotations.pop(k)
-    return {
-        "schemas": {
-            schema_name: {
-                "schema_name": schema_name,
-                "tables": {
-                    tdef["name"]: make_table(tdef, configurator, trusted=trusted, history_capture=history_capture)
-                    for tdef in resources
-                },
+
+    schemas = {}
+    for tdef in resources:
+        sname, tname = tdef.pop("resourceSchema", schema_name), tdef["name"]
+        if sname not in schemas:
+            schemas[sname] = {
+                "schema_name": sname,
+                "tables": {},
                 "acls": configurator.schema_acls.get(schema_name, {}),
             }
-        },
+            if sname == schema_name and indexing_preferences:
+                schemas[sname].update({
+                    "annotations": {
+                        tag["indexing_preferences"]: indexing_preferences
+                    }
+                })
+        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
+    return {
+        "schemas": schemas,
         "annotations": annotations,
         "acls": configurator.catalog_acls,
     }

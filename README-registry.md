@@ -1,43 +1,172 @@
 
 # CFDE Registry
 
-This document summarizes the design and purpose of the CFDE submission
-registry.
+This document summarizes the design and purpose of the CFDE data submission
+and user-preferences registry.
 
 ## Overview
 
-The submission registry is a bookkeeping system for the C2M2
-datapackage submission pipeline.  As a records system, it tracks
-individual submissions and their processing and review status. It also
-stores ancilliary metadata which supports the configuration and
-operation of the pipeline.
+The CFDE registry is a bookkeeping system for:
 
-### Registry Model
+1. The C2M2 datapackage submission pipeline.
+2. Metadata related to DCC federation.
+3. User-managed preferences/profile data.
 
-The registry model is illustrated in the [registry model
-diagram](diagrams/cfde-registry-model.png) and has these core tables
-which are populated based on DCC submission activity:
+The registry data model is illustrated in the [registry model
+diagram](diagrams/cfde-registry-model.png).
+
+### DCC Federation State Tables
+
+These registry tables are populated by CFDE-CC staff activity:
+
+- `dcc`: each row represents an onboarded DCC
+- `group`: each row represents a known group in the authentication system
+- `dcc_group_role`: each row binds a known group to a permission class for a DCC
+- `id_namespace`: each row represents a CFDE federated identifier namespace
+
+Other aspects of DCC federation are under continued development.
+
+### Ontological Tables
+
+These registry tables are populated by a mixture of CFDE-CC staff and
+submission system activity, representing known C2M2 vocabulary concepts:
+
+- `anatomy`
+- `assay_type`
+- `data_type`
+- `disease`
+- `file_format`
+- `mime_type` (C2M2 raw string column)
+- `ncbi_taxonomy`
+- `subject_granularity` (C2M2 enum column)
+- `subject_role` (C2M2 enum column)
+
+Generally, these share structure with C2M2 vocabulary tables present
+in submissions, review catalogs, and release catalogs. However, we may
+introduce additional columns relevant to registry functionality. We
+also promote several non-vocabulary columns into quasi-vocabulary
+tables for the purpose of tracking usage of distinct values for those
+columns.
+
+It is expected that CFDE-CC and/or DCC staff may pre-populate these
+tables with terms intended for common use.  Additionally, the tables
+may indicate automatically-detected terms found in C2M2 submissions.
+
+The usage of these tables is under continued development.
+
+### Submission System State Tables
+
+These registry tables are populated based on DCC submission system
+activity:
 
 - `datapackage`: each row represents one C2M2 submission
 - `datapackage_table`: each row represents one TSV file of one submission
 
-These submission records are augmented by supporting information
-which is maintained by adminstrators:
+These tables are populated by release-planning and preparation:
 
-- `dcc`: each row represents one onboarded DCC
-- `group`: each row represents one Globus Group known by the
-  submission system
-- `dcc_group_role`: each row associates a group w/ a pipeline role to
-  designate how a set of users relate to a given DCC's usage of the
-  submission system
+- `release`: each row represents a CFDE inventory release in some stage of planning
+- `dcc_release_datapackage`: each row binds a constituent submission to a release
 
-Other aspects of the model are under continued development, but
-they do not affect the initial MVP milestone.
+Other aspects of submission-tracking under continued development.
+
+### User Profile State Tables
+
+These registry tables are populated by user activity and represent
+their saved preferences or other state values relevant to
+personalization of CFDE service features:
+
+- `user_profile`: each row represents scalar settings for one user
+- `saved_query`: each row represents one saved query for a user
+- `favorite_anatomy`: each row represents one favorited vocabulary term for a user
+- `favorite_assay_type`: each row represents one favorited vocabulary term for a user
+- `favorite_data_type`: each row represents one favorited vocabulary term for a user
+- `favorite_disease`: each row represents one favorited vocabulary term for a user
+- `favorite_file_format`: each row represents one favorited vocabulary term for a user
+- `favorite_ncbi_taxonomy`: each row represents one favorited vocabulary term for a user
+
+The `user_profile` table is keyed by authenticated user ID which is
+also a foreign key to the built-in `ERMrest_Client` table. Each user
+can have at most one profile record associated with their
+identity. The latter table is automatically populated by the DERIVA
+system, while the former will be populated by a user or user agent
+action to enable per-user profile features.  The profile record will
+store any scalar settings for the user, as a single column for each
+named setting.
+
+The `saved_query` table is keyed by a composite key consisting of
+several parts:
+
+- `user_id`: the user saving the query, also a foreign key to the profile
+- `schema_name`: will always be `CFDE`, needed by DERIVA mechanism
+- `table_name`: the C2M2 table being searched by the query
+- `query_id`: a client-generated key for the query, unique among all queries saved by the user
+
+Each `saved_query` has these additional columns which
+are not part of the composite key:
+
+- `RID`: system-assigned record ID, useful for API access
+- `RCT`: system-maintained record creation time, when the query was saved
+- `name`: a human-readable name for the saved query
+- `description`: a longer, human-readable summary of the query
+- `last_executon_time`: a client maintained timestamp, updated when the query is performed
+
+Each user can have zero or more saved query records associated with
+their identity. Each record will store necessary information to
+reconstitute a query in Chaise, to name/describe the query in a query
+listing UI, and other system metadata TBD.
+
+The Chaise user agent (client) should produce per-user `query_id`
+values to detect/prevent duplicate saved queries for the user:
+
+1. Generate the stable form of the facet config document
+2. Generate an MD5 hexadecimal format hash of the config document
+
+Generally, the various `favorite_*` tables form binary associations to
+link a subset of vocabulary concepts from a given vocabulary table to
+a given user's profile.
+
+#### User Profile Content Lifecycle
+
+There are several possible phases to the profile content (and related
+UX capabilities) for a user.
+
+The following descriptions are based on the assumption that a
+Globus Group will be use to represent the community of CFDE profile
+users. To enroll, a user must join this new group (group name TBD).
+
+1. An anonymous (non-logged-in) user
+    - has no `user_id`
+    - no profile storage possible
+    - prompt to login and join community?
+2. A logged-in user (not yet onboarded to community...)
+    - not yet enrolled in the profile users' group
+    - has a `user_id`
+    - no profile storage possible
+    - promot to join community?
+3. A logged-in user (transitional phase...)
+    - enrolled in the profile user's group
+    - has a `user_id`
+    - `user_profile` can be created on-demand, transitioning to next phase
+4. A logged-in user (full profile functionality...)
+    - continues to belong to profile users' group
+    - has a `user_id`
+    - has a `user_profile` record
+    - has permission to read/update profile
+    - has permission to read/add/delete sub-records (saved queries, favorite terms)
+    - has permission to delete profile (transition back to phase 3)?
+5. A logged-in user (degraded function...)
+    - has been removed from the profile users' group!?
+    - has a `user_id`
+    - has a `user_profile` record
+    - no longer permitted to add sub-records to profile
+    - has permission to read/update profile
+    - has permission to read/delete sub-records (saved queries, favorite terms)
+    - has permission to deleted profile (transition back to phase 2)?
 
 ### Client Roles
 
-It is intended to support several classes of client/user. Generally,
-one group corresponds directly to a role, and other groups for
+The registry supports several classes of client/user. Generally, one
+group corresponds directly to a role, and other groups for
 higher-privilege roles also enjoy the same privileges:
 
 1. Submission ingest pipeline automation (CFDE-hosted machine identity)
@@ -69,8 +198,13 @@ higher-privilege roles also enjoy the same privileges:
     - also CFDE Infrastructure Operations
 9. CFDE-CC staff with highest permissions on infrastructure
     - CFDE Infrastructure Operations
-10. Other roles TBD
+10. General users who have personal preferences/profile data
+    - a member of a general CFDE Portal group?
+    - during dev cycle: CFDE Portal Curator, CFDE Portal Reviewer, CFDE Portal Writer, CFDE Portal Reader
+11. The owner of a particular profile
+    - where the profile `id` or related content `user_id` matches the authenticated client
 
+Other roles TBD.
 
 ## Registry Access Policy
 
@@ -80,11 +214,12 @@ a number of policy elements:
 - For simplicity, the bulk of the registry's CFDE schema is made
   visible to the public, not requiring detailed reconfiguration. This
   includes the general informational/vocabulary tables of the
-  registry.
+  registry. Only portal administrators can write to these tables.
   
 - The core `datapackage` and `datapackage_table` tables are configured
   with more-specific policies which override the schema-wide defaults
-  to make these tables more restrictive.
+  to make these tables more restrictive for read access and to allow
+  the automated submission system to perform certain updates.
 
 - The special built-in ERMrest client table is useful for converting
   low-level authentication IDs into human-readable display
@@ -98,9 +233,10 @@ This table summarizes these in more detail:
 |----------|--------|------|------------|--------|-------|
 | registry catalog | enumerate | public | N/A | catalog ACL | tables detected (chaise avoids table-not-found) |
 | registry `CFDE`.* | select | public | N/A | schema ACL | basic vocabs/config can be public? |
-| registry `CFDE`.* | insert | CFDE admin | N/A | schema ACL | admin can insert all vocabs/config |
-| registry `CFDE`.* | update | CFDE admin | N/A | schema ACL | admin can update all vocabs/config |
-| registry `CFDE`.* | delete | CFDE admin | | N/A | schema ACL | admin can delete all vocabs/config |
+| registry `CFDE`.* | insert, update, delete | CFDE admin | N/A | schema ACL | admin can modify all vocabs/config |
+| registry `CFDE`. _vocab_ | select | public | N/A | table ACL | everyone can view vocabulary term sets |
+| registry `CFDE`. _vocab_ | insert | CFDE admin/curator/pipeline | N/A | table ACL | staff can curate vocabulary terms, pipeline can add newly encountered terms |
+| registry `CFDE`. _vocab_ | update, delete | CFDE admin/curator | N/A | table ACL | staff can curate vocabulary terms |
 | registry `CFDE`.`datapackage` | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
 | registry `CFDE`.`datapackage` | insert | CFDE pipeline | N/A | table ACL | CFDE-CC pipeline can record new submissions |
 | registry `CFDE`.`datapackage` | update | CFDE admin/curator/pipeline | N/A | table ACL | some CFDE-CC roles can edit all submission records |
@@ -124,10 +260,8 @@ This table summarizes these in more detail:
 | registry `CFDE`.`datapackage`.`dcc_approval_status` | update | DCC admin/decider | client belongs to decider or admin group role with `submitting_dcc` | inerited table ACL-binding | DCC admin or decider can edit DCC's submission approval |
 | registry `CFDE`.`datapackage`.* | update | DCC admin/decider | client belongs to decider or admin group role with `submitting_dcc` | masked table ACL-binding | DCC-derived rights are suppressed for all other columns not mentioned previously |
 | registry `CFDE`.`datapackage_table` | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
-| registry `CFDE`.`datapackage_table` | insert | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record new submissions |
-| registry `CFDE`.`datapackage_table` | update | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can edit all submission records |
+| registry `CFDE`.`datapackage_table` | insert, update | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record or edit submissions |
 | registry `CFDE`.`datapackage_table` | delete | CFDE admin | N/A | table ACL | CFDE-CC admin can delete submissions |
-| registry `CFDE`.`datapackage_table` | delete | DCC admin | client belongs to admin group role with `submitting_dcc` | table ACL-binding | DCC admin can delete DCC's submissions |
 | registry `CFDE`.`datapackage_table`.`datapackage` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
 | registry `CFDE`.`datapackage_table`.`position` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
 | registry `CFDE`.`datapackage_table`.`table_name` | update | none | N/A | column ACL | Set once during row insertion, then immutable |
@@ -135,6 +269,30 @@ This table summarizes these in more detail:
 | registry `CFDE`.`datapackage_table`.`num_rows` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or pipeline |
 | registry `CFDE`.`datapackage_table`.`diagnostics` | update | none | N/A | column ACL | Can be edited by CFDE-CC admin or pipeline |
 | registry `CFDE`.`datapackage_table` | select | DCC group | client belongs to any group role with `submitting_dcc` | table ACL-binding | DCC members can see DCC's submissions |
+| registry `CFDE`.`datapackage_` _vocab_ | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
+| registry `CFDE`.`datapackage_` _vocab_ | insert | CFDE admin/pipeline | N/A | table ACL | CFDE-CC admin or pipeline can record new submissions |
+| registry `CFDE`.`datapackage_` _vocab_ | update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can modify all submission records |
+| registry `CFDE`.`user_profile` | insert | CFDE community | N/A | table ACL | Community members can create a profile |
+| registry `CFDE`.`user_profile` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read all profiles |
+| registry `CFDE`.`user_profile` | update, delete | CFDE admin | user `id` matches client | table ACL binding | user can edit their own profile |
+| registry `CFDE`.`user_profile`.`id` | update | none | N/A | fkey ACL | user id is immutable |
+| registry `CFDE`.`user_profile`.`id` fkey | insert | CFDE admin | N/A | fkey ACL | only CFDE-CC admin can set other profile users |
+| registry `CFDE`.`user_profile`.`id` fkey | insert | user-self | N/A | fkey ACL binding | user can only set profile user `id` to self |
+| registry `CFDE`.`user_profile`.`dashboard_state` | select, update, delete | owner | N/A | table ACL-binding | profile owner can read/write dashboard state |
+| registry `CFDE`.`saved_query` | insert | CFDE community | N/A | table ACL | Community members can create |
+| registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read and modify all|
+| registry `CFDE`.`saved_query` | select, update, delete | CFDE admin | user `user_id` matches client | table ACL binding | user can view and edit their own |
+| registry `CFDE`.`saved_query`.`user_id` | update | none | N/A | user_id is immutable |
+| registry `CFDE`.`saved_query`.`schema_name` | update | none | N/A | column ACL | schema name is immutable |
+| registry `CFDE`.`saved_query`.`table_name` | update | none | N/A | column ACL | table name is immutable |
+| registry `CFDE`.`saved_query`.`query_id` | update | none | N/A | column ACL | query id (hash) is immutable |
+| registry `CFDE`.`saved_query`.`facets` | update | none | N/A | column ACL | facets blob is immutable |
+| registry `CFDE`.`saved_query`.`user_id` fkey | insert | profile owner | user_id matches client | user can set own user ID in profile related records |
+| registry `CFDE`.`favorite_*` | insert | CFDE community | N/A | table ACL | Community members can create |
+| registry `CFDE`.`favorite_*` | select, update, delete | CFDE admin | N/A | table ACL | CFDE-CC admin can read and modify all|
+| registry `CFDE`.`favorite_*` | select, update, delete | CFDE admin | user `user_id` matches client | table ACL binding | user can view and edit their own |
+| registry `CFDE`.`favorite_*`.`user_id` | update | none | N/A | user_id is immutable |
+| registry `CFDE`.`favorite_*`.`user_id` fkey | insert | profile owner | user_id matches client | user can set own user ID in profile related records |
 | registry `public`.`ERMrest_Client` | select | users | client matches record ID | table ACL-binding | User can see their own full ERMrest_Client record |
 | registry `public`.`ERMrest_Client` | insert | CFDE-CC admin + pipeline | N/A | table ACL | Submission can discover new submitting users before they visit registry themselves |
 | registry `public`.`ERMrest_Client`.`Email` | select | CFDE admin/curator | N/A | column ACL | Not everyone needs to know a submitting user's email |
