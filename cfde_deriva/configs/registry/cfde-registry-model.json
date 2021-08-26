@@ -3295,9 +3295,6 @@
                   "name": "facets",
                   "description": "The CFDE/DERIVA machine-readable JSON description of the faceted query criteria",
                   "type": "object",
-                  "constraints": {
-                     "required": true
-                  },
                   "deriva": {
                      "acls": {
                         "select": ["*"],
@@ -3313,10 +3310,7 @@
                {
                   "name": "encoded_facets",
                   "description": "The URL-encoded, machine-readable JSON version of faceted query criteria",
-                  "type": "object",
-                  "constraints": {
-                     "required": true
-                  },
+                  "type": "string",
                   "deriva": {
                      "acls": {
                         "select": ["*"],
@@ -3336,6 +3330,9 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "generated": false
                   }
                },
                {
@@ -3344,6 +3341,9 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "generated": false
                   }
                },
                {
@@ -3387,6 +3387,7 @@
             ]
          },
          "deriva": {
+            "generated": true,
             "acls": {
                "select": [ "cfde_portal_admin" ],
                "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
@@ -3418,7 +3419,7 @@
                      "markdown_name": "Query Name",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}savedQueryRid={{{RID}}})"
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
                      }
                   },
                   "table_name",
@@ -3431,7 +3432,7 @@
                      "markdown_name": "Query Name",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
                      }
                   },
                   "table_name",
@@ -3455,7 +3456,7 @@
                      "markdown_name": "Query Link",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
+                        "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
                      }
                   },
                   "description",
