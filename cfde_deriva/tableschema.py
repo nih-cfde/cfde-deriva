@@ -237,6 +237,7 @@ class CatalogConfigurator (object):
                 "groupName": "NIH CFDE Portal Members"
             },
             "navbarMenu": {
+                "newTab": False,
                 "children": [
                     { "name": "My Dashboard", "url": "/dashboard.html" },
                     {
