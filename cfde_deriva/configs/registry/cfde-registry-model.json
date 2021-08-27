@@ -3388,6 +3388,7 @@
          },
          "deriva": {
             "generated": true,
+            "immutable": false,
             "acls": {
                "select": [ "cfde_portal_admin" ],
                "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
