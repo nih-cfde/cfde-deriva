@@ -1713,6 +1713,9 @@
             ]
          },
          "deriva": {
+            "display": {
+               "show_saved_query": true
+            },
             "table_config": {
                "stable_key_columns": ["id"]
             },
