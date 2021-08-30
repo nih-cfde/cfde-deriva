@@ -269,9 +269,21 @@ class CatalogConfigurator (object):
                     {
                         "name": "For Submitters",
                         "children": [
-                            { "name": "QuickStart Guide", "markdownName": ":span:QuickStart Guide:/span:{.external-link-icon}", "url": "https://github.com/nih-cfde/published-documentation/wiki/Quickstart" },
-                            { "name": "cfde-submit Docs", "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/cfde-submit/docs/index.html" },
-                            { "name": "C2M2 Docs", "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}", "url": "https://docs.nih-cfde.org/en/latest/c2m2/draft-C2M2_specification/index.html" },
+                            {
+                                "name": "QuickStart Guide",
+                                "markdownName": ":span:QuickStart Guide:/span:{.external-link-icon}",
+                                "url": "https://github.com/nih-cfde/published-documentation/wiki/Quickstart"
+                            },
+                            {
+                                "name": "cfde-submit Docs",
+                                "markdownName": ":span:cfde-submit Docs:/span:{.external-link-icon}",
+                                "url": "https://docs.nih-cfde.org/en/latest/cfde-submit/docs/index.html"
+                            },
+                            {
+                                "name": "C2M2 Docs",
+                                "markdownName": ":span:C2M2 Docs:/span:{.external-link-icon}",
+                                "url": "https://docs.nih-cfde.org/en/latest/c2m2/draft-C2M2_specification/index.html"
+                            },
                             {
                                 "name": "List All Submissions (requires login)",
                                 "url": "/chaise/recordset/#registry/CFDE:datapackage",
@@ -284,9 +296,36 @@ class CatalogConfigurator (object):
                     {
                         "name": "User Help",
                         "children": [
-                            { "name": "Portal User Guide", "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}", "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/" },
-                            { "name": "Cohort Building Tutorial", "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}", "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/" },
-                            { "name": "About the CFDE", "markdownName": ":span:About the CFDE:/span:{.external-link-icon}", "url": "https://www.nih-cfde.org/" }
+                            {
+                                "name": "Portal User Guide",
+                                "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}",
+                                "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/"
+                            },
+                            {
+                                "name": "Cohort Building Tutorial",
+                                "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}",
+                                "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/"
+                            },
+                            {
+                                "name": "Submit a Feature Request or Bug Report",
+                                "markdownName": ":span:Submit a Feature Request or Bug Report:/span:{.external-link-icon}",
+                                "url": "https://github.com/nih-cfde/published-documentation/discussions"
+                            },
+                            {
+                                "name": "Email the Helpdesk",
+                                "markdownName": ":span:Email the Helpdesk:/span:{.external-link-icon}",
+                                "url": "mailto:support@cfde.atlassian.net"
+                            },
+                            {
+                                "name": "Privacy Policy",
+                                "markdownName": ":span:Privacy Policy:/span:{.external-link-icon}",
+                                "url": "https://docs.nih-cfde.org/en/latest/about/privacy/"
+                            },
+                            {
+                                "name": "About the CFDE",
+                                "markdownName": ":span:About the CFDE:/span:{.external-link-icon}",
+                                "url": "https://www.nih-cfde.org/"
+                            }
                         ]
                     }
                 ]
