@@ -5,6 +5,7 @@ INSERT INTO level1_stats (
   data_type_nid,
   file_format_nid,
   anatomy_nid,
+  disease_nid,
   granularity_nid,
   species_nid,
   root_project_id_namespace,
@@ -15,6 +16,7 @@ INSERT INTO level1_stats (
   data_type_id,
   file_format_id,
   anatomy_id,
+  disease_id,
   granularity_id,
   species_id,
   num_files,
@@ -29,6 +31,7 @@ SELECT
   dt.nid,
   ff.nid,
   anat.nid,
+  dis.nid,
   sg.nid,
   ss.nid,
   dcc_proj.id_namespace,
@@ -39,6 +42,7 @@ SELECT
   dt.id,
   ff.id,
   anat.id,
+  dis.id,
   sg.id,
   ss.id,
   sum(cff.num_files),
@@ -93,6 +97,10 @@ LEFT JOIN (
   JOIN anatomy anat ON (cf_a.anatomy = anat.nid)
 ) ON (cf.nid = cf_a.core_fact)
 LEFT JOIN (
+  core_fact_disease cf_dis
+  JOIN disease dis ON (cf_dis.disease = dis.nid)
+) ON (cf.nid = cf_dis.core_fact)
+LEFT JOIN (
   core_fact_subject_granularity cf_sg
   JOIN subject_granularity sg ON (cf_sg.subject_granularity = sg.nid)
 ) ON (cf.nid = cf_sg.core_fact)
@@ -108,6 +116,7 @@ GROUP BY
   dt.nid, dt.id,
   ff.nid, ff.id,
   anat.nid, anat.id,
+  dis.nid, dis.id,
   sg.nid, sg.id,
   ss.nid, ss.id
 ;

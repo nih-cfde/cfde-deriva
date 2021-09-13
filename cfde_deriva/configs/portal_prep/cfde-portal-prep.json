@@ -3176,6 +3176,11 @@
                   "type": "integer"
                },
                {
+                  "name": "disease_nid",
+                  "description": "The numeric ID for a biosample or subject disease code",
+                  "type": "integer"
+               },
+               {
                   "name": "granularity_nid",
                   "description": "The numeric ID for granularity of described subjects",
                   "type": "integer"
@@ -3238,6 +3243,11 @@
                   "type": "string"
                },
                {
+                  "name": "disease_id",
+                  "description": "A CFDE CV term for biosample or subject disease codes",
+                  "type": "string"
+               },
+               {
                   "name": "granularity_id",
                   "description": "A CFDE CV term for granularity of described subjects",
                   "type": "string"
@@ -3274,6 +3284,7 @@
                "data_type_nid",
                "file_format_nid",
                "anatomy_nid",
+               "disease_nid",
                "granularity_nid",
                "species_nid"
             ],
@@ -3329,6 +3340,15 @@
                   "reference": {
                      "title": "Anatomy",
                      "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease_nid",
+                  "constraint_name": "level1_stats_disease_fkey",
+                  "reference": {
+                     "title": "Disease",
+                     "resource": "disease",
                      "fields": "nid"
                   }
                },

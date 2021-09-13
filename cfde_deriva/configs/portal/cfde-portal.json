@@ -5894,6 +5894,11 @@
                   "type": "integer"
                },
                {
+                  "name": "disease_nid",
+                  "description": "The numeric ID for a biosample or subject disease code",
+                  "type": "integer"
+               },
+               {
                   "name": "granularity_nid",
                   "description": "The numeric ID for granularity of described subjects",
                   "type": "integer"
@@ -5956,6 +5961,11 @@
                   "type": "string"
                },
                {
+                  "name": "disease_id",
+                  "description": "A CFDE CV term for biosample or subject disease codes",
+                  "type": "string"
+               },
+               {
                   "name": "granularity_id",
                   "description": "A CFDE CV term for granularity of described subjects",
                   "type": "string"
@@ -5992,6 +6002,7 @@
                "data_type_nid",
                "file_format_nid",
                "anatomy_nid",
+               "disease_nid",
                "granularity_nid",
                "species_nid"
             ],
@@ -6051,6 +6062,15 @@
                   }
                },
                {
+                  "fields": "disease_nid",
+                  "constraint_name": "level1_stats_disease_fkey",
+                  "reference": {
+                     "title": "Disease",
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "granularity_nid",
                   "constraint_name": "level1_stats_granularity_fkey",
                   "reference": {
@@ -6104,6 +6124,10 @@
                      "comment": "An anatomy CV term associated with a set of C2M2 entities.",
                      "source": [{"outbound": ["CFDE", "level1_stats_anatomy_fkey"]}, "nid"]
                   },
+                  "S_disease": {
+                     "comment": "A disease CV term associated with a set of C2M2 entities.",
+                     "source": [{"outbound": ["CFDE", "level1_stats_disease_fkey"]}, "nid"]
+                  },
                   "S_granularity": {
                      "comment": "A subject granularity CV term associated with a set of C2M2 entities.",
                      "source": [{"outbound": ["CFDE", "level1_stats_granularity_fkey"]}, "nid"]
@@ -6122,6 +6146,7 @@
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_granularity"},
                   {"sourcekey": "S_species"},
                   {"source": "num_files"},
@@ -6135,6 +6160,7 @@
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_granularity"},
                   {"sourcekey": "S_species"},
                   {
@@ -6153,6 +6179,7 @@
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_disease"},
                   {"sourcekey": "S_granularity"},
                   {"sourcekey": "S_species"},
                   {"source": "num_files"},
