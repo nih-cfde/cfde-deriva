@@ -101,17 +101,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -319,7 +308,13 @@
                "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5"],
                "fkeys": false,
                "sources": {
-                  "search-box": {"or": [ {"source": "kw", "markdown_name": "file metadata, anatomy, taxonomy", "comment": "file name, format, data-type, assay-type, anatomy, taxonomy, subject granularity, project, or collection keywords"} ]},
+                  "search-box": {"or": [
+                     {
+                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
+                        "markdown_name": "project, collection, or C2M2 CV terms",
+                        "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
+                     }
+                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
                   },
@@ -636,17 +631,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -824,7 +808,13 @@
                "columns": true,
                "fkeys": false,
                "sources": {
-                  "search-box": {"or": [ {"source": "kw", "markdown_name": "biosample, file, subject metadata", "comment": "biosample identifers/anatomy, file format/assay/data type, subject granularity/role/taxonomy, project, collection keywords"} ]},
+                  "search-box": {"or": [
+                     {
+                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
+                        "markdown_name": "project, collection, or C2M2 CV terms",
+                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                     }
+                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
                   },
@@ -1091,17 +1081,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1239,7 +1218,13 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "search-box": {"or": [ {"source": "kw", "markdown_name": "subject, biosample, file metadata", "comment": "subject identifiers/granularity/role/taxonomy, biosample anatomy, file format/assay/data type, project, collection keywords"} ]},
+                  "search-box": {"or": [
+                     {
+                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
+                        "markdown_name": "project, collection, or C2M2 CV terms",
+                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                     }
+                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
                   },
@@ -1739,6 +1724,17 @@
                "columns": true,
                "fkeys": false,
                "sources": {
+                  "search-box": {"or": [
+                     {
+                        "source": [
+                           "name",
+                           "abbreviation",
+                           "description",
+                           "id"
+                        ],
+                        "markdown_name": "project keywords"
+                     }
+                  ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the project ID.",
                      "source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "nid"]
@@ -2331,6 +2327,13 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "search-box": {"or": [
+                     {
+                        "source": [ "kw" ],
+                        "markdown_name": "project, collection, or C2M2 CV terms",
+                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                     }
+                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
                   },

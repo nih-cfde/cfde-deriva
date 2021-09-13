@@ -780,12 +780,6 @@
                      "unique": true
                   },
                   "derivation_sql_path": "file_id.sql"
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "file_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -929,12 +923,6 @@
                      "unique": true
                   },
                   "derivation_sql_path": "biosample_id.sql"
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "biosample_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -1060,12 +1048,6 @@
                      "unique": true
                   },
                   "derivation_sql_path": "subject_id.sql"
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "subject_kw.sql"
                }
             ],
             "missingValues": [ "" ],
