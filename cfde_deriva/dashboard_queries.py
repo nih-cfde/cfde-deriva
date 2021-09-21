@@ -6,7 +6,7 @@
 import sys
 import os
 import json
-from deriva.core import ErmrestCatalog, urlquote, DEFAULT_HEADERS, DEFAULT_SESSION_CONFIG
+from deriva.core import ErmrestCatalog, urlquote, DEFAULT_HEADERS, DEFAULT_SESSION_CONFIG, get_credential
 from deriva.core.datapath import Min, Max, Cnt, CntD, Avg, Sum, Bin
 
 ######
@@ -68,6 +68,16 @@ def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
     queryobj.path = queryobj.path.link(
         data_type,
         on=( queryobj.path.level1_stats.data_type_id == data_type.id ),
+        join_type= 'left' if show_nulls else ''
+    )
+
+def _add_disease_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'disease' in queryobj.path.table_instances:
+        return
+    disease = queryobj.helper.builder.CFDE.disease
+    queryobj.path = queryobj.path.link(
+        disease,
+        on=( queryobj.path.level1_stats.disease_id == disease.id ),
         join_type= 'left' if show_nulls else ''
     )
 
@@ -190,6 +200,13 @@ class StatsQuery (object):
                 lambda path: path.data_type.column_definitions['name'].alias('data_type_name'),
             ]
         ),
+        'disease': (
+            _add_disease_leaf, [
+                lambda path: path.level1_stats.disease_id,
+            ], [
+                lambda path: path.disease.column_definitions['name'].alias('disease_name'),
+            ]
+        ),
         'species': (
             _add_species_leaf, [
                 lambda path: path.species.id.alias('species_id'),
@@ -296,10 +313,10 @@ class StatsQuery (object):
 
 class DashboardQueryHelper (object):
 
-    def __init__(self, hostname, catalogid, scheme='https', caching=True):
+    def __init__(self, hostname, catalogid, scheme='https', caching=True, credential=None):
         session_config = DEFAULT_SESSION_CONFIG.copy()
         session_config["allow_retry_on_all_methods"] = True
-        self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config)
+        self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config, credentials=credential)
         self.builder = self.catalog.getPathBuilder()
         self.cfde_schema = self.catalog.getCatalogModel().schemas['CFDE']
         if 'core_fact' not in self.cfde_schema.tables:
@@ -312,7 +329,15 @@ class DashboardQueryHelper (object):
             for row in self.list_projects(use_root_projects=True)
         }
 
-        nid_for_parent_proj = projects[('https://www.lincsproject.org/', 'LINCS')]['nid']
+        for proj in [
+                ('tag:hmpdacc.org,2021-08-04:', 'HMP'),
+                ('tag:hmpdacc.org,2021-06-04:', 'HMP'),
+                ('https://www.lincsproject.org/', 'LINCS'),
+                ('https://www.metabolomicsworkbench.org/', 'PPR00001'),
+        ]:
+            if proj in projects:
+                nid_for_parent_proj = projects[proj]['nid']
+                break
 
         # use list() to convert each ResultSet
         # for easier JSON serialization...
@@ -334,6 +359,7 @@ class DashboardQueryHelper (object):
             'file_stats_assaytype_project': list(StatsQuery(self).entity('file').dimension('assay_type').dimension('project_root').fetch()),
             'file_stats_datatype_species': list(StatsQuery(self).entity('file').dimension('data_type').dimension('species').fetch()),
             'file_stats_datatype_project': list(StatsQuery(self).entity('file').dimension('data_type').dimension('project_root').fetch()),
+            'file_stats_datatype_disease': list(StatsQuery(self).entity('file').dimension('data_type').dimension('disease').fetch()),
 
             'biosample_stats_anatomy_assaytype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('assay_type').fetch()),
             'biosample_stats_anatomy_datatype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('data_type').fetch()),
@@ -344,6 +370,7 @@ class DashboardQueryHelper (object):
             'biosample_stats_assaytype_project': list(StatsQuery(self).entity('biosample').dimension('assay_type').dimension('project_root').fetch()),
             'biosample_stats_datatype_species': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('species').fetch()),
             'biosample_stats_datatype_project': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('project_root').fetch()),
+            'biosample_stats_datatype_disease': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('disease').fetch()),
 
             'subject_stats_anatomy_assaytype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('assay_type').fetch()),
             'subject_stats_anatomy_datatype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('data_type').fetch()),
@@ -354,6 +381,7 @@ class DashboardQueryHelper (object):
             'subject_stats_assaytype_project': list(StatsQuery(self).entity('subject').dimension('assay_type').dimension('project_root').fetch()),
             'subject_stats_datatype_species': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('species').fetch()),
             'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
+            'subject_stats_datatype_disease': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('disease').fetch()),
 
         }
         print(json.dumps(results, indent=2))
@@ -424,8 +452,9 @@ class DashboardQueryHelper (object):
 def main():
     """Runs demo of catalog dashboard queries."""
     hostname = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
+    credential = get_credential(hostname)
     catalogid = os.getenv('DERIVA_CATALOGID', '1')
-    db = DashboardQueryHelper(hostname, catalogid)
+    db = DashboardQueryHelper(hostname, catalogid, credential=credential)
     db.run_demo()
     return 0
 
