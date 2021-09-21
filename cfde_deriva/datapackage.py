@@ -182,6 +182,9 @@ class CfdeDataPackage (object):
             baseline_tnames.difference_update({
                 'subject_granularity',
                 'subject_role',
+                'sex',
+                'race',
+                'ethnicity',
             })
         candidate_tnames = set(candidate.doc_cfde_schema.tables.keys())
 
@@ -1090,9 +1093,152 @@ LIMIT 1;
                     table_error_callback(table.name, resource.get("path", None), str(e))
                 raise
 
-    def sqlite_do_etl(self, conn, do_etl_tables=True, do_etl_columns=True, progress=None):
-        """Do ETL described in our customized datapackage
+    def generate_resource_etl_sql(self, source_dp, source_sql_schema, resource):
+        """Return SQL to perform ETL for resource/table
 
+        :param source_dp: the source model, e.g. a submission datapackage
+        :param source_sql_schema: the source schema as attached, e.g. 'submission'
+        :param resource: the tabular resource in self.package_def
+        """
+        path = resource['derivation_sql_path']
+        tname = resource["name"]
+        dst_table = self.doc_cfde_schema.tables[tname]
+
+        if path is not None:
+            # use the custom SQL embedded in the package
+            return self.package_filename.get_data_str(path)
+
+        core_fact_assoc_arrays = {
+            'project': 'projects',
+            'dcc': 'dccs',
+            'anatomy': 'anatomies',
+            'disease': 'diseases',
+            'substance': 'substances',
+            'gene': 'genes',
+            'sex': 'sexes',
+            'race': 'races',
+            'ethnicity': 'ethnicities',
+            'subject_role': 'subject_roles',
+            'subject_granularity': 'subject_granularities',
+            'subject_species': 'subject_species',
+            'ncbi_taxonomy': ('ncbi_taxon', 'ncbi_taxons'),
+            'assay_type': 'assay_types',
+            'file_format': 'file_formats',
+            'compression_format': 'compression_formats',
+            'data_type': 'data_types',
+            'mime_type': 'mime_types',
+        }
+        if tname.startswith('core_fact_') and tname[10:] in core_fact_assoc_arrays:
+            # use built-in template to unpack core_fact arrays as associations
+            acol = core_fact_assoc_arrays[tname[10:]]
+            if isinstance(acol, tuple):
+                # use custom vcol,acol pair for this assoc table
+                vcol, acol = acol
+            else:
+                # vcol is encoded in assoc table name
+                vcol = tname[10:]
+            return """
+INSERT INTO %(tname)s (core_fact, %(vcol)s)
+SELECT s.nid, j.value
+FROM core_fact s
+JOIN json_each(s.%(acol)s) j
+WHERE True;
+""" % {
+    "tname": tname,
+    "vcol": vcol,
+    "acol": acol,
+}
+
+        if tname in source_dp.doc_cfde_schema.tables:
+            # build default SQL to copy with fkey translation
+            # basic dst columns must exist in src table
+            # every dst foreign-key must exist in src with matching constraint-name
+            src_table = source_dp.doc_cfde_schema.tables[tname]
+
+            # some reusable bits for templating
+            parts = {
+                "srcschema": sql_identifier(source_sql_schema),
+                "tname": sql_identifier(tname),
+            }
+
+            # build a map of select expressions for dst columns governed by fkeys
+            src_fkeys = { fkey.constraint_name for fkey in src_table.foreign_keys }
+            selects = {
+                fkc.name: "%(talias)s.%(pkcname)s" % {
+                    "talias": sql_identifier(fkey.constraint_name),
+                    "pkcname": sql_identifier(pkc.name),
+                }
+                for fkey in dst_table.foreign_keys
+                for fkc, pkc in fkey.column_map.items()
+                if fkey.constraint_name in src_fkeys
+            }
+            # add custom SQL expressions embedded in dst column def
+            for field in resource['schema']['fields']:
+                if "derivation_sql_select" in field:
+                    selects[field["name"]] = field["derivation_sql_select"]
+            # add regular column copies by default
+            for c in dst_table.columns:
+                if c.name in src_table.columns.elements:
+                    selects.setdefault(c.name, "src.%s" % sql_identifier(c.name))
+
+            def fkey_join(fkey):
+                # generate join clause for a foreign key in source model
+                fkparts = dict(**parts, **{
+                    "pktname": sql_identifier(fkey.pk_table.name),
+                    "talias": sql_identifier(fkey.constraint_name),
+                })
+                return "LEFT JOIN %(srcschema)s.%(pktname)s %(talias)s ON (%(conds)s)" % dict(
+                    **fkparts,
+                    **{
+                        "conds": " AND ".join([
+                            "src.%(fkcname)s = %(talias)s.%(pkcname)s" % dict(**fkparts, **{
+                                "fkcname": sql_identifier(fkc.name),
+                                "pkcname": sql_identifier(pkc.name),
+                            })
+                            for fkc, pkc in fkey.column_map.items()
+                        ])
+                    }
+                )
+
+            return """
+INSERT INTO %(tname)s (
+  %(dstcolumns)s
+)
+SELECT
+  %(selects)s
+FROM %(srcschema)s.%(tname)s src
+%(joins)s;
+""" % {
+    "dstcolumns": ",\n  ".join([
+        sql_identifier(c.name)
+        for c in dst_table.columns
+        if c.name in selects
+    ]),
+    "selects": ",\n  ".join([
+        selects[c.name]
+        for c in dst_table.columns
+        if c.name in selects
+    ]),
+    "srcschema": sql_identifier(source_sql_schema),
+    "tname": sql_identifier(tname),
+    "joins": "\n".join([
+        fkey_join(fkey)
+        for fkey in src_table.foreign_keys
+    ] + [
+        field["derivation_sql_join"]
+        for field in resource["schema"]["fields"]
+        if "derivation_sql_join" in field
+    ]),
+}
+        #
+        else:
+            raise NotImplementedError('cannot determine ETL SQL for resource %(name)s' % resource)
+
+    def sqlite_do_etl(self, conn, source_dp, source_sql_schema, do_etl_tables=True, do_etl_columns=True, progress=None):
+        """Do ETL described in self, e.g. a portal-prep datapackage
+
+        :param source_dp: the source model, e.g. a submission datapackage
+        :param source_sql_schema: the source schema as attached, e.g. 'submission'
         :param do_etl_tables: Do normal ETL table processing (default True)
         :param do_etl_columns: Do normal ETL column processing (default True)
         :param progress: Dictionary to mutate with progress/restart markers (default None)
@@ -1116,14 +1262,14 @@ LIMIT 1;
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename in { portal_schema_json, portal_prep_schema_json }:
+        if not self.package_filename in { portal_prep_schema_json }:
             raise ValueError('sqlite_do_etl() is only valid for built-in datapackages')
         for resource in self.package_def['resources']:
             if 'derivation_sql_path' in resource and do_etl_tables:
                 if progress.setdefault("tables", {}).get(resource["name"], False):
                     logger.info('Skipping table-generating ETL for %s due to restart marker' % resource['name'])
                     continue
-                sql = self.package_filename.get_data_str(resource['derivation_sql_path'])
+                sql = self.generate_resource_etl_sql(source_dp, source_sql_schema, resource)
                 conn.execute('DELETE FROM %s' % sql_identifier(resource['name']),)
                 logger.debug('Running table-generating ETL for %s...' % sql_identifier(resource['name']))
                 try:

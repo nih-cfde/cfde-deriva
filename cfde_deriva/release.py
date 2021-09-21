@@ -288,10 +288,9 @@ class Release (object):
             # do this once w/ all content now loaded in sqlite
             logger.info('Preparing derived data...')
             Submission.prepare_sqlite_derived_data(
-                portal_prep_schema_json,
                 self.portal_prep_sqlite_filename,
-                attach={'submission': self.ingest_sqlite_filename},
                 progress=progress.setdefault('etl', {}),
+                attach={'submission': self.ingest_sqlite_filename},
             )
             logger.info('Uploading all release content...')
             self.dump_progress(progress)

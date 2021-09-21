@@ -254,13 +254,19 @@ class CatalogConfigurator (object):
                                 "children": [
                                     { "name": "Anatomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:anatomy" },
                                     { "name": "Assay Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:assay_type" },
+                                    { "name": "Compound", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:compound" },
                                     { "name": "Data Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:data_type" },
                                     { "name": "Disease", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:disease" },
+                                    { "name": "Ethnicity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ethnicity" },
                                     { "name": "File Format", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:file_format" },
+                                    { "name": "Gene", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:gene" },
                                     { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
+                                    { "name": "Race", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:race" },
+                                    { "name": "Sex", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:sex" },
                                     { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
+                                    { "name": "Substance", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:substance" },
                                 ]
                             },
                             { "name": "ID Namespace", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:id_namespace" },
@@ -595,7 +601,7 @@ class RegistryConfigurator (CatalogConfigurator):
                 #{ "name": "Enrolled namespaces", "url": "/chaise/recordset/#registry/CFDE:id_namespace" },
                 { "name": "Releases", "url": "/chaise/recordset/#registry/CFDE:release" },
                 {
-                    "name": "Vocabulary",
+                    "name": "Submission System Vocabulary",
                     "children": [
                         { "name": "Datapackage status", "url": "/chaise/recordset/#registry/CFDE:datapackage_status" },
                         { "name": "Table status", "url": "/chaise/recordset/#registry/CFDE:datapackage_table_status" },
@@ -603,6 +609,26 @@ class RegistryConfigurator (CatalogConfigurator):
                         { "name": "Group role", "url": "/chaise/recordset/#registry/CFDE:group_role" },
                         #{ "name": "Namespace role", "url": "/chaise/recordset/#registry/CFDE:id_namespace_role" },
                         { "name": "Release status", "url": "/chaise/recordset/#registry/CFDE:release_status" },
+                    ]
+                },
+                {
+                    "name": "C2M2 Vocabulary",
+                    "children": [
+                        { "name": "Anatomy", "url": "/chaise/recordset/#registry/CFDE:anatomy" },
+                        { "name": "Assay Type", "url": "/chaise/recordset/#registry/CFDE:assay_type" },
+                        { "name": "Compound", "url": "/chaise/recordset/#registry/CFDE:compound" },
+                        { "name": "Data Type", "url": "/chaise/recordset/#registry/CFDE:data_type" },
+                        { "name": "Disease", "url": "/chaise/recordset/#registry/CFDE:disease" },
+                        { "name": "Ethnicity", "url": "/chaise/recordset/#registry/CFDE:ethnicity" },
+                        { "name": "File Format", "url": "/chaise/recordset/#registry/CFDE:file_format" },
+                        { "name": "Gene", "url": "/chaise/recordset/#registry/CFDE:gene" },
+                        { "name": "MIME Type", "url": "/chaise/recordset/#registry/CFDE:mime_type" },
+                        { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#registry/CFDE:ncbi_taxonomy" },
+                        { "name": "Race", "url": "/chaise/recordset/#registry/CFDE:race" },
+                        { "name": "Sex", "url": "/chaise/recordset/#registry/CFDE:sex" },
+                        { "name": "Subject Granularity", "url": "/chaise/recordset/#registry/CFDE:subject_granularity" },
+                        { "name": "Subject Role", "url": "/chaise/recordset/#registry/CFDE:subject_role" },
+                        { "name": "Substance", "url": "/chaise/recordset/#registry/CFDE:substance" },
                     ]
                 },
             ]

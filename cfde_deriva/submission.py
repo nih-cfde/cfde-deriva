@@ -318,7 +318,7 @@ class Submission (object):
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
-            self.prepare_sqlite_derived_data(portal_prep_schema_json, self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
+            self.prepare_sqlite_derived_data(self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
             self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
 
             # this needs project_root from prepare_sqlite_derived_data...
@@ -783,7 +783,17 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                 ))
 
     @classmethod
-    def prepare_sqlite_derived_data(cls, schema_json, sqlite_filename, progress=None, attach={}):
+    def _test_get_sqlite_etl_sql(cls):
+        submission_dp = CfdeDataPackage(submission_schema_json)
+        prep_dp = CfdeDataPackage(portal_prep_schema_json)
+        return [
+            prep_dp.generate_resource_etl_sql(submission_dp, 'submission', resource)
+            for resource in prep_dp.package_def['resources']
+            if 'derivation_sql_path' in resource
+        ]
+
+    @classmethod
+    def prepare_sqlite_derived_data(cls, sqlite_filename, progress=None, attach={}):
         """Prepare derived content via embedded SQL ETL 
 
         This method will clear and recompute the derived results
@@ -792,7 +802,9 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
         """
         if progress is None:
             progress = dict()
-        dp = CfdeDataPackage(schema_json)
+
+        submission_dp = CfdeDataPackage(submission_schema_json)
+        prep_dp = CfdeDataPackage(portal_prep_schema_json)
 
         def json_sorted(j):
             if j is None:
@@ -871,7 +883,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             conn.create_aggregate('cfde_keywords_agg', -1, cfde_keywords_agg)
             conn.create_aggregate('cfde_keywords_merge_agg', -1, cfde_keywords_merge_agg)
             conn.set_trace_callback(logger.debug)
-            dp.sqlite_do_etl(conn, progress=progress)
+            prep_dp.sqlite_do_etl(conn, submission_dp, 'submission', progress=progress)
 
     @classmethod
     def extract_catalog_id(cls, server, catalog_url):
@@ -972,7 +984,11 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     'file_format',
                     'mime_type',
                     'ncbi_taxonomy',
-                    # don't need to update subject_role/subject_granularity which are closed enums for the DCCs...
+                    'compound',
+                    'substance',
+                    'gene',
+                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity
+                    # which are closed enums for the DCCs...
                 }
             )
             logger.info('Recording submission vocabulary usage in registry...')
@@ -989,6 +1005,12 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     ("""  SELECT v.id FROM subject_disease a   JOIN disease v ON (a.disease = v.nid)
                     UNION SELECT v.id FROM biosample_disease a JOIN disease v ON (a.disease = v.nid)""",
                      'datapackage_disease', 'disease'),
+                    ("""  SELECT v1.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)
+                    UNION SELECT v1.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)""",
+                     'datapackage_compound', 'compound'),
+                    ("""  SELECT v2.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid)
+                    UNION SELECT v2.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid)""",
+                     'datapackage_substance', 'substance'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)',
                      'datapackage_file_format', 'file_format'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN mime_type v ON (cf.mime_type = v.nid)',
@@ -997,8 +1019,16 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                      'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
                     ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN subject_granularity v ON (cf.subject_granularity = v.nid)',
                      'datapackage_subject_granularity', 'subject_granularity'),
+                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN sex v ON (cf.sex = v.nid)',
+                     'datapackage_sex', 'sex'),
+                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN race v ON (cf.race = v.nid)',
+                     'datapackage_race', 'race'),
+                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN ethnicity v ON (cf.ethnicity = v.nid)',
+                     'datapackage_ethnicity', 'ethnicity'),
                     ('SELECT v.id FROM subject_role_taxonomy a JOIN subject_role v ON (a.role = v.nid)',
                      'datapackage_subject_role', 'subject_role'),
+                    ("""  SELECT v.id FROM biosample_gene a JOIN gene v ON (a.gene = v.nid)""",
+                     'datapackage_gene', 'gene'),
             ]:
                 try:
                     cur.execute("""
@@ -1040,6 +1070,12 @@ def main(subcommand, *args):
 
     """
     init_logging(logging.INFO)
+
+    # unit test doesn't need security, registry context, etc
+    if subcommand == 'test_sqlite_etl_sql':
+        result = '\n\n'.join(Submission._test_get_sqlite_etl_sql())
+        sys.stdout.write(result)
+        return 0
 
     servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
 

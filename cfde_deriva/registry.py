@@ -716,6 +716,7 @@ def main(servername, subcommand, catalog_id=None):
         dp.apply_custom_config()
     elif subcommand == 'reprovision':
         dp.provision(alter=True)
+        dp.set_catalog(catalog, registry) # to force model reload
         dp.load_data_files(onconflict='update')
         dp.apply_custom_config()
     elif subcommand == 'reconfigure':

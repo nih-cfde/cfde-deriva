@@ -1,9 +1,11 @@
 -- translate submitted links
 INSERT INTO file_describes_subject (
+  nid,
   file,
   subject
 )
 SELECT
+  fds.nid,
   f.nid,
   s.nid
 FROM submission.file_describes_subject fds

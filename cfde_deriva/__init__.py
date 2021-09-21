@@ -1,7 +1,7 @@
 
 # not much here
 
-__version__ = '2.0'
+__version__ = '3.0'
 
 # use the modules you want...
 
