@@ -5878,7 +5878,7 @@
                {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5886,7 +5886,7 @@
                {
                   "name": "dccs",
                   "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5895,7 +5895,7 @@
                {
                   "name": "diseases",
                   "description": "The numeric ID of the disease terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5903,7 +5903,7 @@
                {
                   "name": "substances",
                   "description": "The numeric ID of the substance terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5911,7 +5911,7 @@
                {
                   "name": "genes",
                   "description": "The numeric ID of gene qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5920,7 +5920,7 @@
                {
                   "name": "sexes",
                   "description": "The numeric ID of the sex terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5928,7 +5928,7 @@
                {
                   "name": "races",
                   "description": "The numeric ID of the race terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5936,7 +5936,7 @@
                {
                   "name": "ethnicities",
                   "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5944,7 +5944,7 @@
                {
                   "name": "subject_roles",
                   "description": "The numeric ID of subject_role terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5952,7 +5952,7 @@
                {
                   "name": "subject_granularities",
                   "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5960,7 +5960,7 @@
                {
                   "name": "subject_species",
                   "description": "The numeric ID of subject-species terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5968,7 +5968,7 @@
                {
                   "name": "ncbi_taxons",
                   "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5977,7 +5977,7 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5986,7 +5986,7 @@
                {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -5994,7 +5994,7 @@
                {
                   "name": "file_formats",
                   "description": "The numeric ID of file_format terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -6002,7 +6002,7 @@
                {
                   "name": "compression_formats",
                   "description": "The numeric ID of compression_format terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -6010,7 +6010,7 @@
                {
                   "name": "data_types",
                   "description": "The numeric ID of data_type terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -6018,7 +6018,7 @@
                {
                   "name": "mime_types",
                   "description": "The numeric ID of mime_type terms qualifying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
