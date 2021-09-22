@@ -11,6 +11,8 @@ HOST_TO_GCS_SCOPES = {
     "app.nih-cfde.org": "https://auth.globus.org/scopes/d4c89edc-a22c-4bc3-bfa2-bca5fd19b404/https",
     "app-dev": "https://auth.globus.org/scopes/36530efa-a1e3-45dc-a6e7-9560a8e9ac49/https",
     "app-dev.nih-cfde.org": "https://auth.globus.org/scopes/36530efa-a1e3-45dc-a6e7-9560a8e9ac49/https",
+    "app-dev-new": "https://auth.globus.org/scopes/36530efa-a1e3-45dc-a6e7-9560a8e9ac49/https",
+    "app-dev-new.nih-cfde.org": "https://auth.globus.org/scopes/36530efa-a1e3-45dc-a6e7-9560a8e9ac49/https",
     "app-staging": "https://auth.globus.org/scopes/922ee14d-49b7-4d69-8f1c-8e2ff8207542/https",
     "app-staging.nih-cfde.org": "https://auth.globus.org/scopes/922ee14d-49b7-4d69-8f1c-8e2ff8207542/https"
 }
@@ -20,6 +22,8 @@ HOST_TO_GCS_ENDPOINTS = {
     "app.nih-cfde.org": "https://g-882990.aa98d.08cc.data.globus.org",
     "app-dev": "https://g-c7e94.f19a4.5898.data.globus.org",
     "app-dev.nih-cfde.org": "https://g-c7e94.f19a4.5898.data.globus.org",
+    "app-dev-new": "https://g-c7e94.f19a4.5898.data.globus.org",
+    "app-dev-new.nih-cfde.org": "https://g-c7e94.f19a4.5898.data.globus.org",
     "app-staging": "https://g-3368fe.c0aba.03c0.data.globus.org",
     "app-staging.nih-cfde.org": "https://g-3368fe.c0aba.03c0.data.globus.org"
 }
