@@ -2582,6 +2582,26 @@
                         "nid"
                      ]
                   },
+                  "S_substance": {
+                     "markdown_name": "Substance",
+                     "comment": "A substance linked to a biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "A gene linked to a biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_creation_time": {
                      "comment": "The time when the collection was created.",
                      "source": "creation_time"
@@ -2658,6 +2678,8 @@
                   {"sourcekey": "S_anatomy", "open": true},
                   {"sourcekey": "S_ncbi_taxons"},
                   {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_gene"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularities"},
@@ -2999,9 +3021,10 @@
                      "markdown_name": "Is Bundle",
                      "comment": "The file is a bundle (archive) specifying its content manifest as a collection.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
                         "is_bundle"
-                     ]
+                     ],
+                     "entity": false
                   },
                   "S_bundle_collection": {
                      "markdown_name": "Bundle Collection",
@@ -3158,6 +3181,26 @@
                         "nid"
                      ]
                   },
+                  "S_substance": {
+                     "markdown_name": "Substance",
+                     "comment": "A substance linked to the biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "A gene linked to the biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_part_of_collections": {
                      "markdown_name": "Part of Collection",
                      "comment": "Collections with the file record as a directly or indirectly constituent member.",
@@ -3257,6 +3300,8 @@
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_gene"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularity"},
@@ -3606,7 +3651,7 @@
                         "nid"
                      ]
                   },
-                  "S_disease": {
+                  "S_substance": {
                      "markdown_name": "Substance",
                      "comment": "A substance linked to the biosample.",
                      "source": [
@@ -3669,7 +3714,7 @@
                      "markdown_name": "Age at Sampling",
                      "comment": "The subject age in years when the biosample was taken from a subject.",
                      "source": [
-                        {"sourcekey": "S_subjects"},
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         "age_at_sampling"
                      ]
                   },
@@ -4033,7 +4078,7 @@
                      ]
                   },
                   "S_substance_search": {
-                     "markdown_name": "Disease",
+                     "markdown_name": "Substance",
                      "comment": "A substance linked to the biosample or subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
@@ -4048,6 +4093,16 @@
                      "source": [
                         {"inbound": ["CFDE", "subject_substance_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_substance_substance_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "A gene linked to the biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
                         "nid"
                      ]
                   },
@@ -4174,7 +4229,7 @@
                   },
                   "S_age_at_enrollment": {
                      "comment": "The age in years of this subject when they were first enrolled in the rpimary project within with they were studied.",
-                     "source": "creation_time"
+                     "source": "age_at_enrollment"
                   },
                   "S_biosamples": {
                      "comment": "Biosamples derived from the subject.",
@@ -4292,6 +4347,7 @@
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_substance_search"},
+                  {"sourcekey": "S_gene"},
                   {"sourcekey": "S_role"},
                   {"sourcekey": "S_anatomy_slim"},
                   {"sourcekey": "S_anatomy"},
@@ -6406,7 +6462,7 @@
                      "source": [{"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]}, "nid"]
                   },
                   "S_is_bundle": {
-                     "source": "is_bundle"
+                     "source": ["is_bundle"]
                   },
                   "S_compression_formats": {
                      "markdown_name": "Compression Format",
