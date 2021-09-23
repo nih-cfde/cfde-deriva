@@ -1021,7 +1021,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                      'datapackage_subject_granularity', 'subject_granularity'),
                     ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN sex v ON (cf.sex = v.nid)',
                      'datapackage_sex', 'sex'),
-                    ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN race v ON (cf.race = v.nid)',
+                    ('SELECT v.id FROM subject_race a JOIN race v ON (a.race = v.nid)',
                      'datapackage_race', 'race'),
                     ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN ethnicity v ON (cf.ethnicity = v.nid)',
                      'datapackage_ethnicity', 'ethnicity'),

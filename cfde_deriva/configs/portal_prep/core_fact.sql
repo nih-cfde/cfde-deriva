@@ -11,7 +11,7 @@ CREATE TEMPORARY TABLE file_facts AS
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
     json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.race) FILTER (WHERE s.race IS NOT NULL), '[]')) AS races,
+    json_sorted(COALESCE(json_group_array(DISTINCT sr.race) FILTER (WHERE sr.race IS NOT NULL), '[]')) AS races,
     json_sorted(COALESCE(json_group_array(DISTINCT s.ethnicity) FILTER (WHERE s.ethnicity IS NOT NULL), '[]')) AS ethnicities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
@@ -33,6 +33,7 @@ CREATE TEMPORARY TABLE file_facts AS
     LEFT JOIN (
       biosample_from_subject bfs
       JOIN subject s ON (bfs.subject = s.nid)
+      LEFT JOIN subject_race sr ON (sr.subject = s.nid)
       LEFT JOIN subject_species ss ON (ss.subject = s.nid)
       LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
       LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
@@ -73,7 +74,6 @@ INSERT INTO core_fact (
     project,
     subject_granularity,
     sex,
-    race,
     ethnicity,
     anatomy,
     assay_type,
@@ -106,7 +106,6 @@ INSERT INTO core_fact (
     project_row,
     subject_granularity_row,
     sex_row,
-    race_row,
     ethnicity_row,
     anatomy_row,
     assay_type_row,
@@ -122,7 +121,6 @@ SELECT
   ff.project,
   subject_granularity,
   sex,
-  race,
   ethnicity,
   anatomy,
   assay_type,
@@ -155,7 +153,6 @@ SELECT
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
-  json_object('nid', rc.nid,'name', rc.name, 'description', rc.description) AS race_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', "at".nid, 'name', "at".name, 'description', "at".description) AS assay_type_row,
@@ -171,7 +168,6 @@ FROM (
     (SELECT j.value FROM json_each(ff.projects) j) AS project,
     CASE WHEN json_array_length(ff.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(ff.subject_granularities) j) ELSE NULL END AS subject_granularity,
     CASE WHEN json_array_length(ff.sexes) = 1 THEN (SELECT j.value FROM json_each(ff.sexes) j) ELSE NULL END AS sex,
-    CASE WHEN json_array_length(ff.races) = 1 THEN (SELECT j.value FROM json_each(ff.races) j) ELSE NULL END AS race,
     CASE WHEN json_array_length(ff.ethnicities) = 1 THEN (SELECT j.value FROM json_each(ff.ethnicities) j) ELSE NULL END AS ethnicity,
     CASE WHEN json_array_length(ff.anatomies) = 1 THEN (SELECT j.value FROM json_each(ff.anatomies) j) ELSE NULL END AS anatomy,
     CASE WHEN json_array_length(ff.assay_types) = 1 THEN (SELECT j.value FROM json_each(ff.assay_types) j) ELSE NULL END AS assay_type,
@@ -205,7 +201,6 @@ JOIN id_namespace n ON (ff.id_namespace = n.nid)
 JOIN project p ON (ff.project = p.nid)
 LEFT JOIN subject_granularity sg ON (ff.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (ff.sex = sx.nid)
-LEFT JOIN race rc ON (ff.race = rc.nid)
 LEFT JOIN ethnicity eth ON (ff.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (ff.anatomy = a.nid)
 LEFT JOIN assay_type "at" ON (ff.assay_type = "at".nid)
@@ -256,7 +251,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
     json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.race) FILTER (WHERE s.race IS NOT NULL), '[]')) AS races,
+    json_sorted(COALESCE(json_group_array(DISTINCT sr.race) FILTER (WHERE sr.race IS NOT NULL), '[]')) AS races,
     json_sorted(COALESCE(json_group_array(DISTINCT s.ethnicity) FILTER (WHERE s.ethnicity IS NOT NULL), '[]')) AS ethnicities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
@@ -280,6 +275,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
   LEFT JOIN (
     biosample_from_subject bfs
     JOIN subject s ON (bfs.subject = s.nid)
+    LEFT JOIN subject_race sr ON (sr.subject = s.nid)
     LEFT JOIN subject_species ss ON (ss.subject = s.nid)
     LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
     LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
@@ -318,7 +314,6 @@ INSERT INTO core_fact (
     project,
     subject_granularity,
     sex,
-    race,
     ethnicity,
     anatomy,
     assay_type,
@@ -351,7 +346,6 @@ INSERT INTO core_fact (
     project_row,
     subject_granularity_row,
     sex_row,
-    race_row,
     ethnicity_row,
     anatomy_row,
     assay_type_row,
@@ -367,7 +361,6 @@ SELECT
   bf.project,
   subject_granularity,
   sex,
-  race,
   ethnicity,
   anatomy,
   assay_type,
@@ -400,7 +393,6 @@ SELECT
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
-  json_object('nid', rc.nid,'name', rc.name, 'description', rc.description) AS race_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', "at".nid, 'name', "at".name, 'description', "at".description) AS assay_type_row,
@@ -416,7 +408,6 @@ FROM (
     (SELECT j.value FROM json_each(bf.projects) j) AS project,
     CASE WHEN json_array_length(bf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(bf.subject_granularities) j) ELSE NULL END AS subject_granularity,
     CASE WHEN json_array_length(bf.sexes) = 1 THEN (SELECT j.value FROM json_each(bf.sexes) j) ELSE NULL END AS sex,
-    CASE WHEN json_array_length(bf.races) = 1 THEN (SELECT j.value FROM json_each(bf.races) j) ELSE NULL END AS race,
     CASE WHEN json_array_length(bf.ethnicities) = 1 THEN (SELECT j.value FROM json_each(bf.ethnicities) j) ELSE NULL END AS ethnicity,
     CASE WHEN json_array_length(bf.anatomies) = 1 THEN (SELECT j.value FROM json_each(bf.anatomies) j) ELSE NULL END AS anatomy,
     CASE WHEN json_array_length(bf.assay_types) = 1 THEN (SELECT j.value FROM json_each(bf.assay_types) j) ELSE NULL END AS assay_type,
@@ -450,7 +441,6 @@ JOIN id_namespace n ON (bf.id_namespace = n.nid)
 JOIN project p ON (bf.project = p.nid)
 LEFT JOIN subject_granularity sg ON (bf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (bf.sex = sx.nid)
-LEFT JOIN race rc ON (bf.race = rc.nid)
 LEFT JOIN ethnicity eth ON (bf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (bf.anatomy = a.nid)
 LEFT JOIN assay_type "at" ON (bf.assay_type = "at".nid)
@@ -499,7 +489,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
     CASE WHEN s.granularity IS NOT NULL THEN json_array(s.granularity) ELSE '[]' END AS subject_granularities,
     CASE WHEN s.sex IS NOT NULL THEN json_array(s.sex) ELSE '[]' END AS sexes,
-    CASE WHEN s.race IS NOT NULL THEN json_array(s.race) ELSE '[]' END AS races,
+    CASE WHEN sr.race IS NOT NULL THEN json_array(sr.race) ELSE '[]' END AS races,
     CASE WHEN s.ethnicity IS NOT NULL THEN json_array(s.ethnicity) ELSE '[]' END AS ethnicities,
     json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
     json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
@@ -513,6 +503,7 @@ CREATE TEMPORARY TABLE subject_facts AS
   FROM subject s
   JOIN project_in_project_transitive pipt ON (s.project = pipt.member_project)
   JOIN dcc d ON (pipt.leader_project = d.project)
+  LEFT JOIN subject_race sr ON (sr.subject = s.nid)
   LEFT JOIN subject_species ss ON (ss.subject = s.nid)
   LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
   LEFT JOIN subject_disease sd ON (sd.subject = s.nid)
@@ -562,7 +553,6 @@ INSERT INTO core_fact (
     project,
     subject_granularity,
     sex,
-    race,
     ethnicity,
     anatomy,
     assay_type,
@@ -595,7 +585,6 @@ INSERT INTO core_fact (
     project_row,
     subject_granularity_row,
     sex_row,
-    race_row,
     ethnicity_row,
     anatomy_row,
     assay_type_row,
@@ -610,7 +599,6 @@ SELECT
   sf.project,
   subject_granularity,
   sex,
-  race,
   ethnicity,
   anatomy,
   assay_type,
@@ -643,7 +631,6 @@ SELECT
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
-  json_object('nid', rc.nid,'name', rc.name, 'description', rc.description) AS race_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', "at".nid, 'name', "at".name, 'description', "at".description) AS assay_type_row,
@@ -659,7 +646,6 @@ FROM (
     (SELECT j.value FROM json_each(sf.projects) j) AS project,
     CASE WHEN json_array_length(sf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(sf.subject_granularities) j) ELSE NULL END AS subject_granularity,
     CASE WHEN json_array_length(sf.sexes) = 1 THEN (SELECT j.value FROM json_each(sf.sexes) j) ELSE NULL END AS sex,
-    CASE WHEN json_array_length(sf.races) = 1 THEN (SELECT j.value FROM json_each(sf.races) j) ELSE NULL END AS race,
     CASE WHEN json_array_length(sf.ethnicities) = 1 THEN (SELECT j.value FROM json_each(sf.ethnicities) j) ELSE NULL END AS ethnicity,
     CASE WHEN json_array_length(sf.anatomies) = 1 THEN (SELECT j.value FROM json_each(sf.anatomies) j) ELSE NULL END AS anatomy,
     CASE WHEN json_array_length(sf.assay_types) = 1 THEN (SELECT j.value FROM json_each(sf.assay_types) j) ELSE NULL END AS assay_type,
@@ -693,7 +679,6 @@ JOIN id_namespace n ON (sf.id_namespace = n.nid)
 JOIN project p ON (sf.project = p.nid)
 LEFT JOIN subject_granularity sg ON (sf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (sf.sex = sx.nid)
-LEFT JOIN race rc ON (sf.race = rc.nid)
 LEFT JOIN ethnicity eth ON (sf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (sf.anatomy = a.nid)
 LEFT JOIN assay_type "at" ON (sf.assay_type = "at".nid)
@@ -1023,7 +1008,6 @@ INSERT INTO core_fact (
     project,
     subject_granularity,
     sex,
-    race,
     ethnicity,
     anatomy,
     assay_type,
@@ -1056,7 +1040,6 @@ INSERT INTO core_fact (
     project_row,
     subject_granularity_row,
     sex_row,
-    race_row,
     ethnicity_row,
     anatomy_row,
     assay_type_row,
@@ -1072,7 +1055,6 @@ SELECT
   colf.project,
   subject_granularity,
   sex,
-  race,
   ethnicity,
   anatomy,
   assay_type,
@@ -1105,7 +1087,6 @@ SELECT
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
-  json_object('nid', rc.nid,'name', rc.name, 'description', rc.description) AS race_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', "at".nid, 'name', "at".name, 'description', "at".description) AS assay_type_row,
@@ -1121,7 +1102,6 @@ FROM (
     (SELECT j.value FROM json_each(colf.projects) j) AS project,
     CASE WHEN json_array_length(colf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(colf.subject_granularities) j) ELSE NULL END AS subject_granularity,
     CASE WHEN json_array_length(colf.sexes) = 1 THEN (SELECT j.value FROM json_each(colf.sexes) j) ELSE NULL END AS sex,
-    CASE WHEN json_array_length(colf.races) = 1 THEN (SELECT j.value FROM json_each(colf.races) j) ELSE NULL END AS race,
     CASE WHEN json_array_length(colf.ethnicities) = 1 THEN (SELECT j.value FROM json_each(colf.ethnicities) j) ELSE NULL END AS ethnicity,
     CASE WHEN json_array_length(colf.anatomies) = 1 THEN (SELECT j.value FROM json_each(colf.anatomies) j) ELSE NULL END AS anatomy,
     CASE WHEN json_array_length(colf.assay_types) = 1 THEN (SELECT j.value FROM json_each(colf.assay_types) j) ELSE NULL END AS assay_type,
@@ -1155,7 +1135,6 @@ JOIN id_namespace n ON (colf.id_namespace = n.nid)
 LEFT JOIN project p ON (colf.project = p.nid)
 LEFT JOIN subject_granularity sg ON (colf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (colf.sex = sx.nid)
-LEFT JOIN race rc ON (colf.race = rc.nid)
 LEFT JOIN ethnicity eth ON (colf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (colf.anatomy = a.nid)
 LEFT JOIN assay_type "at" ON (colf.assay_type = "at".nid)

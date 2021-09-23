@@ -2490,7 +2490,7 @@
          "profile": "tabular-data-resource",
          "name": "sex",
          "title": "Sex",
-         "path": "subject_sex.tsv",
+         "path": "sex.tsv",
          "description": "Internal CV: The sex of an organism.",
          "schema": {
             "fields": [
@@ -2547,7 +2547,7 @@
          "profile": "tabular-data-resource",
          "name": "race",
          "title": "Race",
-         "path": "subject_race.tsv",
+         "path": "race.tsv",
          "description": "Internal CV: The race of a human.",
          "schema": {
             "fields": [
@@ -2604,7 +2604,7 @@
          "profile": "tabular-data-resource",
          "name": "ethnicity",
          "title": "Ethnicity",
-         "path": "subject_ethnicity.tsv",
+         "path": "ethnicity.tsv",
          "description": "Internal CV: The ethnicity of a human.",
          "schema": {
             "fields": [

@@ -1476,11 +1476,6 @@
                   "type": "integer"
                },
                {
-                  "name": "race",
-                  "description": "The numeric ID of the race term characterizing this subject",
-                  "type": "integer"
-               },
-               {
                   "name": "ethnicity",
                   "description": "The numeric ID of the ethnicity term characterizing this subject",
                   "type": "string"
@@ -1560,14 +1555,6 @@
                   "constraint_name": "subject_sex_fkey",
                   "reference": {
                      "resource": "sex",
-                     "fields": "nid"
-                  }
-               },
-               {
-                  "fields": "race",
-                  "constraint_name": "subject_race_fkey",
-                  "reference": {
-                     "resource": "race",
                      "fields": "nid"
                   }
                },
@@ -2524,7 +2511,49 @@
          "derivation_sql_path": null
       },
    
-      
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_race",
+         "title": "subject_race",
+         "description": "Identification of a C2M2 subject with one or more self-selected races",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID for this subject",
+                  "type": "integer"
+               },
+               {
+                  "name": "race",
+                  "description": "The numeric ID of a race self-identified by this subject",
+                  "type": "integer"
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "race"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "constraint_name": "subject_race_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "race",
+                  "constraint_name": "subject_race_race_fkey",
+                  "reference": {
+                     "resource": "race",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
       {
          "profile": "tabular-data-resource",
          "name": "subject_role_taxonomy",
@@ -2974,11 +3003,6 @@
                   "type": "integer"
                },
                {
-                  "name": "race",
-                  "description": "The numeric ID of the race term qualifying the described subjects.",
-                  "type": "integer"
-               },
-               {
                   "name": "ethnicity",
                   "description": "The numeric ID of the ethnicity term qualifying the described subjects.",
                   "type": "integer"
@@ -3032,11 +3056,6 @@
                {
                   "name": "sex_row",
                   "description": "Denormalized copy of the sex term qualifying the described subjects.",
-                  "type": "object"
-               },
-               {
-                  "name": "race_row",
-                  "description": "Denormalized copy of the race term qualifying the described subjects.",
                   "type": "object"
                },
                {
@@ -3145,14 +3164,6 @@
                   "constraint_name": "core_fact_sex_fkey",
                   "reference": {
                      "resource": "sex",
-                     "fields": "nid"
-                  }
-               },
-               {
-                  "fields": "race",
-                  "constraint_name": "core_fact_race_fkey",
-                  "reference": {
-                     "resource": "race",
                      "fields": "nid"
                   }
                },

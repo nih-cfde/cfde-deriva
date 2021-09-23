@@ -357,11 +357,6 @@
                   "type": "string"
                },
                {
-                  "name": "race",
-                  "description": "The race of this subject",
-                  "type": "string"
-               },
-               {
                   "name": "ethnicity",
                   "description": "The ethnicity of this subject",
                   "type": "string"
@@ -401,13 +396,6 @@
                   "fields": "sex",
                   "reference": {
                      "resource": "sex",
-                     "fields": "id"
-                  }
-               },
-               {
-                  "fields": "race",
-                  "reference": {
-                     "resource": "race",
                      "fields": "id"
                   }
                },
@@ -1815,6 +1803,67 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "subject_race",
+         "title": "subject_race",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Identification of a C2M2 subject with one or more self-selected races",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_local_id",
+                  "description": "The ID of this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "race",
+                  "description": "A race self-identified by this subject",
+                  "type": "string"
+               }
+            ],
+            "primaryKey": [
+               "subject_id_namespace",
+               "subject_local_id",
+               "race"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "constraint_name": "subject_race_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "race",
+                  "constraint_name": "subject_race_race_fkey",
+                  "reference": {
+                     "resource": "race",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_role_taxonomy",
          "title": "subject_role_taxonomy",
          "dialect": {
@@ -2487,7 +2536,7 @@
          "profile": "tabular-data-resource",
          "name": "sex",
          "title": "Sex",
-         "path": "subject_sex.tsv",
+         "path": "sex.tsv",
          "description": "INTERNAL CV: The coded sex of a subject.",
          "schema": {
             "fields": [
@@ -2523,7 +2572,7 @@
          "profile": "tabular-data-resource",
          "name": "race",
          "title": "Race",
-         "path": "subject_race.tsv",
+         "path": "race.tsv",
          "description": "INTERNAL CV: The coded race of a human subject.",
          "schema": {
             "fields": [
@@ -2559,7 +2608,7 @@
          "profile": "tabular-data-resource",
          "name": "ethnicity",
          "title": "Ethnicity",
-         "path": "subject_ethnicity.tsv",
+         "path": "ethnicity.tsv",
          "description": "INTERNAL CV: The coded ethnicity of a human subject.",
          "schema": {
             "fields": [
