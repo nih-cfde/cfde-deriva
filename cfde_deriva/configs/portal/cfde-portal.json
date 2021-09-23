@@ -2484,6 +2484,17 @@
                         "nid"
                      ]
                   },
+                  "S_project_array": {
+                     "markdown_name": "Project",
+                     "comment": "A project which defined the collection.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_project_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_project_project_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
                   "S_dcc": {
                      "markdown_name": "Common Fund Program",
                      "comment": "The Common Fund Program which defined the collection.",
@@ -2493,6 +2504,17 @@
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_dcc_array": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program which defined the collection.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
                   },
                   "S_super_projects": {
                      "markdown_name": "Project",
@@ -2643,14 +2665,8 @@
             "visible_columns": {
                "export": [],
                "compact": [
-                  {
-                     "sourcekey": "S_dcc",
-                     "aggregate": "array_d"
-                  },
-                  {
-                     "sourcekey": "S_project",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_dcc_array"},
+                  {"sourcekey": "S_project_array"},
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
@@ -3064,6 +3080,17 @@
                      ],
                      "entity": true
                   },
+                  "S_dcc_array": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The data coordinating center attributed as source of the file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
                   "S_file_format": {
                      "comment": "The content format of the file.",
                      "source": [
@@ -3234,10 +3261,7 @@
             "visible_columns": {
                "export": [],
                "compact": [
-                  {
-                     "sourcekey": "S_dcc",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
                      "display": {
@@ -3688,6 +3712,17 @@
                         "nid"
                      ]
                   },
+                  "S_dcc_array": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The data coordinating center attributed as source of the biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
                   "S_super_projects": {
                      "markdown_name": "Project",
                      "comment": "The project (or any super-projects) attributed as source of the biosample.",
@@ -3717,6 +3752,15 @@
                         {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         "age_at_sampling"
                      ]
+                  },
+                  "S_age_at_sampling_array": {
+                     "markdown_name": "Age at Sampling",
+                     "comment": "The subject age in years when the biosample was taken from a subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        "age_at_sampling"
+                     ],
+                     "aggregate": "array_d"
                   },
                   "S_described_by_file": {
                      "comment": "Files whose content describes the biosample.",
@@ -3749,10 +3793,7 @@
             "visible_columns": {
                "export": [],
                "compact": [
-                  {
-                     "sourcekey": "S_dcc",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
                      "display": {
@@ -3780,10 +3821,7 @@
                   "local_id",
                   "persistent_id",
                   {"sourcekey": "S_creation_time"},
-                  {
-                     "sourcekey": "S_age_at_sampling",
-                     "aggregate": "array_d"
-                  }
+                  {"sourcekey": "S_age_at_sampling_array"}
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
@@ -4058,6 +4096,17 @@
                         "nid"
                      ]
                   },
+                  "S_dcc_array": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program attributed as source of the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
                   "S_disease_search": {
                      "markdown_name": "Disease",
                      "comment": "A disease linked to the biosample or subject.",
@@ -4163,7 +4212,7 @@
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_subect_role_subject_role_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
                      ]
                   },
@@ -4176,6 +4225,17 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_taxonomy_array": {
+                     "markdown_name": "Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
                   },
                   "S_anatomy_core1": {
                      "source": [
@@ -4290,10 +4350,7 @@
             "visible_columns": {
                "export": [],
                "compact": [
-                  {
-                     "sourcekey": "S_dcc",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
                      "display": {
@@ -4302,10 +4359,7 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
                      }
                   },
-                  {
-                     "sourcekey": "S_taxonomy",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_taxonomy_array"},
                   {
                      "markdown_name": "Granularity",
                      "display": {
@@ -4652,6 +4706,17 @@
                         "nid"
                      ]
                   },
+                  "S_dcc_array": {
+                     "markdown_name": "Common Fund Program",
+                     "comment": "The Common Fund Program containing this project.",
+                     "source": [
+                        {"inbound": ["CFDE", "project_in_project_transitive_member_fkey"]},
+                        {"outbound": ["CFDE", "project_in_project_transitive_leader_fkey"]},
+                        {"inbound": ["CFDE", "dcc_project_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
                   "S_parent_project": {
                      "markdown_name": "Parent Project",
                      "comment": "Direct ancestor of the project.",
@@ -4812,10 +4877,7 @@
             },
             "visible_columns": {
                "compact": [
-                  {
-                     "sourcekey": "S_dcc",
-                     "aggregate": "array_d"
-                  },
+                  {"sourcekey": "S_dcc_array"},
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
