@@ -4856,7 +4856,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "project_in_project",
-         "title": "project_in_project",
+         "title": "Project in Project",
          "description": "Association between a child project and its parent",
          "schema": {
             "fields": [
@@ -4912,7 +4912,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "collection_in_collection",
-         "title": "collection_in_collection",
+         "title": "Collection in Collection",
          "description": "Association between a containing collection (superset) and a contained collection (subset)",
          "schema": {
             "fields": [
@@ -4968,7 +4968,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "file_describes_collection",
-         "title": "file_describes_collection",
+         "title": "File Describes Collection",
          "description": "Association between a summary file and an entire collection described by that file",
          "schema": {
             "fields": [
@@ -5018,7 +5018,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "collection_defined_by_project",
-         "title": "collection_defined_by_project",
+         "title": "Collection Defined by Project",
          "description": "(Shallow) association between a collection and a project that defined it",
          "schema": {
             "fields": [
@@ -5074,7 +5074,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "file_in_collection",
-         "title": "file_in_collection",
+         "title": "File in Collection",
          "description": "Association between a file and a (containing) collection",
          "schema": {
             "fields": [
@@ -5130,7 +5130,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "biosample_in_collection",
-         "title": "biosample_in_collection",
+         "title": "Biosample in Collection",
          "description": "Association between a biosample and a (containing) collection",
          "schema": {
             "fields": [
@@ -5186,7 +5186,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "subject_in_collection",
-         "title": "subject_in_collection",
+         "title": "Subject in Collection",
          "description": "Association between a subject and a (containing) collection",
          "schema": {
             "fields": [
@@ -5242,7 +5242,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "file_describes_biosample",
-         "title": "file_describes_biosample",
+         "title": "File Describes Biosample",
          "description": "Association between a biosample and a file containing information about that biosample",
          "schema": {
             "fields": [
@@ -5292,7 +5292,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "file_describes_subject",
-         "title": "file_describes_subject",
+         "title": "File Describes Subject",
          "description": "Association between a subject and a file containing information about that subject",
          "schema": {
             "fields": [
@@ -5348,7 +5348,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "biosample_from_subject",
-         "title": "biosample_from_subject",
+         "title": "Biosample From Subject",
          "description": "Association between a biosample and its source subject",
          "schema": {
             "fields": [
@@ -5415,7 +5415,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "biosample_disease",
-         "title": "biosample_disease",
+         "title": "Biosample Disease",
          "description": "Association between a C2M2 biosample and a disease known to be associated with that biosample",
          "schema": {
             "fields": [
@@ -5469,7 +5469,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "subject_disease",
-         "title": "subject_disease",
+         "title": "Subject Disease",
          "description": "Association between a C2M2 subject and a disease positively identified in that subject",
          "schema": {
             "fields": [
@@ -5523,7 +5523,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "biosample_substance",
-         "title": "biosample_substance",
+         "title": "Biosample Substance",
          "description": "Association between a C2M2 biosample and a substance known to be associated with that biosample",
          "schema": {
             "fields": [
@@ -5571,7 +5571,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "subject_substance",
-         "title": "subject_substance",
+         "title": "Subject Substance",
          "description": "Association between a C2M2 subject and a substance positively identified in that subject",
          "schema": {
             "fields": [
@@ -5619,7 +5619,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "biosample_gene",
-         "title": "biosample_gene",
+         "title": "Biosample Gene",
          "description": "Association between a C2M2 biosample and a gene known to be associated with that biosample",
          "schema": {
             "fields": [
@@ -5756,7 +5756,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "project_in_project_transitive",
-         "title": "project_in_project_transitive",
+         "title": "Project in Project (Transitive)",
          "description": "Reflexive transitive-closure of project_in_project relationship",
          "schema": {
             "fields": [
@@ -5844,7 +5844,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "collection_in_collection_transitive",
-         "title": "collection_in_collection_transitive",
+         "title": "Collection in Collection (Transitive)",
          "description": "Reflexive transitive-closure of collection_in_collection relationship",
          "schema": {
             "fields": [
