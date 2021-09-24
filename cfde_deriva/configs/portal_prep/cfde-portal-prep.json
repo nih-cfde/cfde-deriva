@@ -1483,7 +1483,8 @@
                {
                   "name": "age_at_enrollment",
                   "description": "The age in years (with a fixed precision of two digits past the decimal point) of this subject when they were first enrolled in the primary project within which they were studied",
-                  "type": "number"
+                  "type": "number",
+                  "derivation_sql_select": "ROUND(src.age_at_enrollment,2)"
                },
                {
                   "name": "creation_time",
@@ -2235,7 +2236,8 @@
                {
                   "name": "age_at_sampling",
                   "description": "The age in years (with a fixed precision of two digits past the decimal point) of this subject when this biosample was taken",
-                  "type": "number"
+                  "type": "number",
+                  "derivation_sql_select": "ROUND(src.age_at_sampling,2)"
                }
             ],
             "primaryKey": [
