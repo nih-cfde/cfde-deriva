@@ -51,7 +51,10 @@ def main(subcommand, *args):
             host = args[0]
             scope = HOST_TO_GCS_SCOPES[host]
             gnl = GlobusNativeLogin()
-            tokens = gnl.login(no_browser=True, no_local_server=True, requested_scopes=(scope, CFDE_DERIVA_SCOPE))
+            tokens = gnl.login(no_browser=True,
+                               no_local_server=True,
+                               refresh_tokens=True,
+                               requested_scopes=(scope, CFDE_DERIVA_SCOPE))
             access_token = gnl.find_access_token_for_scope(scope, tokens)
             print('Logged into host "%s" with scope: %s' % (host, scope))
         else:
