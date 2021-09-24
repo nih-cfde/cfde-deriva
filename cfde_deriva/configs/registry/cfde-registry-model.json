@@ -4019,6 +4019,18 @@
                   "row_markdown_pattern": "{{{full_name}}} ({{{display_name}}})"
                }
             },
+            "visible_foreign_keys": {
+               "*": [
+                  ["CFDE", "saved_query_user_id_fkey"],
+                  ["CFDE", "favorite_dcc_user_id_fkey"],
+                  ["CFDE", "favorite_ncbi_taxonomy_user_id_fkey"],
+                  ["CFDE", "favorite_anatomy_user_id_fkey"],
+                  ["CFDE", "favorite_disease_user_id_fkey"],
+                  ["CFDE", "favorite_assay_type_user_id_fkey"],
+                  ["CFDE", "favorite_data_type_user_id_fkey"],
+                  ["CFDE", "favorite_file_format_user_id_fkey"]
+               ]
+            },
             "visible_columns": {
                "*": [
                   "id",
@@ -4377,6 +4389,7 @@
                   "fields": "dcc",
                   "constraint_name": "favorite_dcc_dcc_fkey",
                   "reference": {
+                     "title": "Favorite Common Fund Program",
                      "resource": "dcc",
                      "fields": "id"
                   },
@@ -4467,6 +4480,7 @@
                   "fields": "anatomy",
                   "constraint_name": "favorite_anatomy_anatomy_fkey",
                   "reference": {
+                     "title": "Favorite Anatomy",
                      "resource": "anatomy",
                      "fields": "id"
                   },
@@ -4557,6 +4571,7 @@
                   "fields": "disease",
                   "constraint_name": "favorite_disease_disease_fkey",
                   "reference": {
+                     "title": "Favorite Disease",
                      "resource": "disease",
                      "fields": "id"
                   },
@@ -4647,6 +4662,7 @@
                   "fields": "compound",
                   "constraint_name": "favorite_compound_compound_fkey",
                   "reference": {
+                     "title": "Favorite Compound",
                      "resource": "compound",
                      "fields": "id"
                   },
@@ -4737,6 +4753,7 @@
                   "fields": "substance",
                   "constraint_name": "favorite_substance_substance_fkey",
                   "reference": {
+                     "title": "Favorite Substance",
                      "resource": "substance",
                      "fields": "id"
                   },
@@ -4827,6 +4844,7 @@
                   "fields": "gene",
                   "constraint_name": "favorite_gene_gene_fkey",
                   "reference": {
+                     "title": "Favorite Gene",
                      "resource": "gene",
                      "fields": "id"
                   },
@@ -4917,6 +4935,7 @@
                   "fields": "assay_type",
                   "constraint_name": "favorite_assay_type_assay_type_fkey",
                   "reference": {
+                     "title": "Favorite Assay Type",
                      "resource": "assay_type",
                      "fields": "id"
                   },
@@ -5007,6 +5026,7 @@
                   "fields": "data_type",
                   "constraint_name": "favorite_data_type_data_type_fkey",
                   "reference": {
+                     "title": "Favorite Data Type",
                      "resource": "data_type",
                      "fields": "id"
                   },
@@ -5037,7 +5057,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "favorite_mime_type",
-         "title": "Favorite Data Type",
+         "title": "Favorite MIME Type",
          "description": "An association of a favorited MIME type term in a specific user profile.",
          "schema": {
             "fields": [
@@ -5097,6 +5117,7 @@
                   "fields": "mime_type",
                   "constraint_name": "favorite_mime_type_mime_type_fkey",
                   "reference": {
+                     "title": "Favorite MIME Type",
                      "resource": "mime_type",
                      "fields": "id"
                   },
@@ -5187,6 +5208,7 @@
                   "fields": "file_format",
                   "constraint_name": "favorite_file_format_file_format_fkey",
                   "reference": {
+                     "title": "Favorite File Format",
                      "resource": "file_format",
                      "fields": "id"
                   },
@@ -5277,6 +5299,7 @@
                   "fields": "ncbi_taxonomy",
                   "constraint_name": "favorite_ncbi_taxonomy_ncbi_taxonomy_fkey",
                   "reference": {
+                     "title": "Favorite Taxon",
                      "resource": "ncbi_taxonomy",
                      "fields": "id"
                   },

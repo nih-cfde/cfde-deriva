@@ -330,7 +330,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_ncbi_taxonomy",
+                     "favorited_key_columns": ["ncbi_taxonomy"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -593,7 +602,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_file_format",
+                     "favorited_key_columns": ["file_format"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -717,7 +735,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_data_type",
+                     "favorited_key_columns": ["data_type"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -841,7 +868,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_disease",
+                     "favorited_key_columns": ["disease"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
