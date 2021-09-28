@@ -30,8 +30,10 @@ setup(
     scripts=[],
     requires=['deriva'],
     install_requires=[
-        'bdbag>=1.6.3',
+        'bdbag[boto,globus]>=1.6.3',
         'deriva>=1.4.5',
+        'fair-identifiers-client',
+        'fair-research-login',
         'frictionless>=4.0.3',
     ],
     maintainer_email='support@misd.isi.edu',
