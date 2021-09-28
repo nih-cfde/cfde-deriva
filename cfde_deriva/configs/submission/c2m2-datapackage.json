@@ -1455,6 +1455,7 @@
                   "type": "number"
                }   
             ],
+            "missingValues": [ "" ],
             "primaryKey": [
                "biosample_id_namespace",
                "biosample_local_id",
