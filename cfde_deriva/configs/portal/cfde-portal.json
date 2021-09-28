@@ -3920,7 +3920,16 @@
                {
                   "name": "age_at_enrollment",
                   "description": "The age in years (with a fixed precision of two digits past the decimal point) of this subject when they were first enrolled in the primary project within which they were studied",
-                  "type": "number"
+                  "type": "number",
+                  "deriva": {
+                     "column_display": {
+                        "*": {
+                           "pre_format": {
+                              "format": "%.2f"
+                           }
+                        }
+                     }
+                  }
                },
                {
                   "name": "creation_time",
@@ -5492,6 +5501,13 @@
                      "indexing_preferences": {
                         "btree": ["age_at_sampling", "biosample"],
                         "trgm": false
+                     },
+                     "column_display": {
+                        "*": {
+                           "pre_format": {
+                              "format": "%.2f"
+                           }
+                        }
                      }
                   }
                }
