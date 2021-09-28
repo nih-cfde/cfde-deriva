@@ -29,7 +29,11 @@ setup(
     },
     scripts=[],
     requires=['deriva'],
-    install_requires=['deriva>=1.4.5', 'frictionless>=4.0.3'],
+    install_requires=[
+        'bdbag>=1.6.3',
+        'deriva>=1.4.5',
+        'frictionless>=4.0.3',
+    ],
     maintainer_email='support@misd.isi.edu',
     classifiers=[
         'Intended Audience :: Developers',
