@@ -952,7 +952,7 @@
                      "comment": "Identifying information for submission.",
                      "source": "submission_time",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission | {{submission_time}} (ID {{id}}) |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}}|\n{{#_description}}| Description | {{description}} |\n{{/_description}}"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission Time | {{submission_time}} |\n| Submission ID | {{id}} |\n| Description | {{description}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Review Submission | {{#_review_browse_url}}[Browse Datapackage]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[View Summary Page]({{.}}){{/_review_summary_url}} |\n"
                      }
                   },
                   "S_status_extra": {
@@ -960,7 +960,7 @@
                      "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
                      "comment": "The status of the datapackage in the submission system.",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} by DCC, {{$fkeys.CFDE.datapackage_cfde_approval_status_fkey.rowName}} by CFDE-CC |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Review Content | {{#_review_browse_url}}[Browse Data]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[Summary Charts]({{.}}), {{/_review_summary_url}} [Raw Data]({{{_datapackage_url}}})|\n"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| DCC Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Download | [Raw Data]({{{_datapackage_url}}})|\n"
                      }
                   },
                   "S_dcc_approval_status": {
@@ -988,6 +988,16 @@
                      "source": [
                         {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
                         {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_release_statuses": {
+                     "markdown_name": "Release Status",
+                     "comment": "Status of release(s) with this datapackage as a constituent part.",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "release_status_fkey"]},
                         "RID"
                      ]
                   },
@@ -1107,6 +1117,7 @@
                      "markdown_name": "CFDE Approval",
                      "source": [{"outbound": ["CFDE", "datapackage_cfde_approval_status_fkey"]}, "RID"]
                   },
+                  {"sourcekey": "S_release_statuses"},
                   {"source": "submission_time"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
