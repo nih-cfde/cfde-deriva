@@ -1096,6 +1096,16 @@
                   {"sourcekey": "S_submission"},
                   {"sourcekey": "S_status_extra"}
                ],
+               "entry": [
+                  "id",
+                  ["CFDE", "datapackage_submitting_dcc_fkey"],
+                  ["CFDE", "datapackage_submitting_user_fkey"],
+                  "submission_time",
+                  "datapackage_url",
+                  "description",
+                  ["CFDE", "datapackage_status_fkey"],
+                  ["CFDE", "datapackage_dcc_approval_status_fkey"]
+               ],
                "filter": {"and": [
                   {
                      "markdown_name": "Submitting DCC",
