@@ -655,6 +655,30 @@ class Registry (object):
             'Submission to DCC %s is forbidden' % (dcc_id,)
         )
 
+    def custom_migration(self):
+        """Perform custom schema/content migration tasks"""
+        # idempotently remove approved-hold vocab term
+        approved_hold = 'cfde_registry_decision:approved-hold'
+        res = self._catalog.get('/entity/CFDE:approval_status/id=%s' % urlquote(approved_hold)).json()
+        if res:
+            # rewrite any references to approved-hold to approved so we can drop the term
+            remap = [{"old": approved_hold, "new": terms.cfde_registry_decision.approved}]
+            self._catalog.put(
+                '/attributegroup/CFDE:datapackage/old:=dcc_approval_status;new:=dcc_approval_status',
+                json=remap,
+            ).json()
+            self._catalog.put(
+                '/attributegroup/CFDE:datapackage/old:=cfde_approval_status;new:=cfde_approval_status',
+                json=remap,
+            ).json()
+            self._catalog.put(
+                '/attributegroup/CFDE:release/old:=cfde_approval_status;new:=cfde_approval_status',
+                json=remap,
+            ).json()
+            self._catalog.delete(
+                '/entity/CFDE:approval_status/id=%s' % urlquote(approved_hold)
+            )
+
     @classmethod
     def dump_onboarding(self, registry_datapackage):
         """Dump onboarding info about DCCs in registry"""
@@ -718,6 +742,7 @@ def main(servername, subcommand, catalog_id=None):
         dp.provision(alter=True)
         dp.set_catalog(catalog, registry) # to force model reload
         dp.load_data_files(onconflict='update')
+        registry.custom_migration()
         dp.apply_custom_config()
     elif subcommand == 'reconfigure':
         dp.apply_custom_config()
