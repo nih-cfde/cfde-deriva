@@ -483,6 +483,11 @@
                   }
                },
                {
+                  "name": "dp_rank",
+                  "description": "Prioritized ordering of release state as characterization of a constituent datapackage.",
+                  "type": "number"
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this status concept.",
                   "type": "string"
