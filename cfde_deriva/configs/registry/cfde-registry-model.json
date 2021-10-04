@@ -965,7 +965,9 @@
                      "source": [{"outbound": ["CFDE", "datapackage_status_fkey"]}, "RID"],
                      "comment": "The status of the datapackage in the submission system.",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| DCC Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Download | [Raw Data]({{{_datapackage_url}}})|\n"
+                        "wait_for": [ "S_release_status_array" ],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| DCC Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} |\n| Release Status | {{S_release_status_array.0.rowName}} |\n{{#diagnostics}}| Diagnostics | {{diagnostics}} |\n{{/diagnostics}}| Download | [Raw Data]({{{_datapackage_url}}})|\n"
                      }
                   },
                   "S_dcc_approval_status": {
@@ -1005,6 +1007,25 @@
                         {"outbound": ["CFDE", "release_status_fkey"]},
                         "RID"
                      ]
+                  },
+                  "S_release_status_array": {
+                     "markdown_name": "Release Status",
+                     "comment": "Status of release(s) with this datapackage as a constituent part.",
+                     "source": [
+                        {"inbound": ["CFDE", "dcc_release_datapackage_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "dcc_release_datapackage_release_fkey"]},
+                        {"outbound": ["CFDE", "release_status_fkey"]},
+                        "RID"
+                     ],
+                     "entity": true,
+                     "aggregate": "array_d",
+                     "array_options": {
+                        "order": [
+                           {"column": "dp_rank"},
+                           {"column": "name"}
+                        ],
+                        "max_length": 2
+                     }
                   },
                   "S_datapackage_tables": {
                      "markdown_name": "Submitted Tables",
@@ -1428,7 +1449,7 @@
          "deriva": {
             "table_display": {
                "*": {
-                  "row_order": [{"column": "release_time", "descending": true}]
+                  "row_order": [{"column": "RCT", "descending": true}]
                }
             },
             "source_definitions": {
@@ -1436,24 +1457,19 @@
                "fkeys": true,
                "sources": {
                   "S_release_extra": {
-                     "source": "id",
+                     "source": "RID",
+                     "markdown_name": "Release",
                      "display": {
-                        "markdown_pattern": "{{id}}\n{{description}}\n"
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "| | |\n|---|---|---|\n| Creation Time | {{RCT}} |\n| Release Time | {{release_time}}|\n| Release ID | {{id}}|\n| Description | {{description}}|\n| Preview | {{#if _browse_url}}[Browse Release]({{_browse_url}}){{/if}}{{#if _summary_url}}, [View Dashboard Page]({{_summary_url}}){{/if}} |\n"
                      }
                   },
                   "S_status_extra": {
                      "source": "status",
                      "comment": "Status of this release in the submission system.",
                      "display": {
-                        "markdown_pattern": "{{$fkeys.CFDE.release_status_fkey.rowName}}{{#$fkeys.CFDE.release_cfde_approval_status_fkey}}\n{{rowName}}{{/$fkeys.CFDE.release_cfde_approval_status_fkey}}{{#_diagnostics}}\n{{diagnostics}}\n{{/_diagnostics}}"
-                     }
-                  },
-                  "S_urls": {
-                     "markdown_name": "Links",
-                     "comments": "Links to content relevant to this release.",
-                     "source": "ermrest_url",
-                     "display": {
-                        "markdown_pattern": "{{#_ermrest_url}}- ERMrest: [{{.}}]({{.}})\n{{/_ermrest_url}}{{#_browse_url}}- Browse: [{{.}}]({{.}})\n{{/_browse_url}}{{#_summary_url}}- Summary: [{{.}}]({{.}}){{/_summary_url}}"
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "| | |\n|---|---|---|\n| Build Status | {{$fkeys.CFDE.release_status_fkey.rowName}} |\n| CFDE Approval Status | {{#with $fkeys.CFDE.release_cfde_approval_status_fkey}}{{rowName}}{{/with}} |\n| Diagnostics | {{diagnostics}}|\n| Data | {{#if _ermrest_url}}[ERMrest Catalog]({{_ermrest_url}}){{/if}} |\n"
                      }
                   },
                   "S_status": {
@@ -1490,9 +1506,7 @@
             "visible_columns": {
                "compact": [
                   {"sourcekey": "S_release_extra"},
-                  {"source": "release_time"},
-                  {"sourcekey": "S_status_extra"},
-                  {"sourcekey": "S_urls"}
+                  {"sourcekey": "S_status_extra"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_status"},
