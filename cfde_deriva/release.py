@@ -6,6 +6,7 @@ import logging
 import json
 import traceback
 import requests
+import datetime
 
 from deriva.core import DerivaServer, get_credential, init_logging, urlquote, urlunquote
 
@@ -30,6 +31,7 @@ class Release (object):
 
     # Allow monkey-patching or other caller-driven reconfig in future?
     content_path_root = '/var/tmp/cfde_deriva_submissions'
+    next_rel_descr = 'future release candidates'
 
     @classmethod
     def by_id(cls, server, registry, release_id, archive_headers_map=None):
@@ -113,7 +115,10 @@ class Release (object):
             dp.provision()
             dp.apply_custom_config()
             logger.debug('New, empty catalog provisioned')
-            self.registry.update_release(self.release_id, ermrest_url=catalog.get_server_uri())
+            self.registry.update_release(
+                self.release_id,
+                ermrest_url=catalog.get_server_uri(),
+            )
             logger.debug('New catalog registered for release')
             return self.registry.get_release(self.release_id)[0]
         except Exception as e:
@@ -192,9 +197,15 @@ class Release (object):
         )
         res.raise_for_status()
         aliasdoc = res.json()
-        self.registry.update_release(self.release_id, status=terms.cfde_registry_rel_status.public_release)
+        self.registry.update_release(
+            self.release_id,
+            status=terms.cfde_registry_rel_status.public_release,
+            cfde_approval_status=terms.cfde_registry_decision.approved,
+            release_time=datetime.datetime.utcnow().isoformat() if rel_row['release_time'] is None else nochange,
+            description=('%s public release' % datetime.date.today().isoformat()) if rel_row['description'] == self.next_rel_descr else nochange,
+        )
 
-        if prev_release is not None and prev_release.rel_row['status'] == terms.cfde_registry_rel_status.public_release:
+        if prev_release is not None:
             self.registry.update_release(prev_release.release_id, status=terms.cfde_registry_rel_status.obsoleted)
 
         return aliasdoc
@@ -209,6 +220,8 @@ class Release (object):
         failed = True
         diagnostics = 'An unknown operational error has occurred.'
         failed_exc = None
+        browse_url = nochange
+        summary_url = nochange
         # streamline handling of error reporting...
         # next_error_state anticipates how to categorize exceptions
         # based on what we are trying to do during sequence
@@ -296,6 +309,8 @@ class Release (object):
             self.dump_progress(progress)
             Submission.upload_sqlite_content(catalog, self.portal_prep_sqlite_filename, progress=progress.setdefault('upload', {}))
             logger.info('All release content successfully uploaded to %(ermrest_url)s' % rel)
+            browse_url = '/chaise/recordset/#%s/CFDE:file' % catalog.catalog_id
+            summary_url = '/pdashboard.html?catalogId=%s' % catalog.catalog_id
             self.dump_progress(progress)
 
             failed = False
@@ -324,13 +339,21 @@ class Release (object):
                     'Finished release build sequence for release %s' % (self.release_id,)
                 )
             logger.debug(
-                'Updating release %s status=%s diagnostics=%s...' % (
+                'Updating release %s status=%s diagnostics=%s browse_url=%s summary_url=%s...' % (
                     self.release_id,
                     status,
-                    '(nochange)' if diagnostics is nochange else diagnostics
+                    '(nochange)' if diagnostics is nochange else diagnostics,
+                    '(nochange)' if browse_url is nochange else browse_url,
+                    '(nochange)' if summary_url is nochange else summary_url,
                 )
             )
-            self.registry.update_release(self.release_id, status=status, diagnostics=diagnostics)
+            self.registry.update_release(
+                self.release_id,
+                status=status,
+                diagnostics=diagnostics,
+                browse_url=browse_url,
+                summary_url=summary_url,
+            )
             logger.debug('Release %s status successfully updated.' % (self.release_id,))
 
     def dump_progress(self, progress):
@@ -377,8 +400,13 @@ def main(subcommand, *args):
     Sub-commands:
     - 'draft-preview'
        - List current latest content w/o modifying release definitions
-    - 'draft' [ release_id [ description ] ]
-       - Register a new or revised draft release
+    - 'draft'
+       - Register or update a canonical next-release draft
+       - description will be filled automatically as special marker
+    - 'draft' 'new' [ description ]
+       - Register a new draft release (not the canonical next-release)
+    - 'draft' release_id [ description ] ]
+       - Update an existing draft release known by release_id (UUID)
     - 'provision' release_id
        - Create new, empty release catalog
     - 'build' release_id
@@ -411,14 +439,24 @@ def main(subcommand, *args):
     archive_headers_map = get_archive_headers_map(servername)
 
     if subcommand == 'draft':
-        if len(args) > 0:
-            rel_id = args[0]
+        if len(args) == 0:
+            # next-release mode
+            # HACK: find/label next-release by specific description field
+            res = registry._catalog.get('/entity/CFDE:release/description=%s@sort(RCT,RID)' % urlquote(Release.next_rel_descr)).json()
+            if len(res) > 0:
+                rel_id = res[0]['id']
+            else:
+                rel_id = str(uuid.uuid4())
+            description = Release.next_rel_descr
         else:
-            rel_id = str(uuid.uuid4())
-        if len(args) > 1:
-            description = args[1]
-        else:
-            description = nochange
+            if args[0] == 'new':
+                rel_id = str(uuid.uuid4())
+            else:
+                rel_id = args[0]
+            if len(args) > 1:
+                description = args[1]
+            else:
+                description = nochange
         dcc_datapackages = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         release, dcc_datapackages = registry.register_release(rel_id, dcc_datapackages, description)
         print(json.dumps(list(dcc_datapackages.values()), indent=4))
