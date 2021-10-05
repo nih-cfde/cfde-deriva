@@ -1,12 +1,11 @@
-id	name	description
-cfde_registry_dp_status:submitted	in progress (submitted)	Initial state after datapackage submission from client.
-cfde_registry_dp_status:ops-error	failed (ops error)	An unexpected operational error has disrupted processing.
-cfde_registry_dp_status:bag-valid	in progress (bag valid)	BDBag validity check has succeeded, other processing is pending.
-cfde_registry_dp_status:bag-error	failed (bag error)	BDBag validity check has failed, submission cannot be processed.
-cfde_registry_dp_status:check-valid	in progress (check valid)	Content pre-checks have succeeded, other processing is pending.
-cfde_registry_dp_status:check-error	failed (check error)	Content pre-checks have failed, submission cannot be processed.
-cfde_registry_dp_status:content-ready	content ready for review	Submission is loaded and ready for human review.
-cfde_registry_dp_status:content-error	failed (content error)	Content loading has failed, submission cannot be processed.
-cfde_registry_dp_status:rejected	rejected	Submission has been rejected by human reviewers and should not be included in subsequent releases.
-cfde_registry_dp_status:release-pending	release pending	Submission has been approved and should be included in subsequent releases until obsoleted.
-cfde_registry_dp_status:obsoleted	obsoleted	Submission has been obsoleted by a more recently approved submission from the same DCC.
+id	name	css_class	description
+cfde_registry_dp_status:submitted	in progress (submitted)	noinfo	Initial state after datapackage submission from client.
+cfde_registry_dp_status:ops-error	failed (ops error)	error	An unexpected operational error has disrupted processing.
+cfde_registry_dp_status:bag-valid	in progress (bag valid)	pending	BDBag validity check has succeeded, other processing is pending.
+cfde_registry_dp_status:bag-error	failed (bag error)	rejected	BDBag validity check has failed, submission cannot be processed.
+cfde_registry_dp_status:check-valid	in progress (check valid)	pending	Content pre-checks have succeeded, other processing is pending.
+cfde_registry_dp_status:check-error	failed (check error)	rejected	Content pre-checks have failed, submission cannot be processed.
+cfde_registry_dp_status:content-ready	content ready for review	success	Submission is loaded and ready for human review.
+cfde_registry_dp_status:content-error	failed (content error)	rejected	Submission has been rejected by human reviewers and should not be included in subsequent releases.
+cfde_registry_dp_status:release-pending	release pending	success	Submission has been approved and should be included in subsequent releases until obsoleted.
+cfde_registry_dp_status:obsoleted	obsoleted	retired	Submission has been obsoleted by a more recently approved submission from the same DCC.

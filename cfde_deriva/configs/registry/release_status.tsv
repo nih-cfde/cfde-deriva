@@ -1,9 +1,9 @@
-id	name	dp_rank	description
-cfde_registry_rel_status:planning	in planning	2.0	The release is in planning and not yet fully defined (initial state).
-cfde_registry_rel_status:pending	in progress (pending)	2.0	The release is fully-defined and further processing is pending.
-cfde_registry_rel_status:content-ready	in progress (in review)	2.0	The release is loaded and ready for inspection at a preview location.
-cfde_registry_rel_status:content-error	failed (content error)		An unexpected error has occurred while building and the release cannot proceed.
-cfde_registry_rel_status:rejected	rejected		The preview content has been rejected and will not be released.
-cfde_registry_rel_status:public-release	public release	1.0	The release is visible as the current public release.
-cfde_registry_rel_status:obsoleted	obsoleted	3.0	A prior public release has been replaced by a newer release.
-cfde_registry_rel_status:ops-error	failed (ops error)		An unexpected operational error has disrupted processing.
+id	name	dp_rank	css_class	description
+cfde_registry_rel_status:planning	in planning	2.0	pending	The release is in planning and not yet fully defined (initial state).
+cfde_registry_rel_status:pending	in progress (pending)	2.0	pending	The release is fully-defined and further processing is pending.
+cfde_registry_rel_status:content-ready	in progress (in review)	2.0	pending	The release is loaded and ready for inspection at a preview location.
+cfde_registry_rel_status:content-error	failed (content error)	4.0	error	An unexpected error has occurred while building and the release cannot proceed.
+cfde_registry_rel_status:rejected	rejected	4.0	rejected	The preview content has been rejected and will not be released.
+cfde_registry_rel_status:public-release	public release	1.0	success	The release is visible as the current public release.
+cfde_registry_rel_status:obsoleted	obsoleted	3.0	retired	A prior public release has been replaced by a newer release.
+cfde_registry_rel_status:ops-error	failed (ops error)	4.0	rejected	An unexpected operational error has disrupted processing.

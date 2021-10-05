@@ -438,6 +438,11 @@
                   }
                },
                {
+                  "name": "css_class",
+                  "description": "A presentation hint used internally by the portal.",
+                  "type": "string"
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this status concept.",
                   "type": "string"
@@ -447,9 +452,18 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "table_display": {
+               "row_name/compact": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               },
+               "row_name/detailed": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               }
+            },
             "visible_columns": {
                "compact": [
-                  "id",
                   "name",
                   "description"
                ]
@@ -488,6 +502,11 @@
                   "type": "number"
                },
                {
+                  "name": "css_class",
+                  "description": "A presentation hint used internally by the portal.",
+                  "type": "string"
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this status concept.",
                   "type": "string"
@@ -497,9 +516,18 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "table_display": {
+               "row_name/compact": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               },
+               "row_name/detailed": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               }
+            },
             "visible_columns": {
                "compact": [
-                  "id",
                   "name",
                   "description"
                ]
@@ -533,6 +561,11 @@
                   }
                },
                {
+                  "name": "css_class",
+                  "description": "A presentation hint used internally by the portal.",
+                  "type": "string"
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this status concept.",
                   "type": "string"
@@ -542,9 +575,18 @@
             "primaryKey": "id"
          },
          "deriva": {
+            "table_display": {
+               "row_name/compact": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               },
+               "row_name/detailed": {
+                  "template_engine": "handlebars",
+                  "row_markdown_pattern": ":span:{{name}}:/span:{ {{#if _description}}title=\"{{description}}\"{{/if}} {{#if _css_class}}.cfde_{{{css_class}}}{{/if}} }"
+               }
+            },
             "visible_columns": {
                "compact": [
-                  "id",
                   "name",
                   "description"
                ]
@@ -589,7 +631,6 @@
          "deriva": {
             "visible_columns": {
                "compact": [
-                  "id",
                   "name",
                   "description"
                ]
@@ -812,7 +853,7 @@
                      },
                      "column_display": {
                         "*": {
-                           "markdown_pattern": "[{{_review_browse_url}}]({{_review_browse_url}})"
+                           "markdown_pattern": "[Browse Datapackage]({{_review_browse_url}})"
                         }
                      }
                   }
@@ -833,7 +874,7 @@
                      },
                      "column_display": {
                         "*": {
-                           "markdown_pattern": "[{{_review_summary_url}}]({{_review_summary_url}})"
+                           "markdown_pattern": "[View Summary Page]({{_review_summary_url}})"
                         }
                      }
                   }
@@ -1131,6 +1172,27 @@
                   "description",
                   ["CFDE", "datapackage_status_fkey"],
                   ["CFDE", "datapackage_dcc_approval_status_fkey"]
+               ],
+               "detailed": [
+                  "id",
+                  ["CFDE", "datapackage_submitting_dcc_fkey"],
+                  ["CFDE", "datapackage_submitting_user_fkey"],
+                  "submission_time",
+                  "datapackage_url",
+                  "description",
+                  ["CFDE", "datapackage_status_fkey"],
+                  ["CFDE", "datapackage_dcc_approval_status_fkey"],
+                  {
+                     "sourcekey": "S_release_status_array",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{S_release_status_array.0.rowName}}"
+                     }
+                  },
+                  "diagnostics",
+                  "review_ermrest_url",
+                  "review_browse_url",
+                  "review_summary_url"
                ],
                "filter": {"and": [
                   {

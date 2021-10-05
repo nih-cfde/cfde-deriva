@@ -1,4 +1,4 @@
-id	name	description
-cfde_registry_decision:pending	decision pending	An approval decision is due, pending content review.
-cfde_registry_decision:approved	content approved	Content has been approved by the reviewer.
-cfde_registry_decision:rejected	content rejected	Content has been rejected by the reviewer.
+id	name	css_class	description
+cfde_registry_decision:pending	decision pending	noinfo	An approval decision is due, pending content review.
+cfde_registry_decision:approved	content approved	success	Content has been approved by the reviewer.
+cfde_registry_decision:rejected	content rejected	rejected	Content has been rejected by the reviewer.
