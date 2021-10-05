@@ -1012,8 +1012,8 @@
                   "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "substance_compound_fkey"]},
-                        {"inbound": ["CFDE", "core_fact_compound_compound_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_substance_compound_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -2311,7 +2311,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:collection_defined_by_project:collection)/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -2321,7 +2321,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:collection_defined_by_project:collection)/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -2331,7 +2331,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_in_collection:collection)/f:=(file)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/dt:=(cf:data_type)=(CFDE:data_type:nid)/at:=(cf:assay_type)=(CFDE:assay_type:nid)/mt:=(cf:mime_type)=(CFDE:mime_type:nid)/$f/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id"
+                                 "path": "CFDE:file_in_collection/f:=(file)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/fcf:=left(cf:compression_format)=(CFDE:file_format:nid)/dt:=(cf:data_type)=(CFDE:data_type:nid)/at:=(cf:assay_type)=(CFDE:assay_type:nid)/mt:=(cf:mime_type)=(CFDE:mime_type:nid)/bc:=left(f:bundle_collection)=(CFDE:collection:nid)/left(core_fact)=(CFDE:core_fact:nid)/i3:=left(id_namespace)=(CFDE:id_namespace:nid)/$f/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,compression_format:=fcf:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id,bundle_collection_id_namespace:=i3:id,bundle_collection_local_id:=bc:local_id"
                               },
                               "destination": {
                                  "name": "file",
@@ -2341,7 +2341,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)/(file_format)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_file_format/CFDE:file_format/id,name,description"
                               },
                               "destination": {
                                  "name": "file_format",
@@ -2351,7 +2351,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)/(data_type)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_data_type/CFDE:data_type/id,name,description"
                               },
                               "destination": {
                                  "name": "data_type",
@@ -2361,7 +2361,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_in_collection:collection)/(file)/(core_fact)=(CFDE:core_fact_assay_type:core_fact)/(assay_type)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_assay_type/CFDE:assay_type/id,name,description"
                               },
                               "destination": {
                                  "name": "assay_type",
@@ -2371,7 +2371,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_in_collection:collection)/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/an:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=an:id,assay_type:=at:id"
+                                 "path": "CFDE:biosample_in_collection/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/an:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=an:id,assay_type:=at:id"
                               },
                               "destination": {
                                  "name": "biosample",
@@ -2381,7 +2381,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_in_collection:collection)/(biosample)/(core_fact)/(anatomy)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_anatomy/CFDE:anatomy/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
@@ -2391,17 +2391,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_in_collection:collection)/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
-                              },
-                              "destination": {
-                                 "name": "biosample_disease",
-                                 "type": "csv"
-                              }
-                           },
-                           {
-                              "source": {
-                                 "api": "attribute",
-                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_disease/CFDE:disease/id,name,description"
                               },
                               "destination": {
                                  "name": "disease",
@@ -2411,7 +2401,77 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
+                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "compound",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_in_collection/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_in_collection/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_gene:biosample)/g:=(gene)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,gene:=g:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_in_collection/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_substance:biosample)/s:=(substance)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,substance:=s:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_in_collection/b:=(biosample)/(core_fact)/i1:=(id_namespace)/$b/a:=CFDE:biosample_from_subject/s:=CFDE:subject/(core_fact)/i2:=(id_namespace)/$a/biosample_id_namespace:=i1:id,biosample_local_id:=b:local_id,subject_id_namespace:=i2:id,subject_local_id:=s:local_id,age_at_sampling"
+                              },
+                              "destination": {
+                                 "name": "biosample_from_subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:subject_in_collection/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/sx:=left(cf:sex)=(CFDE:sex:nid)/eth:=left(cf:ethnicity)=(CFDE:ethnicity:nid)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id,sex:=sx:id,ethnicity:=eth:id,age_at_enrollment"
                               },
                               "destination": {
                                  "name": "subject",
@@ -2421,7 +2481,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/(subject)/(core_fact)/(subject_granularity)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_granularity/CFDE:subject_granularity/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -2429,10 +2489,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_role_taxonomy:subject)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
+                                 "path": "CFDE:subject_in_collection/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_role_taxonomy:subject)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -2440,10 +2499,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/(subject)=(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_role/CFDE:subject_role/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -2451,10 +2509,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/(subject)=(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_ncbi_taxonomy/CFDE:ncbi_taxonomy/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
@@ -2464,7 +2521,57 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:subject_in_collection:collection)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                                 "path": "(core_fact)/CFDE:core_fact_sex/CFDE:sex/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "sex",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_race/CFDE:race/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_ethnicity/CFDE:ethnicity/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ethnicity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:subject_in_collection/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_race:subject)/v:=(race)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,race:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:subject_in_collection/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_substance:subject)/v:=(substance)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,substance:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:subject_in_collection/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -2870,7 +2977,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)/i:=(cf:id_namespace)/p:=(cf:project)/pi:=(p:id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/dt:=left(cf:data_type)=(CFDE:data_type:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/mt:=left(cf:mime_type)=(CFDE:mime_type:nid)/$M/id_namespace:=i:id,local_id,project_id_namespace:=pi:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id"
+                                 "path": "cf:=(core_fact)/i:=(cf:id_namespace)/p:=(cf:project)/pi:=(p:id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/fcf:=left(cf:compression_format)=(CFDE:file_format:nid)/dt:=left(cf:data_type)=(CFDE:data_type:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/mt:=left(cf:mime_type)=(CFDE:mime_type:nid)/bc:=left(M:bundle_collection)=(CFDE:collection:nid)/left(core_fact)=(CFDE:core_fact:nid)/i3:=left(id_namespace)=(CFDE:id_namespace:nid)/$M/id_namespace:=i:id,local_id,project_id_namespace:=pi:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,compression_format:=fcf:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id,bundle_collection_id_namespace:=i3:id,bundle_collection_local_id:=bc:local_id"
                               },
                               "destination": {
                                  "name": "file",
@@ -2880,7 +2987,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)/(cf:project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)=(CFDE:project:nid)/i:=(id_namespace)=(CFDE:id_namespace:nid)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "cf:=(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)=(CFDE:project:nid)/i:=(id_namespace)=(CFDE:id_namespace:nid)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -2890,7 +2997,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)/(cf:project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(a:parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
+                                 "path": "cf:=(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(a:parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -2900,7 +3007,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(file_format)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_file_format/CFDE:file_format/id,name,description"
                               },
                               "destination": {
                                  "name": "file_format",
@@ -2910,7 +3017,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(data_type)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_data_type/CFDE:data_type/id,name,description"
                               },
                               "destination": {
                                  "name": "data_type",
@@ -2920,7 +3027,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)=(CFDE:core_fact_assay_type:core_fact)/(assay_type)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_assay_type/CFDE:assay_type/id,name,description"
                               },
                               "destination": {
                                  "name": "assay_type",
@@ -2930,7 +3037,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_biosample:file)/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/a:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=a:id,assay_type:=at:id"
+                                 "path": "CFDE:file_describes_biosample/b:=(biosample)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/a:=left(cf:anatomy)=(CFDE:anatomy:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/$b/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,anatomy:=a:id,assay_type:=at:id"
                               },
                               "destination": {
                                  "name": "biosample",
@@ -2940,7 +3047,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_describes_biosample:file)/b:=(biosample)/(core_fact)/a:=(anatomy)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_anatomy/CFDE:anatomy/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
@@ -2950,17 +3057,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_describes_biosample:file)/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
-                              },
-                              "destination": {
-                                 "name": "biosample_disease",
-                                 "type": "csv"
-                              }
-                           },
-                           {
-                              "source": {
-                                 "api": "attribute",
-                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_disease/CFDE:disease/id,name,description"
                               },
                               "destination": {
                                  "name": "disease",
@@ -2970,7 +3067,77 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_subject:file)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
+                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "compound",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_biosample/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_disease:biosample)/d:=(disease)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,disease:=d:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_biosample/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_gene:biosample)/g:=(gene)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,gene:=g:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_biosample/b:=(biosample)/(core_fact)/i:=(id_namespace)/$b/a:=(CFDE:biosample_substance:biosample)/s:=(substance)/$a/biosample_id_namespace:=i:id,biosample_local_id:=b:local_id,substance:=s:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_biosample/b:=(biosample)/(core_fact)/i1:=(id_namespace)/$b/a:=CFDE:biosample_from_subject/s:=CFDE:subject/(core_fact)/i2:=(id_namespace)/$a/biosample_id_namespace:=i1:id,biosample_local_id:=b:local_id,subject_id_namespace:=i2:id,subject_local_id:=s:local_id,age_at_sampling"
+                              },
+                              "destination": {
+                                 "name": "biosample_from_subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_subject/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/sx:=left(cf:sex)=(CFDE:sex:nid)/eth:=left(cf:ethnicity)=(CFDE:ethnicity:nid)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id,sex:=sx:id,ethnicity:=eth:id,age_at_enrollment"
                               },
                               "destination": {
                                  "name": "subject",
@@ -2980,7 +3147,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_subject:file)/(subject)/(core_fact)/(subject_granularity)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_granularity/CFDE:subject_granularity/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -2991,7 +3158,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_subject:file)/a:=(subject)=(CFDE:subject_role_taxonomy:subject)/s:=(a:subject)/(core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
+                                 "path": "CFDE:file_describes_subject/s:=(subject)/a:=CFDE:subject_role_taxonomy/(s:core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -2999,10 +3166,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_subject:file)/(subject)=(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_role/CFDE:subject_role/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -3010,10 +3176,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(nid)=(CFDE:file_describes_subject:file)/(subject)=(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_ncbi_taxonomy/CFDE:ncbi_taxonomy/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
@@ -3023,7 +3188,57 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:file_describes_subject:file)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                                 "path": "(core_fact)/CFDE:core_fact_sex/CFDE:sex/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "sex",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_race/CFDE:race/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_ethnicity/CFDE:ethnicity/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ethnicity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_race:subject)/v:=(race)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,race:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_substance:subject)/v:=(substance)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,substance:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:file_describes_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -3470,7 +3685,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/p:=(leader_project)/i:=(id_namespace)/$p/id_namespace:=i:id,local_id,persistent_id,creation_time,abbreviation,name,description"
                               },
                               "destination": {
                                  "name": "project",
@@ -3480,7 +3695,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(a:parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/a:=(leader_project)=(CFDE:project_in_project:child_project)/pp:=(a:parent_project)/ppi:=(id_namespace)/cp:=(a:child_project)/cpi:=(id_namespace)/$a/parent_project_id_namespace:=ppi:id,parent_project_local_id:=pp:local_id,child_project_id_namespace:=cpi:id,child_project_local_id:=cp:local_id"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -3490,7 +3705,17 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(anatomy)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_assay_type/CFDE:assay_type/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "assay_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_anatomy/CFDE:anatomy/id,name,description"
                               },
                               "destination": {
                                  "name": "anatomy",
@@ -3500,10 +3725,40 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(assay_type)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_disease/CFDE:disease/id,name,description"
                               },
                               "destination": {
-                                 "name": "assay_type",
+                                 "name": "disease",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "compound",
                                  "type": "csv"
                               }
                            },
@@ -3520,17 +3775,37 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/(CFDE:core_fact_disease:core_fact)/(disease)/id,name,description"
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:biosample_gene:biosample)/g:=(gene)/$a/biosample_id_namespace:=i:id,biosample_local_id:=M:local_id,gene:=g:id"
                               },
                               "destination": {
-                                 "name": "disease",
+                                 "name": "biosample_gene",
                                  "type": "csv"
                               }
                            },
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(p:id_namespace)/sg:=(cf:subject_granularity)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:biosample_substance:biosample)/s:=(substance)/$a/biosample_id_namespace:=i:id,biosample_local_id:=M:local_id,substance:=s:id"
+                              },
+                              "destination": {
+                                 "name": "biosample_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/i1:=(id_namespace)/$M/a:=CFDE:biosample_from_subject/s:=CFDE:subject/(core_fact)/i2:=(id_namespace)/$a/biosample_id_namespace:=i1:id,biosample_local_id:=M:local_id,subject_id_namespace:=i2:id,subject_local_id:=s:local_id,age_at_sampling"
+                              },
+                              "destination": {
+                                 "name": "biosample_from_subject",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_from_subject/s:=(subject)/cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(p:id_namespace)/sg:=(cf:subject_granularity)/sx:=left(cf:sex)=(CFDE:sex:nid)/eth:=left(cf:ethnicity)=(CFDE:ethnicity:nid)/$s/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id,sex:=sx:id,ethnicity:=eth:id,age_at_enrollment"
                               },
                               "destination": {
                                  "name": "subject",
@@ -3540,7 +3815,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)/(core_fact)/(subject_granularity)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_granularity/CFDE:subject_granularity/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_granularity",
@@ -3551,7 +3826,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/a:=(CFDE:subject_role_taxonomy:subject)/(s:core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
+                                 "path": "CFDE:biosample_from_subject/s:=(subject)/a:=CFDE:subject_role_taxonomy/(s:core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -3559,10 +3834,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)=(CFDE:subject_role_taxonomy:subject)/(role)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_subject_role/CFDE:subject_role/id,name,description"
                               },
                               "destination": {
                                  "name": "subject_role",
@@ -3570,10 +3844,9 @@
                               }
                            },
                            {
-
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/(subject)=(CFDE:subject_role_taxonomy:subject)/(taxon)/id,name,description"
+                                 "path": "(core_fact)/CFDE:core_fact_ncbi_taxonomy/CFDE:ncbi_taxonomy/id,name,description"
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
@@ -3583,7 +3856,57 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(CFDE:biosample_from_subject:biosample)/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
+                                 "path": "(core_fact)/CFDE:core_fact_sex/CFDE:sex/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "sex",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_race/CFDE:race/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_ethnicity/CFDE:ethnicity/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ethnicity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_from_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_race:subject)/v:=(race)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,race:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_from_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_substance:subject)/v:=(substance)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,substance:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "CFDE:biosample_from_subject/s:=(subject)/(core_fact)/i:=(id_namespace)/$s/a:=(CFDE:subject_disease:subject)/d:=(disease)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,disease:=d:id"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -3984,7 +4307,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/$M/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id"
+                                 "path": "cf:=(core_fact)/i1:=(id_namespace)/p:=(cf:project)/i2:=(id_namespace)/sg:=(cf:subject_granularity)/sx:=left(cf:sex)=(CFDE:sex:nid)/eth:=left(cf:ethnicity)=(CFDE:ethnicity:nid)/$M/id_namespace:=i1:id,local_id,project_id_namespace:=i2:id,project_local_id:=p:local_id,persistent_id,creation_time,granularity:=sg:id,sex:=sx:id,ethnicity:=eth:id,age_at_enrollment"
                               },
                               "destination": {
                                  "name": "subject",
@@ -4025,7 +4348,7 @@
 
                               "source": {
                                  "api": "attribute",
-                                 "path": "a:=(CFDE:subject_role_taxonomy:subject)/s:=(subject)/(core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=s:local_id,role_id:=r:id,taxonomy_id:=t:id"
+                                 "path": "a:=(CFDE:subject_role_taxonomy:subject)/$M/(core_fact)/i:=(id_namespace)/r:=(a:role)/t:=(a:taxon)/$a/subject_id_namespace:=i:id,subject_local_id:=M:local_id,role_id:=r:id,taxonomy_id:=t:id"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -4051,6 +4374,56 @@
                               },
                               "destination": {
                                  "name": "ncbi_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_sex/CFDE:sex/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "sex",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_race/CFDE:race/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/CFDE:core_fact_ethnicity/CFDE:ethnicity/id,name,description"
+                              },
+                              "destination": {
+                                 "name": "ethnicity",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:subject_race:subject)/v:=(race)/$a/subject_id_namespace:=i:id,subject_local_id:=M:local_id,race:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_race",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "attribute",
+                                 "path": "(core_fact)/i:=(id_namespace)/$M/a:=(CFDE:subject_substance:subject)/v:=(substance)/$a/subject_id_namespace:=i:id,subject_local_id:=M:local_id,substance:=v:id"
+                              },
+                              "destination": {
+                                 "name": "subject_substance",
                                  "type": "csv"
                               }
                            },
