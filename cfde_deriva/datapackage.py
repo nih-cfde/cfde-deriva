@@ -1049,11 +1049,17 @@ LIMIT 1;
             if position is not None:
                 logger.info("Restarting after %r due to existing restart marker" % (position,))
 
+            # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
+            table_queries = {
+                'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
+                'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
+            }
+
             def get_batch(cur):
                 nonlocal position
                 sql = 'SELECT %(cols)s FROM %(table)s %(where)s ORDER BY "nid" ASC LIMIT %(batchsize)s' % {
                     'cols': ', '.join([ "nid" ] + [ sql_identifier(cname) for cname in colnames ]),
-                    'table': sql_identifier(table.name),
+                    'table': table_queries.get(table.name, sql_identifier(table.name)),
                     'where': '' if position is None else ('WHERE "nid" > %s' % sql_literal(position)),
                     'batchsize': '%d' % self.batch_size,
                 }
