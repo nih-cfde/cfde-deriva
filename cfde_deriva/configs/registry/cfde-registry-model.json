@@ -1093,12 +1093,42 @@
                      ],
                      "entity": true
                   },
+                  "S_compound": {
+                     "markdown_name": "Compound",
+                     "comment": "Compound terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_compound_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_compound_compound_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_data_type": {
                      "markdown_name": "Data Type",
                      "comment": "Data type terms used in submission",
                      "source": [
                         {"inbound": ["CFDE", "datapackage_data_type_datapackage_fkey"]},
                         {"outbound": ["CFDE", "datapackage_data_type_data_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "Disease terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_disease_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_disease_disease_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_ethnicity": {
+                     "markdown_name": "Ethnicity",
+                     "comment": "Ethnicity terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_ethnicity_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_ethnicity_ethnicity_fkey"]},
                         "id"
                      ],
                      "entity": true
@@ -1113,12 +1143,42 @@
                      ],
                      "entity": true
                   },
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "Gene terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_gene_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_gene_gene_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_ncbi_taxonomy": {
                      "markdown_name": "Taxonomy",
                      "comment": "Taxonomy terms used in submission",
                      "source": [
                         {"inbound": ["CFDE", "datapackage_ncbi_taxonomy_datapackage_fkey"]},
                         {"outbound": ["CFDE", "datapackage_ncbi_taxonomy_ncbi_taxonomy_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_race": {
+                     "markdown_name": "Race",
+                     "comment": "Race terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_race_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_race_race_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_sex": {
+                     "markdown_name": "Sex",
+                     "comment": "Sex terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_sex_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_sex_sex_fkey"]},
                         "id"
                      ],
                      "entity": true
@@ -1142,6 +1202,16 @@
                         "id"
                      ],
                      "entity": true
+                  },
+                  "S_substance": {
+                     "markdown_name": "Substance",
+                     "comment": "Substance terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_substance_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_substance_substance_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
                   }
                }
             },
@@ -1151,11 +1221,18 @@
                   {"sourcekey": "S_datapackage_tables"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_compound"},
                   {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_file_format"},
-                  {"sourcekey": "S_ncbi_taxonomy"},
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_race"},
+                  {"sourcekey": "S_sex"},
                   {"sourcekey": "S_subject_granularity"},
-                  {"sourcekey": "S_subject_role"}
+                  {"sourcekey": "S_subject_role"},
+                  {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_ncbi_taxonomy"}
                ]
             },
             "visible_columns": {
