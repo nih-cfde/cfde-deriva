@@ -99,6 +99,22 @@ def make_session_config():
     })
     return session_config
 
+def tnames_topo_sorted(tables):
+    """Return table names from model topologically sorted to put dependant after references tables.
+
+    :param tables: dict-like map of table instances
+    """
+    def target_tname(fkey):
+        return fkey.referenced_columns[0].table.name
+    return topo_sorted({
+        table.name: [
+            target_tname(fkey)
+            for fkey in table.foreign_keys
+            if target_tname(fkey) != table.name and target_tname(fkey) in tables
+        ]
+        for table in tables.values()
+    })
+
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
     resource_tag = 'tag:isrd.isi.edu,2019:table-resource'
@@ -604,19 +620,11 @@ class CfdeDataPackage (object):
         return row2dict
 
     def data_tnames_topo_sorted(self, source_schema=None):
-        if source_schema is None:
-            source_schema = self.cat_cfde_schema
-        def target_tname(fkey):
-            return fkey.referenced_columns[0].table.name
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        return topo_sorted({
-            table.name: [
-                target_tname(fkey)
-                for fkey in table.foreign_keys
-                if target_tname(fkey) != table.name and target_tname(fkey) in tables_doc
-            ]
-            for table in source_schema.tables.values()
-            if table.name in tables_doc
+        return tnames_topo_sorted({
+            tname: table
+            for tname, table in source_schema.tables.items()
+            if tname in tables_doc
         })
 
     def dump_data_files(self, resources=None, dump_dir=None):
