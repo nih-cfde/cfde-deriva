@@ -1016,7 +1016,8 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     ("""  SELECT v2.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid)
                     UNION SELECT v2.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid)""",
                      'datapackage_substance', 'substance'),
-                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)',
+                    ("""SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)
+                    UNION SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.compression_format = v.nid)""",
                      'datapackage_file_format', 'file_format'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN mime_type v ON (cf.mime_type = v.nid)',
                      'datapackage_mime_type', 'mime_type'),
