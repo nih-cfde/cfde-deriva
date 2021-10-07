@@ -1008,7 +1008,7 @@ LIMIT 1;
             if cur is not None:
                 cur.close()
 
-    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None):
+    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None, table_queries={}):
         """Load tabular data from sqlite table into corresponding catalog table.
 
         :param conn: Existing sqlite3 connection to use as data source.
@@ -1017,6 +1017,7 @@ LIMIT 1;
         :param table_error_callback: Optional callback to signal error for one table, lambda tname, tpath, msg: ...
         :param tablenames: Optional set of tablenames to load (default None means load all tables)
         :param progress: Optional, mutable progress/restart-marker dictionary
+        :param table_queries: Optional, override source SQL query for specific table names
         """
         if progress is None:
             progress = dict()
@@ -1048,12 +1049,6 @@ LIMIT 1;
             batchnum = 0
             if position is not None:
                 logger.info("Restarting after %r due to existing restart marker" % (position,))
-
-            # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
-            table_queries = {
-                'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
-                'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
-            }
 
             def get_batch(cur):
                 nonlocal position

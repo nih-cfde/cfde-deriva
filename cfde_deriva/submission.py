@@ -989,7 +989,12 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     'gene',
                     # don't need to update subject_role/subject_granularity/sex/race/ethnicity
                     # which are closed enums for the DCCs...
-                }
+                },
+                # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
+                table_queries={
+                'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
+                'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
+                },
             )
             logger.info('Recording submission vocabulary usage in registry...')
             cur = conn.cursor()
