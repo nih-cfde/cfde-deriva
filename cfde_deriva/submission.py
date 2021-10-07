@@ -20,11 +20,11 @@ from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
 
-from deriva.core import DerivaServer, get_credential, init_logging, urlquote
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote, topo_sorted
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, sql_literal, sql_identifier, make_session_config
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, sql_literal, sql_identifier, make_session_config, tnames_topo_sorted
 from .cfde_login import get_archive_headers_map
 
 
@@ -1113,7 +1113,7 @@ def main(subcommand, *args):
             Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
             logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
 
-    def rebuild_submission(row):
+    def rebuild_submission(row, purge_partial=True):
         submission_id = row['id']
         dcc_id = row['submitting_dcc']
         archive_url = row['datapackage_url']
@@ -1124,6 +1124,24 @@ def main(subcommand, *args):
             archive_headers_map=archive_headers_map,
             skip_dcc_check=True,
         )
+        if purge_partial:
+            ermrest_url = registry.get_datapackage(submission_id).get('review_ermrest_url')
+            if ermrest_url is not None:
+                submission.review_catalog = server.connect_ermrest(Submission.extract_catalog_id(server, ermrest_url))
+                registry.update_datapackage(
+                    submission_id,
+                    status=terms.cfde_registry_dp_status.submitted,
+                    review_browse_url=None,
+                    review_summary_url=None,
+                )
+                review_model = submission.review_catalog.getCatalogModel()
+                if 'CFDE' in review_model.schemas:
+                    logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
+                    for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
+                        submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
+                    logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
+                    Submission.configure_review_catalog(registry, submission.review_catalog, submission_id, provision=True)
+        #
         submission.ingest()
 
     if subcommand == 'submit':
