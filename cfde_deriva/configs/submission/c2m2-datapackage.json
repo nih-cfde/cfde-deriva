@@ -181,7 +181,10 @@
                   }
                }
             ]
-         }
+         },
+         "check_sql_paths": [
+            "file_check_checksums.sql"
+         ]
       },
       {
          "profile": "tabular-data-resource",

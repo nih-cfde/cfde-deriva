@@ -938,9 +938,41 @@ class CfdeDataPackage (object):
                     continue
 
                 table = self.doc_cfde_schema.tables[tname]
+                sql_checks = self.doc_cfde_schema.tables[tname].annotations.get(self.resource_tag, {}).get('check_sql_paths', [])
+                skip_checks = json.loads(os.getenv('CFDE_SKIP_SQL_CHECKS', '{}'))
                 resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
 
                 progress.setdefault(tname, {})
+
+                for path in sql_checks:
+                    if skip_checks is True or skip_checks.get(path[0:-4]):
+                        logger.info('Skipping custom SQL check %r for table %r due to CFDE_SKIP_SQL_CHECKS env. var.' % (path, tname))
+                        continue
+                    progress[tname].setdefault(path, None)
+                    if progress[tname][path] is not None:
+                        logger.info('Skipping custom SQL check %r for table %r due to progress marker' % (path, tname))
+                        continue
+                    logger.info('Running custom SQL check %r for table %r' % (path, tname,))
+                    sql = self.package_filename.get_data_str(path)
+                    cur.execute(sql)
+                    row = cur.fetchone()
+                    if row:
+                        description, count, example_nid, example_data = row
+                        mesg = '%s in row %s %s%s' % (
+                            description,
+                            example_nid,
+                            example_data,
+                            (' (and %s others...)' % (count - 1)) if count > 1 else '',
+                        )
+                        errors_by_tname.setdefault(tname, []).append(mesg)
+                        if first_error_mesg is None:
+                            first_error_mesg = 'Table %s %s' % (tname, mesg)
+                        logger.error('custom SQL check %r for table %r ERROR: %s' % (path, tname, mesg))
+                        progress[tname][path] = False
+                    else:
+                        logger.info('custom SQL check %r for table %r OK' % (path, tname))
+                        progress[tname][path] = True
+
                 if table.foreign_keys:
                     logger.info('Checking foreign keys for table %r' % (tname,))
                 for fkey in table.foreign_keys:
