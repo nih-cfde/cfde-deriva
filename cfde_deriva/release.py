@@ -442,7 +442,10 @@ def main(subcommand, *args):
         if len(args) == 0:
             # next-release mode
             # HACK: find/label next-release by specific description field
-            res = registry._catalog.get('/entity/CFDE:release/description=%s@sort(RCT,RID)' % urlquote(Release.next_rel_descr)).json()
+            res = registry._catalog.get('/entity/CFDE:release/status=%s/description=%s@sort(RCT,RID)' % (
+                urlquote(terms.cfde_registry_rel_status.planning),
+                urlquote(Release.next_rel_descr),
+            )).json()
             if len(res) > 0:
                 rel_id = res[0]['id']
             else:

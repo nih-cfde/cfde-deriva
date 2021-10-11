@@ -93,14 +93,20 @@ configuration artifacts.
 
 For CFDE developers and operations staff, a low-level CLI wrapper
 provides access to directly execute this code from an appropriate
-development or data preparation workstation, while bypassing
-the normal hosted workflow system.
+development or data preparation workstation, while bypassing the
+normal hosted workflow system. In order to succeed, the developer or
+admin user must provide credentials which include sufficient
+write-access privileges in the CFDE-CC system under test.
 
 The `cfde_deriva.submission` CLI is primarily a test stub and
 takes a few settings via environment variables:
 
 - `DERIVA_SERVERNAME=app.example.org` (defaults to the dev sandbox API endpoint)
-- `CFDE_SKIP_FRICTIONLESS=true` will bypass frictionless package validation (default false)
+- `CFDE_SKIP_FRICTIONLESS=true` will bypass frictionless package validation (default `false`)
+- `CFDE_SKIP_SQL_CHECKS=true` will bypass additional relational data checks (default `{}`)
+    - general syntax is a JSON object `{ "check_name": true, ...}` to bypass specific checks
+    - default `{}` does not bypass any checks
+    - `true` is a equivalent to an object mapping all check names to `true`
 - `SQLITE_TMPDIR=/path/to/dir` will override the default SQLite temp file storage location
 
 #### Submission emulation
@@ -163,6 +169,14 @@ scenarions:
 
 `python -m 'cfde_deriva.submission' reconfigure-all
 
+It is the operator's responsibility to determine whether this
+reconfiguration is appropriate, i.e. that existing review catalog
+content is schema-compatible with the configurations being
+applied. Older review catalogs may need to be reconfigured by an
+older, compatible version of cfde-deriva or conversely purged and
+rebuilt with the `submission rebuild` sub-command to upgrade to
+the internal portal schema used by the newer software.
+
 ### Release preparation
 
 WHen a set of submissions have been ingested, reviewed, and marked
@@ -172,37 +186,67 @@ prepared using the `cfde_deriva.release` CLI wrapper.
 This process is relatively expensive as it, in effect, performs ingest
 over again for each constituent datapackage. However, instead of
 producing a number of per-submission review catalogs, it produces a
-merged release catalog.
+merged release catalog, combining all the constituent submission
+information.
 
-#### Defining a draft release
+#### Defining or maintaining the CFDE next-release draft
 
-The release tools are oriented around release definitions which are
-created in the registry _before_ any release data is prepared.
+The release tools facilitate the preparation of a special draft
+release which is intended to track the likely consituent submissions
+for the "next CFDE release". When invoked without other arguments, the
+release draft sub-command idempotently creates or updates this record
+to reflect the latest _approved_ submissions from each DCC:
 
 `python -m 'cfde_deriva.release' draft`
 
-A new `CFDE`.`release` record is created in the registry,
-automatically populated by the most recently submitted and approved
-release for each CF Program.  When a release has already been drafted,
-but you wish to update it to reflect recent submission or approval
-activities, an optional release_id is supplied:
+A built-in description value (currently `future release candidates`)
+is applied to mark the new draft release, and/or used to locate the
+existing record. Each time the command is invoked, the existing
+record will be updated to reflect the latest approved submissions.
 
-`python -m 'cfde_deriva.release' draft <release_id>`
+Environment variables (some shared with the submission module):
+
+- `DERIVA_SERVERNAME=hostname` (defaults to the dev sandbox API endpoint)
+- `DRAFT_NEED_DCC=true` whether DCC approval is required for constituent datapackages (default true)
+- `DRAFT_NEED_CFDE=false` whether CFDE-CC approval is required for consituent datapackages (default false)
+
+(A draft release is one in the `cfde_registry_rel_status:planning`
+state. The implicit next-release draft is both in this state and
+bearing the special built-in descrption value.  In the event that an
+admin user manually creates multiple draft releases with the same
+description field value, this tool will locate and maintain the
+_earliest_ draft, sorting by record creation time in the release
+registry.)
+
+#### Defining ad-hoc draft releases
+
+The release tools are oriented around release definitions which are
+created in the registry _before_ any release data is prepared. Aside
+from the CFDE next-release draft, the tool can also create other drafts
+with different description values:
+
+`python -m 'cfde_deriva.release' draft new [<description>]`
+
+With this invocation, a new `CFDE`.`release` record is created in the
+registry, automatically populated by the most recently submitted and
+approved release for each CF Program.  When a release has already been
+drafted as such, but you wish to update it to reflect recent
+submission or approval activities, the previously generated release_id
+is supplied in place of the `new` keyword:
+
+`python -m 'cfde_deriva.release' draft <release_id> [<description>]`
 
 Command-like arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
+- description is a short, human-readable string which will be visible in the release registry
 
 A release definition can also be created or revised manually via
 the registry's web UI. This CLI wrapper is a convenience layer
 to automatically update the stored definitions.
 
-Environment variables (some shared with the submission module):
-
-- `DERIVA_SERVERNAME=hostname` (defaults to the dev sandbox API endpoint)
-- `SQLITE_TMPDIR=/path/to/dir` will override the default SQLite temp file storage location
-- `DRAFT_NEED_DCC=true` whether DCC approval is required for constituent datapackages (default true)
-- `DRAFT_NEED_CFDE=false` whether CFDE-CC approval is required for consituent datapackages (default false)
+See previous sub-section for environment variables affecting the
+`release draft` sub-command.
 
 #### Release build
 
@@ -231,6 +275,8 @@ the last progress marker to be repeated.
 
 Environment variables:
 
+- `DERIVA_SERVERNAME=hostname` (defaults to the dev sandbox API endpoint)
+- `SQLITE_TMPDIR=/path/to/dir` will override the default SQLite temp file storage location
 - `REPROVISION_MODEL=false` whether to attempt to apply model changes to a build that is in progress
 
 Normally, restart should use the exact same cfde-deriva codebase and
@@ -240,7 +286,6 @@ enabled to attempt to more rapidly test some small changes, such as
 the addition of another computed table or column.  However, it is the
 developer's responsibility to decide when this short-cut is valid,
 and to start over with a clean build when circumstances require it.
-
 
 #### Release publishing
 
@@ -262,7 +307,8 @@ release's catalog, this tool also attempts to update release status
 metadata in the registry to document the change:
 
 1. Change the new release to "public-release" state
-2. Change the previous release to "obsoleted" state
+2. Replace the built-in next-release description with a release date description
+3. Change the previous release to "obsoleted" state
 
 If used in unexpected ways, the tool may move the alias but skip
 metadata updates, requiring the CFDE admin users to manually correct
