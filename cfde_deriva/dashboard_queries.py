@@ -311,6 +311,271 @@ class StatsQuery (object):
                 for attr_func in self.attr_funcs
             ]).fetch(headers=headers)
 
+class Entity (object):
+    def __init__(self, ent_name, *attr_cnames):
+        self.name = ent_name
+        self.attr_cnames = attr_cnames
+
+class TermMap (object):
+    vocab_cnames = ['nid', 'id', 'name', 'description']
+
+    def __init__(self, helper, vocab_tname, headers=DEFAULT_HEADERS):
+        path = helper.builder.CFDE.tables[vocab_tname].path
+        table = path.table_instances[vocab_tname]
+        self.nid_map =  {
+            row['nid']: row
+            for row in path.attributes(*[
+                    table.column_definitions[cname]
+                    for cname in self.vocab_cnames
+            ]).fetch(headers=headers)
+        }
+
+    def term_array(self, nid_array):
+        return [ self.nid_map[nid] for nid in nid_array ]
+
+class DccMap (TermMap):
+    vocab_cnames = ['nid', 'id', 'dcc_name', 'dcc_abbreviation', 'dcc_description']
+
+class SlimTermMap (TermMap):
+    def __init__(self, helper, vocab_tname, slimmap_tname, headers=DEFAULT_HEADERS):
+        super(SlimTermMap, self).__init__(helper, vocab_tname, headers)
+        path = helper.builder.CFDE.tables[slimmap_tname].path
+        table = path.table_instances[slimmap_tname]
+        self.slim_map = {}
+        for row in path.attributes(table.original_term, table.slim_term).fetch(headers=headers):
+            self.slim_map.setdefault(row['original_term'], set()).add(row['slim_term'])
+
+    def slim_nid_array(self, original_nid_array):
+        terms = set()
+        for nid in original_nid_array:
+            terms.update(self.slim_map[nid])
+        return sorted(terms)
+
+class Dimension (object):
+    slim = False
+
+    def __init__(self, dim_name, array_cname, vocab_tname=None):
+        self.name = dim_name
+        self.array_cname = array_cname
+        self.vocab_tname = vocab_tname if vocab_tname is not None else dim_name
+
+    def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
+        return TermMap(helper, self.vocab_tname, headers)
+
+class DccDimension (Dimension):
+    def __init__(self):
+        super(DccDimension, self).__init__('dcc', 'dccs')
+
+    def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
+        return DccMap(helper, self.vocab_tname, headers)
+
+class SlimDimension (Dimension):
+    slim = True
+
+    def __init__(self, dim_name, array_cname, vocab_tname=None, slimmap_tname=None):
+        super(SlimDimension, self).__init__(dim_name, array_cname, vocab_tname)
+        self.slimmap_tname = slimmap_tname if slimmap_tname is not None else ('%s_slim' % self.vocab_tname)
+
+    def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
+        return SlimTermMap(helper, self.vocab_tname, self.slimmap_tname, headers)
+
+class StatsQuery2 (object):
+    """C2M2 statistics query generator
+
+    Construct with a DashboardQueryHelper instance to bind to a
+    catalog, select base entity for statistics, and select optional
+    dimensions for multi-dimensional grouping of results.
+
+    StatsQuery2(helper)
+    .entity('file')
+    .dimension('data_type')
+    .dimension('dcc')
+    .fetch()
+
+    Exactly one entity MUST be configured. Zero or more dimensions MAY
+    be configured.
+
+    While StatsQuery result groups are identified by a single concept
+    ID in each dimension, StatsuQuery2 groups are identified by a set
+    of terms for each dimension.
+
+    """
+    # define supported keys, mapped to implementation bits...
+    supported_entities = {
+        ent.name: ent
+        for ent in [
+                Entity('file', 'num_files', 'total_size_in_bytes'),
+                Entity('biosample', 'num_biosamples'),
+                Entity('subject', 'num_subjects'),
+                Entity('collection', 'num_collections'),
+        ]
+    }
+    supported_dimensions = {
+        dim.name: dim
+        for dim in [
+                DccDimension(),
+
+                SlimDimension('anatomy', 'anatomies'),
+                Dimension('assay_type', 'assay_types'),
+                Dimension('compression_format', 'compression_formats', 'file_format'),
+                Dimension('data_type', 'data_types'),
+                Dimension('disease', 'diseases'),
+                Dimension('ethnicity', 'ethnicities'),
+                Dimension('file_format', 'file_formats'),
+                Dimension('gene', 'genes'),
+                Dimension('mime_type', 'mime_types'),
+                Dimension('ncbi_taxonomy', 'ncbi_taxons'),
+                Dimension('race', 'races'),
+                Dimension('sex', 'sexes'),
+                Dimension('species', 'subject_species', 'ncbi_taxonomy'),
+                Dimension('substance', 'substances'),
+                Dimension('subject_granularity', 'subject_granularities'),
+                Dimension('subject_role', 'subject_roles'),
+        ]
+    }
+
+    def __init__(self, helper):
+        """Construct a StatsQuery builder object
+
+        :param helper: Instance of DashboardQueryHelper
+        """
+        self.helper = helper
+        self.included_entities = set()
+        self.included_dimensions = set()
+        self.path = self.helper.builder.CFDE.core_fact.path
+
+    def entity(self, entity_name):
+        """Select entity which will be source of statistics
+
+        :param entity_name: One of the StatsQuery2.supported_entities key strings
+        """
+        if self.included_entities:
+            # could relax this later...?
+            raise TypeError('Cannot call .entity() method more than once.')
+
+        try:
+            ent = self.supported_entities[entity_name]
+        except KeyError:
+            raise ValueError('Unsupported entity_name "%s"' % (entity_name,))
+
+        self.included_entities.add(ent)
+
+        return self
+
+    def dimension(self, dimension_name):
+        """Configure a grouping dimension
+
+        :param dimension_name: One of the StatsQuery2.supported_dimension key strings
+
+        """
+        if self.path is None:
+            raise TypeError('Cannot call .dimension() method prior to calling .entity() method.')
+
+        try:
+            dim = self.supported_dimensions[dimension_name]
+        except KeyError:
+            raise ValueError('Unsupported dimension_name "%s"' % (dimension_name,))
+
+        if dim in self.included_dimensions:
+            raise TypeError('Cannot use dimension_name "%s" more than once.' % (dim.ame,))
+
+        self.included_dimensions.add(dim)
+
+        return self
+
+    def _sort_and_merge(self, rows, sort_key, sums_dict):
+        if rows:
+            rows.sort(key=sort_key)
+            prev_row = rows[0]
+            prev_key = sort_key(prev_row)
+            sums = sums_dict(prev_row)
+            for row in rows[1:]:
+                key = sort_key(row)
+                if prev_key == key:
+                    # accumulate another row w/ identical keying
+                    for k, v in sums_dict(row).items():
+                        sums[k] = sums[k] + v
+                else:
+                    # emit previous accumulation and start a new one for new keying
+                    prev_row.update(sums)
+                    yield prev_row
+                    prev_row = row
+                    prev_key = key
+                    sums = sums_dict(prev_row)
+            prev_row.update(sums)
+            yield prev_row
+
+    def fetch(self, headers=DEFAULT_HEADERS):
+        """Fetch results for configured query"""
+        if self.path is None:
+            raise TypeError('Cannot call .fetch() method to calling .entity() method.')
+
+        entities = list(self.included_entities)
+        dimensions = list(self.included_dimensions)
+
+        filters = self.path.core_fact.column_definitions[entities[0].attr_cnames[0]] > 0
+        for ent in entities[1:]:
+            filters = filters | (self.path.core_fact.column_definitions[ent.attr_cnames[0]] > 0)
+
+        if dimensions:
+            attributes = []
+            for ent in self.included_entities:
+                attributes.extend([ self.path.core_fact.column_definitions[cname] for cname in ent.attr_cnames ])
+
+            api = self.path.filter(filters).groupby(*[
+                self.path.core_fact.column_definitions[dim.array_cname]
+                for dim in dimensions
+            ]).attributes(*attributes)
+        else:
+            aggregates = []
+            for ent in self.included_entities:
+                aggregates.extend([ Sum(self.path.core_fact.column_definitions[cname]).alias(cname) for cname in ent.attr_cnames ])
+
+            api = self.path.filter(filters).aggregates(*aggregates)
+
+        rows = api.fetch(headers=headers)
+
+        def with_update(d1, d2):
+            d1.update(d2)
+            return d1
+
+        vocab_term_maps = {
+            dim.name: dim.get_vocab_map(self.helper, headers=headers)
+            for dim in dimensions
+        }
+
+        slim_dimensions = [ dim for dim in dimensions if dim.slim ]
+
+        def slim_row(row):
+            for dim in slim_dimensions:
+                term_map = vocab_term_maps[dim.name]
+                row[dim.array_cname] = term_map.slim_nid_array(row[dim.array_cname])
+            return row
+
+        def rewrite_row(row):
+            for dim in dimensions:
+                term_map = vocab_term_maps[dim.name]
+                row[dim.array_cname] = term_map.term_array(row[dim.array_cname])
+            return row
+
+        if slim_dimensions:
+            # have to re-aggregate after term slimming
+            rows = [ slim_row(row) for row in rows ]
+
+            def sort_key(row):
+                return tuple([ row[dim.array_cname] for dim in dimensions ])
+
+            def sums_dict(row):
+                return {
+                    cname: 0 if row[cname] is None else row[cname]
+                    for ent in self.included_entities
+                    for cname in ent.attr_cnames
+                }
+
+            rows = self._sort_and_merge(rows, sort_key, sums_dict)
+
+        return [ rewrite_row(row) for row in rows ]
+
 class DashboardQueryHelper (object):
 
     def __init__(self, hostname, catalogid, scheme='https', caching=True, credential=None):
@@ -322,7 +587,7 @@ class DashboardQueryHelper (object):
         if 'core_fact' not in self.cfde_schema.tables:
             raise ValueError('Target %s catalog %r lacks the required CFDE.core_fact table' % (hostname, catalogid))
 
-    def run_demo(self):
+    def run_demo1(self):
         """Run each example query and dump all results as JSON."""
         projects = {
             (row['id_namespace'], row['local_id']): row
@@ -383,6 +648,36 @@ class DashboardQueryHelper (object):
             'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
             'subject_stats_datatype_disease': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('disease').fetch()),
 
+        }
+        print(json.dumps(results, indent=2))
+
+    def run_demo2(self):
+        """Run each example query and dump all results as JSON."""
+        # use list() to convert each ResultSet
+        # for easier JSON serialization...
+        x = StatsQuery2(self)
+
+        results = {
+            'file': list(StatsQuery2(self).entity('file').fetch()),
+
+            'file_stats_anatomy_assaytype': list(StatsQuery2(self).entity('file').dimension('anatomy').dimension('assay_type').fetch()),
+            'file_stats_disease_gene': list(StatsQuery2(self).entity('file').dimension('disease').dimension('gene').fetch()),
+            'file_stats_datatype_dcc': list(StatsQuery2(self).entity('file').dimension('data_type').dimension('dcc').fetch()),
+            'file_stats_datatype_species': list(StatsQuery2(self).entity('file').dimension('data_type').dimension('species').fetch()),
+
+            'biosample_stats_datatype_disease': list(StatsQuery2(self).entity('biosample').dimension('data_type').dimension('disease').fetch()),
+
+            'subject_stats_datatype_substance': list(StatsQuery2(self).entity('subject').dimension('data_type').dimension('substance').fetch()),
+
+            'file_all': list(StatsQuery2(self).entity('file')
+                             .dimension('anatomy').dimension('assay_type').dimension('compression_format')
+                             .dimension('data_type').dimension('disease').dimension('ethnicity')
+                             .dimension('file_format').dimension('gene').dimension('mime_type')
+                             .dimension('ncbi_taxonomy').dimension('race').dimension('sex')
+                             .dimension('substance').dimension('subject_granularity').dimension('subject_role')
+                             .dimension('species')
+                             .fetch()
+                             )
         }
         print(json.dumps(results, indent=2))
 
@@ -455,7 +750,7 @@ def main():
     credential = get_credential(hostname)
     catalogid = os.getenv('DERIVA_CATALOGID', '1')
     db = DashboardQueryHelper(hostname, catalogid, credential=credential)
-    db.run_demo()
+    db.run_demo2()
     return 0
 
 if __name__ == '__main__':
