@@ -4214,7 +4214,26 @@
                "*": [
                   "id",
                   "display_name",
-                  "full_name"
+                  "full_name",
+                  {
+                     "markdown_name": "Email",
+                     "display": {
+                       "template_engine": "handlebars",
+                       "markdown_pattern": "{{$session.email}}"
+                     }
+                  }, {
+                     "markdown_name": "Identities",
+                     "display": {
+                       "template_engine": "handlebars",
+                       "markdown_pattern": "{{#each $session.identities}}{{this}}\n{{/each}}"
+                     }
+                  }, {
+                     "markdown_name": "Groups",
+                     "display": {
+                       "template_engine": "handlebars",
+                       "markdown_pattern": "{{#each $session.attributes}}{{#if (eq this.type 'globus_group')}}[{{this.display_name}}]({{this.webpage}})\n{{/if}}{{/each}}"
+                     }
+                  }
                ],
                "compact": [
                   "display_name",

@@ -235,6 +235,18 @@ class CatalogConfigurator (object):
                 "joinUrl": "https://app.globus.org/groups/96a2546e-fa0f-11eb-be15-b7f12332d0e5/join",
                 "groupName": "NIH CFDE Portal Members"
             },
+            "loggedInMenu": {
+              "menuOptions": [
+                { 
+                  "nameMarkdownPattern": "My Profile",
+                  "urlPattern": "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}",
+                  "type": "url"
+                }, { 
+                  "nameMarkdownPattern": "Logout",
+                  "type": "logout"
+                }
+              ]
+            },
             "navbarMenu": {
                 "newTab": False,
                 "children": [
