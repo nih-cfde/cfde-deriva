@@ -4219,19 +4219,19 @@
                      "markdown_name": "Email",
                      "display": {
                        "template_engine": "handlebars",
-                       "markdown_pattern": "{{$session.email}}"
+                       "markdown_pattern": "{{#if (eq $session.id _id)}}{{$session.email}}{{/if}}"
                      }
                   }, {
                      "markdown_name": "Identities",
                      "display": {
                        "template_engine": "handlebars",
-                       "markdown_pattern": "{{#if (eq $session.id {{id}})}}{{#each $session.identities}}{{this}}\n{{/each}}{{/if}}"
+                       "markdown_pattern": "{{#if (eq $session.id _id)}}{{#each $session.identities}}{{this}}\n{{/each}}{{/if}}"
                      }
                   }, {
                      "markdown_name": "Groups",
                      "display": {
                        "template_engine": "handlebars",
-                       "markdown_pattern": "{{#if (eq $session.id {{id}})}}{{#each $session.attributes}}{{#if (eq this.type 'globus_group')}}[{{this.display_name}}]({{this.webpage}})\n{{/if}}{{/each}}{{/if}}"
+                       "markdown_pattern": "{{#if (eq $session.id _id)}}{{#each $session.attributes}}{{#if (eq this.type 'globus_group')}}[{{this.display_name}}]({{this.webpage}})\n{{/if}}{{/each}}{{/if}}"
                      }
                   }
                ],
