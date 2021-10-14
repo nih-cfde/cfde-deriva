@@ -83,6 +83,53 @@ class Release (object):
         os.makedirs(os.path.dirname(self.portal_prep_sqlite_filename), exist_ok=True)
 
     @classmethod
+    def purge_multiple(cls, server, registry, purge_mode='auto'):
+        """Purge multiple release catalogs, updating records appropriately
+
+        :param purge_mode: Target selection mode string (default 'auto')
+
+        Supported purge_mode values:
+        - 'auto': heuristically select likely dead-end releases
+        - 'ALL': purge ALL catalogs, regardless of release status
+
+        """
+        if purge_mode not in {'auto', 'ALL'}:
+            raise ValueError('Invalid purge_mode %r' % (purge_mode,))
+
+        in_past = True
+        for rel_row in registry.list_releases(sortby="RCT"):
+            purge_this = False
+
+            if rel_row["status"] == terms.cfde_registry_rel_status.public_release:
+                logger.debug("Found public-release %(id)s, dividing release history into past/present/future" % rel_row)
+                in_past = False
+
+            if purge_mode == 'ALL':
+                logger.info("Purging release %(id)s in purge ALL mode" % rel_row)
+                purge_this = True
+            elif rel_row["status"] in {
+                    terms.cfde_registry_rel_status.ops_error,
+                    terms.cfde_registry_rel_status.obsoleted,
+                    terms.cfde_registry_rel_status.rejected,
+                    terms.cfde_registry_rel_status.content_error,
+            }:
+                logger.info("Purging release %(id)s with unconditional purge status %(status)s" % rel_row)
+                purge_this = True
+            elif in_past and rel_row["status"] in {
+                    terms.cfde_registry_rel_status.planning,
+                    terms.cfde_registry_rel_status.pending,
+                    terms.cfde_registry_rel_status.content_ready,
+            }:
+                logger.info("Purging past release %(id)s with conditional purge status %(status)s" % rel_row)
+                purge_this = True
+            else:
+                logger.info("Skipping release %(id)s with unmatched status %(status)s for purge." % rel_row)
+
+            if purge_this:
+                release = cls.by_id(server, registry, rel_row['id'])
+                release.purge()
+
+    @classmethod
     def configure_release_catalog(cls, registry, catalog, id, provision=False):
         """Configure release catalog
 
@@ -145,6 +192,38 @@ class Release (object):
         if rel_row['ermrest_url'] is None:
             raise exception.StateError('Catalog %(id)s ermrest_url=%(ermrest_url)r does not have a catalog_id' % rel_row)
         return urlunquote(rel_row['ermrest_url'].split('/')[-1])
+
+    def purge(self):
+        """Purge release catalog state from service, updating release record appropriately"""
+        rel_row = self.rel_row
+        status = rel_row["status"]
+
+        try:
+            catalog_id = self.catalog_id
+
+            new_state = {
+                terms.cfde_registry_rel_status.planning: terms.cfde_registry_rel_status.rejected,
+                terms.cfde_registry_rel_status.pending: terms.cfde_registry_rel_status.rejected,
+                terms.cfde_registry_rel_status.content_ready: terms.cfde_registry_rel_status.rejected,
+                terms.cfde_registry_rel_status.content_error: terms.cfde_registry_rel_status.content_error,
+                terms.cfde_registry_rel_status.rejected: terms.cfde_registry_rel_status.rejected,
+                terms.cfde_registry_rel_status.public_release: terms.cfde_registry_rel_status.obsoleted,
+                terms.cfde_registry_rel_status.obsoleted: terms.cfde_registry_rel_status.obsoleted,
+                terms.cfde_registry_rel_status.ops_error: terms.cfde_registry_rel_status.ops_error,
+            }.get(status, terms.cfde_registry_rel_status.ops_error)
+
+            if status != new_state:
+                logger.debug('Changing release %r status %s -> %s' % (self.release_id, status, new_state))
+                self.registry.update_release(self.release_id, status=new_state)
+
+            logger.debug('Deleting ermrest catalog %r' % (catalog_id,))
+            self.server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
+            self.registry.update_release(self.release_id, ermrest_url=None, browse_url=None, summary_url=None)
+            logger.info('Purged catalog %r for release %r.' % (catalog_id, self.release_id))
+            return True
+        except exception.StateError:
+            logger.info('Release %r already purged.' % self.release_id)
+            return False
 
     def publish(self, publish_id='1'):
         """Adjust ermrest catalog alias to publish this release"""
@@ -415,6 +494,13 @@ def main(subcommand, *args):
        - Revise policy/presentation config on existing catalog
     - 'publish' release_id
        - Adjust the /ermrest/catalog/1 alias to point to the identified release's catalog
+    - 'purge' release_id
+       - Purge release's backing ermrest catalog storage and update release record status
+    - 'purge-auto'
+       - Purge redundant releases by timeline-aware heuristics
+    - 'purge-ALL'
+       - Purge ALL releases including current public one
+       - This is a disruptive administrative tool to be used with offline sytems!
 
     This client uses default DERIVA credentials for server.
 
@@ -468,7 +554,7 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish'}:
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge'}:
         if len(args) < 1:
             raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
@@ -489,8 +575,12 @@ def main(subcommand, *args):
         elif subcommand == 'publish':
             aliasdoc = release.publish()
             print("Publishing alias %(id)r now bound to target %(alias_target)r" % aliasdoc)
+        elif subcommand == 'purge':
+            release.purge()
         else:
             assert(False)
+    elif subcommand in {'purge-ALL', 'purge-auto'}:
+        Release.purge_multiple(server, registry, purge_mode={'purge-ALL': 'ALL', 'purge-auto': 'auto'}[subcommand])
     else:
         raise ValueError('unknown sub-command "%s"' % subcommand)
 

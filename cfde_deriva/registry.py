@@ -148,7 +148,7 @@ class Registry (object):
             raise exception.UnknownDccId(dcc_id)
         self.enforce_dcc_submission(dcc_id, submitting_user)
 
-    def _get_entity(self, table_name, id=None):
+    def _get_entity(self, table_name, id=None, sortby=None):
         """Get one or all entity records from a registry table.
 
         :param table_name: The registry table to access.
@@ -157,7 +157,12 @@ class Registry (object):
         path = self._builder.CFDE.tables[table_name].path
         if id is not None:
             path = path.filter(path.table_instances[table_name].column_definitions['id'] == id)
-        return list( path.entities().fetch() )
+        results = path.entities()
+        if sortby is not None:
+            if isinstance(sortby, str):
+                sortby=[sortby]
+            results = results.sort(*[ path.table_instances[table_name].column_definitions[cname] for cname in sortby ])
+        return list( results.fetch() )
 
     def get_user(self, client_id):
         """Get WebauthnUser instance representing existing registry user with client_id.
@@ -184,6 +189,12 @@ class Registry (object):
 
         """
         return self._get_entity('datapackage')
+
+    def list_releases(self, sortby=None):
+        """Get a list of all release definitions in the registry
+
+        """
+        return self._get_entity('release', sortby=sortby)
 
     def get_latest_approved_datapackages(self, need_dcc_appr=True, need_cfde_appr=True):
         """Get a map of latest datapackages approved for release for each DCC id."""
