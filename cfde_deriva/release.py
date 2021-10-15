@@ -7,6 +7,7 @@ import json
 import traceback
 import requests
 import datetime
+import dateutil.parser
 
 from deriva.core import DerivaServer, get_credential, init_logging, urlquote, urlunquote
 
@@ -548,6 +549,29 @@ def main(subcommand, *args):
                 description = nochange
         dcc_datapackages = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         release, dcc_datapackages = registry.register_release(rel_id, dcc_datapackages, description)
+        # also update submission states
+        datapackages = { dp_row['id'] for dp_row in dcc_datapackages.values() }
+        for dp_row in registry.list_datapackages(sortby='submission_time'):
+            next_state = dp_row['status']
+            if dp_row['id'] in datapackages:
+                if dp_row['status'] != terms.cfde_registry_dp_status.release_pending:
+                    next_state = terms.cfde_registry_dp_status.release_pending
+            elif dp_row['status'] in {
+                    terms.cfde_registry_dp_status.release_pending,
+                    terms.cfde_registry_dp_status.content_ready,
+            }:
+                next_state = terms.cfde_registry_dp_status.content_ready
+                dcc_latest = dcc_datapackages.get(dp_row['submitting_dcc'])
+                if dcc_latest is not None:
+                    this_date = dateutil.parser.parse(dp_row['submission_time'])
+                    latest_date = dateutil.parser.parse(dcc_latest['submission_time'])
+                    if this_date < latest_date:
+                        next_state = terms.cfde_registry_dp_status.obsoleted
+
+            if next_state != dp_row['status']:
+                logger.info('Updating datapackage %r status %s -> %s' % (dp_row['id'], dp_row['status'], next_state))
+                registry.update_datapackage(dp_row['id'], status=next_state)
+
         print(json.dumps(list(dcc_datapackages.values()), indent=4))
         print(json.dumps(release, indent=4))
     elif subcommand == 'draft-preview':
