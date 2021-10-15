@@ -1,4 +1,5 @@
 
+import os
 import sys
 import datetime
 import json
@@ -743,43 +744,65 @@ class Registry (object):
         ]
         registry_datapackage.dump_data_files(resources=resources)
 
-def main(servername, subcommand, catalog_id=None):
+def main(subcommand, catalog_id='registry'):
     """Perform registry maintenance.
 
-    :param servername: The DERIVA server where the registry should reside.
     :param subcommand: A named sub-command of this utility.
     :param catalog_id: The existing catalog ID, if any.
 
     Subcommands:
 
-    - 'provision': Build a new registry catalog and report its ID (ignores catalog_id)
-    - 'reprovision': Adjust existing registry model (required catalog_id)
-    - 'reconfigure': Re-configure existing registry (requires catalog_id)
-    - 'delete': Delete an existing (test) registry
-    - 'creators-acl': Print ermrest creators ACL
-    - 'dump-onboarding': Write out *.tsv files for onboarding info in registry
+    - 'provision' [ catalog_id ]
+       - Build a new registry catalog and report its ID
+    - 'reprovision' [ catalog_id ]
+       - Adjust existing registry model
+    - 'reconfigure' [ catalog_id ]
+       - Re-configure existing registry
+    - 'delete' [ catalog_id ]
+       - Delete an existing registry, i.e. a parallel test DB
+    - 'creators-acl' [ catalog_id ]
+       - Print ermrest creators ACL
+    - 'dump-onboarding' [ catalog_id ]
+       - Write out *.tsv files for onboarding info in registry
+    - 'fixup-fqdn' [ catalog_id ]
+       - Update URLs to match FQDN service host
+
+    Set environment variables:
+    - DERIVA_SERVERNAME to choose service host.
 
     """
     init_logging(logging.INFO)
 
+    servername = os.getenv('DERIVA_SERVERNAME', 'app-dev.nih-cfde.org')
     credentials = get_credential(servername)
     session_config = DEFAULT_SESSION_CONFIG.copy()
     session_config["allow_retry_on_all_methods"] = True
     server = DerivaServer('https', servername, credentials, session_config=session_config)
 
+    if catalog_id == '':
+        catalog_id = None
+
     if subcommand == 'creators-acl':
         print(json.dumps(ermrest_creators_acl, indent=2))
         return 0
     if subcommand == 'provision':
-        catalog = server.create_ermrest_catalog()
-        print('Created new catalog %s' % catalog.catalog_id)
-    elif subcommand in { 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn' }:
-        if catalog_id is None:
-            raise TypeError('missing 1 required positional argument: catalog_id')
+        catalog_id = server.post(
+            '/ermrest/catalog',
+            json={
+                "id": catalog_id,
+                "owner":  [
+                    authn_id.cfde_portal_admin,
+                    authn_id.cfde_infrastructure_ops,
+                ],
+            }
+        ).json()["id"]
+        print('Created new catalog %r' % (catalog_id,))
+
+    if subcommand in { 'provision', 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn' }:
         catalog = server.connect_ermrest(catalog_id)
-        print('Connected to existing catalog %s' % catalog.catalog_id)
+        print('Connected to catalog %r' % catalog.catalog_id)
     else:
-        raise ValueError('unknown subcommand %s' % subcommand)
+        raise ValueError('unknown subcommand %r' % subcommand)
 
     dp = CfdeDataPackage(registry_schema_json, RegistryConfigurator(catalog))
     registry = Registry('https', servername, catalog.catalog_id, credentials)
