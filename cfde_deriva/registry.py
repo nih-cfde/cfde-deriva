@@ -3,6 +3,7 @@ import sys
 import datetime
 import json
 import logging
+import urllib3
 
 from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG, init_logging, urlquote
 from deriva.core.ermrest_model import nochange
@@ -690,6 +691,48 @@ class Registry (object):
                 '/entity/CFDE:approval_status/id=%s' % urlquote(approved_hold)
             )
 
+    def fixup_url_hostnames(self, fqdn):
+        """Rewrite URLs in registry if we've moved the FQDN of the deployment"""
+        rewrites = []
+        for row in self.list_datapackages():
+            changed = False
+            for cname in {'review_ermrest_url', 'review_browse_url', 'review_summary_url'}:
+                url = row[cname]
+                if url is None:
+                    continue
+                u = urllib3.util.parse_url(url)
+                if u.host != fqdn:
+                    row[cname] = u._replace(host=fqdn).url
+                    logger.info('Updating %s: %s -> %s' % (cname, u.url, row[cname]))
+                    changed = True
+            if changed:
+                rewrites.append(row)
+        if rewrites:
+            self._catalog.put(
+                '/attributegroup/CFDE:datapackage/id;review_ermrest_url,review_browse_url,review_summary_url',
+                json=rewrites
+            ).json()
+
+        rewrites = []
+        for row in self.list_releases():
+            changed = False
+            for cname in {'ermrest_url', 'browse_url', 'summary_url'}:
+                url = row[cname]
+                if url is None:
+                    continue
+                u = urllib3.util.parse_url(url)
+                if u.host != fqdn:
+                    row[cname] = u._replace(host=fqdn).url
+                    logger.info('Updating %s: %s -> %s' % (cname, u.url, row[cname]))
+                    changed = True
+            if changed:
+                rewrites.append(row)
+        if rewrites:
+            self._catalog.put(
+                '/attributegroup/CFDE:release/id;ermrest_url,browse_url,summary_url',
+                json=rewrites
+            ).json()
+
     @classmethod
     def dump_onboarding(self, registry_datapackage):
         """Dump onboarding info about DCCs in registry"""
@@ -730,7 +773,7 @@ def main(servername, subcommand, catalog_id=None):
     if subcommand == 'provision':
         catalog = server.create_ermrest_catalog()
         print('Created new catalog %s' % catalog.catalog_id)
-    elif subcommand in { 'reconfigure', 'delete', 'reprovision', 'dump-onboarding' }:
+    elif subcommand in { 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn' }:
         if catalog_id is None:
             raise TypeError('missing 1 required positional argument: catalog_id')
         catalog = server.connect_ermrest(catalog_id)
@@ -762,7 +805,8 @@ def main(servername, subcommand, catalog_id=None):
         print('Deleted existing catalog %s' % catalog.catalog_id)
     elif subcommand == 'dump-onboarding':
         registry.dump_onboarding(dp)
-
+    elif subcommand == 'fixup-fqdn':
+        registry.fixup_url_hostnames(servername)
     return 0
 
 if __name__ == '__main__':
