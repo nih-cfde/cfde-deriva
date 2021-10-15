@@ -380,7 +380,7 @@ class Registry (object):
             "submitting_user": submitting_user.webauthn_id,
             "datapackage_url": archive_url,
             # we need to supply these unless catalog starts giving default values for us
-            "submission_time": datetime.datetime.utcnow().isoformat(),
+            "submission_time": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "status": terms.cfde_registry_dp_status.submitted,
         }
         defaults = [
