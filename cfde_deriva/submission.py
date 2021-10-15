@@ -4,6 +4,8 @@ import os.path
 import sys
 import traceback
 import re
+import datetime
+import dateutil.parser
 import shutil
 import zipfile
 import tarfile
@@ -142,6 +144,98 @@ class Submission (object):
         with open(self.restart_marker_filename, 'w') as f:
             json.dump(progress, f, indent=2)
         logger.info("Dumped restart marker file %s" % self.restart_marker_filename)
+
+    @classmethod
+    def purge_multiple(cls, server, registry, purge_mode='auto', horizon=datetime.timedelta(weeks=-2)):
+        """Purge multiple datapackge catalogs, updating records appropriately
+
+        :param purge_mode: Target selection mode string (default 'auto')
+        :param horizon: A timedelta horizon to influence 'auto' purge mode
+
+        Supported purge_mode values:
+        - 'auto': heuristically select likely dead-end datapackages
+        - 'ALL': purge ALL catalogs, regardless of status
+
+        The horizon is a relative time offset (from NOW) to divide the timeline
+        into (earlier) irrelevant times and (more recent) elevant times.
+
+        """
+        if purge_mode not in {'auto', 'ALL'}:
+            raise ValueError('Invalid purge_mode %r' % (purge_mode,))
+
+        # convert relative horizon to absolute
+        horizon = datetime.datetime.now(datetime.timezone.utc) + horizon
+
+        # find exclusions we want to protect in 'auto' mode
+        excluding = {
+            dp_row['id']
+            for dp_row in registry.get_latest_approved_datapackages(True, False).values()
+        }
+
+        for dp_row in registry.list_datapackages(sortby="submission_time"):
+
+            submission_time = dateutil.parser.parse(dp_row['submission_time'])
+            in_past = submission_time < horizon
+
+            if purge_mode == 'ALL':
+                logger.info("Purging datapackage %(id)s in purge ALL mode" % dp_row)
+                purge_this = True
+            elif dp_row['id'] in excluding:
+                logger.info("Skipping datapackage %(id)s excluded by heuristic guard." % dp_row)
+                purge_this = False
+            elif dp_row["status"] in {
+                    terms.cfde_registry_dp_status.ops_error,
+                    terms.cfde_registry_dp_status.obsoleted,
+                    terms.cfde_registry_dp_status.bag_error,
+                    terms.cfde_registry_dp_status.check_error,
+                    terms.cfde_registry_dp_status.content_error,
+            }:
+                logger.info("Purging datapackage %(id)s with unconditional purge status %(status)s" % dp_row)
+                purge_this = True
+            elif in_past and dp_row["status"] in {
+                    terms.cfde_registry_dp_status.submitted,
+                    terms.cfde_registry_dp_status.bag_valid,
+                    terms.cfde_registry_dp_status.check_valid,
+                    terms.cfde_registry_dp_status.content_ready,
+            }:
+                logger.info("Purging past datapackage %(id)s with conditional purge status %(status)s" % dp_row)
+                purge_this = True
+            else:
+                purge_this = False
+                logger.info("Skipping datapackage %(id)s with unmatched status %(status)s for purge." % dp_row)
+
+            if purge_this:
+                Submission.purge(server, registry, dp_row['id'])
+
+    @classmethod
+    def purge(cls, server, registry, datapackage_id):
+        """Purge datapackage catalog state from service, updating datapackage record appropriately"""
+        dp_row = registry.get_datapackage(datapackage_id)
+        status = dp_row["status"]
+        catalog_url = dp_row["review_ermrest_url"]
+
+        new_state = {
+            terms.cfde_registry_dp_status.content_ready: terms.cfde_registry_dp_status.obsoleted,
+            # are we puring an active submission?
+            terms.cfde_registry_dp_status.submitted: terms.cfde_registry_dp_status.ops_error,
+            terms.cfde_registry_dp_status.bag_valid: terms.cfde_registry_dp_status.ops_error,
+            terms.cfde_registry_dp_status.check_valid: terms.cfde_registry_dp_status.ops_error,
+        }.get(status, status)
+
+        if status != new_state:
+            logger.info('Changing datapackage %r status %s -> %s' % (datapackage_id, status, new_state))
+            registry.update_datapackage(datapackage_id, status=new_state)
+
+        if catalog_url:
+            logger.info('Deleting ermrest catalog %r' % (catalog_url,))
+            catalog_id = cls.extract_catalog_id(server, catalog_url)
+            server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
+            mesg = 'Purged catalog %r for datapackage %r.' % (catalog_id, datapackage_id)
+        else:
+            mesg = 'Purged review URLs for datapackage %r.' % datapackage_id
+
+        registry.update_datapackage(datapackage_id, review_ermrest_url=None, review_browse_url=None, review_summary_url=None)
+        logger.info(mesg)
 
     def ingest(self):
         """Idempotently run submission-ingest processing lifecycle.
@@ -1067,7 +1161,11 @@ def main(subcommand, *args):
        - Test harness for idempotent ingest flow on existing registered submission
     - 'reconfigure' <submission_id>
        - Revise policy/resentation config on existing review catalog
+    - 'purge' <submission id>
+       - Purge ermrest catalog state for submission and update records
     - 'reconfigure-all'
+    - 'purge-auto'
+    - 'purge-ALL'
 
     This client uses default DERIVA credentials for server both for
     registry operations and as "submitting user" in CFDE parlance.
@@ -1159,7 +1257,7 @@ def main(subcommand, *args):
         # run the actual submission work if we get this far
         submission = Submission(server, registry, submission_id, dcc_id, archive_url, submitting_user, archive_headers_map=archive_headers_map)
         submission.ingest()
-    elif subcommand in {'reconfigure', 'rebuild'}:
+    elif subcommand in {'reconfigure', 'rebuild', 'purge'}:
         if len(args) == 1:
             submission_id = args[0]
         else:
@@ -1170,6 +1268,12 @@ def main(subcommand, *args):
             reconfigure_submission(row)
         elif subcommand == 'rebuild':
             rebuild_submission(row)
+        elif subcommand == 'purge':
+            Submission.purge(server, registry, submission_id)
+    elif subcommand == 'purge-auto':
+        Submission.purge_multiple(server, registry, 'auto')
+    elif subcommand == 'purge-ALL':
+        Submission.purge_multiple(server, registry, 'ALL')
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
             try:
