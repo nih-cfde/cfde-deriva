@@ -118,8 +118,8 @@ scenario, without relying on the hosted workflow system.
 
 Command-line arguments:
 
-- dcc_id is a `CFDE`.`dcc`.`id` key from the registry
-- archive_url is a BDBag location accessible to the running tool
+- dcc\_id is a `CFDE`.`dcc`.`id` key from the registry
+- archive\_url is a BDBag location accessible to the running tool
 
 NOTE: This emulated submission _does not_ write to the datapackage
 archive system. The input BDBag must be placed in an accessible
@@ -177,9 +177,33 @@ older, compatible version of cfde-deriva or conversely purged and
 rebuilt with the `submission rebuild` sub-command to upgrade to
 the internal portal schema used by the newer software.
 
+#### Submission purge
+
+An administrator can purge ERMrest catalog storage resources
+associated with a submission, reducing a submission record to basic
+historical information.  (Such a submission can be reconstructed later
+using the `submission rebuild ...` command above.)
+
+`python -m cfde_deriva.submission purge <submission_id>`
+
+Command-line arguments:
+
+- `submission_id is a `CFDE`.`datapackage`.`id` key from the registry
+
+This purge method can be applied in bulk to many submissions with
+two special commands.
+
+`python -m cfde_deriva.submission purge-auto`
+
+`python -m cfde_deriva.submission purge-ALL`
+
+The `purge-auto` variant uses heuristics to identify older submissions
+which are likely irrelevant and purges them. The `purge-ALL` variant
+purges every submission, useful in certain administrative scenarios.
+
 ### Release preparation
 
-WHen a set of submissions have been ingested, reviewed, and marked
+When a set of submissions have been ingested, reviewed, and marked
 "approved" by the appropriate CF Program staff, a new release can be
 prepared using the `cfde_deriva.release` CLI wrapper.
 
@@ -197,7 +221,7 @@ for the "next CFDE release". When invoked without other arguments, the
 release draft sub-command idempotently creates or updates this record
 to reflect the latest _approved_ submissions from each DCC:
 
-`python -m 'cfde_deriva.release' draft`
+`python -m cfde_deriva.release draft`
 
 A built-in description value (currently `future release candidates`)
 is applied to mark the new draft release, and/or used to locate the
@@ -287,6 +311,18 @@ the addition of another computed table or column.  However, it is the
 developer's responsibility to decide when this short-cut is valid,
 and to start over with a clean build when circumstances require it.
 
+#### Release reconfiguration
+
+A release that is already built can be updated with display hints or
+other non-data configuration changes, without rebuilding the tabular
+data content.
+
+`python -m 'cfde_deriva.release' reconfigure <release_id>`
+
+Command-like arguments:
+
+- release_id is a `CFDE`.`release`.`id` key from the registry
+
 #### Release publishing
 
 After a release has been built and inspected by QA users, a quick task
@@ -313,4 +349,91 @@ metadata in the registry to document the change:
 If used in unexpected ways, the tool may move the alias but skip
 metadata updates, requiring the CFDE admin users to manually correct
 release status via the web UI.
+
+#### Release purge
+
+An administrator can purge ERMrest catalog storage resources
+associated with a release, reducing a release record to basic
+historical information.  (Such a release can be reconstructed later
+using the `release build ...` command above.)
+
+`python -m cfde_deriva.release purge <release_id>`
+
+Command-line arguments:
+
+- `release_id is a `CFDE`.`release`.`id` key from the registry
+
+This purge method can be applied in bulk to many releases with
+two special commands.
+
+`python -m cfde_deriva.release purge-auto`
+
+`python -m cfde_deriva.release purge-ALL`
+
+The `purge-auto` variant uses heuristics to identify older releases
+which are likely irrelevant and purges them. The `purge-ALL` variant
+purges every release, useful in certain administrative scenarios.
+
+### Registry maintenance
+
+The registry is a long-lived component of the CFDE portal
+infrastructure. However, similar tools are available to perform
+maintenance tasks including the provisioning of a brand-new system.
+
+Command-line arguments shared by nearly all registry sub-commands:
+
+- `catalog_id is an ERMrest catalog ID string (default `registry`)
+
+If provided, an alternate catalog ID allows for testing with a
+parallel instance of the registry, independent of the normal CFDE
+registry maintained with the default ID `registry`.
+
+#### Provision registry
+
+A new registry can be created from scratch as a new ERMrest catalog
+which will be initialized with the registry model and initial,
+default content.
+
+`python -m cfde_deriva.registry provision [<catalog_id>]`
+
+It is an error to provision a registry with a catalog ID that
+already exists in the ERMrest service host.
+
+#### Reprovision registry
+
+An existing registry can be upgraded, i.e. schema-migrated.
+
+`python -m cfde_deriva.registry reprovision [<catalog_id>]`
+
+unlike the previous command, this requires the registry catalog
+to already exist, so it performs incremental upgrades.
+
+#### Reconfigure registry
+
+An existing registry can also be given configuration changes, without
+model or data updates.
+
+`python -m cfde_deriva.registry reconfigure [<catalog_id>]`
+
+#### Delete registry
+
+AN existing registry can be deleted, e.g. to remove a parallel test
+registry.
+
+`python -m cfde_deriva.registry delete [<catalog_id>]`
+
+WARNING: care must be taken as this command, if misused, can also
+remove other ERMrest catalogs whether or not they were actually
+produced by the registry module.
+
+#### Fixup FQDN
+
+If a CFDE service host is moved from one fully-qualified domain name
+to another, e.g. due to changes in a load balancer config or DNS
+records in the hosting environment, the registry UX will be
+internally-inconsistent due to URLs stored in the registry records.  A
+fixup command rewrites these URLs to match the current service host
+FQDN.
+
+`python -m cfde_deriva.registry fixup-fqdn [<catalog_id>]`
 
