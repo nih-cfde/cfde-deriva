@@ -185,11 +185,11 @@ class Registry (object):
         else:
             raise ValueError("Registry user with ID=%r not found." % (client_id,))
 
-    def list_datapackages(self):
+    def list_datapackages(self, sortby=None):
         """Get a list of all datapackage submissions in the registry
 
         """
-        return self._get_entity('datapackage')
+        return self._get_entity('datapackage', sortby=None)
 
     def list_releases(self, sortby=None):
         """Get a list of all release definitions in the registry
