@@ -1149,6 +1149,35 @@ WHERE id IS NOT NULL
                     logger.error("Error while recording terms for table %s: %s" % (dst_tname, e))
                     raise
 
+    @classmethod
+    def rebuild(cls, server, registry, id=None, submitting_dcc=None, datapackage_url=None, submitting_user=None, archive_headers_map=None, skip_dcc_check=True, purge_partial=True):
+        submission = cls(
+            server, registry,
+            id, submitting_dcc, datapackage_url,
+            submitting_user,
+            archive_headers_map=archive_headers_map,
+            skip_dcc_check=True,
+        )
+        if purge_partial:
+            ermrest_url = registry.get_datapackage(id).get('review_ermrest_url')
+            if ermrest_url is not None:
+                submission.review_catalog = server.connect_ermrest(cls.extract_catalog_id(server, ermrest_url))
+                registry.update_datapackage(
+                    id,
+                    status=terms.cfde_registry_dp_status.submitted,
+                    review_browse_url=None,
+                    review_summary_url=None,
+                )
+                review_model = submission.review_catalog.getCatalogModel()
+                if 'CFDE' in review_model.schemas:
+                    logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
+                    for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
+                        submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
+                    logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
+                    Submission.configure_review_catalog(registry, submission.review_catalog, submission_id, provision=True)
+        #
+        submission.ingest()
+
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
 
@@ -1212,35 +1241,12 @@ def main(subcommand, *args):
             logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
 
     def rebuild_submission(row, purge_partial=True):
-        submission_id = row['id']
-        dcc_id = row['submitting_dcc']
-        archive_url = row['datapackage_url']
-        submission = Submission(
-            server, registry,
-            submission_id, dcc_id, archive_url,
-            submitting_user if submitting_user.webauthn_id == row['submitting_user'] else registry.get_user(row['submitting_user']),
-            archive_headers_map=archive_headers_map,
-            skip_dcc_check=True,
-        )
-        if purge_partial:
-            ermrest_url = registry.get_datapackage(submission_id).get('review_ermrest_url')
-            if ermrest_url is not None:
-                submission.review_catalog = server.connect_ermrest(Submission.extract_catalog_id(server, ermrest_url))
-                registry.update_datapackage(
-                    submission_id,
-                    status=terms.cfde_registry_dp_status.submitted,
-                    review_browse_url=None,
-                    review_summary_url=None,
-                )
-                review_model = submission.review_catalog.getCatalogModel()
-                if 'CFDE' in review_model.schemas:
-                    logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
-                    for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
-                        submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
-                    logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
-                    Submission.configure_review_catalog(registry, submission.review_catalog, submission_id, provision=True)
-        #
-        submission.ingest()
+        if submitting_user.webauthn_id == row['submitting_user']:
+            row['submitting_user'] = submitting_user
+        else:
+            row['submitting_user'] = registry.get_user(row['submitting_user'])
+        row = { k: v for k, v in row.items() if k in {'id', 'submitting_dcc', 'submitting_user', 'datapackage_url'} }
+        Submission.rebuild(server, registry, **row, archive_headers_map=archive_headers_map, skip_dcc_check=True)
 
     if subcommand == 'submit':
         # arguments dcc_id and archive_url would come from action provider

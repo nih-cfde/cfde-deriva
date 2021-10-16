@@ -177,6 +177,17 @@ older, compatible version of cfde-deriva or conversely purged and
 rebuilt with the `submission rebuild` sub-command to upgrade to
 the internal portal schema used by the newer software.
 
+#### Submission rebuild all in release
+
+A set of constituent submissions can be rebuilt in bulk by a
+helper routine in the release submodule.
+
+`python -m cfde_deriva.release rebuild-submissions <release_id>`
+
+Command-like arguments:
+
+- release_id is a `CFDE`.`release`.`id` key from the registry
+
 #### Submission purge
 
 An administrator can purge ERMrest catalog storage resources

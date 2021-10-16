@@ -491,6 +491,8 @@ def main(subcommand, *args):
        - Create new, empty release catalog
     - 'build' release_id
        - Build content based on release definition
+    - 'rebuild-submissions' release_id
+       - Rebuild submission review catalogs for each constituent of release
     - 'reconfigure' release_id
        - Revise policy/presentation config on existing catalog
     - 'publish' release_id
@@ -578,7 +580,7 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge'}:
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions'}:
         if len(args) < 1:
             raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
@@ -601,6 +603,14 @@ def main(subcommand, *args):
             print("Publishing alias %(id)r now bound to target %(alias_target)r" % aliasdoc)
         elif subcommand == 'purge':
             release.purge()
+        elif subcommand == 'rebuild-submissions':
+            rel_row, dcc_datapackages = registry.get_release(rel_id)
+            for dp_row in dcc_datapackages.values():
+                kwargs = { k: v for k, v in dp_row.items() if k in {'id', 'submitting_dcc', 'submitting_user', 'datapackage_url'} }
+                kwargs['submitting_user'] = registry.get_user(dp_row['submitting_user'])
+                #Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
+                print('rebuild', kwargs)
+            print('Rebuilt %d constituent submissions of release %s' % (len(dcc_datapackages), rel_row['id']))
         else:
             assert(False)
     elif subcommand in {'purge-ALL', 'purge-auto'}:
