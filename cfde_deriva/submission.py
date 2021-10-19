@@ -1174,7 +1174,7 @@ WHERE id IS NOT NULL
                     for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
                         submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
                     logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
-                    Submission.configure_review_catalog(registry, submission.review_catalog, submission_id, provision=True)
+                    Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
         #
         submission.ingest()
 
