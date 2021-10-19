@@ -116,7 +116,7 @@ INSERT INTO core_fact (
 )
 SELECT
   ff.id_namespace,
-  is_bundle,
+  ff.is_bundle,
 
   ff.project,
   subject_granularity,

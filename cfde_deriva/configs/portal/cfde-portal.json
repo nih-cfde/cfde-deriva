@@ -2209,6 +2209,9 @@
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
@@ -2873,6 +2876,9 @@
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
@@ -3615,6 +3621,9 @@
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
@@ -4233,6 +4242,9 @@
                   "title": "Numeric ID of core fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
@@ -6831,7 +6843,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "is_bundle", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",

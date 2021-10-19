@@ -3143,7 +3143,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "is_bundle", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
