@@ -229,8 +229,14 @@ class Submission (object):
         if catalog_url:
             logger.info('Deleting ermrest catalog %r' % (catalog_url,))
             catalog_id = cls.extract_catalog_id(server, catalog_url)
-            server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
-            mesg = 'Purged catalog %r for datapackage %r.' % (catalog_id, datapackage_id)
+            try:
+                server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
+                mesg = 'Purged catalog %r for datapackage %r.' % (catalog_id, datapackage_id)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == requests.codes.not_found:
+                    mesg = 'Catalog %r for datapackage %r already purged?' % (catalog_id, datapackage_id)
+                else:
+                    raise
         else:
             mesg = 'Purged review URLs for datapackage %r.' % datapackage_id
 

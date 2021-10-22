@@ -218,9 +218,16 @@ class Release (object):
                 self.registry.update_release(self.release_id, status=new_state)
 
             logger.debug('Deleting ermrest catalog %r' % (catalog_id,))
-            self.server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
+            try:
+                self.server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
+                mesg = 'Purged catalog %r for release %r.' % (catalog_id, self.release_id)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == requests.codes.not_found:
+                    mesg = 'Catalog %r for release %r already purged?' % (catalog_id, self.release_id)
+                else:
+                    raise
             self.registry.update_release(self.release_id, ermrest_url=None, browse_url=None, summary_url=None)
-            logger.info('Purged catalog %r for release %r.' % (catalog_id, self.release_id))
+            logger.info(mesg)
             return True
         except exception.StateError:
             logger.info('Release %r already purged.' % self.release_id)
