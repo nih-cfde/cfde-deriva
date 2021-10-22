@@ -1048,7 +1048,7 @@ LIMIT 1;
             if cur is not None:
                 cur.close()
 
-    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None, table_queries={}):
+    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None, table_queries={}, skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB'}):
         """Load tabular data from sqlite table into corresponding catalog table.
 
         :param conn: Existing sqlite3 connection to use as data source.
@@ -1058,6 +1058,7 @@ LIMIT 1;
         :param tablenames: Optional set of tablenames to load (default None means load all tables)
         :param progress: Optional, mutable progress/restart-marker dictionary
         :param table_queries: Optional, override source SQL query for specific table names
+        :param skip_cols: Optiona, override set of column names to ignore (default ERMrest system columns)
         """
         if progress is None:
             progress = dict()
@@ -1076,9 +1077,22 @@ LIMIT 1;
                 continue
 
             logger.debug('Loading table "%s" from sqlite to catalog...' % tname)
-            entity_url = "/entity/CFDE:%s?onconflict=%s" % (urlquote(table.name), urlquote(onconflict))
-            cols = [ col for col in table.columns if col.name not in {'RID', 'RCT', 'RMT', 'RCB', 'RMB'} ]
+            entity_url = "/entity/CFDE:%s?onconflict=%s" % (
+                urlquote(table.name),
+                {
+                    'abort': 'abort',
+                    'skip': 'skip',
+                    'update': 'skip', # we will synthesize update below...
+                }[onconflict],
+            )
+
+            cols = [ col for col in table.columns if col.name not in skip_cols ]
             colnames = [ col.name for col in cols ]
+            # HACK: this ONLY works for our vocab-like tables keyed by 'id'
+            update_url = "/attributegroup/CFDE:%s/id;%s" % (
+                urlquote(table.name),
+                ",".join([ cname for cname in colnames if cname != 'id']),
+            )
             valfuncs = [
                 # f(x) does json decoding or is identify func, depending on column def
                 (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb') else lambda x: x
@@ -1086,7 +1100,7 @@ LIMIT 1;
             ]
             cur = conn.cursor()
             position = progress.get(tname, None)
-            batchnum = 0
+
             if position is not None:
                 logger.info("Restarting after %r due to existing restart marker" % (position,))
 
@@ -1111,21 +1125,72 @@ LIMIT 1;
                     batch = get_batch(cur)
 
             try:
+                existing = None
+                if onconflict == 'update':
+                    # fetch a local copy of registered terms for use below
+                    eposition = None
+                    def get_existing_batch():
+                        nonlocal eposition
+                        r = self.catalog.get(
+                            "/attribute/CFDE:%s/%s@sort(id)%s?limit=%d" % (
+                                urlquote(table.name),
+                                ",".join([ urlquote(cname) for cname in colnames ]),
+                                ("@after(%s)" % urlquote(eposition)) if eposition is not None else "",
+                                self.batch_size,
+                            ))
+                        batch = r.json()
+                        if batch:
+                            eposition = batch[-1]['id']
+                        return batch
+
+                    existing = {}
+                    batch = get_existing_batch()
+                    while batch:
+                        existing.update({
+                            row['id']: row
+                            for row in batch
+                        })
+                        batch = get_existing_batch()
+                    logger.debug("Retrieved local copy of existing table %s with %d rows" % (table.name, len(existing)))
+
+                nrows = 0
                 for batch in get_batches(cur):
                     marker = batch[-1][0]
-                    batch = [
+                    orig_batch = [
                         # generate per-row dict { colname: f(x), ... } with transcoded row values
                         dict(zip( colnames, [ f(x) for f, x in zip (valfuncs, row[1:]) ]))
                         for row in batch
                     ]
-                    r = self.catalog.post(entity_url, json=batch)
-                    logger.info("Batch %s of rows for %s loaded" % (batchnum, table.name))
+
+                    if onconflict == 'update':
+                        # only need to POST rows that don't exist
+                        batch = [ row for row in orig_batch if row['id'] not in existing ]
+                    else:
+                        batch = orig_batch
+
+                    blen = len(batch)
+                    if blen:
+                        result = self.catalog.post(entity_url, json=batch).json()
+                        logger.debug("POST /entity/ sent for %d new rows" % blen)
+
+                    if onconflict == 'update':
+                        def needs_update(row):
+                            erow = existing[ row['id'] ]
+                            for cname in colnames:
+                                if row[cname] != erow[cname]:
+                                    return True
+                            return False
+                        # only update rows that show differences
+                        batch = [ row for row in orig_batch if needs_update(row) ]
+                        if batch:
+                            r = self.catalog.put(update_url, json=batch).json()
+                            logger.debug("PUT /attributegroup/ sent for %d existing rows" % len(batch))
+
                     progress[tname] = marker
-                    skipped = len(batch) - len(r.json())
-                    if skipped:
-                        logger.debug("Batch contained %d rows which were skipped (i.e. duplicate keys)" % skipped)
-                    batchnum += 1
-                logger.info("All data for table %s loaded." % (table.name,))
+                    nrows += blen
+                    logger.info("Batch of %d rows loaded for %s (%d cumulative)" % (blen, table.name, nrows))
+
+                logger.info("Table %s loaded %s rows." % (table.name, nrows,))
                 if table_done_callback:
                     table_done_callback(table.name, resource.get("path", None))
             except Exception as e:

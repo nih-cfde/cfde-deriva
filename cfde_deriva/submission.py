@@ -1075,7 +1075,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             logger.info('Augmenting registry vocabulary tables...')
             canon_dp.load_sqlite_tables(
                 conn,
-                onconflict='skip',
+                onconflict='update',
                 tablenames={
                     'anatomy',
                     'assay_type',
@@ -1095,6 +1095,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                 'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
                 'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
                 },
+                skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid'},
             )
             logger.info('Recording submission vocabulary usage in registry...')
             cur = conn.cursor()
