@@ -4253,13 +4253,13 @@
       {
          "profile": "tabular-data-resource",
          "name": "saved_query",
-         "title": "Saved Query",
-         "description": "A CFDE portal query saved by a user.",
+         "title": "Saved Search",
+         "description": "A CFDE portal search saved by a user.",
          "schema": {
             "fields": [
                {
                   "name": "user_id",
-                  "description": "The authentication system ID for the user who saved the query.",
+                  "description": "The authentication system ID for the user who saved the search.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -4278,7 +4278,7 @@
                },
                {
                   "name": "schema_name",
-                  "description": "The name of the schema containing the table being queried.",
+                  "description": "The name of the schema containing the table being searched.",
                   "type": "string",
                   "default": "CFDE",
                   "constraints": {
@@ -4298,7 +4298,7 @@
                },
                {
                   "name": "table_name",
-                  "description": "The name of the table being queried.",
+                  "description": "The name of the table being searched.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -4317,7 +4317,7 @@
                },
                {
                   "name": "query_id",
-                  "description": "The client-generated unique ID for the saved query's filters (i.e. hash).",
+                  "description": "The client-generated unique ID for the saved search's filters (i.e. hash).",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -4336,7 +4336,7 @@
                },
                {
                   "name": "facets",
-                  "description": "The CFDE/DERIVA machine-readable JSON description of the faceted query criteria",
+                  "description": "The CFDE/DERIVA machine-readable JSON description of the faceted search criteria",
                   "type": "object",
                   "deriva": {
                      "acls": {
@@ -4352,7 +4352,7 @@
                },
                {
                   "name": "encoded_facets",
-                  "description": "The URL-encoded, machine-readable JSON version of faceted query criteria",
+                  "description": "The URL-encoded, machine-readable JSON version of faceted search criteria",
                   "type": "string",
                   "deriva": {
                      "acls": {
@@ -4368,8 +4368,8 @@
                },
                {
                   "name": "name",
-                  "title": "Query Name",
-                  "description": "A short, human-readable title for the saved query.",
+                  "title": "Search Name",
+                  "description": "A short, human-readable title for the saved search.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -4380,7 +4380,7 @@
                },
                {
                   "name": "description",
-                  "description": "A human-readable summary of the saved query's purpose and/or search criteria.",
+                  "description": "A human-readable summary of the saved search's purpose and/or search criteria.",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -4392,7 +4392,7 @@
                {
                   "name": "last_execution_time",
                   "title": "Last Searched",
-                  "description": "A timestamp for when the saved query was most recently executed by the user.",
+                  "description": "A timestamp for when the saved search was most recently executed by the user.",
                   "type": "datetime",
                   "format": "any",
                   "deriva": {
@@ -4460,7 +4460,8 @@
             "visible_columns": {
                "compact": [
                   {
-                     "markdown_name": "Query Name",
+                     "markdown_name": "Search Name",
+                     "comment": "A short, human-readable title, linked to a page performing the saved search.",
                      "display": {
                         "template_engine": "handlebars",
                         "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
@@ -4473,7 +4474,8 @@
                ],
                "compact/brief": [
                   {
-                     "markdown_name": "Query Name",
+                     "markdown_name": "Search Name",
+                     "comment": "A short, human-readable title, linked to a page performing the saved search.",
                      "display": {
                         "template_engine": "handlebars",
                         "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
@@ -4497,7 +4499,8 @@
                   "name",
                   "table_name",
                   {
-                     "markdown_name": "Query Link",
+                     "markdown_name": "Search Link",
+                     "comment": "A link to a page performing the saved search.",
                      "display": {
                         "template_engine": "handlebars",
                         "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/{{#with _encoded_facets}}*::facets::{{{this}}}{{/with}}?savedQueryRid={{{RID}}})"
