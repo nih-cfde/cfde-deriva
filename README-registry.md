@@ -235,8 +235,8 @@ This table summarizes these in more detail:
 | registry `CFDE`.* | select | public | N/A | schema ACL | basic vocabs/config can be public? |
 | registry `CFDE`.* | insert, update, delete | CFDE admin | N/A | schema ACL | admin can modify all vocabs/config |
 | registry `CFDE`. _vocab_ | select | public | N/A | table ACL | everyone can view vocabulary term sets |
-| registry `CFDE`. _vocab_ | insert | CFDE admin/curator/pipeline | N/A | table ACL | staff can curate vocabulary terms, pipeline can add newly encountered terms |
-| registry `CFDE`. _vocab_ | update, delete | CFDE admin/curator | N/A | table ACL | staff can curate vocabulary terms |
+| registry `CFDE`. _vocab_ | insert, update | CFDE admin/curator/pipeline | N/A | table ACL | staff can curate vocabulary terms, pipeline can add newly encountered terms |
+| registry `CFDE`. _vocab_ | delete | CFDE admin/curator | N/A | table ACL | staff can curate vocabulary terms |
 | registry `CFDE`.`datapackage` | select | CFDE admin/curator/pipeline/reviewer | N/A | table ACL | CFDE-CC roles can read all submission records |
 | registry `CFDE`.`datapackage` | insert | CFDE pipeline | N/A | table ACL | CFDE-CC pipeline can record new submissions |
 | registry `CFDE`.`datapackage` | update | CFDE admin/curator/pipeline | N/A | table ACL | some CFDE-CC roles can edit all submission records |
