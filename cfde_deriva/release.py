@@ -615,7 +615,7 @@ def main(subcommand, *args):
             for dp_row in dcc_datapackages.values():
                 kwargs = { k: v for k, v in dp_row.items() if k in {'id', 'submitting_dcc', 'submitting_user', 'datapackage_url'} }
                 kwargs['submitting_user'] = registry.get_user(dp_row['submitting_user'])
-                #Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
+                Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
                 print('rebuild', kwargs)
             print('Rebuilt %d constituent submissions of release %s' % (len(dcc_datapackages), rel_row['id']))
         else:

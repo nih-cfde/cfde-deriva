@@ -22,6 +22,7 @@ HOST_TO_GCS_ENDPOINTS = {
 for orig, aliases in {
         'app-dev': {'app-dev-sandbox',},
         'app-staging': {'app-staging-sandbox',},
+        'app': {'app-prod',},
 }.items():
     templates = ('%s', '%s.nih-cfde.org')
     # expand originals for alternate forms
