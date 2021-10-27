@@ -1175,7 +1175,9 @@ LIMIT 1;
 
                     if onconflict == 'update':
                         def needs_update(row):
-                            erow = existing[ row['id'] ]
+                            erow = existing.get(row['id'])
+                            if erow is None:
+                                return False
                             for cname in colnames:
                                 if row[cname] != erow[cname]:
                                     return True
