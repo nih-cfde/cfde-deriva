@@ -3568,6 +3568,7 @@
                   {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
+                     "comment": "The project attributed as the source of the file.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -3576,6 +3577,7 @@
                   },
                   {
                      "markdown_name": "File Format",
+                     "comment": "The content format of the file.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -3584,6 +3586,7 @@
                   },
                   {
                      "markdown_name": "Data Type",
+                     "comment": "The type of data represented by the file.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -3592,6 +3595,7 @@
                   },
                   {
                      "markdown_name": "Assay Type",
+                     "comment": "Assay type used to generate the file.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4253,6 +4257,7 @@
                   {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
+                     "comment": "The project attributed as the source of the biosample.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4261,6 +4266,7 @@
                   },
                   {
                      "markdown_name": "Anatomy",
+                     "comment": "The anatomy from which the biosample is derived.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4269,6 +4275,7 @@
                   },
                   {
                      "markdown_name": "Assay Type",
+                     "comment": "The assay type of the biosample.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4884,6 +4891,7 @@
                   {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
+                     "comment": "The project attributed as the source of the subject.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4893,6 +4901,7 @@
                   {"sourcekey": "S_taxonomy_array"},
                   {
                      "markdown_name": "Granularity",
+                     "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4901,6 +4910,7 @@
                   },
                   {
                      "markdown_name": "Sex",
+                     "comment": "The sex term characterizing this subject.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
@@ -4910,6 +4920,7 @@
                   {"sourcekey": "S_race_array"},
                   {
                      "markdown_name": "Ethnicity",
+                     "comment": "The ethnicity term characterizing this subject.",
                      "display": {
                         "wait_for": ["S_core_fact"],
                         "template_engine": "handlebars",
