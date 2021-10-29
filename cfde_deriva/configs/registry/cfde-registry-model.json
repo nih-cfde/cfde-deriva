@@ -4062,13 +4062,16 @@
                   "projection_type": "acl",
                   "scope_acl": ["*"]
                },
-               "data_submitter": {
+               "data_submitter_of_dcc_group": {
                   "types": ["select"],
                   "projection": [
                      {"inbound": ["CFDE", "datapackage_submitting_user_fkey"]},
-                     "RID"
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
                   ],
-                  "projection_type": "nonnull",
+                  "projection_type": "acl",
                   "scope_acl": ["*"]
                }
             },
