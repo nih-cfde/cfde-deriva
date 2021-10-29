@@ -3505,6 +3505,53 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_sex": {
+                     "comment": "A sex linked to the described subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sex_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sex_sex_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_race": {
+                     "markdown_name": "Race",
+                     "comment": "A race linked to the described subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_race_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_race_race_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_ethnicity": {
+                     "comment": "An ethnicity linked to the described subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ethnicity_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ethnicity_ethnicity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_age_at_enrollment": {
+                     "markdown_name": "Age at Enrollment",
+                     "comment": "The age in years of a described subject when they were first enrolled in the primary project within with they were studied.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_subject_file_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_subject_subject_fkey"]},
+                        "age_at_enrollment"
+                     ]
+                  },
+                  "S_age_at_sampling": {
+                     "markdown_name": "Age at Sampling",
+                     "comment": "The subject age in years when the described biosample was taken from the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "file_describes_biosample_file_fkey"]},
+                        {"outbound": ["CFDE", "file_describes_biosample_biosample_fkey"]},
+                        {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
+                        "age_at_sampling"
+                     ]
                   }
                }
             },
@@ -3583,6 +3630,11 @@
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_age_at_sampling"},
+                  {"sourcekey": "S_sex"},
+                  {"sourcekey": "S_race"},
+                  {"sourcekey": "S_ethnicity"},
+                  {"sourcekey": "S_age_at_enrollment"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularity"},
@@ -4113,6 +4165,43 @@
                         "nid"
                      ]
                   },
+                  "S_sex": {
+                     "comment": "A sex linked to the originating subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sex_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sex_sex_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_race": {
+                     "markdown_name": "Race",
+                     "comment": "A race linked to the originating subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_race_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_race_race_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_ethnicity": {
+                     "comment": "An ethnicity linked to the originating subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ethnicity_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ethnicity_ethnicity_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_age_at_enrollment": {
+                     "markdown_name": "Age at Enrollment",
+                     "comment": "The age in years of the originating subject when they were first enrolled in the primary project within with they were studied.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_file_fkey"]},
+                        {"outbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        "age_at_enrollment"
+                     ]
+                  },
                   "S_age_at_sampling": {
                      "markdown_name": "Age at Sampling",
                      "comment": "The subject age in years when the biosample was taken from a subject.",
@@ -4123,7 +4212,7 @@
                   },
                   "S_age_at_sampling_array": {
                      "markdown_name": "Age at Sampling",
-                     "comment": "The subject age in years when the biosample was taken from a subject.",
+                     "comment": "The subject age in years when the biosample was taken from the subject.",
                      "source": [
                         {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         "age_at_sampling"
@@ -4140,7 +4229,7 @@
                   },
                   "S_part_of_collections": {
                      "markdown_name": "Part of Collection",
-                     "comment": "Collections with the biosample recor as a directly or indirectly constituent member.",
+                     "comment": "Collections with the biosample record as a directly or indirectly constituent member.",
                      "source": [
                         {"inbound": ["CFDE", "biosample_in_collection_biosample_fkey"]},
                         {"outbound": ["CFDE", "biosample_in_collection_collection_fkey"]},
@@ -4201,8 +4290,12 @@
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_gene"},
-                  {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_age_at_sampling"}
+                  {"sourcekey": "S_age_at_sampling"},
+                  {"sourcekey": "S_sex"},
+                  {"sourcekey": "S_race"},
+                  {"sourcekey": "S_ethnicity"},
+                  {"sourcekey": "S_age_at_enrollment"},
+                  {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_assay_type", "open": true},
@@ -4737,8 +4830,16 @@
                      "source": "creation_time"
                   },
                   "S_age_at_enrollment": {
-                     "comment": "The age in years of this subject when they were first enrolled in the rpimary project within with they were studied.",
+                     "comment": "The age in years of this subject when they were first enrolled in the primary project within with they were studied.",
                      "source": "age_at_enrollment"
+                  },
+                  "S_age_at_sampling": {
+                     "markdown_name": "Age at Sampling",
+                     "comment": "The subject age in years when a derived biosample was taken from the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_from_subject_subject_fkey"]},
+                        "age_at_sampling"
+                     ]
                   },
                   "S_biosamples": {
                      "comment": "Biosamples derived from the subject.",
@@ -4833,7 +4934,8 @@
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_age_at_enrollment"}
+                  {"sourcekey": "S_age_at_enrollment"},
+                  {"sourcekey": "S_age_at_sampling"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_taxonomy", "open": true},
