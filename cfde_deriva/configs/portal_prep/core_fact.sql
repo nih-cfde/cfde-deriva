@@ -30,18 +30,18 @@ CREATE TEMPORARY TABLE file_facts AS
     LEFT JOIN biosample_disease bd ON (b.nid = bd.biosample)
     LEFT JOIN biosample_substance bsubst ON (bsubst.biosample = b.nid)
     LEFT JOIN biosample_gene bg ON (bg.biosample = b.nid)
-    LEFT JOIN (
-      biosample_from_subject bfs
-      JOIN subject s ON (bfs.subject = s.nid)
-      LEFT JOIN subject_race sr ON (sr.subject = s.nid)
-      LEFT JOIN subject_species ss ON (ss.subject = s.nid)
-      LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
-      LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
-      LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
-    ) ON (b.nid = bfs.biosample)
-    LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
-    LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
   ) ON (f.nid = fdb.file)
+  LEFT JOIN (
+   file_describes_subject fds
+   JOIN subject s ON (fds.subject = s.nid)
+    LEFT JOIN subject_race sr ON (sr.subject = s.nid)
+    LEFT JOIN subject_species ss ON (ss.subject = s.nid)
+    LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
+    LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
+    LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
+  ) ON (f.nid = fds.file)
+  LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
+  LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
   LEFT JOIN assay_type "at" ON (f.assay_type = "at".nid OR b.assay_type = "at".nid)
   GROUP BY f.nid
 ;
