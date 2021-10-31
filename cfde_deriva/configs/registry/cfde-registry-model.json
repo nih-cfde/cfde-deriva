@@ -4105,7 +4105,9 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -4119,7 +4121,9 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -4133,7 +4137,9 @@
                      },
                      "acl_bindings": {
                         "profile_owner": false
-                     }
+                     },
+                     "generated": true,
+                     "immutable": true
                   }
                },
                {
@@ -4182,7 +4188,7 @@
          "deriva": {
             "generated": true,
             "immutable": false,
-            "non-deletable": true,
+            "non_deletable": true,
             "acls": {
                "select": [ "cfde_portal_admin" ],
                "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
@@ -4245,7 +4251,7 @@
                   "display_name",
                   "full_name"
                ],
-               "entry/create": [
+               "entry": [
                   {
                      "markdown_name": "Profile Owner",
                      "comment": "Select the profile owner (your own identity, unless you are an administrator)",

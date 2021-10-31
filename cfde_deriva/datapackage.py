@@ -512,6 +512,7 @@ class CfdeDataPackage (object):
                 doc_table = doc_schema.tables.get(table.name)
                 if doc_table is None:
                     continue
+                table.annotations.clear()
                 table.annotations.update(doc_table.annotations)
                 table.acls.clear()
                 table.acl_bindings.clear()
@@ -521,6 +522,7 @@ class CfdeDataPackage (object):
                     doc_column = doc_table.columns.elements.get(column.name)
                     if doc_column is None:
                         continue
+                    column.annotations.clear()
                     column.annotations.update(doc_column.annotations)
                     column.acls.clear()
                     column.acl_bindings.clear()
@@ -537,6 +539,7 @@ class CfdeDataPackage (object):
                         doc_fkey = doc_table.foreign_keys.elements.get( (doc_schema, fkey.name[1]) )
                         if doc_fkey is None:
                             continue
+                        fkey.annotations.clear()
                         fkey.annotations.update(doc_fkey.annotations)
                         fkey.acls.clear()
                         fkey.acl_bindings.clear()

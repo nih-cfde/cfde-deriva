@@ -15,14 +15,11 @@ from deriva.core.ermrest_model import builtin_types, Table, Column, Key, Foreign
 
 logger = logging.getLogger(__name__)
 
-if 'source_definitions' not in tag:
-    # monkey-patch this newer annotation key until it appears in deriva-py
-    tag['source_definitions'] = 'tag:isrd.isi.edu,2019:source-definitions'
-if 'history_capture' not in tag:
-    tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
-
-if 'table_config' not in tag:
-    tag['table_config'] = 'tag:isrd.isi.edu,2021:table-config'
+# monkey-patch these newer annotation keys until it appears in deriva-py
+tag.setdefault('source_definitions', 'tag:isrd.isi.edu,2019:source-definitions')
+tag.setdefault('history_capture', 'tag:isrd.isi.edu,2020:history-capture')
+tag.setdefault('table_config', 'tag:isrd.isi.edu,2021:table-config')
+tag.setdefault('non_deletable', 'tag:isrd.isi.edu,2016:non-deletable')
 
 # some useful authentication IDs to use in preparing ACLs...
 authn_id = AttrDict({
