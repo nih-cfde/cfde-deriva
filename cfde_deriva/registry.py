@@ -702,8 +702,8 @@ class Registry (object):
                 if url is None:
                     continue
                 u = urllib3.util.parse_url(url)
-                if u.host != fqdn:
-                    row[cname] = u._replace(host=fqdn).url
+                if u.host != fqdn or u.scheme != 'https':
+                    row[cname] = u._replace(scheme='https', host=fqdn).url
                     logger.info('Updating %s: %s -> %s' % (cname, u.url, row[cname]))
                     changed = True
             if changed:
@@ -722,8 +722,8 @@ class Registry (object):
                 if url is None:
                     continue
                 u = urllib3.util.parse_url(url)
-                if u.host != fqdn:
-                    row[cname] = u._replace(host=fqdn).url
+                if u.host != fqdn or u.scheme != 'https':
+                    row[cname] = u._replace(scheme='https', host=fqdn).url
                     logger.info('Updating %s: %s -> %s' % (cname, u.url, row[cname]))
                     changed = True
             if changed:
