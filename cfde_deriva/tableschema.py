@@ -11,7 +11,7 @@ import logging
 import requests
 
 from deriva.core import tag, AttrDict, init_logging
-from deriva.core.ermrest_model import builtin_types, Table, Column, Key, ForeignKey
+from deriva.core.ermrest_model import builtin_types, Model, Table, Column, Key, ForeignKey
 
 logger = logging.getLogger(__name__)
 
@@ -1006,7 +1006,7 @@ def main():
     else:
         trusted = False
 
-    json.dump(make_model(json.load(sys.stdin), configurator, trusted), sys.stdout, indent=2)
+    json.dump(Model(None, make_model(json.load(sys.stdin), configurator, trusted)).prejson(), sys.stdout, indent=2)
     return 0
 
 if __name__ == '__main__':
