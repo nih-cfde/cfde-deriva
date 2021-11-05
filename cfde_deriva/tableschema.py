@@ -660,12 +660,26 @@ schema_name = 'CFDE'
 def make_type(type, format):
     """Choose appropriate ERMrest column types..."""
     if type == "string":
+        if format == "markdown":
+            return builtin_types.markdown
+        if format == "ermrest_rid":
+            return builtin_types.ermrest_rid
+        if format == "ermrest_rcb":
+            return builtin_types.ermrest_rcb
+        if format == "ermrest_rmb":
+            return builtin_types.ermrest_rmb
         return builtin_types.text
     if type == "datetime":
+        if format == "ermrest_rct":
+            return builtin_types.ermrest_rct
+        if format == "ermrest_rmt":
+            return builtin_types.ermrest_rmt
         return builtin_types.timestamptz
     if type == "date":
         return builtin_types.date
     if type == "integer":
+        if format == "serial":
+            return builtin_types.serial8
         return builtin_types.int8
     if type == "number":
         return builtin_types.float8
