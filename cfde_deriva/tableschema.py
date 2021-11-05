@@ -916,18 +916,46 @@ def make_table(tdef, configurator, trusted=False, history_capture=False, provide
         configurator.schema_table_aclbindings.get( (schema_name, tname), {} ),
         pre_annotations.pop('acl_bindings', {})
     )
+
+    # override system defs but defer other dupe detection...
+    columns = system_columns
+    cname2idx = {
+        columns[i]['name']: i
+        for i in range(len(columns))
+    }
+    for cdef in tdef_fields:
+        col = make_column(tname, cdef, configurator)
+        i = cname2idx.get(col['name'])
+        if i is not None:
+            columns[i] = col
+        else:
+            columns.append(col)
+
+    fkeys = system_fkeys
+    fkmap2idx = {
+        frozenset(zip(
+            [ v['column_name'] for v in fkeys[i]['foreign_key_columns'] ],
+            [ (v.get('schema_name'), v.get('table_name'), v['column_name']) for v in fkeys[i]['referenced_columns'] ]
+        )): i
+        for i in range(len(fkeys))
+    }
+    for fkdef in tdef_fkeys:
+        fkey = make_fkey(tname, fkdef, trusted=trusted)
+        fkmap = frozenset(zip(
+            [ v['column_name'] for v in fkey['foreign_key_columns'] ],
+            [ (v.get('schema_name'), v.get('table_name'), v['column_name']) for v in fkey['referenced_columns'] ]
+        ))
+        i = fkmap2idx.get(fkmap)
+        if i is not None:
+            fkeys[i] = fkey
+        else:
+            fkeys.append(fkey)
+
     return Table.define(
         tname,
-        column_defs=system_columns + [
-            make_column(tname, cdef, configurator)
-            for cdef in tdef_fields
-            if cdef.get("name") not in { cdef['name'] for cdef in system_columns }
-        ],
+        column_defs=columns,
         key_defs=keys,
-        fkey_defs=system_fkeys + [
-            make_fkey(tname, fkdef)
-            for fkdef in tdef_fkeys
-        ],
+        fkey_defs=fkeys,
         comment=tcomment,
         provide_system=False,
         annotations=annotations,
