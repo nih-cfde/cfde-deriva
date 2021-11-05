@@ -234,16 +234,29 @@ class CatalogConfigurator (object):
                 "groupName": "NIH CFDE Portal Members"
             },
             "loggedInMenu": {
-              "menuOptions": [
-                { 
-                  "nameMarkdownPattern": "My Profile",
-                  "urlPattern": "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}",
-                  "type": "url"
-                }, { 
-                  "nameMarkdownPattern": "Logout",
-                  "type": "logout"
-                }
-              ]
+                "menuOptions": [
+                    {
+                        "nameMarkdownPattern": "My Profile",
+                        "urlPattern": "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}",
+                        "type": "url"
+                    },
+                    {
+                        "nameMarkdownPattern": "Personal Collections",
+                        "urlPattern": '/chaise/recordset/#{{#if (eq $catalog.id "registry")}}1{{else}}{{{$catalog.id}}}{{/if}}/CFDE:personal_collection/'
+                        '*::facets::{{#encodeFacet}}'
+                        '{"and": [{'
+                        '"sourcekey":"S_RCB",'
+                        '"choices":["{{{$session.id}}}"],'
+                        '"source_domain":{"schema":"public","table":"ERMrest_Client","column":"ID"}'
+                        '}]}'
+                        '{{/encodeFacet}}',
+                        "type": "url"
+                    },
+                    {
+                        "nameMarkdownPattern": "Logout",
+                        "type": "logout"
+                    }
+                ]
             },
             "navbarMenu": {
                 "newTab": False,
