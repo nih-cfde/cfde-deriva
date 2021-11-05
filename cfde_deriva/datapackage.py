@@ -454,7 +454,7 @@ class CfdeDataPackage (object):
             for ntable in nschema.tables.values():
                 table = schema.tables[ntable.name]
                 for nfkey in ntable.foreign_keys:
-                    if { c.name for c in nfkey.foreign_key_columns }.issubset({'RCB', 'RMB'}):
+                    if { c.name for c in nfkey.foreign_key_columns }.issubset({'RCB', 'RMB'}) and not nfkey.annotations.get(tag.noprune, False):
                         # skip built-in RCB/RMB fkeys we don't want
                         continue
                     pktable = schema.model.table(nfkey.pk_table.schema.name, nfkey.pk_table.name)
@@ -533,6 +533,8 @@ class CfdeDataPackage (object):
                         if cname not in table.columns.elements:
                             continue
                         for fkey in table.fkeys_by_columns([cname], raise_nomatch=False):
+                            if fkey.annotations.get(tag.noprune, False):
+                                continue
                             logger.info('Dropping %s' % fkey.uri_path)
                             fkey.drop()
                     for fkey in table.foreign_keys:
@@ -607,7 +609,7 @@ class CfdeDataPackage (object):
     def make_row2dict(cls, table, header):
         """Pickle a row2dict(row) function for use with a csv reader"""
         numcols = len(header)
-        missingValues = set(table.annotations[cls.schema_tag].get("missingValues", []))
+        missingValues = set(table.annotations.get(cls.schema_tag, {}).get("missingValues", []))
 
         for cname in header:
             if cname not in table.column_definitions.elements:
@@ -727,7 +729,7 @@ class CfdeDataPackage (object):
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
                     header = next(reader)
-                    missing = set(table.annotations[self.schema_tag].get("missingValues", []))
+                    missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
                     for cname in header:
                         if cname not in table.column_definitions.elements:
                             raise ValueError("header column %s not found in table %s" % (cname, table.name))
@@ -845,7 +847,7 @@ class CfdeDataPackage (object):
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t")
                     header = next(reader)
-                    missing = set(table.annotations[self.schema_tag].get("missingValues", []))
+                    missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
                     for cname in header:
                         if cname not in table.column_definitions.elements:
                             raise ValueError("header column %s not found in table %s" % (cname, table.name))
@@ -1070,6 +1072,7 @@ LIMIT 1;
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         if tablenames is None:
             tablenames = set(tables_doc.keys())
+        cur = conn.cursor()
         for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
             # we are copying sqlite table content to catalog under same table name
             table = self.doc_cfde_schema.tables[tname]
@@ -1077,6 +1080,12 @@ LIMIT 1;
 
             if tname not in tablenames:
                 # skip tables excluded in caller-supplied tablenames list
+                continue
+
+            cur.execute("SELECT true FROM sqlite_master WHERE type = 'table' AND name = %s" % (sql_literal(tname),))
+            found = cur.fetchone()
+            if found is None:
+                # skip tables that don't exist in sqlite
                 continue
 
             logger.debug('Loading table "%s" from sqlite to catalog...' % tname)
@@ -1101,7 +1110,6 @@ LIMIT 1;
                 (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb') else lambda x: x
                 for col in cols
             ]
-            cur = conn.cursor()
             position = progress.get(tname, None)
 
             if position is not None:

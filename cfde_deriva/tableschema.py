@@ -20,6 +20,7 @@ tag.setdefault('source_definitions', 'tag:isrd.isi.edu,2019:source-definitions')
 tag.setdefault('history_capture', 'tag:isrd.isi.edu,2020:history-capture')
 tag.setdefault('table_config', 'tag:isrd.isi.edu,2021:table-config')
 tag.setdefault('non_deletable', 'tag:isrd.isi.edu,2016:non-deletable')
+tag.setdefault('noprune', 'tag:isrd.isi.edu,2021:noprune')
 
 # some useful authentication IDs to use in preparing ACLs...
 authn_id = AttrDict({
