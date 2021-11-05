@@ -697,13 +697,11 @@ def make_column(tname, cdef, configurator):
     cdef = dict(cdef)
     constraints = cdef.get("constraints", {})
     cdef_name = cdef.pop("name")
-    title = cdef.get("title", None)
+    title = cdef.pop("title", None)
     nullok = not constraints.pop("required", False)
     default = cdef.pop("default", None)
     description = cdef.pop("description", None)
-    annotations = {
-        schema_tag: cdef,
-    }
+    annotations = {}
     if title is not None:
         annotations[tag.display] = {"name": title}
     pre_annotations = cdef.get("deriva", {})
@@ -718,11 +716,17 @@ def make_column(tname, cdef, configurator):
         configurator.schema_table_column_aclbindings.get( (schema_name, tname, cdef_name), {} ),
         pre_annotations.pop('acl_bindings', {})
     )
+    if not constraints:
+        cdef.pop('constraints', None)
+    if not pre_annotations:
+        cdef.pop('deriva', None)
+    if cdef:
+        annotations[schema_tag]: cdef
     return Column.define(
         cdef_name,
         make_type(
-            cdef.get("type", "string"),
-            cdef.get("format", "default"),
+            cdef.pop("type", "string"),
+            cdef.pop("format", "default"),
         ),
         nullok=nullok,
         default=default,
@@ -781,7 +785,7 @@ def make_key(tname, cols):
         constraint_names=[[ schema_name, make_id(tname, cols, 'key') ]],
     )
 
-def make_fkey(tname, fkdef):
+def make_fkey(tname, fkdef, trusted=False):
     fkcols = fkdef.pop("fields")
     fkcols = [fkcols] if isinstance(fkcols, str) else fkcols
     reference = fkdef.pop("reference")
@@ -811,9 +815,7 @@ def make_fkey(tname, fkdef):
     on_delete = get_action('on_delete')
     on_update = get_action('on_update')
     pre_annotations = fkdef.get("deriva", {})
-    annotations = {
-        schema_tag: fkdef,
-    }
+    annotations = {}
     if to_name is not None:
         annotations[tag.foreign_key] = {"to_name": to_name}
     for k, t in tag.items():
@@ -821,6 +823,8 @@ def make_fkey(tname, fkdef):
             annotations[t] = pre_annotations.pop(k)
     acls = pre_annotations.pop('acls', {})
     acl_bindings = pre_annotations.pop('acl_bindings', {})
+    if fkdef:
+        annotations[schema_tag]: fkdef
     return ForeignKey.define(
         fkcols,
         pkschema,
@@ -834,10 +838,19 @@ def make_fkey(tname, fkdef):
         acl_bindings=acl_bindings,
     )
 
-def make_table(tdef, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
+def make_table(tdef_resource, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
     if provide_system is None:
         provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
-    tname = tdef["name"]
+
+    tdef = tdef_resource.pop("schema")
+    tname = tdef_resource["name"]
+    title = tdef_resource.get("title", None)
+    tcomment = tdef_resource.get("description")
+    pre_annotations = tdef_resource.get("deriva", {})
+
+    provide_system = pre_annotations.pop('provide_system', provide_system)
+    provide_nid = pre_annotations.pop('provide_nid', provide_nid)
+
     if provide_system:
         system_columns = Table.system_column_defs()
         # bypass bug in deriva-py producing invalid default constraint name for system key
@@ -876,9 +889,7 @@ def make_table(tdef, configurator, trusted=False, history_capture=False, provide
     if provide_nid:
         system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
         system_keys.append(make_key(tname, ['nid']))
-    tcomment = tdef.get("description")
-    tdef_resource = tdef
-    tdef = tdef_resource.pop("schema")
+
     # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints
     keys = {
         frozenset(kdef["unique_columns"]): kdef
@@ -895,14 +906,13 @@ def make_table(tdef, configurator, trusted=False, history_capture=False, provide
             keys.setdefault(frozenset([cdef["name"]]), make_key(tname, [cdef["name"]]))
     keys = list(keys.values())
     tdef_fkeys = tdef.pop("foreignKeys", [])
-    title = tdef_resource.get("title", None)
+
     annotations = {
         resource_tag: tdef_resource,
-        schema_tag: tdef,
     }
     if title is not None:
         annotations[tag.display] = {"name": title}
-    pre_annotations = tdef_resource.get("deriva", {})
+
     for k, t in tag.items():
         if k == 'history_capture':
             annotations[t] = pre_annotations.pop('history_capture', history_capture) if trusted else history_capture
@@ -950,6 +960,9 @@ def make_table(tdef, configurator, trusted=False, history_capture=False, provide
             fkeys[i] = fkey
         else:
             fkeys.append(fkey)
+
+    if tdef:
+        annotations[schema_tag] = tdef
 
     return Table.define(
         tname,
