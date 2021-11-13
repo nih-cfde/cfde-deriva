@@ -3302,6 +3302,15 @@
                      ],
                      "entity": false
                   },
+                  "S_has_persistent_id": {
+                     "markdown_name": "Has Persistent ID",
+                     "comment": "The file is assigned a persistent ID.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        "has_persistent_id"
+                     ],
+                     "entity": false
+                  },
                   "S_bundle_collection": {
                      "markdown_name": "Bundle Collection",
                      "comment": "The collection describing the contents of this bundle (archive) file.",
@@ -3652,6 +3661,7 @@
                      "sourcekey": "S_creation_time"
                   },
                   {"source": "size_in_bytes"},
+                  {"sourcekey": "S_has_persistent_id"},
                   {"sourcekey": "S_is_bundle"},
                   {"source": "uncompressed_size_in_bytes"},
                   {"sourcekey": "S_compression_format"}
@@ -6602,6 +6612,14 @@
                   }
                },
                {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
                   "type": "object",
@@ -6960,7 +6978,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "is_bundle", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "is_bundle", "has_persistent_id", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -8772,7 +8790,14 @@
             },
             "visible_foreign_keys": {
                "*": [
-                  ["CFDE", "personal_collection_file_collection_fkey"]
+                  {
+                     "markdown_name": "File in Collection",
+                     "source": [
+                        {"inbound": ["CFDE", "personal_collection_file_collection_fkey"]},
+                        {"outbound": ["CFDE", "personal_collection_file_file_fkey"]},
+                        "nid"
+                     ]
+                  }
                ]
             },
             "source_definitions": {

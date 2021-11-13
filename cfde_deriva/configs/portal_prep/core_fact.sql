@@ -3,6 +3,7 @@ CREATE TEMPORARY TABLE file_facts AS
     f.nid,
     f.id_namespace,
     f.bundle_collection IS NOT NULL AS is_bundle,
+    f.persistent_id IS NOT NULL AS has_persistent_id,
     json_array(f.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
     json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
@@ -48,6 +49,7 @@ CREATE TEMPORARY TABLE file_facts AS
 CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     id_namespace,
     is_bundle,
+    has_persistent_id,
     projects,
     dccs,
     diseases,
@@ -70,6 +72,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
 INSERT INTO core_fact (
     id_namespace,
     is_bundle,
+    has_persistent_id,
 
     project,
     subject_granularity,
@@ -117,6 +120,7 @@ INSERT INTO core_fact (
 SELECT
   ff.id_namespace,
   ff.is_bundle,
+  ff.has_persistent_id,
 
   ff.project,
   subject_granularity,
@@ -164,6 +168,7 @@ FROM (
   SELECT DISTINCT
     ff.id_namespace,
     ff.is_bundle,
+    ff.has_persistent_id,
 
     (SELECT j.value FROM json_each(ff.projects) j) AS project,
     CASE WHEN json_array_length(ff.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(ff.subject_granularities) j) ELSE NULL END AS subject_granularity,
@@ -218,6 +223,7 @@ FROM file_facts ff, core_fact cf
 WHERE u.nid = ff.nid
   AND ff.id_namespace = cf.id_namespace
   AND ff.is_bundle = cf.is_bundle
+  AND ff.has_persistent_id = cf.has_persistent_id
   AND ff.projects = cf.projects
   AND ff.dccs = cf.dccs
   AND ff.diseases = cf.diseases
@@ -243,6 +249,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
     b.nid,
     b.id_namespace,
     False AS is_bundle,
+    b.persistent_id IS NOT NULL AS has_persistent_id,
     json_array(b.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
     json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
@@ -288,6 +295,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
 CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     id_namespace,
     is_bundle,
+    has_persistent_id,
     projects,
     dccs,
     diseases,
@@ -310,6 +318,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
 INSERT INTO core_fact (
     id_namespace,
     is_bundle,
+    has_persistent_id,
 
     project,
     subject_granularity,
@@ -356,7 +365,8 @@ INSERT INTO core_fact (
 )
 SELECT
   bf.id_namespace,
-  is_bundle,
+  bf.is_bundle,
+  bf.has_persistent_id,
 
   bf.project,
   subject_granularity,
@@ -404,6 +414,7 @@ FROM (
   SELECT DISTINCT
     bf.id_namespace,
     bf.is_bundle,
+    bf.has_persistent_id,
 
     (SELECT j.value FROM json_each(bf.projects) j) AS project,
     CASE WHEN json_array_length(bf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(bf.subject_granularities) j) ELSE NULL END AS subject_granularity,
@@ -457,6 +468,7 @@ FROM biosample_facts bf, core_fact cf
 WHERE u.nid = bf.nid
   AND bf.id_namespace = cf.id_namespace
   AND bf.is_bundle = cf.is_bundle
+  AND bf.has_persistent_id = cf.has_persistent_id
   AND bf.projects = cf.projects
   AND bf.dccs = cf.dccs
   AND bf.diseases = cf.diseases
@@ -482,6 +494,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     s.nid,
     s.id_namespace,
     False AS is_bundle,
+    s.persistent_id IS NOT NULL AS has_persistent_id,
     json_array(s.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
     json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
@@ -527,6 +540,7 @@ CREATE TEMPORARY TABLE subject_facts AS
 CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     id_namespace,
     is_bundle,
+    has_persistent_id,
     projects,
     dccs,
     diseases,
@@ -549,6 +563,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
 INSERT INTO core_fact (
     id_namespace,
     is_bundle,
+    has_persistent_id,
 
     project,
     subject_granularity,
@@ -591,10 +606,12 @@ INSERT INTO core_fact (
     file_format_row,
     compression_format_row,
     data_type_row,
-    mime_type_row)
+    mime_type_row
+)
 SELECT
   sf.id_namespace,
-  is_bundle,
+  sf.is_bundle,
+  sf.has_persistent_id,
 
   sf.project,
   subject_granularity,
@@ -642,6 +659,7 @@ FROM (
   SELECT DISTINCT
     sf.id_namespace,
     sf.is_bundle,
+    sf.has_persistent_id,
 
     (SELECT j.value FROM json_each(sf.projects) j) AS project,
     CASE WHEN json_array_length(sf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(sf.subject_granularities) j) ELSE NULL END AS subject_granularity,
@@ -696,6 +714,7 @@ FROM subject_facts sf, core_fact cf
 WHERE u.nid = sf.nid
   AND sf.id_namespace = cf.id_namespace
   AND sf.is_bundle = cf.is_bundle
+  AND sf.has_persistent_id = cf.has_persistent_id
   AND sf.projects = cf.projects
   AND sf.dccs = cf.dccs
   AND sf.diseases = cf.diseases
@@ -721,6 +740,7 @@ SELECT
   nid,
   id_namespace,
   is_bundle,
+  has_persistent_id,
   projects,
   dccs,
   diseases,
@@ -744,6 +764,7 @@ FROM (
     col.nid,
     col.id_namespace,
     False AS is_bundle,
+    col.persistent_id IS NOT NULL AS has_persistent_id,
     (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project) FILTER (WHERE cdbp.project IS NOT NULL)), '[]')
      FROM collection_defined_by_project cdbp
      WHERE cdbp.collection = col.nid) AS projects,
@@ -982,6 +1003,7 @@ FROM (
 CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     id_namespace,
     is_bundle,
+    has_persistent_id,
     projects,
     dccs,
     diseases,
@@ -1004,6 +1026,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
 INSERT INTO core_fact (
     id_namespace,
     is_bundle,
+    has_persistent_id,
 
     project,
     subject_granularity,
@@ -1050,7 +1073,8 @@ INSERT INTO core_fact (
 )
 SELECT
   colf.id_namespace,
-  is_bundle,
+  colf.is_bundle,
+  colf.has_persistent_id,
 
   colf.project,
   subject_granularity,
@@ -1098,6 +1122,7 @@ FROM (
   SELECT DISTINCT
     colf.id_namespace,
     colf.is_bundle,
+    colf.has_persistent_id,
 
     (SELECT j.value FROM json_each(colf.projects) j) AS project,
     CASE WHEN json_array_length(colf.subject_granularities) = 1 THEN (SELECT j.value FROM json_each(colf.subject_granularities) j) ELSE NULL END AS subject_granularity,
@@ -1151,6 +1176,7 @@ FROM collection_facts colf, core_fact cf
 WHERE u.nid = colf.nid
   AND colf.id_namespace = cf.id_namespace
   AND colf.is_bundle = cf.is_bundle
+  AND colf.has_persistent_id = cf.has_persistent_id
   AND colf.projects = cf.projects
   AND colf.dccs = cf.dccs
   AND colf.diseases = cf.diseases

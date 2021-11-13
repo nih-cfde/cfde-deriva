@@ -2846,6 +2846,14 @@
                   }
                },
                {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
                   "type": "array",
@@ -3143,7 +3151,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "is_bundle", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": [ "id_namespace", "is_bundle", "has_persistent_id", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
             "foreignKeys": [
                {
                   "fields": "id_namespace",
