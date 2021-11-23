@@ -6302,6 +6302,53 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "collection_disease",
+         "title": "collection_disease",
+         "description": "Association between a disease and a C2M2 collection containing experimental resources directly related to the study of that disease",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID for a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_disease_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "biosample_substance",
          "title": "Biosample Substance",
          "description": "Association between a C2M2 biosample and a substance known to be associated with that biosample",

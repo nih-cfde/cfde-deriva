@@ -1651,6 +1651,69 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "collection_disease",
+         "title": "collection_disease",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a disease and a C2M2 collection containing experimental resources directly related to the study of that disease",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "A Disease Ontology CV term ID describing this disease",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_disease_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "biosample_substance",
          "title": "biosample_substance",
          "dialect": {
