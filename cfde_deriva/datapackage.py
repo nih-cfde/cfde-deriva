@@ -889,7 +889,10 @@ class CfdeDataPackage (object):
                                                 dict(zip(header, row)),
                                             ))
                                 except ValueError:
-                                    raise InvalidDatapackage('Resource file "%s" does not supply required column %r' % (error_cname))
+                                    raise InvalidDatapackage('Resource file "%s" does not supply required column %r' % (
+                                        resource["path"],
+                                        error_cname,
+                                    ))
                             # re-raise if we don't have a better idea
                             raise
                         logger.debug("Batch of rows for %s loaded" % table.name)
@@ -1490,6 +1493,8 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
         key = col.table.key_by_columns({col}, raise_nomatch=False)
         if key is not None:
             parts.append('UNIQUE')
+        if col.default is not None:
+            parts.append('DEFAULT %s' % sql_literal(col.default))
         return ' '.join(parts)
 
     def type_sqlite_ddl(self, typeobj):
