@@ -200,7 +200,6 @@
                   "description": "A very short display label for this identifier namespace",
                   "type": "string",
                   "constraints": {
-                     "pattern": "^[a-zA-Z0-9_]+$"
                   }
                },
                {
@@ -1934,8 +1933,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^UBERON:[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2000,8 +1998,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^OBI:[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2062,8 +2059,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^data:[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2127,8 +2123,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^data:[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2187,8 +2182,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^format:[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2252,8 +2246,7 @@
                   "type": "string",
                   "constraints": {
                      "required": true,
-                     "unique": true,
-                     "pattern": "^NCBI:txid[0-9]+$"
+                     "unique": true
                   }
                },
                {
@@ -2609,7 +2602,7 @@
          "profile": "tabular-data-resource",
          "name": "subject_granularity",
          "title": "Subject Granularity",
-         "path": "subject_granularity.tsv",
+         "path": "/submission/subject_granularity.tsv",
          "description": "INTERNAL CV: The category of a subject in terms of multiplicity, e.g.: single organism; enumerated group of organisms and their relationships to one another (e.g. host X plus endosymbiont Y); host-associated microbiome; environmental microbiome; cell line",
          "schema": {
             "fields": [
@@ -2669,7 +2662,7 @@
          "profile": "tabular-data-resource",
          "name": "sex",
          "title": "Sex",
-         "path": "sex.tsv",
+         "path": "/submission/sex.tsv",
          "description": "Internal CV: The sex of an organism.",
          "schema": {
             "fields": [
@@ -2726,7 +2719,7 @@
          "profile": "tabular-data-resource",
          "name": "race",
          "title": "Race",
-         "path": "race.tsv",
+         "path": "/submission/race.tsv",
          "description": "Internal CV: The race of a human.",
          "schema": {
             "fields": [
@@ -2783,7 +2776,7 @@
          "profile": "tabular-data-resource",
          "name": "ethnicity",
          "title": "Ethnicity",
-         "path": "ethnicity.tsv",
+         "path": "/submission/ethnicity.tsv",
          "description": "Internal CV: The ethnicity of a human.",
          "schema": {
             "fields": [
@@ -2840,7 +2833,7 @@
          "profile": "tabular-data-resource",
          "name": "subject_role",
          "title": "Subject Role",
-         "path": "subject_role.tsv",
+         "path": "/submission/subject_role.tsv",
          "description": "INTERNAL CV: The ontological role of an organism-level constituent component of a subject, e.g.: unitary organism (e.g. 'this subject represents a single orchid and that's it'), host, pathogen, symbiont, taxon detected in microbiome, host associated with microbiome, taxon in lineage of cell line, etc.",
          "schema": {
             "fields": [

@@ -720,7 +720,13 @@ class CfdeDataPackage (object):
                 continue
             def open_package():
                 if isinstance(self.package_filename, _PackageDataName):
-                    return self.package_filename.get_data_stringio(resource["path"])
+                    path = resource["path"]
+                    if self.package_filename is registry_schema_json and path.startswith("/submission/"):
+                        # allow absolute path to reference submission package
+                        path = path[len("/submission/"):]
+                        return submission_schema_json.get_data_stringio(path)
+                    else:
+                        return self.package_filename.get_data_stringio(resource["path"])
                 else:
                     fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
                     return open(fname, 'r')
