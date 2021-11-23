@@ -222,7 +222,10 @@ class CfdeDataPackage (object):
             candidate_cnames = set(candidate_table.columns.elements.keys())
             missing_cnames = baseline_cnames.difference(candidate_cnames)
             extra_cnames = candidate_cnames.difference(baseline_cnames)
-            missing_nonnull_cnames = [ cname for cname in missing_cnames if not baseline_table.columns[cname].nullok ]
+            missing_nonnull_cnames = [
+                cname for cname in missing_cnames
+                if (not baseline_table.columns[cname].nullok) and (baseline_table.columns[cname].default is None)
+            ]
             extra_nonnull_cnames = [ cname for cname in extra_cnames if not candidate_table.columns[cname].nullok ]
             if missing_cnames and not absent_column_ok:
                 raise IncompatibleDatapackageModel(
