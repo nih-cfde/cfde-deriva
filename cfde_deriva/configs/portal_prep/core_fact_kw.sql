@@ -1,5 +1,18 @@
 UPDATE core_fact AS v
-SET kw = s.kw
+SET kw = s.kw,
+-- HACK: undo usage of -1 in place of NULLs before we send to catalog
+-- has nothing to do with kw but this should be done in the same column-rewriting phase
+  project = CASE WHEN s.project = -1 THEN NULL ELSE s.project END,
+  sex = CASE WHEN s.sex = -1 THEN NULL ELSE s.sex END,
+  race = CASE WHEN srace = -1 THEN NULL ELSE s.race END,
+  ethnicity = CASE WHEN sethnicity = -1 THEN NULL ELSE s.ethnicity END,
+  subject_granularity = CASE WHEN ssubject_granularity = -1 THEN NULL ELSE s.subject_granularity END,
+  anatomy = CASE WHEN sanatomy = -1 THEN NULL ELSE s.anatomy END,
+  assay_type = CASE WHEN sassay_type = -1 THEN NULL ELSE s.assay_type END,
+  file_format = CASE WHEN sfile_format = -1 THEN NULL ELSE s.file_format END,
+  compression_format = CASE WHEN scompression_format = -1 THEN NULL ELSE s.compression_format END,
+  data_type = CASE WHEN sdata_type = -1 THEN NULL ELSE s.data_type END,
+  mime_type = CASE WHEN smime_type = -1 THEN NULL ELSE s.mime_type END
 FROM (
   SELECT
     cf.nid,
