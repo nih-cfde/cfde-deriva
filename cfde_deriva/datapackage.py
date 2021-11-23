@@ -1255,6 +1255,7 @@ LIMIT 1;
             'subject_species': 'subject_species',
             'ncbi_taxonomy': ('ncbi_taxon', 'ncbi_taxons'),
             'assay_type': 'assay_types',
+            'analysis_type': 'analysis_types',
             'file_format': 'file_formats',
             'compression_format': 'compression_formats',
             'data_type': 'data_types',

@@ -186,6 +186,57 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "analysis_type",
+         "title": "Analysis Type",
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe analytic methods that generate C2M2 files",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this analysis_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "ncbi_taxonomy",
          "title": "NCBI Taxonomy",
          "description": "List of NCBI Taxonomy Database IDs identifying taxa used to describe subjects in this dataset",
@@ -1194,6 +1245,11 @@
                   "type": "integer"
                },
                {
+                  "name": "analysis_type",
+                  "description": "An OBI CV term ID describing the type of analytic operation that generated this file",
+                  "type": "integer"
+               },
+               {
                   "name": "mime_type",
                   "description": "Numeric ID for the MIME type describing this file",
                   "type": "integer",
@@ -1318,6 +1374,13 @@
                   "constraint_name": "file_assay_type_fkey",
                   "reference": {
                      "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type",
+                  "reference": {
+                     "resource": "analysis_type",
                      "fields": "nid"
                   }
                },
@@ -3098,6 +3161,14 @@
                   }
                },
                {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "file_formats",
                   "description": "The numeric ID of file_format terms qualifying the described entities.",
                   "type": "array",
@@ -3161,6 +3232,11 @@
                   "type": "integer"
                },
                {
+                  "name": "analysis_type",
+                  "description": "The numeric ID of the analysis_type term qualifying the described files.",
+                  "type": "integer"
+               },
+               {
                   "name": "file_format",
                   "description": "The numeric ID of the file_format term qualifying the described files.",
                   "type": "integer"
@@ -3213,6 +3289,11 @@
                },
                {
                   "name": "assay_type_row",
+                  "description": "Denormalized copy of the assay_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
+                  "name": "analysis_type_row",
                   "description": "Denormalized copy of the assay_type term qualifying the described files.",
                   "type": "object"
                },
@@ -4019,6 +4100,52 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "core_fact_analysis_type",
+         "description": "An exploded representation of the core_fact.analysis_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "analysis_type",
+                  "description": "The numeric ID of a term found in the core_fact.analysis_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "analysis_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_analysis_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type",
+                  "constraint_name": "core_fact_analysis_type_analysis_type_fkey",
+                  "reference": {
+                     "resource": "analysis_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "core_fact_file_format",
          "description": "An exploded representation of the core_fact.file_formats array column as a binary association.",
          "schema": {
@@ -4237,7 +4364,12 @@
                },
                {
                   "name": "assay_type_nid",
-                  "description": "The numeric ID for a file assay type",
+                  "description": "The numeric ID for a file or biosample assay type",
+                  "type": "integer"
+               },
+               {
+                  "name": "analysis_type_nid",
+                  "description": "The numeric ID for a file analysis type",
                   "type": "integer"
                },
                {
@@ -4304,7 +4436,12 @@
                },
                {
                   "name": "assay_type_id",
-                  "description": "The numeric ID of a CFDE CV term for generated file assay types",
+                  "description": "A CFDE CV term for generated file assay types",
+                  "type": "string"
+               },
+               {
+                  "name": "analysis_type_id",
+                  "description": "A CFDE CV term for generated file analysis types",
                   "type": "string"
                },
                {
@@ -4361,6 +4498,7 @@
             "primaryKey": [
                "project_nid",
                "assay_type_nid",
+               "analysis_type_nid",
                "data_type_nid",
                "file_format_nid",
                "anatomy_nid",
@@ -4393,6 +4531,15 @@
                   "reference": {
                      "title": "Assay Type",
                      "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type_nid",
+                  "constraint_name": "level1_stats_analysis_type_fkey",
+                  "reference": {
+                     "title": "Analysis Type",
+                     "resource": "analysis_type",
                      "fields": "nid"
                   }
                },
