@@ -202,6 +202,7 @@ class CfdeDataPackage (object):
                 'race',
                 'ethnicity',
                 'disease_association_type',
+                'phenotype_association_type',
             })
         candidate_tnames = set(candidate.doc_cfde_schema.tables.keys())
 
@@ -1244,6 +1245,7 @@ LIMIT 1;
             'project': 'projects',
             'dcc': 'dccs',
             'anatomy': 'anatomies',
+            'phenotype': 'phenotypes',
             'disease': 'diseases',
             'substance': 'substances',
             'gene': 'genes',

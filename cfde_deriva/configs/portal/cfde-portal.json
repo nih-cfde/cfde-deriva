@@ -1004,6 +1004,56 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "phenotype",
+         "title": "phenotype",
+         "description": "List of Human Phenotype Ontology terms used to describe phenotypes recorded in association with C2M2 subjects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this 'phenotype' term in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Human Phenotype Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Human Phenotype Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "compound",
          "title": "Compound",
          "description": "List of PubChem 'compound' terms (normalized chemical structure) associated with PubChem 'substance' terms.",
@@ -2238,6 +2288,51 @@
                   {"sourcekey": "S_subject"}
                ]
             }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_association_type",
+         "title": "Phenotype Association Type",
+         "description": "INTERNAL CV: The coded type of a phenotype term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this phenotype association type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
          }
       },
 
@@ -6311,7 +6406,7 @@
                   },
                   "deriva": {
                      "indexing_preferences": {
-                        "btree": ["disease", "subject"],
+                        "btree": ["disease", "association_type", "subject"],
                         "trgm": false
                      }
                   }
@@ -6371,6 +6466,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["disease", "collection"],
+                        "trgm": false
+                     }
                   }
                }
             ],
@@ -6391,6 +6492,128 @@
                   "fields": "disease",
                   "reference": {
                      "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_phenotype",
+         "title": "collection_phenotype",
+         "description": "Association between a phenotype and a C2M2 collection containing experimental resources directly related to the study of that phenotype",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_phenotype_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_phenotype",
+         "title": "subject_phenotype",
+         "description": "Association between a C2M2 subject and a phenotype positively OR negatively clinically identified for that subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID for this subject",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this phenotype (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID describing this phenotype",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "association_type", "subject"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "association_type",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "constraint_name": "subject_phenotype_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "reference": {
+                     "resource": "phenotype_association_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
                      "fields": "nid"
                   }
                }
@@ -6535,6 +6758,98 @@
                   "constraint_name": "biosample_gene_gene_fkey",
                   "reference": {
                      "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_gene",
+         "title": "phenotype_gene",
+         "description": "Association between a Human Phenotype Ontology term and an Ensembl gene especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "The numeric ID of an Ensembl gene",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_disease",
+         "title": "phenotype_disease",
+         "description": "Association between a Human Phenotype Ontology term and a Disease Ontology term identifying a disease especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
                      "fields": "nid"
                   }
                }
@@ -6876,7 +7191,15 @@
                },
                
                {
-                  "name": "diseases",
+                  "name": "phenotypes",
+                  "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                   "name": "diseases",
                   "description": "The numeric ID of the disease terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
@@ -7686,6 +8009,57 @@
                   "constraint_name": "core_fact_dcc_dcc_fkey",
                   "reference": {
                      "resource": "dcc",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_phenotype",
+         "description": "An exploded representation of the core_fact.phenotypes array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a term found in the core_fact.phenotypes array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "core_fact"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "phenotype"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_phenotype_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "constraint_name": "core_fact_phenotype_phenotype_fkey",
+                  "reference": {
+                     "resource": "phenotype",
                      "fields": "nid"
                   }
                }
