@@ -2085,6 +2085,114 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "disease_association_type",
+         "title": "Disease Association Type",
+         "description": "INTERNAL CV: The coded type of a disease term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease association type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_biosample_disease_assoc": {
+                     "markdown_name": "Biosample Disease",
+                     "comment": "Biosample-isease associations with this association type",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_disease_association_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_subject_disease_assoc": {
+                     "markdown_name": "Subject Disease",
+                     "comment": "Subject-disease associations with this association type",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_disease_association_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples associated to diseases by this association type",
+                     "source": [
+                        {"sourcekey": "S_biosample_disease_assoc"},
+                        {"outbound": ["CFDE", "biosample_disease_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects associated to diseases by this association type",
+                     "source": [
+                        {"sourcekey": "S_subject_disease_assoc"},
+                        {"outbound": ["CFDE", "subject_disease_biosample_fkey"]},
+                        "RID"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "anatomy_slim",
          "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms.",
          "schema": {
@@ -6066,6 +6174,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this biosample and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -6082,6 +6198,7 @@
             ],
             "primaryKey": [
                "biosample",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -6091,6 +6208,14 @@
                   "reference": {
                      "resource": "biosample",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "biosample_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
                   }
                },
                {
@@ -6120,6 +6245,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -6136,6 +6269,7 @@
             ],
             "primaryKey": [
                "subject",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -6145,6 +6279,14 @@
                   "reference": {
                      "resource": "subject",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "subject_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
                   }
                },
                {

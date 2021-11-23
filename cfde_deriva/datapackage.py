@@ -201,6 +201,7 @@ class CfdeDataPackage (object):
                 'sex',
                 'race',
                 'ethnicity',
+                'disease_association_type',
             })
         candidate_tnames = set(candidate.doc_cfde_schema.tables.keys())
 

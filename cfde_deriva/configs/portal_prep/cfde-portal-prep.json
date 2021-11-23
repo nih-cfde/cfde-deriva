@@ -888,6 +888,52 @@
          },
          "derivation_sql_path": null
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_association_type",
+         "title": "Disease Association Type",
+         "description": "INTERNAL CV: The coded type of a disease term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease association type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "derivation_sql_path": null
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -2283,6 +2329,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this biosample and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -2293,6 +2347,7 @@
             ],
             "primaryKey": [
                "biosample",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -2302,6 +2357,14 @@
                   "reference": {
                      "resource": "biosample",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "biosample_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
                   }
                },
                {
@@ -2332,6 +2395,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -2342,6 +2413,7 @@
             ],
             "primaryKey": [
                "subject",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -2351,6 +2423,14 @@
                   "reference": {
                      "resource": "subject",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "subject_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
                   }
                },
                {

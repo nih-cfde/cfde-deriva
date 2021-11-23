@@ -1496,7 +1496,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "Association between a C2M2 biosample and a disease known to be associated with that biosample",
+         "description": "Association between a C2M2 biosample and a disease positively (e.g. cancer tumor tissue sample) OR negatively (e.g. cancer-free tissue sample) identified for that biosample",
          "schema": {
             "fields": [
                {
@@ -1516,6 +1516,15 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this biosample and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "string",
+                  "default": "cfde_disease_association_type:1",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "A Disease Ontology CV term ID describing this disease",
                   "type": "string",
@@ -1527,6 +1536,7 @@
             "primaryKey": [
                "biosample_id_namespace",
                "biosample_local_id",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -1536,6 +1546,14 @@
                   "reference": {
                      "resource": "biosample",
                      "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "biosample_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
                   }
                },
                {
@@ -1560,7 +1578,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "Association between a C2M2 subject and a disease positively identified in that subject",
+         "description": "Association between a C2M2 subject and a disease positively OR negatively clinically identified in that subject",
          "schema": {
             "fields": [
                {
@@ -1580,6 +1598,15 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "string",
+                  "default": "cfde_disease_association_type:1",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "A Disease Ontology CV term ID describing this disease",
                   "type": "string",
@@ -1591,6 +1618,7 @@
             "primaryKey": [
                "subject_id_namespace",
                "subject_local_id",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -1600,6 +1628,14 @@
                   "reference": {
                      "resource": "subject",
                      "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "subject_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
                   }
                },
                {
@@ -2202,7 +2238,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects or biosamples",
+         "description": "List of Disease Ontology terms used to describe diseases recorded in association with C2M2 subjects or biosamples",
          "schema": {
             "fields": [
                {
@@ -2614,6 +2650,42 @@
          "title": "Ethnicity",
          "path": "ethnicity.tsv",
          "description": "INTERNAL CV: The coded ethnicity of a human subject.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_association_type",
+         "title": "Disease Association Type",
+         "path": "disease_association_type.tsv",
+         "description": "INTERNAL CV: The coded type of a disease term association.",
          "schema": {
             "fields": [
                {
