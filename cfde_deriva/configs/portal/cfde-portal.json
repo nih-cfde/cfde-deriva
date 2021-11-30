@@ -7564,7 +7564,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "is_bundle", "has_persistent_id", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": "nid",
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -8031,6 +8031,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The numeric ID of the phenotype_assocation_type found in the core_fact.phenotypes array.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "phenotype",
                   "description": "The numeric ID of a term found in the core_fact.phenotypes array column.",
                   "type": "integer",
@@ -8039,19 +8047,27 @@
                   },
                   "deriva": {
                      "indexing_preferences": {
-                        "btree": ["phenotype", "core_fact"],
+                        "btree": ["phenotype", "association_type", "core_fact"],
                         "trgm": false
                      }
                   }
                }
             ],
-            "primaryKey": ["core_fact", "phenotype"],
+            "primaryKey": ["core_fact", "association_type", "phenotype"],
             "foreignKeys": [
                {
                   "fields": "core_fact",
                   "constraint_name": "core_fact_phenotype_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "core_fact_phenotype_association_type_fkey",
+                  "reference": {
+                     "resource": "phenotype_association_type",
                      "fields": "nid"
                   }
                },
@@ -8074,8 +8090,15 @@
             "fields": [
                {
                   "name": "core_fact",
-                  "title": "Numeric ID",
                   "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The numeric ID of the disease_assocation_type found in the core_fact.diseases array.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -8090,19 +8113,27 @@
                   },
                   "deriva": {
                      "indexing_preferences": {
-                        "btree": ["disease", "core_fact"],
+                        "btree": ["disease", "association_type", "core_fact"],
                         "trgm": false
                      }
                   }
                }
             ],
-            "primaryKey": ["core_fact", "disease"],
+            "primaryKey": ["core_fact", "association_type", "disease"],
             "foreignKeys": [
                {
                   "fields": "core_fact",
                   "constraint_name": "core_fact_disease_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "core_fact_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
                      "fields": "nid"
                   }
                },

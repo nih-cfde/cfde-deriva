@@ -2,17 +2,17 @@ UPDATE core_fact AS v
 SET kw = s.kw,
 -- HACK: undo usage of -1 in place of NULLs before we send to catalog
 -- has nothing to do with kw but this should be done in the same column-rewriting phase
-  project = CASE WHEN s.project = -1 THEN NULL ELSE s.project END,
-  sex = CASE WHEN s.sex = -1 THEN NULL ELSE s.sex END,
-  race = CASE WHEN srace = -1 THEN NULL ELSE s.race END,
-  ethnicity = CASE WHEN sethnicity = -1 THEN NULL ELSE s.ethnicity END,
-  subject_granularity = CASE WHEN ssubject_granularity = -1 THEN NULL ELSE s.subject_granularity END,
-  anatomy = CASE WHEN sanatomy = -1 THEN NULL ELSE s.anatomy END,
-  assay_type = CASE WHEN sassay_type = -1 THEN NULL ELSE s.assay_type END,
-  file_format = CASE WHEN sfile_format = -1 THEN NULL ELSE s.file_format END,
-  compression_format = CASE WHEN scompression_format = -1 THEN NULL ELSE s.compression_format END,
-  data_type = CASE WHEN sdata_type = -1 THEN NULL ELSE s.data_type END,
-  mime_type = CASE WHEN smime_type = -1 THEN NULL ELSE s.mime_type END
+  project = CASE WHEN v.project = -1 THEN NULL ELSE v.project END,
+  sex = CASE WHEN v.sex = -1 THEN NULL ELSE v.sex END,
+  ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
+  subject_granularity = CASE WHEN v.subject_granularity = -1 THEN NULL ELSE v.subject_granularity END,
+  anatomy = CASE WHEN v.anatomy = -1 THEN NULL ELSE v.anatomy END,
+  assay_type = CASE WHEN v.assay_type = -1 THEN NULL ELSE v.assay_type END,
+  analysis_type = CASE WHEN v.analysis_type = -1 THEN NULL ELSE v.analysis_type END,
+  file_format = CASE WHEN v.file_format = -1 THEN NULL ELSE v.file_format END,
+  compression_format = CASE WHEN v.compression_format = -1 THEN NULL ELSE v.compression_format END,
+  data_type = CASE WHEN v.data_type = -1 THEN NULL ELSE v.data_type END,
+  mime_type = CASE WHEN v.mime_type = -1 THEN NULL ELSE v.mime_type END
 FROM (
   SELECT
     cf.nid,
@@ -57,7 +57,7 @@ FROM (
   LEFT JOIN dcc d ON (dj.value = d.nid)
 
   LEFT JOIN json_each(cf.diseases) disj
-  LEFT JOIN disease dis ON (disj.value = dis.nid)
+  LEFT JOIN disease dis ON (json_extract(disj.value, '$[0]') = dis.nid)
   LEFT JOIN json_each(cf.substances) substj
   LEFT JOIN substance subst ON (substj.value = subst.nid)
   LEFT JOIN json_each(cf.genes) gnj

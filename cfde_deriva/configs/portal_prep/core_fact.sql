@@ -12,6 +12,7 @@ CREATE TEMPORARY TABLE file_facts AS
     -1 AS subject_granularity,
     -1 AS anatomy,
     COALESCE(f.assay_type, -1) AS assay_type,
+    COALESCE(f.analysis_type, -1) AS analysis_type,
     COALESCE(f.file_format, -1) AS file_format,
     COALESCE(f.compression_format, -1) AS compression_format,
     COALESCE(f.data_type, -1) AS data_type,
@@ -19,7 +20,8 @@ CREATE TEMPORARY TABLE file_facts AS
 
     json_array(f.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
     json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
     json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
@@ -32,6 +34,7 @@ CREATE TEMPORARY TABLE file_facts AS
     json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
     json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
 
+    CASE WHEN f.analysis_type IS NOT NULL THEN json_array(f.analysis_type) ELSE '[]' END AS analysis_types,
     CASE WHEN f.file_format IS NOT NULL THEN json_array(f.file_format) ELSE '[]' END AS file_formats,
     CASE WHEN f.compression_format IS NOT NULL THEN json_array(f.compression_format) ELSE '[]' END AS compression_formats,
     CASE WHEN f.data_type   IS NOT NULL THEN json_array(f.data_type)   ELSE '[]' END AS data_types,
@@ -54,8 +57,14 @@ CREATE TEMPORARY TABLE file_facts AS
     LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
     LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
     LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
+    LEFT JOIN (
+      subject_phenotype spht
+      JOIN phenotype pht ON (spht.phenotype = pht.nid)
+      JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
+    ) ON (s.nid = spht.subject)
   ) ON (f.nid = fds.file)
   LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
+  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
   LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
   LEFT JOIN assay_type ast ON (f.assay_type = ast.nid OR b.assay_type = ast.nid)
   GROUP BY f.nid
@@ -71,6 +80,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -78,6 +88,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -91,6 +102,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -107,6 +119,7 @@ INSERT INTO core_fact (
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -114,6 +127,7 @@ INSERT INTO core_fact (
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -127,6 +141,7 @@ INSERT INTO core_fact (
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -139,6 +154,7 @@ INSERT INTO core_fact (
     subject_granularity_row,
     anatomy_row,
     assay_type_row,
+    analysis_type_row,
     file_format_row,
     compression_format_row,
     data_type_row,
@@ -155,6 +171,7 @@ SELECT
   ff.subject_granularity,
   ff.anatomy,
   ff.assay_type,
+  ff.analysis_type,
   ff.file_format,
   ff.compression_format,
   ff.data_type,
@@ -162,6 +179,7 @@ SELECT
     
   ff.projects,
   ff.dccs,
+  ff.phenotypes,
   ff.diseases,
   ff.substances,
   ff.genes,
@@ -175,6 +193,7 @@ SELECT
   ff.anatomies,
   ff.assay_types,
 
+  ff.analysis_types,
   ff.file_formats,
   ff.compression_formats,
   ff.data_types,
@@ -187,6 +206,7 @@ SELECT
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
+  json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
   json_object('nid', cfmt.nid,'name', cfmt.name, 'description', cfmt.description) AS compression_format_row,
   json_object('nid', dt.nid, 'name', dt.name, 'description', dt.description) AS data_type_row,
@@ -203,6 +223,7 @@ FROM (
     ff.subject_granularity,
     ff.anatomy,
     ff.assay_type,
+    ff.analysis_type,
     ff.file_format,
     ff.compression_format,
     ff.data_type,
@@ -210,6 +231,7 @@ FROM (
 
     ff.projects,
     ff.dccs,
+    ff.phenotypes,
     ff.diseases,
     ff.substances,
     ff.genes,
@@ -223,6 +245,7 @@ FROM (
     ff.anatomies,
     ff.assay_types,
 
+    ff.analysis_types,
     ff.file_formats,
     ff.compression_formats,
     ff.data_types,
@@ -236,6 +259,7 @@ LEFT JOIN sex sx ON (ff.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (ff.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (ff.anatomy = a.nid)
 LEFT JOIN assay_type ast ON (ff.assay_type = ast.nid)
+LEFT JOIN analysis_type ant ON (ff.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (ff.file_format = fmt.nid)
 LEFT JOIN file_format cfmt ON (ff.compression_format = cfmt.nid)
 LEFT JOIN data_type dt ON (ff.data_type = dt.nid)
@@ -257,6 +281,7 @@ WHERE u.nid = ff.nid
   AND ff.subject_granularity = cf.subject_granularity
   AND ff.anatomy = cf.anatomy
   AND ff.assay_type = cf.assay_type
+  AND ff.analysis_type = cf.analysis_type
   AND ff.file_format = cf.file_format
   AND ff.compression_format = cf.compression_format
   AND ff.data_type = cf.data_type
@@ -264,6 +289,7 @@ WHERE u.nid = ff.nid
 
   AND ff.projects = cf.projects
   AND ff.dccs = cf.dccs
+  AND ff.phenotypes = cf.phenotypes
   AND ff.diseases = cf.diseases
   AND ff.substances = cf.substances
   AND ff.genes = cf.genes
@@ -277,6 +303,7 @@ WHERE u.nid = ff.nid
   AND ff.anatomies = cf.anatomies
   AND ff.assay_types = cf.assay_types
 
+  AND ff.analysis_types = cf.analysis_types
   AND ff.file_formats = cf.file_formats
   AND ff.compression_formats = cf.compression_formats
   AND ff.data_types = cf.data_types
@@ -297,6 +324,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
     -1 AS subject_granularity,
     COALESCE(b.anatomy, -1) AS anatomy,
     COALESCE(b.assay_type, -1) AS assay_type,
+    -1 AS analysis_type,
     -1 AS file_format,
     -1 AS compression_format,
     -1 AS data_type,
@@ -304,7 +332,8 @@ CREATE TEMPORARY TABLE biosample_facts AS
 
     json_array(b.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
     json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
     json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
@@ -317,6 +346,7 @@ CREATE TEMPORARY TABLE biosample_facts AS
     CASE WHEN b.anatomy IS NOT NULL THEN json_array(b.anatomy) ELSE '[]' END AS anatomies,
     json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
 
+    json_sorted(COALESCE(json_group_array(DISTINCT f.analysis_type) FILTER (WHERE f.analysis_type IS NOT NULL), '[]')) AS analysis_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.compression_format) FILTER (WHERE f.compression_format IS NOT NULL), '[]')) AS compression_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
@@ -340,8 +370,14 @@ CREATE TEMPORARY TABLE biosample_facts AS
     LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
     LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
     LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
+    LEFT JOIN (
+      subject_phenotype spht
+      JOIN phenotype pht ON (spht.phenotype = pht.nid)
+      JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
+    ) ON (s.nid = spht.subject)
   ) ON (b.nid = bfs.biosample)
   LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
+  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
   LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
   GROUP BY b.nid
 ;
@@ -356,6 +392,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -363,6 +400,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -376,6 +414,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -392,6 +431,7 @@ INSERT INTO core_fact (
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -399,6 +439,7 @@ INSERT INTO core_fact (
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -412,6 +453,7 @@ INSERT INTO core_fact (
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -424,6 +466,7 @@ INSERT INTO core_fact (
     subject_granularity_row,
     anatomy_row,
     assay_type_row,
+    analysis_type_row,
     file_format_row,
     compression_format_row,
     data_type_row,
@@ -440,6 +483,7 @@ SELECT
   bf.subject_granularity,
   bf.anatomy,
   bf.assay_type,
+  bf.analysis_type,
   bf.file_format,
   bf.compression_format,
   bf.data_type,
@@ -447,6 +491,7 @@ SELECT
     
   bf.projects,
   bf.dccs,
+  bf.phenotypes,
   bf.diseases,
   bf.substances,
   bf.genes,
@@ -460,6 +505,7 @@ SELECT
   bf.anatomies,
   bf.assay_types,
 
+  bf.analysis_types,
   bf.file_formats,
   bf.compression_formats,
   bf.data_types,
@@ -472,6 +518,7 @@ SELECT
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
+  json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
   json_object('nid', cfmt.nid,'name', cfmt.name, 'description', cfmt.description) AS compression_format_row,
   json_object('nid', dt.nid, 'name', dt.name, 'description', dt.description) AS data_type_row,
@@ -488,6 +535,7 @@ FROM (
     bf.subject_granularity,
     bf.anatomy,
     bf.assay_type,
+    bf.analysis_type,
     bf.file_format,
     bf.compression_format,
     bf.data_type,
@@ -495,6 +543,7 @@ FROM (
     
     bf.projects,
     bf.dccs,
+    bf.phenotypes,
     bf.diseases,
     bf.substances,
     bf.genes,
@@ -508,6 +557,7 @@ FROM (
     bf.anatomies,
     bf.assay_types,
 
+    bf.analysis_types,
     bf.file_formats,
     bf.compression_formats,
     bf.data_types,
@@ -521,6 +571,7 @@ LEFT JOIN sex sx ON (bf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (bf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (bf.anatomy = a.nid)
 LEFT JOIN assay_type ast ON (bf.assay_type = ast.nid)
+LEFT JOIN analysis_type ant ON (bf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (bf.file_format = fmt.nid)
 LEFT JOIN file_format cfmt ON (bf.compression_format = cfmt.nid)
 LEFT JOIN data_type dt ON (bf.data_type = dt.nid)
@@ -542,6 +593,7 @@ WHERE u.nid = bf.nid
   AND bf.subject_granularity = cf.subject_granularity
   AND bf.anatomy = cf.anatomy
   AND bf.assay_type = cf.assay_type
+  AND bf.analysis_type = cf.analysis_type
   AND bf.file_format = cf.file_format
   AND bf.compression_format = cf.compression_format
   AND bf.data_type = cf.data_type
@@ -549,6 +601,7 @@ WHERE u.nid = bf.nid
 
   AND bf.projects = cf.projects
   AND bf.dccs = cf.dccs
+  AND bf.phenotypes = cf.phenotypes
   AND bf.diseases = cf.diseases
   AND bf.substances = cf.substances
   AND bf.genes = cf.genes
@@ -562,6 +615,7 @@ WHERE u.nid = bf.nid
   AND bf.anatomies = cf.anatomies
   AND bf.assay_types = cf.assay_types
 
+  AND bf.analysis_types = cf.analysis_types
   AND bf.file_formats = cf.file_formats
   AND bf.compression_formats = cf.compression_formats
   AND bf.data_types = cf.data_types
@@ -582,6 +636,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     COALESCE(s.granularity, -1) AS subject_granularity,
     -1 AS anatomy,
     -1 AS assay_type,
+    -1 AS analysis_type,
     -1 AS file_format,
     -1 AS compression_format,
     -1 AS data_type,
@@ -589,7 +644,8 @@ CREATE TEMPORARY TABLE subject_facts AS
 
     json_array(s.project) AS projects,
     json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT dis.nid) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
+    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
     json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
     json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
     CASE WHEN s.sex IS NOT NULL THEN json_array(s.sex) ELSE '[]' END AS sexes,
@@ -602,6 +658,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
     json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
 
+    json_sorted(COALESCE(json_group_array(DISTINCT f.analysis_type) FILTER (WHERE f.analysis_type IS NOT NULL), '[]')) AS analysis_types,
     json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.compression_format) FILTER (WHERE f.compression_format IS NOT NULL), '[]')) AS compression_formats,
     json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
@@ -615,6 +672,11 @@ CREATE TEMPORARY TABLE subject_facts AS
   LEFT JOIN subject_disease sd ON (sd.subject = s.nid)
   LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
   LEFT JOIN (
+    subject_phenotype spht
+    JOIN phenotype pht ON (spht.phenotype = pht.nid)
+    JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
+  ) ON (s.nid = spht.subject)
+  LEFT JOIN (
     biosample_from_subject bfs
     JOIN biosample b ON (bfs.biosample = b.nid)
     LEFT JOIN biosample_disease bd ON (bd.biosample = b.nid)
@@ -627,6 +689,7 @@ CREATE TEMPORARY TABLE subject_facts AS
     LEFT JOIN assay_type ast ON (b.assay_type = ast.nid OR f.assay_type = ast.nid)
   ) ON (s.nid = bfs.subject)
   LEFT JOIN disease dis ON (sd.disease = dis.nid OR bd.disease = dis.nid)
+  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
   LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
   GROUP BY s.nid, s.id_namespace
 ;
@@ -641,6 +704,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -648,6 +712,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -661,6 +726,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -677,6 +743,7 @@ INSERT INTO core_fact (
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -684,6 +751,7 @@ INSERT INTO core_fact (
     
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -697,6 +765,7 @@ INSERT INTO core_fact (
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -709,6 +778,7 @@ INSERT INTO core_fact (
     subject_granularity_row,
     anatomy_row,
     assay_type_row,
+    analysis_type_row,
     file_format_row,
     compression_format_row,
     data_type_row,
@@ -725,6 +795,7 @@ SELECT
   sf.subject_granularity,
   sf.anatomy,
   sf.assay_type,
+  sf.analysis_type,
   sf.file_format,
   sf.compression_format,
   sf.data_type,
@@ -732,6 +803,7 @@ SELECT
     
   sf.projects,
   sf.dccs,
+  sf.phenotypes,
   sf.diseases,
   sf.substances,
   sf.genes,
@@ -745,6 +817,7 @@ SELECT
   sf.anatomies,
   sf.assay_types,
 
+  sf.analysis_types,
   sf.file_formats,
   sf.compression_formats,
   sf.data_types,
@@ -757,6 +830,7 @@ SELECT
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
+  json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
   json_object('nid', cfmt.nid,'name', cfmt.name, 'description', cfmt.description) AS compression_format_row,
   json_object('nid', dt.nid, 'name', dt.name, 'description', dt.description) AS data_type_row,
@@ -773,6 +847,7 @@ FROM (
     sf.subject_granularity,
     sf.anatomy,
     sf.assay_type,
+    sf.analysis_type,
     sf.file_format,
     sf.compression_format,
     sf.data_type,
@@ -780,6 +855,7 @@ FROM (
 
     sf.projects,
     sf.dccs,
+    sf.phenotypes,
     sf.diseases,
     sf.substances,
     sf.genes,
@@ -793,6 +869,7 @@ FROM (
     sf.anatomies,
     sf.assay_types,
 
+    sf.analysis_types,
     sf.file_formats,
     sf.compression_formats,
     sf.data_types,
@@ -806,6 +883,7 @@ LEFT JOIN sex sx ON (sf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (sf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (sf.anatomy = a.nid)
 LEFT JOIN assay_type ast ON (sf.assay_type = ast.nid)
+LEFT JOIN analysis_type ant ON (sf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (sf.file_format = fmt.nid)
 LEFT JOIN file_format cfmt ON (sf.compression_format = cfmt.nid)
 LEFT JOIN data_type dt ON (sf.data_type = dt.nid)
@@ -827,6 +905,7 @@ WHERE u.nid = sf.nid
   AND sf.subject_granularity = cf.subject_granularity
   AND sf.anatomy = cf.anatomy
   AND sf.assay_type = cf.assay_type
+  AND sf.analysis_type = cf.analysis_type
   AND sf.file_format = cf.file_format
   AND sf.compression_format = cf.compression_format
   AND sf.data_type = cf.data_type
@@ -834,6 +913,7 @@ WHERE u.nid = sf.nid
 
   AND sf.projects = cf.projects
   AND sf.dccs = cf.dccs
+  AND sf.phenotypes = cf.phenotypes
   AND sf.diseases = cf.diseases
   AND sf.substances = cf.substances
   AND sf.genes = cf.genes
@@ -847,6 +927,7 @@ WHERE u.nid = sf.nid
   AND sf.anatomies = cf.anatomies
   AND sf.assay_types = cf.assay_types
 
+  AND sf.analysis_types = cf.analysis_types
   AND sf.file_formats = cf.file_formats
   AND sf.compression_formats = cf.compression_formats
   AND sf.data_types = cf.data_types
@@ -866,6 +947,7 @@ SELECT
   subject_granularity,
   anatomy,
   assay_type,
+  analysis_type,
   file_format,
   compression_format,
   data_type,
@@ -873,6 +955,7 @@ SELECT
 
   projects,
   dccs,
+  phenotypes,
   diseases,
   substances,
   genes,
@@ -886,6 +969,7 @@ SELECT
   anatomies,
   assay_types,
 
+  analysis_types,
   file_formats,
   compression_formats,
   data_types,
@@ -904,6 +988,7 @@ FROM (
     -1 AS subject_granularity,
     -1 AS anatomy,
     -1 AS assay_type,
+    -1 AS analysis_type,
     -1 AS file_format,
     -1 AS compression_format,
     -1 AS data_type,
@@ -917,6 +1002,20 @@ FROM (
      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
      JOIN dcc d ON (pipt.leader_project = d.project)
      WHERE cdbp.collection = col.nid) AS dccs,
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
+     FROM (
+       SELECT j.value
+       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.phenotypes) j
+       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+     UNION
+       SELECT j.value
+       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.phenotypes) j
+       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+     UNION
+       SELECT j.value
+       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.phenotypes) j
+       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+     ) s ) AS phenotypes,
     (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
@@ -1088,6 +1187,20 @@ FROM (
     (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
      FROM (
        SELECT j.value
+       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.analysis_types) j
+       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+     UNION
+       SELECT j.value
+       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j
+       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+     UNION
+       SELECT j.value
+       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j
+       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+     ) s ) AS analysis_types,
+    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
+     FROM (
+       SELECT j.value
        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.file_formats) j
        WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
      UNION
@@ -1155,6 +1268,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -1162,6 +1276,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
 
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -1175,6 +1290,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -1191,6 +1307,7 @@ INSERT INTO core_fact (
     subject_granularity,
     anatomy,
     assay_type,
+    analysis_type,
     file_format,
     compression_format,
     data_type,
@@ -1198,6 +1315,7 @@ INSERT INTO core_fact (
     
     projects,
     dccs,
+    phenotypes,
     diseases,
     substances,
     genes,
@@ -1211,6 +1329,7 @@ INSERT INTO core_fact (
     anatomies,
     assay_types,
 
+    analysis_types,
     file_formats,
     compression_formats,
     data_types,
@@ -1223,6 +1342,7 @@ INSERT INTO core_fact (
     subject_granularity_row,
     anatomy_row,
     assay_type_row,
+    analysis_type_row,
     file_format_row,
     compression_format_row,
     data_type_row,
@@ -1239,6 +1359,7 @@ SELECT
   colf.subject_granularity,
   colf.anatomy,
   colf.assay_type,
+  colf.analysis_type,
   colf.file_format,
   colf.compression_format,
   colf.data_type,
@@ -1246,6 +1367,7 @@ SELECT
     
   colf.projects,
   colf.dccs,
+  colf.phenotypes,
   colf.diseases,
   colf.substances,
   colf.genes,
@@ -1259,6 +1381,7 @@ SELECT
   colf.anatomies,
   colf.assay_types,
 
+  colf.analysis_types,
   colf.file_formats,
   colf.compression_formats,
   colf.data_types,
@@ -1271,6 +1394,7 @@ SELECT
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
+  json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
   json_object('nid', cfmt.nid,'name', cfmt.name, 'description', cfmt.description) AS compression_format_row,
   json_object('nid', dt.nid, 'name', dt.name, 'description', dt.description) AS data_type_row,
@@ -1287,6 +1411,7 @@ FROM (
     colf.subject_granularity,
     colf.anatomy,
     colf.assay_type,
+    colf.analysis_type,
     colf.file_format,
     colf.compression_format,
     colf.data_type,
@@ -1294,6 +1419,7 @@ FROM (
 
     colf.projects,
     colf.dccs,
+    colf.phenotypes,
     colf.diseases,
     colf.substances,
     colf.genes,
@@ -1307,6 +1433,7 @@ FROM (
     colf.anatomies,
     colf.assay_types,
 
+    colf.analysis_types,
     colf.file_formats,
     colf.compression_formats,
     colf.data_types,
@@ -1320,6 +1447,7 @@ LEFT JOIN sex sx ON (colf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (colf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (colf.anatomy = a.nid)
 LEFT JOIN assay_type ast ON (colf.assay_type = ast.nid)
+LEFT JOIN analysis_type ant ON (colf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (colf.file_format = fmt.nid)
 LEFT JOIN file_format cfmt ON (colf.compression_format = cfmt.nid)
 LEFT JOIN data_type dt ON (colf.data_type = dt.nid)
@@ -1341,6 +1469,7 @@ WHERE u.nid = colf.nid
   AND colf.subject_granularity = cf.subject_granularity
   AND colf.anatomy = cf.anatomy
   AND colf.assay_type = cf.assay_type
+  AND colf.analysis_type = cf.analysis_type
   AND colf.file_format = cf.file_format
   AND colf.compression_format = cf.compression_format
   AND colf.data_type = cf.data_type
@@ -1348,6 +1477,7 @@ WHERE u.nid = colf.nid
 
   AND colf.projects = cf.projects
   AND colf.dccs = cf.dccs
+  AND colf.phenotypes = cf.phenotypes
   AND colf.diseases = cf.diseases
   AND colf.substances = cf.substances
   AND colf.genes = cf.genes
@@ -1361,6 +1491,7 @@ WHERE u.nid = colf.nid
   AND colf.anatomies = cf.anatomies
   AND colf.assay_types = cf.assay_types
 
+  AND colf.analysis_types = cf.analysis_types
   AND colf.file_formats = cf.file_formats
   AND colf.compression_formats = cf.compression_formats
   AND colf.data_types = cf.data_types
