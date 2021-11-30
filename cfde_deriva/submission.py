@@ -1087,7 +1087,9 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     'compound',
                     'substance',
                     'gene',
-                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity
+                    'analysis_type',
+                    'phenotype',
+                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
                     # which are closed enums for the DCCs...
                 },
                 # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
@@ -1108,8 +1110,9 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                      'datapackage_assay_type', 'assay_type'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN data_type v ON (cf.data_type = v.nid)',
                      'datapackage_data_type', 'data_type'),
-                    ("""  SELECT v.id FROM subject_disease a   JOIN disease v ON (a.disease = v.nid)
-                    UNION SELECT v.id FROM biosample_disease a JOIN disease v ON (a.disease = v.nid)""",
+                    ("""  SELECT v.id FROM subject_disease a    JOIN disease v ON (a.disease = v.nid)
+                    UNION SELECT v.id FROM biosample_disease a  JOIN disease v ON (a.disease = v.nid)
+                    UNION SELECT v.id FROM collection_disease a JOIN disease v ON (a.disease = v.nid)""",
                      'datapackage_disease', 'disease'),
                     ("""  SELECT v1.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)
                     UNION SELECT v1.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)""",
@@ -1136,6 +1139,16 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                      'datapackage_subject_role', 'subject_role'),
                     ("""  SELECT v.id FROM biosample_gene a JOIN gene v ON (a.gene = v.nid)""",
                      'datapackage_gene', 'gene'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN analysis_type v ON (cf.analysis_type = v.nid)',
+                     'datapackage_analysis_type', 'analysis_type'),
+                    ("""  SELECT v.id FROM subject_phenotype a    JOIN phenotype v ON (a.phenotype = v.nid)
+                    UNION SELECT v.id FROM collection_phenotype a JOIN phenotype v ON (a.phenotype = v.nid)""",
+                     'datapackage_phenotype', 'phenotype'),
+                    ("""  SELECT v.id FROM subject_disease a   JOIN disease_association_type v ON (a.association_type = v.nid)
+                    UNION SELECT v.id FROM biosample_disease a JOIN disease_association_type v ON (a.association_type = v.nid)""",
+                     'datapackage_disease_association_type', 'disease_association_type'),
+                    ('SELECT v.id FROM subject_phenotype a JOIN phenotype_association_type v ON (a.association_type = v.nid)',
+                     'datapackage_phenotype_association_type', 'phenotype_association_type'),
             ]:
                 try:
                     cur.execute("""
