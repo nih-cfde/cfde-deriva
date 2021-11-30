@@ -1082,6 +1082,16 @@
                      ],
                      "entity": true
                   },
+                  "S_analysis_type": {
+                     "markdown_name": "Analysis Type",
+                     "comment": "Analysis type terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_analysis_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_analysis_type_analysis_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_assay_type": {
                      "markdown_name": "Assay Type",
                      "comment": "Assay type terms used in submission",
@@ -1122,6 +1132,16 @@
                      ],
                      "entity": true
                   },
+                  "S_disease_assoc_type": {
+                     "markdown_name": "Disease Association Type",
+                     "comment": "Disease association types used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_disease_assoc_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_disease_assoc_type_assoc_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_ethnicity": {
                      "markdown_name": "Ethnicity",
                      "comment": "Ethnicity terms used in submission",
@@ -1158,6 +1178,26 @@
                      "source": [
                         {"inbound": ["CFDE", "datapackage_ncbi_taxonomy_datapackage_fkey"]},
                         {"outbound": ["CFDE", "datapackage_ncbi_taxonomy_ncbi_taxonomy_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotype terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_phenotype_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_phenotype_phenotype_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_phenotype_assoc_type": {
+                     "markdown_name": "Phenotype Association Type",
+                     "comment": "Phenotype association types used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_phenotype_assoc_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_phenotype_assoc_type_assoc_type_fkey"]},
                         "id"
                      ],
                      "entity": true
@@ -1218,14 +1258,18 @@
                "*": [
                   {"sourcekey": "S_releases"},
                   {"sourcekey": "S_datapackage_tables"},
+                  {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_compound"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_disease_assoc_type"},
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_phenotype"},
+                  {"sourcekey": "S_phenotype_assoc_type"},
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_sex"},
                   {"sourcekey": "S_subject_granularity"},
