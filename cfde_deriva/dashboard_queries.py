@@ -351,8 +351,24 @@ class SlimTermMap (TermMap):
             terms.update(self.slim_map[nid])
         return sorted(terms)
 
+class AssocTermMap (TermMap):
+    def __init__(self, helper, vocab_tname, atype_tname, headers=DEFAULT_HEADERS):
+        super(AssocTermMap, self).__init__(helper, vocab_tname, headers)
+        atype_map = TermMap(helper, atype_tname, headers=headers)
+
+    def assoc_nid_array(self, original_nidpair_array):
+        terms = set()
+        for entry in original_nidpair_array:
+            # guard for compat with older simple dimension arrays in mixed deployment
+            if isinstance(entry, list):
+                term_nid, atype_nid = entry
+                # TODO: drop terms for certain atype_nids?
+                terms.add(term_nid)
+        return sorted(terms)
+
 class Dimension (object):
     slim = False
+    assoc = False
 
     def __init__(self, dim_name, array_cname, vocab_tname=None):
         self.name = dim_name
@@ -378,6 +394,16 @@ class SlimDimension (Dimension):
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
         return SlimTermMap(helper, self.vocab_tname, self.slimmap_tname, headers)
+
+class AssocTypeDimension (Dimension):
+    assoc = True
+
+    def __init__(self, dim_name, array_cname, vocab_tname=None, atype_tname=None):
+        super(AssocTypeDimension, self).__init__(dim_name, array_cname, vocab_tname)
+        self.atype_tname = atype_tname if atype_tname is not None else ('%s_association_type' % self.vocab_tname)
+
+    def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
+        return AssocTermMap(helper, self.vocab_tname, self.atype_tname, headers)
 
 class StatsQuery2 (object):
     """C2M2 statistics query generator
@@ -415,16 +441,18 @@ class StatsQuery2 (object):
         for dim in [
                 DccDimension(),
 
+                Dimension('analysis_type', 'analysis_types'),
                 SlimDimension('anatomy', 'anatomies'),
                 Dimension('assay_type', 'assay_types'),
                 Dimension('compression_format', 'compression_formats', 'file_format'),
                 Dimension('data_type', 'data_types'),
-                Dimension('disease', 'diseases'),
+                AssocTypeDimension('disease', 'diseases'),
                 Dimension('ethnicity', 'ethnicities'),
                 Dimension('file_format', 'file_formats'),
                 Dimension('gene', 'genes'),
                 Dimension('mime_type', 'mime_types'),
                 Dimension('ncbi_taxonomy', 'ncbi_taxons'),
+                AssocTypeDimension('phenotype', 'phenotypes'),
                 Dimension('race', 'races'),
                 Dimension('sex', 'sexes'),
                 Dimension('species', 'subject_species', 'ncbi_taxonomy'),
@@ -545,11 +573,18 @@ class StatsQuery2 (object):
         }
 
         slim_dimensions = [ dim for dim in dimensions if dim.slim ]
+        assoc_dimensions = [ dim for dim in dimensions if dim.assoc ]
 
         def slim_row(row):
             for dim in slim_dimensions:
                 term_map = vocab_term_maps[dim.name]
                 row[dim.array_cname] = term_map.slim_nid_array(row[dim.array_cname])
+            return row
+
+        def assoc_row(row):
+            for dim in assoc_dimensions:
+                atype_map = vocab_term_maps[dim.name]
+                row[dim.array_cname] = atype_map.assoc_nid_array(row[dim.array_cname])
             return row
 
         def rewrite_row(row):
@@ -558,9 +593,9 @@ class StatsQuery2 (object):
                 row[dim.array_cname] = term_map.term_array(row[dim.array_cname])
             return row
 
-        if slim_dimensions:
-            # have to re-aggregate after term slimming
-            rows = [ slim_row(row) for row in rows ]
+        if slim_dimensions or assoc_row:
+            # have to re-aggregate after term slimming or assoc type masking
+            rows = [ slim_row(assoc_row(row)) for row in rows ]
 
             def sort_key(row):
                 return tuple([ row[dim.array_cname] for dim in dimensions ])
