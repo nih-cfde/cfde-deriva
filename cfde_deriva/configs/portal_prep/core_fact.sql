@@ -1,74 +1,126 @@
 CREATE TEMPORARY TABLE file_facts AS
-  SELECT
-    f.nid,
+SELECT
+  f.nid,
 
-    f.id_namespace,
-    f.bundle_collection IS NOT NULL AS is_bundle,
-    f.persistent_id IS NOT NULL AS has_persistent_id,
+  f.id_namespace,
+  f.bundle_collection IS NOT NULL AS is_bundle,
+  f.persistent_id IS NOT NULL AS has_persistent_id,
 
-    COALESCE(f.project, -1) AS project,
-    -1 AS sex,
-    -1 AS ethnicity,
-    -1 AS subject_granularity,
-    -1 AS anatomy,
-    COALESCE(f.assay_type, -1) AS assay_type,
-    COALESCE(f.analysis_type, -1) AS analysis_type,
-    COALESCE(f.file_format, -1) AS file_format,
-    COALESCE(f.compression_format, -1) AS compression_format,
-    COALESCE(f.data_type, -1) AS data_type,
-    COALESCE(f.mime_type, -1) AS mime_type,
+  COALESCE(f.project, -1) AS project,
+  -1 AS sex,
+  -1 AS ethnicity,
+  -1 AS subject_granularity,
+  -1 AS anatomy,
+  COALESCE(f.assay_type, -1) AS assay_type,
+  COALESCE(f.analysis_type, -1) AS analysis_type,
+  COALESCE(f.file_format, -1) AS file_format,
+  COALESCE(f.compression_format, -1) AS compression_format,
+  COALESCE(f.data_type, -1) AS data_type,
+  COALESCE(f.mime_type, -1) AS mime_type,
 
-    json_array(f.project) AS projects,
-    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
-    json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
-    json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
-    json_sorted(COALESCE(json_group_array(DISTINCT sr.race) FILTER (WHERE sr.race IS NOT NULL), '[]')) AS races,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.ethnicity) FILTER (WHERE s.ethnicity IS NOT NULL), '[]')) AS ethnicities,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
-    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
-    json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
-    json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
+  json_array(f.project) AS projects,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
+      FROM project_in_project_transitive pipt
+      JOIN dcc ON (pipt.leader_project = dcc.project)
+      WHERE pipt.member_project = f.project
+    ),
+    '[]'
+  ) AS dccs,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.phenotype, a.association_type)))
+      FROM (
+        SELECT a.phenotype, a.association_type FROM file_describes_subject fds JOIN subject_phenotype a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+        UNION
+        SELECT a.phenotype, 0 AS association_type FROM file_in_collection fic JOIN collection_phenotype a ON (fic.collection = a.collection) WHERE fic.file = f.nid
+      ) a
+    ),
+    '[]'
+  ) AS phenotypes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      FROM (
+        SELECT a.disease, a.association_type FROM file_describes_subject fds JOIN subject_disease a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+        UNION
+        SELECT a.disease, a.association_type FROM file_describes_biosample fdb JOIN biosample_disease a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
+        UNION
+        SELECT a.disease, 0 AS association_type FROM file_in_collection fic JOIN collection_disease a ON (fic.collection = a.collection) WHERE fic.file = f.nid
+      ) a
+    ),
+    '[]'
+  ) AS diseases,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.substance))
+      FROM (
+        SELECT a.substance FROM file_describes_subject fds JOIN subject_substance a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+        UNION
+        SELECT a.substance FROM file_describes_biosample fdb JOIN biosample_substance a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
+      ) a
+    ),
+    '[]'
+  ) AS substances,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM file_describes_biosample fdb JOIN biosample_gene a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
+    ),
+    '[]'
+  ) AS genes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.sex)) FROM file_describes_subject fds JOIN subject s ON (fds.subject = s.nid) WHERE fds.file = f.nid AND s.sex IS NOT NULL
+    ),
+    '[]'
+  ) AS sexes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.race)) FROM file_describes_subject fds JOIN subject_race a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+    ),
+    '[]'
+  ) AS races,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.ethnicity)) FROM file_describes_subject fds JOIN subject s ON (fds.subject = s.nid) WHERE fds.file = f.nid AND s.ethnicity IS NOT NULL
+    ),
+    '[]'
+  ) AS ethnicities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a."role")) FROM file_describes_subject fds JOIN subject_role_taxonomy a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+    ),
+    '[]'
+  ) AS subject_roles,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.granularity)) FROM file_describes_subject fds JOIN subject s ON (fds.subject = s.nid) WHERE fds.file = f.nid AND s.granularity IS NOT NULL
+    ),
+    '[]'
+  ) AS subject_granularities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.species)) FROM file_describes_subject fds JOIN subject_species a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+    ),
+    '[]'
+  ) AS subject_species,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM file_describes_subject fds JOIN subject_role_taxonomy a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+    ),
+    '[]'
+  ) AS ncbi_taxons,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT b.anatomy)) FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) WHERE fdb.file = f.nid AND b.anatomy IS NOT NULL
+    ),
+    '[]'
+  ) AS anatomies,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      FROM (
+        SELECT b.assay_type FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) WHERE fdb.file = f.nid AND b.assay_type IS NOT NULL
+        UNION
+        SELECT v.nid AS assay_type FROM assay_type v WHERE v.nid = f.assay_type
+      ) a
+    ),
+    '[]'
+  ) AS assay_types,
 
-    CASE WHEN f.analysis_type IS NOT NULL THEN json_array(f.analysis_type) ELSE '[]' END AS analysis_types,
-    CASE WHEN f.file_format IS NOT NULL THEN json_array(f.file_format) ELSE '[]' END AS file_formats,
-    CASE WHEN f.compression_format IS NOT NULL THEN json_array(f.compression_format) ELSE '[]' END AS compression_formats,
-    CASE WHEN f.data_type   IS NOT NULL THEN json_array(f.data_type)   ELSE '[]' END AS data_types,
-    CASE WHEN f.mime_type   IS NOT NULL THEN json_array(f.mime_type)   ELSE '[]' END AS mime_types
-  FROM file f
-  JOIN project_in_project_transitive pipt ON (f.project = pipt.member_project)
-  JOIN dcc d ON (pipt.leader_project = d.project)
-  LEFT JOIN (
-    file_describes_biosample fdb
-    JOIN biosample b ON (fdb.biosample = b.nid)
-    LEFT JOIN biosample_disease bd ON (b.nid = bd.biosample)
-    LEFT JOIN biosample_substance bsubst ON (bsubst.biosample = b.nid)
-    LEFT JOIN biosample_gene bg ON (bg.biosample = b.nid)
-  ) ON (f.nid = fdb.file)
-  LEFT JOIN (
-   file_describes_subject fds
-   JOIN subject s ON (fds.subject = s.nid)
-    LEFT JOIN subject_race sr ON (sr.subject = s.nid)
-    LEFT JOIN subject_species ss ON (ss.subject = s.nid)
-    LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
-    LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
-    LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
-    LEFT JOIN (
-      subject_phenotype spht
-      JOIN phenotype pht ON (spht.phenotype = pht.nid)
-      JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
-    ) ON (s.nid = spht.subject)
-  ) ON (f.nid = fds.file)
-  LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
-  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
-  LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
-  LEFT JOIN assay_type ast ON (f.assay_type = ast.nid OR b.assay_type = ast.nid)
-  GROUP BY f.nid
-;
+  CASE WHEN f.analysis_type IS NOT NULL THEN json_array(f.analysis_type) ELSE '[]' END AS analysis_types,
+  CASE WHEN f.file_format IS NOT NULL THEN json_array(f.file_format) ELSE '[]' END AS file_formats,
+  CASE WHEN f.compression_format IS NOT NULL THEN json_array(f.compression_format) ELSE '[]' END AS compression_formats,
+  CASE WHEN f.data_type   IS NOT NULL THEN json_array(f.data_type)   ELSE '[]' END AS data_types,
+  CASE WHEN f.mime_type   IS NOT NULL THEN json_array(f.mime_type)   ELSE '[]' END AS mime_types
+FROM file f;
 CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     id_namespace,
     is_bundle,
@@ -311,76 +363,144 @@ WHERE u.nid = ff.nid
 ;
 
 CREATE TEMPORARY TABLE biosample_facts AS
-  SELECT
-    b.nid,
+SELECT
+  b.nid,
 
-    b.id_namespace,
-    False AS is_bundle,
-    b.persistent_id IS NOT NULL AS has_persistent_id,
+  b.id_namespace,
+  False AS is_bundle,
+  b.persistent_id IS NOT NULL AS has_persistent_id,
 
-    COALESCE(b.project, -1) AS project,
-    -1 AS sex,
-    -1 AS ethnicity,
-    -1 AS subject_granularity,
-    COALESCE(b.anatomy, -1) AS anatomy,
-    COALESCE(b.assay_type, -1) AS assay_type,
-    -1 AS analysis_type,
-    -1 AS file_format,
-    -1 AS compression_format,
-    -1 AS data_type,
-    -1 AS mime_type,
+  COALESCE(b.project, -1) AS project,
+  -1 AS sex,
+  -1 AS ethnicity,
+  -1 AS subject_granularity,
+  COALESCE(b.anatomy, -1) AS anatomy,
+  COALESCE(b.assay_type, -1) AS assay_type,
+  -1 AS analysis_type,
+  -1 AS file_format,
+  -1 AS compression_format,
+  -1 AS data_type,
+  -1 AS mime_type,
 
-    json_array(b.project) AS projects,
-    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
-    json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
-    json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.sex) FILTER (WHERE s.sex IS NOT NULL), '[]')) AS sexes,
-    json_sorted(COALESCE(json_group_array(DISTINCT sr.race) FILTER (WHERE sr.race IS NOT NULL), '[]')) AS races,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.ethnicity) FILTER (WHERE s.ethnicity IS NOT NULL), '[]')) AS ethnicities,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
-    json_sorted(COALESCE(json_group_array(DISTINCT s.granularity) FILTER (WHERE s.granularity IS NOT NULL), '[]')) AS subject_granularities,
-    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
-    CASE WHEN b.anatomy IS NOT NULL THEN json_array(b.anatomy) ELSE '[]' END AS anatomies,
-    json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
+  json_array(b.project) AS projects,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
+      FROM project_in_project_transitive pipt
+      JOIN dcc ON (pipt.leader_project = dcc.project)
+      WHERE pipt.member_project = b.project
+    ),
+    '[]'
+  ) AS dccs,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.phenotype, a.association_type)))
+      FROM (
+        SELECT a.phenotype, a.association_type FROM biosample_from_subject bfs JOIN subject_phenotype a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+        UNION
+        SELECT a.phenotype, 0 AS association_type FROM biosample_in_collection bic JOIN collection_phenotype a ON (bic.collection = a.collection) WHERE bic.biosample = b.nid
+      ) a
+    ),
+    '[]'
+  ) AS phenotypes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      FROM (
+        SELECT a.disease, a.association_type FROM biosample_from_subject bfs JOIN subject_disease a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+        UNION
+        SELECT a.disease, a.association_type FROM biosample_disease a WHERE a.biosample = b.nid
+        UNION
+        SELECT a.disease, 0 AS association_type FROM biosample_in_collection bic JOIN collection_disease a ON (bic.collection = a.collection) WHERE bic.biosample = b.nid
+      ) a
+    ),
+    '[]'
+  ) AS diseases,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.substance))
+      FROM (
+        SELECT a.substance FROM biosample_from_subject bfs JOIN subject_substance a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+        UNION
+        SELECT a.substance FROM biosample_substance a WHERE a.biosample = b.nid
+      ) a
+    ),
+    '[]'
+  ) AS substances,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM biosample_gene a WHERE a.biosample = b.nid
+    ),
+    '[]'
+  ) AS genes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.sex)) FROM biosample_from_subject bfs JOIN subject s ON (bfs.subject = s.nid) WHERE bfs.biosample = b.nid AND s.sex IS NOT NULL
+    ),
+    '[]'
+  ) AS sexes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.race)) FROM biosample_from_subject bfs JOIN subject_race a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+    ),
+    '[]'
+  ) AS races,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.ethnicity)) FROM biosample_from_subject bfs JOIN subject s ON (bfs.subject = s.nid) WHERE bfs.biosample = b.nid AND s.ethnicity IS NOT NULL
+    ),
+    '[]'
+  ) AS ethnicities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a."role")) FROM biosample_from_subject bfs JOIN subject_role_taxonomy a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+    ),
+    '[]'
+  ) AS subject_roles,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.granularity)) FROM biosample_from_subject bfs JOIN subject s ON (bfs.subject = s.nid) WHERE bfs.biosample = b.nid AND s.granularity IS NOT NULL
+    ),
+    '[]'
+  ) AS subject_granularities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.species)) FROM biosample_from_subject bfs JOIN subject_species a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+    ),
+    '[]'
+  ) AS subject_species,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM biosample_from_subject bfs JOIN subject_role_taxonomy a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+    ),
+    '[]'
+  ) AS ncbi_taxons,
+  CASE WHEN b.anatomy IS NOT NULL THEN json_array(b.anatomy) ELSE '[]' END AS anatomies,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      FROM (
+        SELECT f.assay_type FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.assay_type IS NOT NULL
+        UNION
+        SELECT v.nid AS assay_type FROM assay_type v WHERE v.nid = b.assay_type
+      ) a
+    ),
+    '[]'
+  ) AS assay_types,
 
-    json_sorted(COALESCE(json_group_array(DISTINCT f.analysis_type) FILTER (WHERE f.analysis_type IS NOT NULL), '[]')) AS analysis_types,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.compression_format) FILTER (WHERE f.compression_format IS NOT NULL), '[]')) AS compression_formats,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
-  FROM biosample b
-  JOIN project_in_project_transitive pipt ON (b.project = pipt.member_project)
-  JOIN dcc d ON (pipt.leader_project = d.project)
-  LEFT JOIN biosample_disease bd ON (b.nid = bd.biosample)
-  LEFT JOIN biosample_substance bsubst ON (bsubst.biosample = b.nid)
-  LEFT JOIN biosample_gene bg ON (bg.biosample = b.nid)
-  LEFT JOIN (
-    file_describes_biosample fdb
-    JOIN file f ON (fdb.file = f.nid)
-  ) ON (b.nid = fdb.biosample)
-  LEFT JOIN assay_type ast ON (b.assay_type = ast.nid OR f.assay_type = ast.nid)
-  LEFT JOIN (
-    biosample_from_subject bfs
-    JOIN subject s ON (bfs.subject = s.nid)
-    LEFT JOIN subject_race sr ON (sr.subject = s.nid)
-    LEFT JOIN subject_species ss ON (ss.subject = s.nid)
-    LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
-    LEFT JOIN subject_disease sd ON (s.nid = sd.subject)
-    LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
-    LEFT JOIN (
-      subject_phenotype spht
-      JOIN phenotype pht ON (spht.phenotype = pht.nid)
-      JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
-    ) ON (s.nid = spht.subject)
-  ) ON (b.nid = bfs.biosample)
-  LEFT JOIN disease dis ON (bd.disease = dis.nid OR sd.disease = dis.nid)
-  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
-  LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
-  GROUP BY b.nid
-;
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.analysis_type)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.analysis_type IS NOT NULL
+    ),
+    '[]'
+  ) AS analysis_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.file_format)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.file_format IS NOT NULL
+    ),
+    '[]'
+  ) AS file_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.compression_format)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.compression_format IS NOT NULL
+    ),
+    '[]'
+  ) AS compression_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.data_type)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.data_type IS NOT NULL
+    ),
+    '[]'
+  ) AS data_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.mime_type)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.mime_type IS NOT NULL
+    ),
+    '[]'
+  ) AS mime_types
+FROM biosample b;
 CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     id_namespace,
     is_bundle,
@@ -623,76 +743,136 @@ WHERE u.nid = bf.nid
 ;
 
 CREATE TEMPORARY TABLE subject_facts AS
-  SELECT
-    s.nid,
+SELECT
+  s.nid,
 
-    s.id_namespace,
-    False AS is_bundle,
-    s.persistent_id IS NOT NULL AS has_persistent_id,
+  s.id_namespace,
+  False AS is_bundle,
+  s.persistent_id IS NOT NULL AS has_persistent_id,
 
-    COALESCE(b.project, -1) AS project,
-    COALESCE(s.sex, -1) AS sex,
-    COALESCE(s.ethnicity, -1) AS ethnicity,
-    COALESCE(s.granularity, -1) AS subject_granularity,
-    -1 AS anatomy,
-    -1 AS assay_type,
-    -1 AS analysis_type,
-    -1 AS file_format,
-    -1 AS compression_format,
-    -1 AS data_type,
-    -1 AS mime_type,
+  COALESCE(s.project, -1) AS project,
+  COALESCE(s.sex, -1) AS sex,
+  COALESCE(s.ethnicity, -1) AS ethnicity,
+  COALESCE(s.granularity, -1) AS subject_granularity,
+  -1 AS anatomy,
+  -1 AS assay_type,
+  -1 AS analysis_type,
+  -1 AS file_format,
+  -1 AS compression_format,
+  -1 AS data_type,
+  -1 AS mime_type,
 
-    json_array(s.project) AS projects,
-    json_sorted(COALESCE(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL), '[]')) AS dccs,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(pht.nid, phtat.nid)) FILTER (WHERE pht.nid IS NOT NULL), '[]')) AS phenotypes,
-    json_sorted(COALESCE(json_group_array(DISTINCT json_array(dis.nid, disat.nid)) FILTER (WHERE dis.nid IS NOT NULL), '[]')) AS diseases,
-    json_sorted(COALESCE(json_group_array(DISTINCT subst.nid) FILTER (WHERE subst.nid IS NOT NULL), '[]')) AS substances,
-    json_sorted(COALESCE(json_group_array(DISTINCT bg.gene) FILTER (WHERE bg.gene IS NOT NULL), '[]')) AS genes,
-    CASE WHEN s.sex IS NOT NULL THEN json_array(s.sex) ELSE '[]' END AS sexes,
-    CASE WHEN sr.race IS NOT NULL THEN json_array(sr.race) ELSE '[]' END AS races,
-    CASE WHEN s.ethnicity IS NOT NULL THEN json_array(s.ethnicity) ELSE '[]' END AS ethnicities,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt."role") FILTER (WHERE srt."role" IS NOT NULL), '[]')) AS subject_roles,
-    CASE WHEN s.granularity IS NOT NULL THEN json_array(s.granularity) ELSE '[]' END AS subject_granularities,
-    json_sorted(COALESCE(json_group_array(DISTINCT ss.species) FILTER (WHERE ss.species IS NOT NULL), '[]')) AS subject_species,
-    json_sorted(COALESCE(json_group_array(DISTINCT srt.taxon) FILTER (WHERE srt.taxon IS NOT NULL), '[]')) AS ncbi_taxons,
-    json_sorted(COALESCE(json_group_array(DISTINCT b.anatomy) FILTER (WHERE b.anatomy IS NOT NULL), '[]')) AS anatomies,
-    json_sorted(COALESCE(json_group_array(DISTINCT ast.nid) FILTER (WHERE ast.nid IS NOT NULL), '[]')) AS assay_types,
+  json_array(s.project) AS projects,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
+      FROM project_in_project_transitive pipt
+      JOIN dcc ON (pipt.leader_project = dcc.project)
+      WHERE pipt.member_project = s.project
+    ),
+    '[]'
+  ) AS dccs,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.phenotype, a.association_type)))
+      FROM (
+        SELECT a.phenotype, a.association_type FROM subject_phenotype a WHERE a.subject = s.nid
+        UNION
+        SELECT a.phenotype, 0 AS association_type FROM subject_in_collection sic JOIN collection_phenotype a ON (sic.collection = a.collection) WHERE sic.subject = s.nid
+      ) a
+    ),
+    '[]'
+  ) AS phenotypes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      FROM (
+        SELECT a.disease, a.association_type FROM subject_disease a WHERE a.subject = s.nid
+        UNION
+        SELECT a.disease, a.association_type FROM biosample_from_subject bfs JOIN biosample_disease a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
+        UNION
+        SELECT a.disease, 0 AS association_type FROM subject_in_collection sic JOIN collection_disease a ON (sic.collection = a.collection) WHERE sic.subject = s.nid
+      ) a
+    ),
+    '[]'
+  ) AS diseases,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.substance))
+      FROM (
+        SELECT a.substance FROM subject_substance a WHERE a.subject = s.nid
+        UNION
+        SELECT a.substance FROM biosample_from_subject bfs JOIN biosample_substance a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
+      ) a
+    ),
+    '[]'
+  ) AS substances,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM biosample_from_subject bfs JOIN biosample_gene a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
+    ),
+    '[]'
+  ) AS genes,
+  CASE WHEN s.sex IS NOT NULL THEN json_array(s.sex) ELSE '[]' END AS sexes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.race)) FROM subject_race a WHERE a.subject = s.nid
+    ),
+    '[]'
+  ) AS races,
+  CASE WHEN s.ethnicity IS NOT NULL THEN json_array(s.ethnicity) ELSE '[]' END AS ethnicities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a."role")) FROM subject_role_taxonomy a WHERE a.subject = s.nid
+    ),
+    '[]'
+  ) AS subject_roles,
+  CASE WHEN s.granularity IS NOT NULL THEN json_array(s.granularity) ELSE '[]' END AS subject_granularities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.species)) FROM subject_species a WHERE a.subject = s.nid
+    ),
+    '[]'
+  ) AS subject_species,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM subject_role_taxonomy a WHERE a.subject = s.nid
+    ),
+    '[]'
+  ) AS ncbi_taxons,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT b.anatomy)) FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) WHERE bfs.subject = s.nid AND b.anatomy IS NOT NULL
+    ),
+    '[]'
+  ) AS anatomies,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      FROM (
+        SELECT f.assay_type FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.assay_type IS NOT NULL
+        UNION
+        SELECT b.assay_type FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) WHERE bfs.subject = s.nid AND b.assay_type IS NOT NULL
+      ) a
+    ),
+    '[]'
+  ) AS assay_types,
 
-    json_sorted(COALESCE(json_group_array(DISTINCT f.analysis_type) FILTER (WHERE f.analysis_type IS NOT NULL), '[]')) AS analysis_types,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.file_format) FILTER (WHERE f.file_format IS NOT NULL), '[]')) AS file_formats,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.compression_format) FILTER (WHERE f.compression_format IS NOT NULL), '[]')) AS compression_formats,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.data_type) FILTER (WHERE f.data_type IS NOT NULL), '[]')) AS data_types,
-    json_sorted(COALESCE(json_group_array(DISTINCT f.mime_type) FILTER (WHERE f.mime_type IS NOT NULL), '[]')) AS mime_types
-  FROM subject s
-  JOIN project_in_project_transitive pipt ON (s.project = pipt.member_project)
-  JOIN dcc d ON (pipt.leader_project = d.project)
-  LEFT JOIN subject_race sr ON (sr.subject = s.nid)
-  LEFT JOIN subject_species ss ON (ss.subject = s.nid)
-  LEFT JOIN subject_role_taxonomy srt ON (s.nid = srt.subject)
-  LEFT JOIN subject_disease sd ON (sd.subject = s.nid)
-  LEFT JOIN subject_substance ssubst ON (ssubst.subject = s.nid)
-  LEFT JOIN (
-    subject_phenotype spht
-    JOIN phenotype pht ON (spht.phenotype = pht.nid)
-    JOIN phenotype_association_type phtat ON (spht.association_type = phtat.nid)
-  ) ON (s.nid = spht.subject)
-  LEFT JOIN (
-    biosample_from_subject bfs
-    JOIN biosample b ON (bfs.biosample = b.nid)
-    LEFT JOIN biosample_disease bd ON (bd.biosample = b.nid)
-    LEFT JOIN biosample_substance bsubst ON (bsubst.biosample = b.nid)
-    LEFT JOIN biosample_gene bg ON (bg.biosample = b.nid)
-    LEFT JOIN (
-      file_describes_biosample fdb
-      JOIN file f ON (fdb.file = f.nid)
-    ) ON (b.nid = fdb.biosample)
-    LEFT JOIN assay_type ast ON (b.assay_type = ast.nid OR f.assay_type = ast.nid)
-  ) ON (s.nid = bfs.subject)
-  LEFT JOIN disease dis ON (sd.disease = dis.nid OR bd.disease = dis.nid)
-  LEFT JOIN disease_association_type disat ON (bd.association_type = disat.nid OR sd.association_type = disat.nid)
-  LEFT JOIN substance subst ON (ssubst.substance = subst.nid OR bsubst.substance = subst.nid)
-  GROUP BY s.nid, s.id_namespace
-;
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.analysis_type)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.analysis_type IS NOT NULL
+    ),
+    '[]'
+  ) AS analysis_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.file_format)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.file_format IS NOT NULL
+    ),
+    '[]'
+  ) AS file_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.compression_format)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.compression_format IS NOT NULL
+    ),
+    '[]'
+  ) AS compression_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.data_type)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.data_type IS NOT NULL
+    ),
+    '[]'
+  ) AS data_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT f.mime_type)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.mime_type IS NOT NULL
+    ),
+    '[]'
+  ) AS mime_types
+FROM subject s;
 CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     id_namespace,
     is_bundle,
@@ -936,327 +1116,266 @@ WHERE u.nid = sf.nid
 
 CREATE TEMPORARY TABLE collection_facts AS
 SELECT
-  nid,
-  id_namespace,
-  is_bundle,
-  has_persistent_id,
-  
-  project,
-  sex,
-  ethnicity,
-  subject_granularity,
-  anatomy,
-  assay_type,
-  analysis_type,
-  file_format,
-  compression_format,
-  data_type,
-  mime_type,
+  col.nid,
 
-  projects,
-  dccs,
-  phenotypes,
-  diseases,
-  substances,
-  genes,
-  sexes,
-  races,
-  ethnicities,
-  subject_roles,
-  subject_granularities,
-  subject_species,
-  ncbi_taxons,
-  anatomies,
-  assay_types,
+  col.id_namespace,
+  False AS is_bundle,
+  col.persistent_id IS NOT NULL AS has_persistent_id,
 
-  analysis_types,
-  file_formats,
-  compression_formats,
-  data_types,
-  mime_types
-FROM (
-  SELECT
-    col.nid,
+  -1 AS project,
+  -1 AS sex,
+  -1 AS ethnicity,
+  -1 AS subject_granularity,
+  -1 AS anatomy,
+  -1 AS assay_type,
+  -1 AS analysis_type,
+  -1 AS file_format,
+  -1 AS compression_format,
+  -1 AS data_type,
+  -1 AS mime_type,
 
-    col.id_namespace,
-    False AS is_bundle,
-    col.persistent_id IS NOT NULL AS has_persistent_id,
-
-    -1 AS project,
-    -1 AS sex,
-    -1 AS ethnicity,
-    -1 AS subject_granularity,
-    -1 AS anatomy,
-    -1 AS assay_type,
-    -1 AS analysis_type,
-    -1 AS file_format,
-    -1 AS compression_format,
-    -1 AS data_type,
-    -1 AS mime_type,
-
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT cdbp.project) FILTER (WHERE cdbp.project IS NOT NULL)), '[]')
-     FROM collection_defined_by_project cdbp
-     WHERE cdbp.collection = col.nid) AS projects,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT d.nid) FILTER (WHERE d.nid IS NOT NULL)), '[]')
-     FROM collection_defined_by_project cdbp
-     JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
-     JOIN dcc d ON (pipt.leader_project = d.project)
-     WHERE cdbp.collection = col.nid) AS dccs,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.phenotypes) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.phenotypes) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.phenotypes) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s ) AS phenotypes,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.diseases) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.diseases) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.diseases) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS diseases,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.substances) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.substances) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.substances) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS substances,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.genes) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.genes) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.genes) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS genes,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.sexes) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.sexes) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.sexes) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS sexes,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.races) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.races) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.races) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS races,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.ethnicities) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.ethnicities) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.ethnicities) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS ethnicities,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_roles) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_roles) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_roles) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS subject_roles,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_granularities) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_granularities) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_granularities) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS subject_granularities,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_species) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_species) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_species) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS subject_species,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.ncbi_taxons) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.ncbi_taxons) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.ncbi_taxons) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS ncbi_taxons,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.anatomies) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.anatomies) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.anatomies) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS anatomies,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.assay_types) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.assay_types) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.assay_types) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS assay_types,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.analysis_types) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s ) AS analysis_types,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.file_formats) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.file_formats) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.file_formats) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS file_formats,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.compression_formats) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.compression_formats) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.compression_formats) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS compression_formats,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.data_types) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.data_types) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.data_types) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS data_types,
-    (SELECT COALESCE(json_sorted(json_group_array(DISTINCT s.value) FILTER (WHERE s.value IS NOT NULL)), '[]')
-     FROM (
-       SELECT j.value
-       FROM file_in_collection fic, file f, core_fact cf, json_each(cf.mime_types) j
-       WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.mime_types) j
-       WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-     UNION
-       SELECT j.value
-       FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.mime_types) j
-       WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-     ) s) AS mime_types
-  FROM collection col
-) colf
-;
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT cdbp.project)) FROM collection_defined_by_project cdbp WHERE cdbp.collection = col.nid
+    ),
+    '[]'
+  ) AS projects,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT d.nid))
+      FROM collection_defined_by_project cdbp
+      JOIN project_in_project_transitive pipt ON (cdbp.project = pipt.member_project)
+      JOIN dcc d ON (pipt.leader_project = d.project)
+      WHERE cdbp.collection = col.nid
+    ),
+    '[]'
+  ) AS dccs,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(s.phenotype, s.association_type)))
+      FROM (
+        SELECT a.phenotype, 0 AS association_type FROM collection_phenotype a WHERE a.collection = col.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS phenotype, json_extract(j.value, '$[1]') AS association_type
+        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.phenotypes) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS phenotype, json_extract(j.value, '$[1]') AS association_type
+        FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.phenotypes) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS phenotype, json_extract(j.value, '$[1]') AS association_type
+        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.phenotypes) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS phenotypes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT json_array(s.disease, s.association_type)))
+      FROM (
+        SELECT a.disease, 0 AS association_type FROM collection_disease a WHERE a.collection = col.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS disease, json_extract(j.value, '$[1]') AS association_type
+        FROM file_in_collection fic, file f, core_fact cf, json_each(cf.diseases) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS disease, json_extract(j.value, '$[1]') AS association_type
+        FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.diseases) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT json_extract(j.value, '$[0]') AS disease, json_extract(j.value, '$[1]') AS association_type
+        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.diseases) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS diseases,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.substances) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.substances) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.substances) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS substances,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.genes) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.genes) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.genes) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS genes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.sexes) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.sexes) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.sexes) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS sexes,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.races) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.races) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.races) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS races,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.ethnicities) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.ethnicities) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.ethnicities) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS ethnicities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_roles) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_roles) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_roles) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS subject_roles,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_granularities) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_granularities) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_granularities) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS subject_granularities,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.subject_species) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.subject_species) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.subject_species) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS subject_species,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.ncbi_taxons) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.ncbi_taxons) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value
+        FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.ncbi_taxons) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS ncbi_taxons,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.anatomies) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.anatomies) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.anatomies) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS anatomies,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.assay_types) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.assay_types) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.assay_types) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS assay_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.analysis_types) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.analysis_types) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS analysis_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.file_formats) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.file_formats) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.file_formats) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS file_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.compression_formats) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.compression_formats) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.compression_formats) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS compression_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.data_types) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.data_types) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.data_types) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS data_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.mime_types) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.mime_types) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.mime_types) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS mime_types
+FROM collection col;
 CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     id_namespace,
     is_bundle,
