@@ -1034,7 +1034,7 @@
             "missingValues": [ "" ],
             "primaryKey": "id"
          },
-         "derivation_sql_path": null
+         "derivation_sql_path": "disease_association_type.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -1080,7 +1080,7 @@
             "missingValues": [ "" ],
             "primaryKey": "nid"
          },
-         "derivation_sql_path": null
+         "derivation_sql_path": "phenotype_association_type.sql"
       },
 
       {
