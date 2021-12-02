@@ -1217,7 +1217,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_compound",
+                     "favorited_key_columns": ["compound"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -1362,7 +1371,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_substance",
+                     "favorited_key_columns": ["substance"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -1506,7 +1524,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_gene",
+                     "favorited_key_columns": ["gene"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
