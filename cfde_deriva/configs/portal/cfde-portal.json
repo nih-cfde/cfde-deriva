@@ -938,6 +938,15 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotypes linked to this disease term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_disease_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_disease_disease_fkey"]},
@@ -992,6 +1001,7 @@
                "filter": {"and": [
                   {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
@@ -1000,6 +1010,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -1010,7 +1021,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "phenotype",
-         "title": "phenotype",
+         "title": "Phenotype",
          "description": "List of Human Phenotype Ontology terms used to describe phenotypes recorded in association with C2M2 subjects",
          "schema": {
             "fields": [
@@ -1059,6 +1070,99 @@
          "deriva": {
             "table_config": {
                "stable_key_columns": ["id"]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "Genes linked to this phenotype term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_gene_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "Diseases linked to this phenotype term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_disease_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]
             }
          }
       },
@@ -1408,6 +1512,15 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotypes linked to this gene term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_gene_gene_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_gene_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_gene_gene_fkey"]},
@@ -1462,6 +1575,7 @@
                "filter": {"and": [
                   {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
@@ -1470,6 +1584,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
