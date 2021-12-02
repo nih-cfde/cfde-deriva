@@ -6479,6 +6479,186 @@
                }
             }
          }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_disease_association_type",
+         "title": "Favorite Disease Association Type",
+         "description": "An association of a favorited disease association type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "disease_association_type",
+                  "description": "The favorited disease association type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "disease_association_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_disease_assoc_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "disease_association_type",
+                  "constraint_name": "favorite_disease_assoc_type_assoc_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_phenotype_association_type",
+         "title": "Favorite Phenotype Association Type",
+         "description": "An association of a favorited phenotype association type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "phenotype_association_type",
+                  "description": "The favorited phenotype association type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "phenotype_association_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_phenotype_assoc_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "phenotype_association_type",
+                  "constraint_name": "favorite_phenotype_assoc_type_assoc_type_fkey",
+                  "reference": {
+                     "resource": "phenotype_association_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
       }
 
    ],
