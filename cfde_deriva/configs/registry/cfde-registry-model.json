@@ -4972,6 +4972,7 @@
                   "name": "description",
                   "description": "A human-readable summary of the saved search's purpose and/or search criteria.",
                   "type": "string",
+                  "format": "markdown",
                   "constraints": {
                      "required": true
                   },
