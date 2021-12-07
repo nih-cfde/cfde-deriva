@@ -125,6 +125,36 @@ def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
         join_type= 'left' if show_nulls else ''
     )
 
+def _add_sex_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'sex' in queryobj.path.table_instances:
+        return
+    sex = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('sex')
+    queryobj.path = queryobj.path.link(
+        sex,
+        on=( queryobj.path.level1_stats.sex_id == sex.id ),
+        join_type= 'left' if show_nulls else ''
+    )
+
+def _add_race_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'race' in queryobj.path.table_instances:
+        return
+    race = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('race')
+    queryobj.path = queryobj.path.link(
+        race,
+        on=( queryobj.path.level1_stats.race_id == race.id ),
+        join_type= 'left' if show_nulls else ''
+    )
+
+def _add_ethnicity_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'ethnicity' in queryobj.path.table_instances:
+        return
+    ethnicity = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('ethnicity')
+    queryobj.path = queryobj.path.link(
+        ethnicity,
+        on=( queryobj.path.level1_stats.ethnicity_id == ethnicity.id ),
+        join_type= 'left' if show_nulls else ''
+    )
+
 def _add_rootproject_leaf(queryobj, show_nulls=False, **kwargs):
     """Idempotently add root project concept to path"""
     # ignore show_nulls since project is always attributed
@@ -253,6 +283,27 @@ class StatsQuery (object):
                 lambda path: path.species.id.alias('species_id'),
             ], [
                 lambda path: path.species.column_definitions['name'].alias('species_name'),
+            ]
+        ),
+        'sex': (
+            _add_sex_leaf, [
+                lambda path: path.sex.id.alias('sex_id'),
+            ], [
+                lambda path: path.sex.column_definitions['name'].alias('sex_name'),
+            ]
+        ),
+        'race': (
+            _add_race_leaf, [
+                lambda path: path.race.id.alias('race_id'),
+            ], [
+                lambda path: path.race.column_definitions['name'].alias('race_name'),
+            ]
+        ),
+        'ethnicity': (
+            _add_ethnicity_leaf, [
+                lambda path: path.ethnicity.id.alias('ethnicity_id'),
+            ], [
+                lambda path: path.ethnicity.column_definitions['name'].alias('ethnicity_name'),
             ]
         ),
         'project_root': (
@@ -562,7 +613,7 @@ class StatsQuery2 (object):
             raise ValueError('Unsupported dimension_name "%s"' % (dimension_name,))
 
         if dim in self.included_dimensions:
-            raise TypeError('Cannot use dimension_name "%s" more than once.' % (dim.ame,))
+            raise TypeError('Cannot use dimension_name "%s" more than once.' % (dim.name,))
 
         self.included_dimensions.add(dim)
 
@@ -691,6 +742,7 @@ class DashboardQueryHelper (object):
                 ('tag:hmpdacc.org,2021-06-04:', 'HMP'),
                 ('https://www.lincsproject.org/', 'LINCS'),
                 ('https://www.metabolomicsworkbench.org/', 'PPR00001'),
+                ('tag:hubmapconsortium.org,2021:', 'HuBMAP'),
         ]:
             if proj in projects:
                 nid_for_parent_proj = projects[proj]['nid']
@@ -717,6 +769,7 @@ class DashboardQueryHelper (object):
             'file_stats_datatype_species': list(StatsQuery(self).entity('file').dimension('data_type').dimension('species').fetch()),
             'file_stats_datatype_project': list(StatsQuery(self).entity('file').dimension('data_type').dimension('project_root').fetch()),
             'file_stats_datatype_disease': list(StatsQuery(self).entity('file').dimension('data_type').dimension('disease').fetch()),
+            'file_stats_datatype_clinical': list(StatsQuery(self).entity('file').dimension('sex').dimension('race').dimension('ethnicity').fetch()),
 
             'biosample_stats_anatomy_assaytype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('assay_type').fetch()),
             'biosample_stats_anatomy_datatype': list(StatsQuery(self).entity('biosample').dimension('anatomy').dimension('data_type').fetch()),
@@ -728,6 +781,7 @@ class DashboardQueryHelper (object):
             'biosample_stats_datatype_species': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('species').fetch()),
             'biosample_stats_datatype_project': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('project_root').fetch()),
             'biosample_stats_datatype_disease': list(StatsQuery(self).entity('biosample').dimension('data_type').dimension('disease').fetch()),
+            'biosample_stats_datatype_clinical': list(StatsQuery(self).entity('biosample').dimension('sex').dimension('race').dimension('ethnicity').fetch()),
 
             'subject_stats_anatomy_assaytype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('assay_type').fetch()),
             'subject_stats_anatomy_datatype': list(StatsQuery(self).entity('subject').dimension('anatomy').dimension('data_type').fetch()),
@@ -739,6 +793,7 @@ class DashboardQueryHelper (object):
             'subject_stats_datatype_species': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('species').fetch()),
             'subject_stats_datatype_project': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('project_root').fetch()),
             'subject_stats_datatype_disease': list(StatsQuery(self).entity('subject').dimension('data_type').dimension('disease').fetch()),
+            'subject_stats_datatype_clinical': list(StatsQuery(self).entity('subject').dimension('sex').dimension('race').dimension('ethnicity').fetch()),
 
         }
         print(json.dumps(results, indent=2))
@@ -762,12 +817,14 @@ class DashboardQueryHelper (object):
             'subject_stats_datatype_substance': list(StatsQuery2(self).entity('subject').dimension('data_type').dimension('substance').fetch()),
 
             'file_all': list(StatsQuery2(self).entity('file')
-                             .dimension('anatomy').dimension('assay_type').dimension('compression_format')
-                             .dimension('data_type').dimension('disease').dimension('ethnicity')
-                             .dimension('file_format').dimension('gene').dimension('mime_type')
-                             .dimension('ncbi_taxonomy').dimension('race').dimension('sex')
-                             .dimension('substance').dimension('subject_granularity').dimension('subject_role')
-                             .dimension('species')
+                             .dimension('anatomy')
+                             .dimension('assay_type')
+                             .dimension('analysis_type').dimension('compression_format').dimension('data_type').dimension('file_format').dimension('mime_type')
+                             .dimension('gene')
+                             .dimension('substance')
+                             .dimension('subject_granularity').dimension('subject_role').dimension('species').dimension('ncbi_taxonomy')
+                             .dimension('sex').dimension('race').dimension('ethnicity')
+                             .dimension('disease').dimension('phenotype')
                              .fetch()
                              )
         }
@@ -842,6 +899,7 @@ def main():
     credential = get_credential(hostname)
     catalogid = os.getenv('DERIVA_CATALOGID', '1')
     db = DashboardQueryHelper(hostname, catalogid, credential=credential)
+    db.run_demo1()
     db.run_demo2()
     return 0
 

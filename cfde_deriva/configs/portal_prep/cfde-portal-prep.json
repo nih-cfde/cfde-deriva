@@ -5477,12 +5477,27 @@
                },
                {
                   "name": "granularity_nid",
-                  "description": "The numeric ID for granularity of described subjects",
+                  "description": "The numeric ID for the granularity of described subjects",
                   "type": "integer"
                },
                {
                   "name": "species_nid",
                   "description": "The numeric ID for single organism subject species, a subset of subject taxonomy concepts",
+                  "type": "integer"
+               },
+               {
+                  "name": "sex_nid",
+                  "description": "The numeric ID for the sex of described subjects",
+                  "type": "integer"
+               },
+               {
+                  "name": "race_nid",
+                  "description": "The numeric ID for the race of described subjects",
+                  "type": "integer"
+               },
+               {
+                  "name": "ethnicity_nid",
+                  "description": "The numeric ID for the ethnicity of described subjects",
                   "type": "integer"
                },
                {
@@ -5558,6 +5573,21 @@
                   "type": "string"
                },
                {
+                  "name": "sex_id",
+                  "description": "A CFDE CV term for the sex of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "race_id",
+                  "description": "A CFDE CV term for the race of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "ethnicity_id",
+                  "description": "A CFDE CV term for the ethnicity of described subjects",
+                  "type": "string"
+               },
+               {
                   "name": "num_files",
                   "description": "The number of files related to this combination of metadata terms",
                   "type": "integer"
@@ -5587,7 +5617,10 @@
                "anatomy_nid",
                "disease_nid",
                "granularity_nid",
-               "species_nid"
+               "species_nid",
+               "sex_nid",
+               "race_nid",
+               "ethnicity_nid"
             ],
             "foreignKeys": [
                {
@@ -5677,6 +5710,33 @@
                   "reference": {
                      "title": "Subject Species",
                      "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "sex_nid",
+                  "constraint_name": "level1_stats_sex_fkey",
+                  "reference": {
+                     "title": "Subject Sex",
+                     "resource": "sex",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "race_nid",
+                  "constraint_name": "level1_stats_race_fkey",
+                  "reference": {
+                     "title": "Subject Race",
+                     "resource": "race",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "ethnicity_nid",
+                  "constraint_name": "level1_stats_ethnicity_fkey",
+                  "reference": {
+                     "title": "Subject Ethnicity",
+                     "resource": "ethnicity",
                      "fields": "nid"
                   }
                }

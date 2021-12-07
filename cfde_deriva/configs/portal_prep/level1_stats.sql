@@ -8,6 +8,9 @@ INSERT INTO level1_stats (
   disease_nid,
   granularity_nid,
   species_nid,
+  sex_nid,
+  race_nid,
+  ethnicity_nid,
   root_project_id_namespace,
   root_project_local_id,
   project_id_namespace,
@@ -19,6 +22,9 @@ INSERT INTO level1_stats (
   disease_id,
   granularity_id,
   species_id,
+  sex_id,
+  race_id,
+  ethnicity_id,
   num_files,
   num_bytes,
   num_biosamples,
@@ -34,6 +40,9 @@ SELECT
   dis.nid,
   sg.nid,
   ss.nid,
+  sx.nid,
+  rc.nid,
+  eth.nid,
   dcc_proj.id_namespace,
   dcc_proj.local_id,
   proj.id_namespace,
@@ -45,6 +54,9 @@ SELECT
   dis.id,
   sg.id,
   ss.id,
+  sx.id,
+  rc.id,
+  eth.id,
   sum(cff.num_files),
   sum(cff.size_in_bytes) AS size_in_bytes,
   sum(cfb.num_biosamples),
@@ -108,6 +120,19 @@ LEFT JOIN (
   core_fact_subject_species cf_ss
   JOIN ncbi_taxonomy ss ON (cf_ss.subject_species = ss.nid)
 ) ON (cf.nid = cf_ss.core_fact)
+LEFT JOIN (
+  core_fact_sex cf_sx
+  JOIN sex sx ON (cf_sx.sex = sx.nid)
+) ON (cf.nid = cf_sx.core_fact)
+LEFT JOIN (
+  core_fact_race cf_rc
+  JOIN race rc ON (cf_rc.race = rc.nid)
+) ON (cf.nid = cf_rc.core_fact)
+LEFT JOIN (
+  core_fact_ethnicity cf_eth
+  JOIN ethnicity eth ON (cf_eth.ethnicity = eth.nid)
+) ON (cf.nid = cf_eth.core_fact)
+
 GROUP BY
   -- group by all extra cols so we can test/run this on postgres too
   proj.nid, proj.id_namespace, proj.local_id,
@@ -118,5 +143,8 @@ GROUP BY
   anat.nid, anat.id,
   dis.nid, dis.id,
   sg.nid, sg.id,
-  ss.nid, ss.id
+  ss.nid, ss.id,
+  sx.nid, sx.id,
+  rc.nid, rc.id,
+  eth.nid, eth.id
 ;
