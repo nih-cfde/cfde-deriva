@@ -1284,6 +1284,116 @@ WHERE True;
     "acol": acol,
 }
 
+        slim_vocab_tnames = {
+            'anatomy',
+            'assay_type',
+            'data_type',
+            'disease',
+            'file_format',
+        }
+        if tname in slim_vocab_tnames:
+            # use built-in template to populate slim vocab table
+            return """
+INSERT INTO %(cvname)s (
+  nid,
+  id,
+  "name",
+  is_slim,
+  description,
+  synonyms
+)
+-- get submissions term nid + id but canonical labels
+SELECT
+  s.nid,
+  s.id,
+  c."name",
+  COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
+  c.description,
+  c.synonyms
+FROM submission.%(cvname)s s
+JOIN %(cvname)s_canonical c ON (s.id = c.id)
+
+UNION
+
+-- get submissions definitions for non-canonical terms
+SELECT
+  s.nid,
+  s.id,
+  s."name",
+  COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
+  s.description,
+  s.synonyms
+FROM submission.%(cvname)s s
+LEFT JOIN %(cvname)s_canonical c ON (s.id = c.id)
+WHERE c.id IS NULL;
+
+-- get extra canonical terms imputed by slim map and not already present
+INSERT INTO %(cvname)s (
+  id,
+  "name",
+  is_slim,
+  description,
+  synonyms
+)
+SELECT DISTINCT
+  c.id,
+  c."name",
+  true,
+  c.description,
+  c.synonyms
+FROM %(cvname)s s
+JOIN %(cvname)s_slim_raw sm ON (s.id = sm.original_term_id)
+JOIN %(cvname)s_canonical c ON (sm.slim_term_id = c.id)
+LEFT JOIN submission.%(cvname)s e ON (c.id = e.id)
+WHERE e.id IS NULL;
+""" % {
+    "cvname": tname,
+}
+        if tname.endswith('_slim') and tname[0:-5] in slim_vocab_tnames:
+            # use built-in template to populate slim map
+            return """
+INSERT INTO %(cvname)s_slim (
+  original_term,
+  slim_term
+)
+-- get slim mappings for every term used
+SELECT
+  o.nid,
+  s.nid
+FROM %(cvname)s_slim_raw a
+JOIN %(cvname)s o ON (a.original_term_id = o.id)
+JOIN %(cvname)s s ON (a.slim_term_id = s.id)
+
+UNION
+
+-- add identity mapping for any unmapped terms
+SELECT
+  o.nid,
+  o.nid
+FROM %(cvname)s o
+LEFT JOIN %(cvname)s_slim_raw a ON (o.id = a.original_term_id)
+WHERE a.original_term_id IS NULL;
+""" % {
+    "cvname": tname[0:-5],
+}
+        if tname.endswith('_slim_union') and tname[0:-11] in slim_vocab_tnames:
+            # use built-in template to populate slim+self map
+            return """
+INSERT INTO %(cvname)s_slim_union (
+  original_term,
+  slim_term
+)
+-- start with slim map
+SELECT original_term, slim_term FROM %(cvname)s_slim
+
+UNION
+
+-- add self-map for every term to allow matching on self or slim term
+SELECT o.nid, o.nid FROM %(cvname)s o;
+""" % {
+    "cvname": tname[0:-11],
+}
+
         if tname in source_dp.doc_cfde_schema.tables:
             # build default SQL to copy with fkey translation
             # basic dst columns must exist in src table

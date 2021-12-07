@@ -54,30 +54,64 @@ def _add_anatomy_leaf(queryobj, show_nulls=False, **kwargs):
 def _add_assaytype_leaf(queryobj, show_nulls=False, **kwargs):
     if 'assay_type' in queryobj.path.table_instances:
         return
+    assay_type_slim = queryobj.helper.builder.CFDE.assay_type_slim
     assay_type = queryobj.helper.builder.CFDE.assay_type
     queryobj.path = queryobj.path.link(
+        assay_type_slim,
+        on=( queryobj.path.level1_stats.assay_type_nid == assay_type_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
         assay_type,
-        on=( queryobj.path.level1_stats.assay_type_id == assay_type.id ),
+        on=( queryobj.path.assay_type_slim.slim_term == assay_type.nid ),
         join_type= 'left' if show_nulls else ''
     )
 
 def _add_datatype_leaf(queryobj, show_nulls=False, **kwargs):
     if 'data_type' in queryobj.path.table_instances:
         return
+    data_type_slim = queryobj.helper.builder.CFDE.data_type_slim
     data_type = queryobj.helper.builder.CFDE.data_type
     queryobj.path = queryobj.path.link(
+        data_type_slim,
+        on=( queryobj.path.level1_stats.data_type_nid == data_type_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
         data_type,
-        on=( queryobj.path.level1_stats.data_type_id == data_type.id ),
+        on=( queryobj.path.data_type_slim.slim_term == data_type.nid ),
+        join_type= 'left' if show_nulls else ''
+    )
+
+def _add_fileformat_leaf(queryobj, show_nulls=False, **kwargs):
+    if 'file_format' in queryobj.path.table_instances:
+        return
+    file_format_slim = queryobj.helper.builder.CFDE.file_format_slim
+    file_format = queryobj.helper.builder.CFDE.file_format
+    queryobj.path = queryobj.path.link(
+        file_format_slim,
+        on=( queryobj.path.level1_stats.file_format_nid == file_format_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
+        file_format,
+        on=( queryobj.path.file_format_slim.slim_term == file_format.nid ),
         join_type= 'left' if show_nulls else ''
     )
 
 def _add_disease_leaf(queryobj, show_nulls=False, **kwargs):
     if 'disease' in queryobj.path.table_instances:
         return
+    disease_slim = queryobj.helper.builder.CFDE.disease_slim
     disease = queryobj.helper.builder.CFDE.disease
     queryobj.path = queryobj.path.link(
+        disease_slim,
+        on=( queryobj.path.level1_stats.disease_nid == disease_slim.original_term ),
+        join_type= 'left' if show_nulls else ''
+    )
+    queryobj.path = queryobj.path.link(
         disease,
-        on=( queryobj.path.level1_stats.disease_id == disease.id ),
+        on=( queryobj.path.disease_slim.slim_term == disease.nid ),
         join_type= 'left' if show_nulls else ''
     )
 
@@ -200,6 +234,13 @@ class StatsQuery (object):
                 lambda path: path.data_type.column_definitions['name'].alias('data_type_name'),
             ]
         ),
+        'file_format': (
+            _add_fileformat_leaf, [
+                lambda path: path.level1_stats.file_format_id,
+            ], [
+                lambda path: path.data_type.column_definitions['name'].alias('file_format_name'),
+            ]
+        ),
         'disease': (
             _add_disease_leaf, [
                 lambda path: path.level1_stats.disease_id,
@@ -319,7 +360,8 @@ class Entity (object):
 class TermMap (object):
     vocab_cnames = ['nid', 'id', 'name', 'description']
 
-    def __init__(self, helper, vocab_tname, headers=DEFAULT_HEADERS):
+    def __init__(self, helper, vocab_tname, **kwargs):
+        headers = kwargs.get('headers', DEFAULT_HEADERS)
         path = helper.builder.CFDE.tables[vocab_tname].path
         table = path.table_instances[vocab_tname]
         self.nid_map =  {
@@ -337,8 +379,10 @@ class DccMap (TermMap):
     vocab_cnames = ['nid', 'id', 'dcc_name', 'dcc_abbreviation', 'dcc_description']
 
 class SlimTermMap (TermMap):
-    def __init__(self, helper, vocab_tname, slimmap_tname, headers=DEFAULT_HEADERS):
-        super(SlimTermMap, self).__init__(helper, vocab_tname, headers)
+    def __init__(self, helper, vocab_tname, **kwargs):
+        super(SlimTermMap, self).__init__(helper, vocab_tname, **kwargs)
+        headers = kwargs.get('headers', DEFAULT_HEADERS)
+        slimmap_tname = kwargs['slimmap_tname']
         path = helper.builder.CFDE.tables[slimmap_tname].path
         table = path.table_instances[slimmap_tname]
         self.slim_map = {}
@@ -352,9 +396,11 @@ class SlimTermMap (TermMap):
         return sorted(terms)
 
 class AssocTermMap (TermMap):
-    def __init__(self, helper, vocab_tname, atype_tname, headers=DEFAULT_HEADERS):
-        super(AssocTermMap, self).__init__(helper, vocab_tname, headers)
-        atype_map = TermMap(helper, atype_tname, headers=headers)
+    def __init__(self, helper, vocab_tname, **kwargs):
+        super(AssocTermMap, self).__init__(helper, vocab_tname, **kwargs)
+        headers = kwargs.get('headers', DEFAULT_HEADERS)
+        atype_tname = kwargs['atype_tname']
+        self.atype_map = TermMap(helper, atype_tname, headers=headers)
 
     def assoc_nid_array(self, original_nidpair_array):
         terms = set()
@@ -366,44 +412,55 @@ class AssocTermMap (TermMap):
                 terms.add(term_nid)
         return sorted(terms)
 
+class SlimAssocTermMap (SlimTermMap, AssocTermMap):
+    def __init__(self, helper, vocab_tname, **kwargs):
+        super(SlimAssocTermMap, self).__init__(helper, vocab_tname, **kwargs)
+
 class Dimension (object):
     slim = False
     assoc = False
 
-    def __init__(self, dim_name, array_cname, vocab_tname=None):
+    def __init__(self, dim_name, array_cname, **kwargs):
         self.name = dim_name
         self.array_cname = array_cname
-        self.vocab_tname = vocab_tname if vocab_tname is not None else dim_name
+        self.vocab_tname = kwargs.get('vocab_tname', dim_name)
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
-        return TermMap(helper, self.vocab_tname, headers)
+        return TermMap(helper, self.vocab_tname, headers=headers)
 
 class DccDimension (Dimension):
     def __init__(self):
         super(DccDimension, self).__init__('dcc', 'dccs')
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
-        return DccMap(helper, self.vocab_tname, headers)
+        return DccMap(helper, self.vocab_tname, headers=headers)
 
 class SlimDimension (Dimension):
     slim = True
 
-    def __init__(self, dim_name, array_cname, vocab_tname=None, slimmap_tname=None):
-        super(SlimDimension, self).__init__(dim_name, array_cname, vocab_tname)
-        self.slimmap_tname = slimmap_tname if slimmap_tname is not None else ('%s_slim' % self.vocab_tname)
+    def __init__(self, dim_name, array_cname, **kwargs):
+        super(SlimDimension, self).__init__(dim_name, array_cname, **kwargs)
+        self.slimmap_tname = kwargs.get('slimmap_tname', ('%s_slim' % self.vocab_tname))
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
-        return SlimTermMap(helper, self.vocab_tname, self.slimmap_tname, headers)
+        return SlimTermMap(helper, self.vocab_tname, slimmap_tname=self.slimmap_tname, headers=headers)
 
 class AssocTypeDimension (Dimension):
     assoc = True
 
-    def __init__(self, dim_name, array_cname, vocab_tname=None, atype_tname=None):
-        super(AssocTypeDimension, self).__init__(dim_name, array_cname, vocab_tname)
-        self.atype_tname = atype_tname if atype_tname is not None else ('%s_association_type' % self.vocab_tname)
+    def __init__(self, dim_name, array_cname, **kwargs):
+        super(AssocTypeDimension, self).__init__(dim_name, array_cname, **kwargs)
+        self.atype_tname = kwargs.get('atype_tname', ('%s_association_type' % self.vocab_tname))
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
-        return AssocTermMap(helper, self.vocab_tname, self.atype_tname, headers)
+        return AssocTermMap(helper, self.vocab_tname, atype_tname=self.atype_tname, headers=headers)
+
+class SlimAssocTypeDimension (SlimDimension, AssocTypeDimension):
+    def __init__(self, dim_name, array_cname, **kwargs):
+        super(SlimAssocTypeDimension, self).__init__(dim_name, array_cname, **kwargs)
+
+    def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
+        return SlimAssocTermMap(helper, self.vocab_tname, slimmap_tname=self.slimmap_tname, atype_tname=self.atype_tname, headers=headers)
 
 class StatsQuery2 (object):
     """C2M2 statistics query generator
@@ -443,19 +500,19 @@ class StatsQuery2 (object):
 
                 Dimension('analysis_type', 'analysis_types'),
                 SlimDimension('anatomy', 'anatomies'),
-                Dimension('assay_type', 'assay_types'),
-                Dimension('compression_format', 'compression_formats', 'file_format'),
-                Dimension('data_type', 'data_types'),
-                AssocTypeDimension('disease', 'diseases'),
+                SlimDimension('assay_type', 'assay_types'),
+                Dimension('compression_format', 'compression_formats', vocab_tname='file_format'),
+                SlimDimension('data_type', 'data_types'),
+                SlimAssocTypeDimension('disease', 'diseases'),
                 Dimension('ethnicity', 'ethnicities'),
-                Dimension('file_format', 'file_formats'),
+                SlimDimension('file_format', 'file_formats'),
                 Dimension('gene', 'genes'),
                 Dimension('mime_type', 'mime_types'),
                 Dimension('ncbi_taxonomy', 'ncbi_taxons'),
                 AssocTypeDimension('phenotype', 'phenotypes'),
                 Dimension('race', 'races'),
                 Dimension('sex', 'sexes'),
-                Dimension('species', 'subject_species', 'ncbi_taxonomy'),
+                Dimension('species', 'subject_species', vocab_tname='ncbi_taxonomy'),
                 Dimension('substance', 'substances'),
                 Dimension('subject_granularity', 'subject_granularities'),
                 Dimension('subject_role', 'subject_roles'),

@@ -91,6 +91,162 @@
             "primaryKey": "id"
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_canonical",
+         "description": "Canonical assay type terms known by CFDE, imported from TSV.",
+         "path": "assay_type.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_canonical",
+         "description": "Canonical data type terms known by CFDE, imported from TSV.",
+         "path": "data_type.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An EDAM CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_canonical",
+         "description": "Canonical disease terms known by CFDE, imported from TSV.",
+         "path": "disease.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An Disease Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Uberon term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_canonical",
+         "description": "Canonical file format terms known by CFDE, imported from TSV.",
+         "path": "file_format.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An EDAM CV formt term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -136,6 +292,182 @@
             ]
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_slim_raw",
+         "path": "assay_type_slim.tsv",
+         "description": "The assay type slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "assay_type_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "assay_type_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_slim_raw",
+         "path": "data_type_slim.tsv",
+         "description": "The data type slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "data_type_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "data_type_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_slim_raw",
+         "path": "disease_slim.tsv",
+         "description": "The disease slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "disease_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "disease_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_slim_raw",
+         "path": "file_format_slim.tsv",
+         "description": "The file format slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "file_format_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "file_format_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -167,6 +499,15 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string"
+               },
+               {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
+                  }
                },
                {
                   "name": "description",
@@ -328,6 +669,15 @@
                   }
                },
                {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this Uberon term",
                   "type": "string"
@@ -341,7 +691,7 @@
             "missingValues": [ "" ],
             "primaryKey": "nid"
          },
-         "derivation_sql_path": "anatomy.sql"
+         "derivation_sql_path": null
       },
       {
          "profile": "tabular-data-resource",
@@ -375,6 +725,15 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  }
+               },
+               {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
                   }
                },
                {
@@ -428,6 +787,15 @@
                   }
                },
                {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this EDAM data term",
                   "type": "string"
@@ -476,6 +844,15 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  }
+               },
+               {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
                   }
                },
                {
@@ -1125,8 +1502,185 @@
                }
             ]
          },
-         "derivation_sql_path": "anatomy_slim.sql"
+         "derivation_sql_path": null
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) assay type terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) data type terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) disease terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) file format terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+
       {
          "profile": "tabular-data-resource",
          "name": "anatomy_slim_union",
@@ -1169,7 +1723,183 @@
                }
             ]
          },
-         "derivation_sql_path": "anatomy_slim_union.sql"
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) assay type terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) data type terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) disease terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) file format terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
       },
 
       {
