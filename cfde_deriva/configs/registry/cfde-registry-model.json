@@ -1082,6 +1082,16 @@
                      ],
                      "entity": true
                   },
+                  "S_analysis_type": {
+                     "markdown_name": "Analysis Type",
+                     "comment": "Analysis type terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_analysis_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_analysis_type_analysis_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_assay_type": {
                      "markdown_name": "Assay Type",
                      "comment": "Assay type terms used in submission",
@@ -1122,6 +1132,16 @@
                      ],
                      "entity": true
                   },
+                  "S_disease_assoc_type": {
+                     "markdown_name": "Disease Association Type",
+                     "comment": "Disease association types used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_disease_assoc_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_disease_assoc_type_assoc_type_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_ethnicity": {
                      "markdown_name": "Ethnicity",
                      "comment": "Ethnicity terms used in submission",
@@ -1158,6 +1178,26 @@
                      "source": [
                         {"inbound": ["CFDE", "datapackage_ncbi_taxonomy_datapackage_fkey"]},
                         {"outbound": ["CFDE", "datapackage_ncbi_taxonomy_ncbi_taxonomy_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotype terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_phenotype_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_phenotype_phenotype_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
+                  "S_phenotype_assoc_type": {
+                     "markdown_name": "Phenotype Association Type",
+                     "comment": "Phenotype association types used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_phenotype_assoc_type_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_phenotype_assoc_type_assoc_type_fkey"]},
                         "id"
                      ],
                      "entity": true
@@ -1218,14 +1258,18 @@
                "*": [
                   {"sourcekey": "S_releases"},
                   {"sourcekey": "S_datapackage_tables"},
+                  {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_compound"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_disease_assoc_type"},
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_phenotype"},
+                  {"sourcekey": "S_phenotype_assoc_type"},
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_sex"},
                   {"sourcekey": "S_subject_granularity"},
@@ -4751,6 +4795,9 @@
                   ["CFDE", "favorite_ncbi_taxonomy_user_id_fkey"],
                   ["CFDE", "favorite_anatomy_user_id_fkey"],
                   ["CFDE", "favorite_disease_user_id_fkey"],
+                  ["CFDE", "favorite_gene_user_id_fkey"],
+                  ["CFDE", "favorite_substance_user_id_fkey"],
+                  ["CFDE", "favorite_compound_user_id_fkey"],
                   ["CFDE", "favorite_assay_type_user_id_fkey"],
                   ["CFDE", "favorite_data_type_user_id_fkey"],
                   ["CFDE", "favorite_file_format_user_id_fkey"]
@@ -4928,6 +4975,7 @@
                   "name": "description",
                   "description": "A human-readable summary of the saved search's purpose and/or search criteria.",
                   "type": "string",
+                  "format": "markdown",
                   "constraints": {
                      "required": true
                   },
@@ -6410,6 +6458,186 @@
                   "constraint_name": "favorite_subject_role_subject_role_fkey",
                   "reference": {
                      "resource": "subject_role",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_disease_association_type",
+         "title": "Favorite Disease Association Type",
+         "description": "An association of a favorited disease association type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "disease_association_type",
+                  "description": "The favorited disease association type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "disease_association_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_disease_assoc_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "disease_association_type",
+                  "constraint_name": "favorite_disease_assoc_type_assoc_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_phenotype_association_type",
+         "title": "Favorite Phenotype Association Type",
+         "description": "An association of a favorited phenotype association type term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "phenotype_association_type",
+                  "description": "The favorited phenotype association type term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "phenotype_association_type"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_phenotype_assoc_type_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "phenotype_association_type",
+                  "constraint_name": "favorite_phenotype_assoc_type_assoc_type_fkey",
+                  "reference": {
+                     "resource": "phenotype_association_type",
                      "fields": "id"
                   },
                   "on_update": "CASCADE",

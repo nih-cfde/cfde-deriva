@@ -206,6 +206,8 @@
                "sources": {
                   "S_core_fact": {
                      "source": [
+                        {"inbound": ["CFDE", "assay_type_slim_union_slim_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_union_original_fkey"]},
                         {"inbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         "nid"
@@ -268,6 +270,61 @@
                "*": [
                   {"sourcekey": "S_file"}
                ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "analysis_type",
+         "title": "Analysis Type",
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe analytic methods that generate C2M2 files",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this analysis_type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
             }
          }
       },
@@ -619,6 +676,8 @@
                "sources": {
                   "S_core_fact": {
                      "source": [
+                        {"inbound": ["CFDE", "file_format_slim_union_slim_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_union_original_fkey"]},
                         {"inbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         "nid"
@@ -752,6 +811,8 @@
                "sources": {
                   "S_core_fact": {
                      "source": [
+                        {"inbound": ["CFDE", "data_type_slim_union_slim_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_union_original_fkey"]},
                         {"inbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         "nid"
@@ -883,8 +944,19 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotypes linked to this disease term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_disease_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_core_fact": {
                      "source": [
+                        {"inbound": ["CFDE", "disease_slim_union_slim_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_union_original_fkey"]},
                         {"inbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         "nid"
@@ -937,6 +1009,7 @@
                "filter": {"and": [
                   {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
@@ -945,6 +1018,155 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_phenotype"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype",
+         "title": "Phenotype",
+         "description": "List of Human Phenotype Ontology terms used to describe phenotypes recorded in association with C2M2 subjects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this 'phenotype' term in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Human Phenotype Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Human Phenotype Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "Genes linked to this phenotype term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_gene_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Disease",
+                     "comment": "Diseases linked to this phenotype term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_disease_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections linked to this gene term.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_gene"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -1003,7 +1225,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_compound",
+                     "favorited_key_columns": ["compound"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -1148,7 +1379,16 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_substance",
+                     "favorited_key_columns": ["substance"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -1292,12 +1532,30 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_gene",
+                     "favorited_key_columns": ["gene"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "Phenotypes linked to this gene term.",
+                     "source": [
+                        {"inbound": ["CFDE", "phenotype_gene_gene_fkey"]},
+                        {"outbound": ["CFDE", "phenotype_gene_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_core_fact": {
                      "source": [
                         {"inbound": ["CFDE", "core_fact_gene_gene_fkey"]},
@@ -1352,6 +1610,7 @@
                "filter": {"and": [
                   {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
@@ -1360,6 +1619,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -2085,6 +2345,164 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "disease_association_type",
+         "title": "Disease Association Type",
+         "description": "INTERNAL CV: The coded type of a disease term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this disease association type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_biosample_disease_assoc": {
+                     "markdown_name": "Biosample Disease",
+                     "comment": "Biosample-isease associations with this association type",
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_disease_association_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_subject_disease_assoc": {
+                     "markdown_name": "Subject Disease",
+                     "comment": "Subject-disease associations with this association type",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_disease_association_type_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples associated to diseases by this association type",
+                     "source": [
+                        {"sourcekey": "S_biosample_disease_assoc"},
+                        {"outbound": ["CFDE", "biosample_disease_biosample_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects associated to diseases by this association type",
+                     "source": [
+                        {"sourcekey": "S_subject_disease_assoc"},
+                        {"outbound": ["CFDE", "subject_disease_biosample_fkey"]},
+                        "RID"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_association_type",
+         "title": "Phenotype Association Type",
+         "description": "INTERNAL CV: The coded type of a phenotype term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this phenotype association type in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"]
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "anatomy_slim",
          "description": "A binary association of original (more detailed) to slim (more abstracted) anatomy terms.",
          "schema": {
@@ -2185,7 +2603,414 @@
             ]
          }
       },
-
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) assay type terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "assay_type_slim_original_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "assay_type_slim_slim_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "assay_type_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) assay type terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "assay_type_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "assay_type_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) data type terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "data_type_slim_original_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "data_type_slim_slim_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "data_type_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) data type terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "data_type_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "data_type_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "data_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) disease terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "disease_slim_original_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "disease_slim_slim_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) disease terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "disease_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "disease_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) file format terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "file_format_slim_original_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "file_format_slim_slim_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_format_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) file format terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "file_format_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "file_format_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
       
       {
          "profile": "tabular-data-resource",
@@ -2672,7 +3497,7 @@
                         "nid"
                      ]
                   },
-                  "S_file_format": {
+                  "S_file_format_core1": {
                      "comment": "The content format of a constituent file.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
@@ -2681,7 +3506,35 @@
                         "nid"
                      ]
                   },
-                  "S_data_type": {
+                  "S_file_format_core2": {
+                     "comment": "The content format of a constituent file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format": {
+                     "comment": "File format of a constituent file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core1"},
+                        {"inbound": ["CFDE", "file_format_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_slim": {
+                     "markdown_name": "File Format (slim)",
+                     "comment": "File format of a constituent file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core2"},
+                        {"inbound": ["CFDE", "file_format_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_core1": {
                      "comment": "The type of data represented by a constituent file.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
@@ -2690,13 +3543,70 @@
                         "nid"
                      ]
                   },
-                  "S_assay_type": {
+                  "S_data_type_core2": {
+                     "comment": "The type of data represented by a constituent file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type": {
+                     "comment": "Data type of a constituent file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core1"},
+                        {"inbound": ["CFDE", "data_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_slim": {
+                     "markdown_name": "Data Type (slim)",
+                     "comment": "Data type of a constituent file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core2"},
+                        {"inbound": ["CFDE", "data_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_core1": {
                      "markdown_name": "Assay Type",
                      "comment": "The assay type of a directly or indirectly constituent biosample.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_core2": {
+                     "markdown_name": "Assay Type",
+                     "comment": "The assay type of a directly or indirectly constituent biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "Assay type of a constituent file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core1"},
+                        {"inbound": ["CFDE", "assay_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_slim": {
+                     "markdown_name": "Assay Type (slim)",
+                     "comment": "Assay type of a constituent file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core2"},
+                        {"inbound": ["CFDE", "assay_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -2730,7 +3640,7 @@
                         "nid"
                      ]
                   },
-                  "S_anatomy": {
+                  "S_anatomy_core1": {
                      "markdown_name": "Anatomy",
                      "comment": "The anatomical source of a biosample.",
                      "source": [
@@ -2740,15 +3650,121 @@
                         "nid"
                      ]
                   },
-                  "S_disease": {
+                  "S_anatomy_core2": {
+                     "markdown_name": "Anatomy",
+                     "comment": "The anatomical source of a biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy": {
+                     "comment": "Anatomy for biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core1"},
+                        {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_slim": {
+                     "markdown_name": "Anatomy (slim)",
+                     "comment": "Anatomy for biosamples, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_anatomy_core2"},
+                        {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_core1": {
                      "markdown_name": "Disease",
-                     "comment": "The disease terms qualifying a biosample or subject.",
+                     "comment": "The disease terms qualifying a collection, biosample, or subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_disease_core2": {
+                     "markdown_name": "Disease",
+                     "comment": "The disease terms qualifying a collection, biosample, or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_disease_core1"},
+                        {"inbound": ["CFDE", "disease_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_slim": {
+                     "markdown_name": "Disease (slim)",
+                     "comment": "Disease for collection, biosample, or subject, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_disease_core2"},
+                        {"inbound": ["CFDE", "disease_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "The phenotype terms qualifying a collection or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_assoc": {
+                     "markdown_name": "Disease",
+                     "comment": "The diseases studied in a collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_disease_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype_assoc": {
+                     "markdown_name": "Phenotype",
+                     "comment": "The phenotypes studied in a collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_phenotype_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_phenotype_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_array": {
+                     "markdown_name": "Disease",
+                     "comment": "The diseases studied in a collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_disease_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_disease_disease_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
+                  },
+                  "S_phenotype_array": {
+                     "markdown_name": "Phenotype",
+                     "comment": "The phenotypes studied in a collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_phenotype_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_phenotype_phenotype_fkey"]},
+                        "nid"
+                     ],
+                     "aggregate": "array_d"
                   },
                   "S_substance": {
                      "markdown_name": "Substance",
@@ -2813,6 +3829,8 @@
                "compact": [
                   {"sourcekey": "S_dcc_array"},
                   {"sourcekey": "S_project_array"},
+                  {"sourcekey": "S_disease_array"},
+                  {"sourcekey": "S_phenotype_array"},
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"}
@@ -2825,6 +3843,8 @@
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"},
+                  {"sourcekey": "S_disease_assoc"},
+                  {"sourcekey": "S_phenotype_assoc"},
                   {
                      "source": [
                         {"inbound": ["CFDE", "collection_in_collection_subset_fkey"]},
@@ -2834,14 +3854,20 @@
                   }
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_data_type", "open": true},
+                  {"sourcekey": "S_data_type_slim", "open": true},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format_slim"},
                   {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
-                  {"sourcekey": "S_anatomy", "open": true},
+                  {"sourcekey": "S_anatomy_slim", "open": true},
+                  {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_ncbi_taxons"},
+                  {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularities"},
@@ -3360,11 +4386,38 @@
                      ],
                      "aggregate": "array_d"
                   },
-                  "S_file_format": {
+                  "S_file_format_core1": {
                      "comment": "The content format of the file.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_core2": {
+                     "comment": "The content format of the file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format": {
+                     "comment": "File format of the file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core1"},
+                        {"inbound": ["CFDE", "file_format_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_slim": {
+                     "markdown_name": "File Format (slim)",
+                     "comment": "File format of the file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core2"},
+                        {"inbound": ["CFDE", "file_format_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -3377,11 +4430,38 @@
                         "nid"
                      ]
                   },
-                  "S_data_type": {
+                  "S_data_type_core1": {
                      "comment": "The type of data represented by the file.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_data_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_core2": {
+                     "comment": "The type of data represented by the file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_data_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type": {
+                     "comment": "Data type of a the file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core1"},
+                        {"inbound": ["CFDE", "data_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_slim": {
+                     "markdown_name": "Data Type (slim)",
+                     "comment": "Data type of a the file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core2"},
+                        {"inbound": ["CFDE", "data_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -3424,7 +4504,7 @@
                   },
                   "S_anatomy_slim": {
                      "markdown_name": "Anatomy (slim)",
-                     "comment": "Anatomy for biosamples, oferring only \"slim\" terms corresponding to original metadata.",
+                     "comment": "Anatomy for biosamples, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
                         {"sourcekey": "S_anatomy_core2"},
                         {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
@@ -3432,12 +4512,48 @@
                         "nid"
                      ]
                   },
-                  "S_assay_type": {
-                     "comment": "Assay type used to generate the file.",
+                  "S_assay_type_core1": {
+                     "comment": "Assay type used to generate the file or related biosamples.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_core2": {
+                     "comment": "Assay type used to generate the file or related biosamples.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "Assay type of the file or related biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core1"},
+                        {"inbound": ["CFDE", "assay_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_slim": {
+                     "markdown_name": "Assay Type (slim)",
+                     "comment": "Assay type of the file or related biosamples, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core2"},
+                        {"inbound": ["CFDE", "assay_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_analysis_type": {
+                     "comment": "Analysis type used to generate the file.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_analysis_type_fkey"]},
                         "nid"
                      ]
                   },
@@ -3467,13 +4583,52 @@
                         "nid"
                      ]
                   },
-                  "S_disease": {
+                  "S_disease_core1": {
                      "markdown_name": "Disease",
-                     "comment": "A disease linked to the described biosample or subject.",
+                     "comment": "A disease linked by collection, biosample, or subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_core2": {
+                     "markdown_name": "Disease",
+                     "comment": "A disease linked by collection, biosample, or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_disease_core1"},
+                        {"inbound": ["CFDE", "disease_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_slim": {
+                     "markdown_name": "Disease (slim)",
+                     "comment": "Disease for collection, biosample, or subject, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_disease_core2"},
+                        {"inbound": ["CFDE", "disease_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "A phenotype linked to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
                      ]
                   },
@@ -3615,6 +4770,15 @@
                         "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
                      }
                   },
+                  {
+                     "markdown_name": "Analysis Type",
+                     "comment": "Assay type used to generate the file.",
+                     "display": {
+                        "wait_for": ["S_core_fact"],
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#with S_core_fact}}{{values._analysis_type_row.name}}{{/with}}"
+                     }
+                  },
                   "size_in_bytes",
                   "filename",
                   "persistent_id",
@@ -3633,18 +4797,25 @@
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
                   "sha256",
                   "md5"
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_data_type", "open": true},
+                  {"sourcekey": "S_data_type_slim", "open": true},
+                  {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format_slim"},
                   {"sourcekey": "S_file_format"},
+                  {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
+                  {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_age_at_sampling"},
@@ -4031,12 +5202,40 @@
                         "nid"
                      ]
                   },
-                  "S_assay_type": {
+                  "S_assay_type_core1": {
                      "comment": "The assay type(s) of biosample or related files.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_core2": {
+                     "comment": "The assay type(s) of biosample or related files.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "Assay type of a biosample or related files, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core1"},
+                        {"inbound": ["CFDE", "assay_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_slim": {
+                     "markdown_name": "Assay Type (slim)",
+                     "comment": "Assay type of a biosample or related files, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core2"},
+                        {"inbound": ["CFDE", "assay_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -4049,7 +5248,14 @@
                         "nid"
                      ]
                   },
-                  "S_anatomy_core": {
+                  "S_anatomy_core1": {
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_core2": {
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_anatomy_fkey"]},
@@ -4059,7 +5265,7 @@
                   "S_anatomy": {
                      "comment": "The anatomy from which the biosample is derived, offering original and corresponding \"slim\" terms.",
                      "source": [
-                        {"sourcekey": "S_anatomy_core"},
+                        {"sourcekey": "S_anatomy_core1"},
                         {"inbound": ["CFDE", "anatomy_slim_union_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_union_slim_fkey"]},
                         "nid"
@@ -4069,15 +5275,15 @@
                      "markdown_name": "Anatomy (slim)",
                      "comment": "The anatomy from which the biosample is derived, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
-                        {"sourcekey": "S_anatomy_core"},
+                        {"sourcekey": "S_anatomy_core2"},
                         {"inbound": ["CFDE", "anatomy_slim_original_fkey"]},
                         {"outbound": ["CFDE", "anatomy_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
-                  "S_disease_search": {
+                  "S_disease_core1": {
                      "markdown_name": "Disease",
-                     "comment": "A disease linked to the biosample or subject.",
+                     "comment": "A disease linked by collection, biosample, or subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
@@ -4085,12 +5291,50 @@
                         "nid"
                      ]
                   },
-                  "S_disease": {
+                  "S_disease_core2": {
                      "markdown_name": "Disease",
+                     "comment": "A disease linked by collection, biosample, or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_search": {
+                     "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_disease_core1"},
+                        {"inbound": ["CFDE", "disease_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_search_slim": {
+                     "markdown_name": "Disease (slim)",
+                     "comment": "Disease for collection, biosample, or subject, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_disease_core2"},
+                        {"inbound": ["CFDE", "disease_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype_search": {
+                     "markdown_name": "Phenotype",
+                     "comment": "A phenotype linked to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Biosample Disease",
                      "comment": "A disease linked to the biosample.",
                      "source": [
                         {"inbound": ["CFDE", "biosample_disease_biosample_fkey"]},
-                        {"outbound": ["CFDE", "biosample_disease_disease_fkey"]},
                         "nid"
                      ]
                   },
@@ -4308,7 +5552,13 @@
                   {"sourcekey": "S_project"},
                   {"sourcekey": "S_assay_type_local"},
                   {"sourcekey": "S_anatomy"},
-                  {"sourcekey": "S_disease"},
+                  {
+                     "sourcekey": "S_disease",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#each $self}}- {{#with values.$fkey_CFDE_biosample_disease_disease_fkey}}[{{{rowName}}}]({{{uri.detailed}}}){{/with}} {{{values.$fkey_CFDE_biosample_disease_association_type_fkey.rowName}}}\n{{/each}}"
+                     }
+                  },
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_age_at_sampling"},
@@ -4319,11 +5569,14 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_assay_type", "open": true},
+                  {"sourcekey": "S_assay_type_slim", "open": true},
+                  {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_disease_search_slim"},
                   {"sourcekey": "S_disease_search"},
+                  {"sourcekey": "S_phenotype_search"},
                   {"sourcekey": "S_substance_search"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_dcc"},
@@ -4651,9 +5904,9 @@
                      ],
                      "aggregate": "array_d"
                   },
-                  "S_disease_search": {
+                  "S_disease_core1": {
                      "markdown_name": "Disease",
-                     "comment": "A disease linked to the biosample or subject.",
+                     "comment": "A disease linked to the collection, biosample, or subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
@@ -4661,12 +5914,58 @@
                         "nid"
                      ]
                   },
-                  "S_disease": {
+                  "S_disease_core2": {
                      "markdown_name": "Disease",
-                     "comment": "A disease linked to the subject or a related biosample.",
+                     "comment": "A disease linked to the collection, biosample, or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_search": {
+                     "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_disease_core1"},
+                        {"inbound": ["CFDE", "disease_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease_search_slim": {
+                     "markdown_name": "Disease (slim)",
+                     "comment": "Disease for collection, biosample, or subject, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_disease_core2"},
+                        {"inbound": ["CFDE", "disease_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "disease_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_disease": {
+                     "markdown_name": "Subject Disease",
+                     "comment": "A disease linked to the subject.",
                      "source": [
                         {"inbound": ["CFDE", "subject_disease_subject_fkey"]},
-                        {"outbound": ["CFDE", "subject_disease_disease_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype": {
+                     "markdown_name": "Phenotype",
+                     "comment": "A phenotype linked to the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_phenotype_subject_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_phenotype_search": {
+                     "markdown_name": "Phenotype",
+                     "comment": "A phenotype linked to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
                      ]
                   },
@@ -4682,7 +5981,7 @@
                   },
                   "S_substance": {
                      "markdown_name": "Substance",
-                     "comment": "A substance linked to the subject or a related biosample.",
+                     "comment": "A substance linked to the subject.",
                      "source": [
                         {"inbound": ["CFDE", "subject_substance_subject_fkey"]},
                         {"outbound": ["CFDE", "subject_substance_substance_fkey"]},
@@ -4816,7 +6115,7 @@
                         "nid"
                      ]
                   },
-                  "S_assay_type": {
+                  "S_assay_type_core1": {
                      "markdown_name": "Assay Type",
                      "comment": "An assay-type linked to a file or biosample related to the subject.",
                      "source": [
@@ -4826,9 +6125,38 @@
                         "nid"
                      ]
                   },
-                  "S_data_type": {
+                  "S_assay_type_core2": {
+                     "markdown_name": "Assay Type",
+                     "comment": "An assay-type linked to a file or biosample related to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type": {
+                     "comment": "Assay type of a file or related biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core1"},
+                        {"inbound": ["CFDE", "assay_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_assay_type_slim": {
+                     "markdown_name": "Assay Type (slim)",
+                     "comment": "Assay type of a file or related biosamples, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_assay_type_core2"},
+                        {"inbound": ["CFDE", "assay_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "assay_type_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_core1": {
                      "markdown_name": "Data Type",
-                     "comment": "An data-type linked to a file related to the subject.",
+                     "comment": "A data-type of a file related to the subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
@@ -4836,13 +6164,71 @@
                         "nid"
                      ]
                   },
-                  "S_file_format": {
+                  "S_data_type_core2": {
+                     "markdown_name": "Data Type",
+                     "comment": "A data-type of a file related to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type": {
+                     "comment": "Data type of a related file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core1"},
+                        {"inbound": ["CFDE", "data_type_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_data_type_slim": {
+                     "markdown_name": "Data Type (slim)",
+                     "comment": "Data type of a related file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_data_type_core2"},
+                        {"inbound": ["CFDE", "data_type_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "data_type_slim_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_core1": {
                      "markdown_name": "File Format",
                      "comment": "An data-type linked to a file related to the subject.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_core2": {
+                     "markdown_name": "File Format",
+                     "comment": "An data-type linked to a file related to the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format": {
+                     "comment": "File format of a related file, offering original terms and corresponding \"slim\" terms.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core1"},
+                        {"inbound": ["CFDE", "file_format_slim_union_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_union_slim_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file_format_slim": {
+                     "markdown_name": "File Format (slim)",
+                     "comment": "File format of a related file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_file_format_core2"},
+                        {"inbound": ["CFDE", "file_format_slim_original_fkey"]},
+                        {"outbound": ["CFDE", "file_format_slim_slim_fkey"]},
                         "nid"
                      ]
                   },
@@ -4956,7 +6342,20 @@
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_taxonomy"},
-                  {"sourcekey": "S_disease"},
+                  {
+                     "sourcekey": "S_disease",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#each $self}}- {{#with values.$fkey_CFDE_subject_disease_disease_fkey}}[{{{rowName}}}]({{{uri.detailed}}}){{/with}} {{{values.$fkey_CFDE_subject_disease_association_type_fkey.rowName}}}\n{{/each}}"
+                     }
+                  },
+                  {
+                     "sourcekey": "S_phenotype",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#each $self}}- {{#with values.$fkey_CFDE_subject_phenotype_phenotype_fkey}}[{{{rowName}}}({{{uri.detailed}}}){{/with}} {{{values.$fkey_CFDE_subject_phenotype_association_type_fkey.rowName}}}\n{{/each}}"
+                     }
+                  },
                   {"sourcekey": "S_substance"},
                   {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_age_at_enrollment"},
@@ -4968,14 +6367,19 @@
                   {"sourcekey": "S_sex"},
                   {"sourcekey": "S_race_search"},
                   {"sourcekey": "S_ethnicity"},
+                  {"sourcekey": "S_disease_search_slim"},
                   {"sourcekey": "S_disease_search"},
+                  {"sourcekey": "S_phenotype_search"},
                   {"sourcekey": "S_substance_search"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_role"},
                   {"sourcekey": "S_anatomy_slim"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_data_type_slim"},
                   {"sourcekey": "S_data_type"},
+                  {"sourcekey": "S_file_format_slim"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
@@ -6066,6 +7470,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this biosample and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -6082,6 +7494,7 @@
             ],
             "primaryKey": [
                "biosample",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -6091,6 +7504,14 @@
                   "reference": {
                      "resource": "biosample",
                      "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "biosample_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
                   }
                },
                {
@@ -6120,6 +7541,14 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "The numeric ID of a Disease Ontology CV term ID describing this disease",
                   "type": "integer",
@@ -6128,7 +7557,7 @@
                   },
                   "deriva": {
                      "indexing_preferences": {
-                        "btree": ["disease", "subject"],
+                        "btree": ["disease", "association_type", "subject"],
                         "trgm": false
                      }
                   }
@@ -6136,6 +7565,7 @@
             ],
             "primaryKey": [
                "subject",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -6148,10 +7578,193 @@
                   }
                },
                {
+                  "fields": "association_type",
+                  "constraint_name": "subject_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "disease",
                   "constraint_name": "subject_disease_disease_fkey",
                   "reference": {
                      "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_disease",
+         "title": "collection_disease",
+         "description": "Association between a disease and a C2M2 collection containing experimental resources directly related to the study of that disease",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID for a Disease Ontology CV term ID describing this disease",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["disease", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_disease_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_phenotype",
+         "title": "collection_phenotype",
+         "description": "Association between a phenotype and a C2M2 collection containing experimental resources directly related to the study of that phenotype",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_phenotype_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_phenotype",
+         "title": "subject_phenotype",
+         "description": "Association between a C2M2 subject and a phenotype positively OR negatively clinically identified for that subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject",
+                  "description": "The numeric ID for this subject",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this phenotype (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID describing this phenotype",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "association_type", "subject"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject",
+               "association_type",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject" ],
+                  "constraint_name": "subject_phenotype_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "nid" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "reference": {
+                     "resource": "phenotype_association_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
                      "fields": "nid"
                   }
                }
@@ -6296,6 +7909,98 @@
                   "constraint_name": "biosample_gene_gene_fkey",
                   "reference": {
                      "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_gene",
+         "title": "phenotype_gene",
+         "description": "Association between a Human Phenotype Ontology term and an Ensembl gene especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "The numeric ID of an Ensembl gene",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_disease",
+         "title": "phenotype_disease",
+         "description": "Association between a Human Phenotype Ontology term and a Disease Ontology term identifying a disease especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a Human Phenotype Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "The numeric ID of a Disease Ontology CV term",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
                      "fields": "nid"
                   }
                }
@@ -6637,7 +8342,15 @@
                },
                
                {
-                  "name": "diseases",
+                  "name": "phenotypes",
+                  "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                   "name": "diseases",
                   "description": "The numeric ID of the disease terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
@@ -6731,6 +8444,14 @@
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "object",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
                   "constraints": {
                      "required": true
                   }
@@ -6835,6 +8556,17 @@
                   }
                },
                {
+                  "name": "analysis_type",
+                  "description": "The numeric ID of the analysis_type term qualifying the described files.",
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["analysis_type", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "file_format",
                   "description": "The numeric ID of the file_format term qualifying the described files.",
                   "type": "integer",
@@ -6915,6 +8647,11 @@
                   "type": "object"
                },
                {
+                  "name": "analysis_type_row",
+                  "description": "Denormalized copy of the assay_type term qualifying the described files.",
+                  "type": "object"
+               },
+               {
                   "name": "file_format_row",
                   "description": "Denormalized copy of the file_format term qualifying the described files.",
                   "type": "object"
@@ -6978,7 +8715,7 @@
                   "default": 0
                }
             ],
-            "primaryKey": [ "id_namespace", "is_bundle", "has_persistent_id", "projects", "dccs", "diseases", "substances", "genes", "sexes", "races", "ethnicities", "subject_roles", "subject_granularities", "subject_species", "ncbi_taxons", "anatomies", "assay_types", "file_formats", "compression_formats", "data_types", "mime_types" ],
+            "primaryKey": "nid",
             "foreignKeys": [
                {
                   "fields": "id_namespace",
@@ -7033,6 +8770,14 @@
                   "constraint_name": "core_fact_assay_type_fkey",
                   "reference": {
                      "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type",
+                  "constraint_name": "core_fact_analysis_type_fkey",
+                  "reference": {
+                     "resource": "analysis_type",
                      "fields": "nid"
                   }
                },
@@ -7423,14 +9168,88 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_disease",
-         "description": "An exploded representation of the core_fact.diseases array column as a binary association.",
+         "name": "core_fact_phenotype",
+         "description": "An exploded representation of the core_fact.phenotypes array column as a binary association.",
          "schema": {
             "fields": [
                {
                   "name": "core_fact",
                   "title": "Numeric ID",
                   "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The numeric ID of the phenotype_assocation_type found in the core_fact.phenotypes array.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "The numeric ID of a term found in the core_fact.phenotypes array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["phenotype", "association_type", "core_fact"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "association_type", "phenotype"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_phenotype_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "core_fact_phenotype_association_type_fkey",
+                  "reference": {
+                     "resource": "phenotype_association_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "constraint_name": "core_fact_phenotype_phenotype_fkey",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_disease",
+         "description": "An exploded representation of the core_fact.diseases array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The numeric ID of the disease_assocation_type found in the core_fact.diseases array.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -7445,19 +9264,27 @@
                   },
                   "deriva": {
                      "indexing_preferences": {
-                        "btree": ["disease", "core_fact"],
+                        "btree": ["disease", "association_type", "core_fact"],
                         "trgm": false
                      }
                   }
                }
             ],
-            "primaryKey": ["core_fact", "disease"],
+            "primaryKey": ["core_fact", "association_type", "disease"],
             "foreignKeys": [
                {
                   "fields": "core_fact",
                   "constraint_name": "core_fact_disease_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "core_fact_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
                      "fields": "nid"
                   }
                },
@@ -8007,6 +9834,51 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "core_fact_analysis_type",
+         "description": "An exploded representation of the core_fact.analysis_types array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "analysis_type",
+                  "description": "The numeric ID of a term found in the core_fact.analysis_types array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "analysis_type"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_analysis_type_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type",
+                  "constraint_name": "core_fact_analysis_type_analysis_type_fkey",
+                  "reference": {
+                     "resource": "analysis_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "core_fact_file_format",
          "description": "An exploded representation of the core_fact.file_formats array column as a binary association.",
          "schema": {
@@ -8244,6 +10116,11 @@
                   "type": "integer"
                },
                {
+                  "name": "analysis_type_nid",
+                  "description": "The numeric ID for a file analysis type",
+                  "type": "integer"
+               },
+               {
                   "name": "data_type_nid",
                   "description": "The numeric ID of a file data type",
                   "type": "integer"
@@ -8271,6 +10148,21 @@
                {
                   "name": "species_nid",
                   "description": "The numeric ID for single organism subject species, a subset of subject taxonomy concepts",
+                  "type": "integer"
+               },
+               {
+                  "name": "sex_nid",
+                  "description": "The numeric ID for the sex of described subjects",
+                  "type": "integer"
+               },
+               {
+                  "name": "race_nid",
+                  "description": "The numeric ID for the race of described subjects",
+                  "type": "integer"
+               },
+               {
+                  "name": "ethnicity_nid",
+                  "description": "The numeric ID for the ethnicity of described subjects",
                   "type": "integer"
                },
                {
@@ -8311,6 +10203,11 @@
                   "type": "string"
                },
                {
+                  "name": "analysis_type_id",
+                  "description": "A CFDE CV term for generated file analysis types",
+                  "type": "string"
+               },
+               {
                   "name": "data_type_id",
                   "description": "A CFDE CV term for generated file data types",
                   "type": "string"
@@ -8341,6 +10238,21 @@
                   "type": "string"
                },
                {
+                  "name": "sex_id",
+                  "description": "A CFDE CV term for the sex of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "race_id",
+                  "description": "A CFDE CV term for the race of described subjects",
+                  "type": "string"
+               },
+               {
+                  "name": "ethnicity_id",
+                  "description": "A CFDE CV term for the ethnicity of described subjects",
+                  "type": "string"
+               },
+               {
                   "name": "num_files",
                   "description": "The number of files related to this combination of metadata terms",
                   "type": "integer"
@@ -8364,12 +10276,16 @@
             "primaryKey": [
                "project_nid",
                "assay_type_nid",
+               "analysis_type_nid",
                "data_type_nid",
                "file_format_nid",
                "anatomy_nid",
                "disease_nid",
                "granularity_nid",
-               "species_nid"
+               "species_nid",
+               "sex_nid",
+               "race_nid",
+               "ethnicity_nid"
             ],
             "foreignKeys": [
                {
@@ -8396,6 +10312,15 @@
                   "reference": {
                      "title": "Assay Type",
                      "resource": "assay_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "analysis_type_nid",
+                  "constraint_name": "level1_stats_analysis_type_fkey",
+                  "reference": {
+                     "title": "Analysis Type",
+                     "resource": "analysis_type",
                      "fields": "nid"
                   }
                },
@@ -8450,6 +10375,33 @@
                   "reference": {
                      "title": "Subject Species",
                      "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "sex_nid",
+                  "constraint_name": "level1_stats_sex_fkey",
+                  "reference": {
+                     "title": "Subject Sex",
+                     "resource": "sex",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "race_nid",
+                  "constraint_name": "level1_stats_race_fkey",
+                  "reference": {
+                     "title": "Subject Race",
+                     "resource": "race",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "ethnicity_nid",
+                  "constraint_name": "level1_stats_ethnicity_fkey",
+                  "reference": {
+                     "title": "Subject Ethnicity",
+                     "resource": "ethnicity",
                      "fields": "nid"
                   }
                }

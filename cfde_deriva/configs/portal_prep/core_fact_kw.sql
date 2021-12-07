@@ -1,5 +1,18 @@
 UPDATE core_fact AS v
-SET kw = s.kw
+SET kw = s.kw,
+-- HACK: undo usage of -1 in place of NULLs before we send to catalog
+-- has nothing to do with kw but this should be done in the same column-rewriting phase
+  project = CASE WHEN v.project = -1 THEN NULL ELSE v.project END,
+  sex = CASE WHEN v.sex = -1 THEN NULL ELSE v.sex END,
+  ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
+  subject_granularity = CASE WHEN v.subject_granularity = -1 THEN NULL ELSE v.subject_granularity END,
+  anatomy = CASE WHEN v.anatomy = -1 THEN NULL ELSE v.anatomy END,
+  assay_type = CASE WHEN v.assay_type = -1 THEN NULL ELSE v.assay_type END,
+  analysis_type = CASE WHEN v.analysis_type = -1 THEN NULL ELSE v.analysis_type END,
+  file_format = CASE WHEN v.file_format = -1 THEN NULL ELSE v.file_format END,
+  compression_format = CASE WHEN v.compression_format = -1 THEN NULL ELSE v.compression_format END,
+  data_type = CASE WHEN v.data_type = -1 THEN NULL ELSE v.data_type END,
+  mime_type = CASE WHEN v.mime_type = -1 THEN NULL ELSE v.mime_type END
 FROM (
   SELECT
     cf.nid,
@@ -8,6 +21,8 @@ FROM (
       cfde_keywords_agg(p.name, p.abbreviation, p.description),
       cfde_keywords_agg(d.dcc_name, d.dcc_abbreviation, d.dcc_description),
 
+      cfde_keywords_agg(pht.id, pht.name, pht.description),
+      cfde_keywords_merge_agg(pht.synonyms),
       cfde_keywords_agg(dis.id, dis.name, dis.description),
       cfde_keywords_merge_agg(dis.synonyms),
       cfde_keywords_agg(subst.id, subst.name, subst.description),
@@ -30,6 +45,8 @@ FROM (
 
       cfde_keywords_agg("at".id, "at".name, "at".description),
       cfde_keywords_merge_agg("at".synonyms),
+      cfde_keywords_agg(ant.id, ant.name, ant.description),
+      cfde_keywords_merge_agg(ant.synonyms),
       cfde_keywords_agg(ff.id, ff.name, ff.description),
       cfde_keywords_merge_agg(ff.synonyms),
       cfde_keywords_agg(dt.id, dt.name, dt.description),
@@ -43,8 +60,10 @@ FROM (
   LEFT JOIN json_each(cf.dccs) dj
   LEFT JOIN dcc d ON (dj.value = d.nid)
 
+  LEFT JOIN json_each(cf.phenotypes) phtj
+  LEFT JOIN phenotype pht ON (json_extract(phtj.value, '$[0]') = pht.nid)
   LEFT JOIN json_each(cf.diseases) disj
-  LEFT JOIN disease dis ON (disj.value = dis.nid)
+  LEFT JOIN disease dis ON (json_extract(disj.value, '$[0]') = dis.nid)
   LEFT JOIN json_each(cf.substances) substj
   LEFT JOIN substance subst ON (substj.value = subst.nid)
   LEFT JOIN json_each(cf.genes) gnj
@@ -70,6 +89,8 @@ FROM (
 
   LEFT JOIN json_each(cf.assay_types) atj
   LEFT JOIN assay_type "at" ON (atj.value = "at".nid)
+  LEFT JOIN json_each(cf.analysis_types) antj
+  LEFT JOIN analysis_type ant ON (antj.value = ant.nid)
   LEFT JOIN json_each(cf.file_formats) ffj
   LEFT JOIN file_format ff ON (ffj.value = ff.nid)
   LEFT JOIN json_each(cf.data_types) dtj

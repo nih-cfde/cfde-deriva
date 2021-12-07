@@ -111,6 +111,11 @@
                   "type": "string"
                },
                {
+                  "name": "analysis_type",
+                  "description": "An OBI CV term ID describing the type of analytic operation that generated this file",
+                  "type": "string"
+               },
+               {
                   "name": "mime_type",
                   "description": "A MIME type describing this file",
                   "type": "string"
@@ -169,6 +174,13 @@
                   "fields": "assay_type",
                   "reference": {
                      "resource": "assay_type",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "analysis_type",
+                  "reference": {
+                     "resource": "analysis_type",
                      "fields": "id"
                   }
                },
@@ -1496,7 +1508,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "Association between a C2M2 biosample and a disease known to be associated with that biosample",
+         "description": "Association between a C2M2 biosample and a disease positively (e.g. cancer tumor tissue sample) OR negatively (e.g. cancer-free tissue sample) identified for that biosample",
          "schema": {
             "fields": [
                {
@@ -1516,6 +1528,15 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this biosample and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "string",
+                  "default": "cfde_disease_association_type:1",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "A Disease Ontology CV term ID describing this disease",
                   "type": "string",
@@ -1527,6 +1548,7 @@
             "primaryKey": [
                "biosample_id_namespace",
                "biosample_local_id",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -1536,6 +1558,14 @@
                   "reference": {
                      "resource": "biosample",
                      "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "constraint_name": "biosample_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
                   }
                },
                {
@@ -1560,7 +1590,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "Association between a C2M2 subject and a disease positively identified in that subject",
+         "description": "Association between a C2M2 subject and a disease positively OR negatively clinically identified in that subject",
          "schema": {
             "fields": [
                {
@@ -1580,6 +1610,15 @@
                   }
                },
                {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this disease (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "string",
+                  "default": "cfde_disease_association_type:1",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "disease",
                   "description": "A Disease Ontology CV term ID describing this disease",
                   "type": "string",
@@ -1591,6 +1630,7 @@
             "primaryKey": [
                "subject_id_namespace",
                "subject_local_id",
+               "association_type",
                "disease"
             ],
             "foreignKeys": [
@@ -1603,10 +1643,224 @@
                   }
                },
                {
+                  "fields": "association_type",
+                  "constraint_name": "subject_disease_association_type_fkey",
+                  "reference": {
+                     "resource": "disease_association_type",
+                     "fields": "id"
+                  }
+               },
+               {
                   "fields": "disease",
                   "constraint_name": "subject_disease_disease_fkey",
                   "reference": {
                      "resource": "disease",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_disease",
+         "title": "collection_disease",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a disease and a C2M2 collection containing experimental resources directly related to the study of that disease",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "A Disease Ontology CV term ID describing this disease",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_disease_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_phenotype",
+         "title": "collection_phenotype",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a phenotype and a C2M2 collection containing experimental resources directly related to the study of that phenotype",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID describing this phenotype",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_phenotype_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_phenotype",
+         "title": "subject_phenotype",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a C2M2 subject and a phenotype positively OR negatively clinically identified for that subject",
+         "schema": {
+            "fields": [
+               {
+                  "name": "subject_id_namespace",
+                  "description": "Identifier namespace for this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "subject_local_id",
+                  "description": "The ID of this subject",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "association_type",
+                  "description": "The relationship between this subject and this phenotype (e.g. 'observed' or '(tested for, but) not observed')",
+                  "type": "string",
+                  "default": "cfde_phenotype_association_type:0",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID describing this phenotype",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "subject_id_namespace",
+               "subject_local_id",
+               "association_type",
+               "phenotype"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "subject_id_namespace", "subject_local_id" ],
+                  "constraint_name": "subject_phenotype_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "association_type",
+                  "reference": {
+                     "resource": "phenotype_association_type",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
                      "fields": "id"
                   }
                }
@@ -1807,6 +2061,112 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "phenotype_gene",
+         "title": "phenotype_gene",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a Human Phenotype Ontology term and an Ensembl gene especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "An Ensembl gene ID",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_disease",
+         "title": "phenotype_disease",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a Human Phenotype Ontology term and a Disease Ontology term identifying a disease especially relevant to it",
+         "schema": {
+            "fields": [
+               {
+                  "name": "phenotype",
+                  "description": "A Human Phenotype Ontology CV term ID",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "disease",
+                  "description": "A Disease Ontology CV term ID",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "phenotype",
+               "disease"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "phenotype",
+                  "reference": {
+                     "resource": "phenotype",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "disease",
+                  "reference": {
+                     "resource": "disease",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_race",
          "title": "subject_race",
          "dialect": {
@@ -1959,6 +2319,53 @@
             "header": true
          },
          "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe types of experiment that generate C2M2 biosamples or results stored in C2M2 files",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "analysis_type",
+         "title": "analysis_type",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe analytic methods that generate C2M2 files",
          "schema": {
             "fields": [
                {
@@ -2202,7 +2609,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "List of Disease Ontology terms used to describe diseases associated with C2M2 subjects or biosamples",
+         "description": "List of Disease Ontology terms used to describe diseases recorded in association with C2M2 subjects or biosamples",
          "schema": {
             "fields": [
                {
@@ -2231,6 +2638,53 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype",
+         "title": "phenotype",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "List of Human Phenotype Ontology terms used to describe phenotypes recorded in association with C2M2 subjects",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this Human Phenotype Ontology term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the Human Phenotype Ontology metadata",
                   "type": "array"
                }
             ],
@@ -2614,6 +3068,78 @@
          "title": "Ethnicity",
          "path": "ethnicity.tsv",
          "description": "INTERNAL CV: The coded ethnicity of a human subject.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "disease_association_type",
+         "title": "Disease Association Type",
+         "path": "disease_association_type.tsv",
+         "description": "INTERNAL CV: The coded type of a disease term association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "phenotype_association_type",
+         "title": "Phenotype Association Type",
+         "path": "phenotype_association_type.tsv",
+         "description": "INTERNAL CV: The coded type of a phenotype term association.",
          "schema": {
             "fields": [
                {

@@ -270,10 +270,11 @@ class CatalogConfigurator (object):
                             { "name": "Biosample", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:biosample" },
                             { "name": "Subject", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject" },
                             { "name": "Project", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:project" },
-                            { "name": "Primary DCC Contact", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
+                            { "name": "Common Fund Program", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:dcc" },
                             {
                                 "name": "Vocabulary",
                                 "children": [
+                                    { "name": "Analysis Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:analysis_type" },
                                     { "name": "Anatomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:anatomy" },
                                     { "name": "Assay Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:assay_type" },
                                     { "name": "Compound", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:compound" },
@@ -284,6 +285,7 @@ class CatalogConfigurator (object):
                                     { "name": "Gene", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:gene" },
                                     { "name": "MIME Type", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:mime_type" },
                                     { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:ncbi_taxonomy" },
+                                    { "name": "Phenotype", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:phenotype" },
                                     { "name": "Race", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:race" },
                                     { "name": "Sex", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:sex" },
                                     { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
