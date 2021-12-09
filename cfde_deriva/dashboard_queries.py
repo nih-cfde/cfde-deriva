@@ -128,7 +128,7 @@ def _add_species_leaf(queryobj, show_nulls=False, **kwargs):
 def _add_sex_leaf(queryobj, show_nulls=False, **kwargs):
     if 'sex' in queryobj.path.table_instances:
         return
-    sex = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('sex')
+    sex = queryobj.helper.builder.CFDE.sex.alias('sex')
     queryobj.path = queryobj.path.link(
         sex,
         on=( queryobj.path.level1_stats.sex_id == sex.id ),
@@ -138,7 +138,7 @@ def _add_sex_leaf(queryobj, show_nulls=False, **kwargs):
 def _add_race_leaf(queryobj, show_nulls=False, **kwargs):
     if 'race' in queryobj.path.table_instances:
         return
-    race = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('race')
+    race = queryobj.helper.builder.CFDE.race.alias('race')
     queryobj.path = queryobj.path.link(
         race,
         on=( queryobj.path.level1_stats.race_id == race.id ),
@@ -148,7 +148,7 @@ def _add_race_leaf(queryobj, show_nulls=False, **kwargs):
 def _add_ethnicity_leaf(queryobj, show_nulls=False, **kwargs):
     if 'ethnicity' in queryobj.path.table_instances:
         return
-    ethnicity = queryobj.helper.builder.CFDE.ncbi_taxonomy.alias('ethnicity')
+    ethnicity = queryobj.helper.builder.CFDE.ethnicity.alias('ethnicity')
     queryobj.path = queryobj.path.link(
         ethnicity,
         on=( queryobj.path.level1_stats.ethnicity_id == ethnicity.id ),
