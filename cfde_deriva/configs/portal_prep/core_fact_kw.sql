@@ -27,6 +27,8 @@ FROM (
       cfde_keywords_merge_agg(dis.synonyms),
       cfde_keywords_agg(subst.id, subst.name, subst.description),
       cfde_keywords_merge_agg(subst.synonyms),
+      cfde_keywords_agg(cmpd.id, cmpd.name, cmpd.description),
+      cfde_keywords_merge_agg(cmpd.synonyms),
       cfde_keywords_agg(gn.id, gn.name, gn.description),
       cfde_keywords_merge_agg(gn.synonyms),
 
@@ -66,6 +68,8 @@ FROM (
   LEFT JOIN disease dis ON (json_extract(disj.value, '$[0]') = dis.nid)
   LEFT JOIN json_each(cf.substances) substj
   LEFT JOIN substance subst ON (substj.value = subst.nid)
+  LEFT JOIN json_each(cf.compounds) cmpdj
+  LEFT JOIN compound cmpd ON (cmpdj.value = cmpd.nid)
   LEFT JOIN json_each(cf.genes) gnj
   LEFT JOIN gene gn ON (gnj.value = gn.nid)
 
