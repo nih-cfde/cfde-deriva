@@ -1242,9 +1242,8 @@
                "sources": {
                   "S_core_fact": {
                      "source": [
-                        {"inbound": ["CFDE", "substance_compound_fkey"]},
-                        {"inbound": ["CFDE", "core_fact_substance_compound_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -3776,6 +3775,16 @@
                         "nid"
                      ]
                   },
+                  "S_compound": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound linked to a biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_gene": {
                      "markdown_name": "Gene",
                      "comment": "A gene linked to a biosample.",
@@ -3866,6 +3875,7 @@
                   {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_compound"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_dcc"},
@@ -4642,6 +4652,16 @@
                         "nid"
                      ]
                   },
+                  "S_compound": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound linked to the biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_gene": {
                      "markdown_name": "Gene",
                      "comment": "A gene linked to the biosample.",
@@ -4817,6 +4837,7 @@
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_compound"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_age_at_sampling"},
                   {"sourcekey": "S_sex"},
@@ -5366,6 +5387,16 @@
                         "nid"
                      ]
                   },
+                  "S_compound_search": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound linked to the biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject of the biosampling.",
@@ -5578,6 +5609,7 @@
                   {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_phenotype_search"},
                   {"sourcekey": "S_substance_search"},
+                  {"sourcekey": "S_compound_search"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
@@ -5988,6 +6020,26 @@
                         "nid"
                      ]
                   },
+                  "S_compound_search": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound linked to the biosample or subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_compound": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound linked to the subject.",
+                     "source": [
+                        {"inbound": ["CFDE", "subject_substance_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_substance_substance_fkey"]},
+                        {"outbound": ["CFDE", "substance_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_gene": {
                      "markdown_name": "Gene",
                      "comment": "A gene linked to the biosample.",
@@ -6371,6 +6423,7 @@
                   {"sourcekey": "S_disease_search"},
                   {"sourcekey": "S_phenotype_search"},
                   {"sourcekey": "S_substance_search"},
+                  {"sourcekey": "S_compound_search"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_role"},
                   {"sourcekey": "S_anatomy_slim"},
@@ -8846,6 +8899,10 @@
                      "comment": "A substance CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]}, "nid"]
                   },
+                  "S_compounds": {
+                     "comment": "A compound CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]}, "nid"]
+                  },
                   "S_genes": {
                      "comment": "A gene CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]}, "nid"]
@@ -8915,6 +8972,7 @@
                   {"sourcekey": "S_projects"},
                   {"sourcekey": "S_diseases"},
                   {"sourcekey": "S_substances"},
+                  {"sourcekey": "S_compounds"},
                   {"sourcekey": "S_genes"},
                   {"sourcekey": "S_assay_types"},
                   {"sourcekey": "S_data_types"},
@@ -8996,7 +9054,16 @@
                      "comment": "Substance term qualifying the set of C2M2 entities.",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "{{#if (gt _substances.length \"0\")}}{{_subsances.length}} values{{/if}}"
+                        "markdown_pattern": "{{#if (gt _substances.length \"0\")}}{{_substances.length}} values{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Compound",
+                     "source": "compounds",
+                     "comment": "Compound term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _compounds.length \"0\")}}{{_compounds.length}} values{{/if}}"
                      }
                   },
                   {
@@ -9037,6 +9104,7 @@
                   {"sourcekey": "S_anatomies"},
                   {"sourcekey": "S_diseases"},
                   {"sourcekey": "S_substances"},
+                  {"sourcekey": "S_compounds"},
                   {"sourcekey": "S_genes"},
                   {"sourcekey": "S_granularities"},
                   {"sourcekey": "S_species"},
