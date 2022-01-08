@@ -1379,16 +1379,7 @@
          },
          "deriva": {
             "table_config": {
-               "stable_key_columns": ["id"],
-               "user_favorites": {
-                  "storage_table": {
-                     "catalog": "registry",
-                     "schema": "CFDE",
-                     "table": "favorite_substance",
-                     "favorited_key_columns": ["substance"],
-                     "user_id_column": "user_id"
-                  }
-               }
+               "stable_key_columns": ["id"]
             },
             "source_definitions": {
                "columns": true,
@@ -3011,7 +3002,7 @@
             ]
          }
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "collection",
@@ -8340,7 +8331,7 @@
                      "required": true
                   }
                },
-               
+
                {
                   "name": "phenotypes",
                   "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
