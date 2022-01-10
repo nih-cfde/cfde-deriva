@@ -64,7 +64,7 @@ SELECT
       FROM (
         SELECT v.compound FROM file_describes_subject fds JOIN subject_substance a ON (fds.subject = a.subject) JOIN substance v ON (a.substance = v.nid) WHERE fds.file = f.nid
         UNION
-        SELECT v.compound FROM file_describes_biosample fdb JOIN biosample_substance a ON (fdb.biosample = a.biosample) JOIN substance v ON (a.substance = v.nid) WHERE fds.file = f.nid
+        SELECT v.compound FROM file_describes_biosample fdb JOIN biosample_substance a ON (fdb.biosample = a.biosample) JOIN substance v ON (a.substance = v.nid) WHERE fdb.file = f.nid
       ) a
     ),
     '[]'
@@ -439,9 +439,9 @@ SELECT
     '[]'
   ) AS substances,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.substance))
+      SELECT json_sorted(json_group_array(DISTINCT a.compound))
       FROM (
-        SELECT v.compound FROM biosample_from_subject bfs JOIN subject_substance a ON (bfs.subject = a.subject) JOIN sunstance v ON (a.substance = v.nid) WHERE bfs.biosample = b.nid
+        SELECT v.compound FROM biosample_from_subject bfs JOIN subject_substance a ON (bfs.subject = a.subject) JOIN substance v ON (a.substance = v.nid) WHERE bfs.biosample = b.nid
         UNION
         SELECT v.compound FROM biosample_substance a JOIN substance v ON (a.substance = v.nid) WHERE a.biosample = b.nid
       ) a
@@ -834,7 +834,7 @@ SELECT
     '[]'
   ) AS substances,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.substance))
+      SELECT json_sorted(json_group_array(DISTINCT a.compound))
       FROM (
         SELECT v.compound FROM subject_substance a JOIN substance v ON (a.substance = v.nid) WHERE a.subject = s.nid
         UNION
