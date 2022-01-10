@@ -297,6 +297,70 @@ class Release (object):
 
         return aliasdoc
 
+    def prune_favorites(self):
+        """Remove user favorites from registry for terms not present in this catalog."""
+        rel_row = self.rel_row
+        cat_id = self.catalog_id
+
+        if rel_row.get('status') not in {
+                terms.cfde_registry_rel_status.content_ready,
+                terms.cfde_registry_rel_status.public_release, # eventual consistency/idempotence
+        }:
+            raise exception.StateError('Release %(id)s status=%(status)r not safe for pruning favorites' % rel_row)
+
+        for vocab_tname in [
+                "dcc",
+                "anatomy",
+                "disease",
+                "compound",
+                "substance",
+                "gene",
+                "assay_type",
+                "analysis_type",
+                "data_type",
+                "mime_type",
+                "file_format",
+                "ncbi_taxonomy",
+                "phenotype",
+                "subject_granularity",
+                "subject_role",
+                "disease_association_type",
+                "phenotype_association_type",
+        ]:
+            logger.info("Checking %s for orphaned favorites" % (vocab_tname,))
+            favorite_terms = {
+                row['id']
+                for row in self.server.get(
+                        '/ermrest/catalog/registry/attributegroup/CFDE:%s/id:=%s' % (
+                            urlquote('favorite_' + vocab_tname),
+                            urlquote(vocab_tname),
+                        )
+                ).json()
+            }
+            known_terms = {
+                row['id']
+                for row in self.server.get(
+                        '/ermrest/catalog/%s/attributegroup/CFDE:%s/id' % (
+                            urlquote(cat_id),
+                            urlquote(vocab_tname),
+                        )
+                ).json()
+            }
+            orphans = favorite_terms - known_terms
+            logger.info("Deleting %d orphaned terms..." % len(orphans))
+            if not orphans:
+                logger.info("No orphans for %s" % (vocab_tname,))
+                continue
+            for term in orphans:
+                r = self.server.delete(
+                    '/ermrest/catalog/registry/entity/CFDE:%s/%s=%s' % (
+                        urlquote('favorite_' + vocab_tname),
+                        urlquote(vocab_tname),
+                        urlquote(term),
+                    )
+                )
+            logger.info("Deleted orphans %r for %s" % (orphans, vocab_tname,))
+
     def build(self):
         """Idempotently run release-build processing lifecycle.
 
@@ -504,6 +568,8 @@ def main(subcommand, *args):
        - Revise policy/presentation config on existing catalog
     - 'publish' release_id
        - Adjust the /ermrest/catalog/1 alias to point to the identified release's catalog
+    - 'prune' release_id
+       - Remove user favorite terms from the registry for terms not present in release
     - 'purge' release_id
        - Purge release's backing ermrest catalog storage and update release record status
     - 'purge-auto'
@@ -587,7 +653,7 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'analyze'}:
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'analyze', 'prune-favorites'}:
         if len(args) < 1:
             raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
@@ -618,6 +684,9 @@ def main(subcommand, *args):
                 Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
                 print('rebuild', kwargs)
             print('Rebuilt %d constituent submissions of release %s' % (len(dcc_datapackages), rel_row['id']))
+        elif subcommand == 'prune-favorites':
+            release.prune_favorites()
+            print("Favorites pruned based on release")
         elif subcommand == 'analyze':
             catalog = server.connect_ermrest(release.catalog_id)
             r = catalog.post('/?analyze')

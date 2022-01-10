@@ -362,6 +362,16 @@ If used in unexpected ways, the tool may move the alias but skip
 metadata updates, requiring the CFDE admin users to manually correct
 release status via the web UI.
 
+#### Release prune favorites
+
+The user-specific favorite vocabulary terms can be pruned to remove
+orphaned terms by using a given release as the reference source for
+known terms.
+
+`python -m 'cfde_deriva.release' prune-favorites <release_id>`
+
+- release_id is a `CFDE`.`release`.`id` key from the registry
+
 #### Release purge
 
 An administrator can purge ERMrest catalog storage resources
