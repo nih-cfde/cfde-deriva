@@ -2343,7 +2343,7 @@
                   "constraint_name": "biosample_assay_type_fkey",
                   "reference": {
                      "resource": "assay_type",
-                     "fields": "id"
+                     "fields": "nid"
                   }
                },
                {
