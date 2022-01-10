@@ -1247,6 +1247,14 @@
                         "nid"
                      ]
                   },
+                  "S_substance": {
+                     "markdown_name": "Substance",
+                     "comment": "Substances associated with the compound.",
+                     "source": [
+                        {"inbound": ["CFDE", "substance_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_subject": {
                      "markdown_name": "Subject",
                      "comment": "Subjects linked to this compound term.",
@@ -1292,8 +1300,8 @@
                   "description"
                ],
                "filter": {"and": [
-                  {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_substance"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
@@ -1302,6 +1310,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_substance"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -1391,6 +1400,13 @@
                         "nid"
                      ]
                   },
+                  "S_compound": {
+                     "markdown_name": "Compound",
+                     "source": [
+                        {"outbound": ["CFDE", "substance_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_subject": {
                      "markdown_name": "Subject",
                      "comment": "Subjects linked to this substance term.",
@@ -1433,11 +1449,17 @@
                "*": [
                   "id",
                   "name",
+                  {"sourcekey": "S_compound"},
+                  "description"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
-                  {"source": "id"},
                   {"source": "name"},
+                  {"sourcekey": "S_compound"},
                   {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
