@@ -647,6 +647,7 @@ class RegistryConfigurator (CatalogConfigurator):
                 {
                     "name": "C2M2 Vocabulary",
                     "children": [
+                        { "name": "Analysis Type", "url": "/chaise/recordset/#registry/CFDE:analysis_type" },
                         { "name": "Anatomy", "url": "/chaise/recordset/#registry/CFDE:anatomy" },
                         { "name": "Assay Type", "url": "/chaise/recordset/#registry/CFDE:assay_type" },
                         { "name": "Compound", "url": "/chaise/recordset/#registry/CFDE:compound" },
@@ -657,6 +658,7 @@ class RegistryConfigurator (CatalogConfigurator):
                         { "name": "Gene", "url": "/chaise/recordset/#registry/CFDE:gene" },
                         { "name": "MIME Type", "url": "/chaise/recordset/#registry/CFDE:mime_type" },
                         { "name": "NCBI Taxonomy", "url": "/chaise/recordset/#registry/CFDE:ncbi_taxonomy" },
+                        { "name": "Phenotype", "url": "/chaise/recordset/#registry/CFDE:phenotype" },
                         { "name": "Race", "url": "/chaise/recordset/#registry/CFDE:race" },
                         { "name": "Sex", "url": "/chaise/recordset/#registry/CFDE:sex" },
                         { "name": "Subject Granularity", "url": "/chaise/recordset/#registry/CFDE:subject_granularity" },
