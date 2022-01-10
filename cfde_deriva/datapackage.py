@@ -1248,6 +1248,7 @@ LIMIT 1;
             'phenotype': 'phenotypes',
             'disease': 'diseases',
             'substance': 'substances',
+            'compound': 'compounds',
             'gene': 'genes',
             'sex': 'sexes',
             'race': 'races',
