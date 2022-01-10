@@ -831,6 +831,8 @@ class Submission (object):
             if 'primary_dcc_contact' in submitted_dp.doc_cfde_schema.tables:
                 if 'dcc' in submitted_dp.doc_cfde_schema.tables:
                     raise exception.InvalidDatapackage('Submission mixes C2M2 dcc and legacy primary_dcc_contact tables')
+                if os.getenv('CFDE_REQUIRE_DCC_TABLE', 'true').lower() == 'true':
+                    raise exception.InvalidDatapackage('Submission must include "dcc" table rather than legacy "primary_dcc_contact"')
                 logger.info('Translating legacy primary_dcc_contact into dcc table...')
                 cur.execute("""
 INSERT INTO dcc (id, dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id)

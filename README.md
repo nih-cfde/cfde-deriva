@@ -107,6 +107,7 @@ takes a few settings via environment variables:
     - general syntax is a JSON object `{ "check_name": true, ...}` to bypass specific checks
     - default `{}` does not bypass any checks
     - `true` is a equivalent to an object mapping all check names to `true`
+- `CFDE_REQUIRE_DCC_TABLE=false` will support legacy primary_dcc_contact table (default `true`)
 - `SQLITE_TMPDIR=/path/to/dir` will override the default SQLite temp file storage location
 
 #### Submission emulation
@@ -137,7 +138,7 @@ state, the developer can restart the idempotent ingest process
 to attempt to diagnose a software or hosting issue and/or to test
 new features of the ingest process.
 
-`python -m 'cfde_deriva.submission' build <submission_id>`
+`python -m 'cfde_deriva.submission' rebuild <submission_id>`
 
 Command-line arguments:
 
