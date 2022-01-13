@@ -181,7 +181,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -316,7 +322,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the OBI metadata",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -379,7 +391,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -512,7 +530,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -651,7 +675,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -786,7 +816,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -921,7 +957,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1069,7 +1111,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the Human Phenotype Ontology metadata",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1217,7 +1265,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1361,7 +1415,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                },
                {
                   "name": "compound",
@@ -1518,7 +1578,13 @@
                {
                   "name": "synonyms",
                   "description": "A list of synonyms for this term",
-                  "type": "array"
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                },
                {
                   "name": "organism",
