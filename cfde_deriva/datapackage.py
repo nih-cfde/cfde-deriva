@@ -123,6 +123,7 @@ class CfdeDataPackage (object):
     schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 
     batch_size = 2000 # how may rows we'll send to ermrest
+    batch_bytes_limit = 1024**2 # 1MB
 
     def __init__(self, package_filename, configurator=None):
         """Construct CfdeDataPackage from given package definition filename.
@@ -1129,6 +1130,33 @@ LIMIT 1;
             if position is not None:
                 logger.info("Restarting after %r due to existing restart marker" % (position,))
 
+            def batch_trim(rows, max_length=self.batch_bytes_limit):
+                """Slice rows to a prefix that approximately meets target size limit."""
+                def row_len(row):
+                    bytecnt = 2 # {}
+                    for field in range(len(cols)):
+                        # 'colname':'value',
+                        bytecnt += 6 + len(colnames[field]) + len(str(row[field]))
+                    return bytecnt
+
+                # we must send at least first row
+                fullcnt = len(rows)
+                rowcnt = 1
+                bytecnt = 3 + row_len(rows[0]) # '[row1]\n'
+
+                while True:
+                    if rowcnt >= fullcnt:
+                        # full batch is under budget
+                        return rows
+
+                    nextcnt = 1 + row_len(rows[rowcnt]) # ,row
+                    if (bytecnt + nextcnt) > max_length:
+                        # stop here, adding another row would exceed budget
+                        return rows[0:rowcnt]
+
+                    bytecnt += nextcnt
+                    rowcnt += 1
+
             def get_batch(cur):
                 nonlocal position
                 sql = 'SELECT %(cols)s FROM %(table)s %(where)s ORDER BY "nid" ASC LIMIT %(batchsize)s' % {
@@ -1140,6 +1168,7 @@ LIMIT 1;
                 cur.execute(sql)
                 batch = list(cur)
                 if batch:
+                    batch = batch_trim(batch)
                     position = batch[-1][0]
                 return batch
 
