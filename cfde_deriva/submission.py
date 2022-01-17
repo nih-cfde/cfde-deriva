@@ -417,7 +417,12 @@ class Submission (object):
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
+            try:
+                self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
+            except exception.InvalidDatapackage:
+                next_error_state = terms.cfde_registry_dp_status.content_error
+                raise
+
             self.prepare_sqlite_derived_data(self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
             self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
 
