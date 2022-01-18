@@ -933,12 +933,20 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
 
         def cfde_keywords_set(*strings):
             """Downcase and split strings into tokens, remove common junk tokens, merge into set."""
+            def str_split(s):
+                for s2 in re.split('\s|[/.,;()[\]{}\'"_~%&|]', s.lower()):
+                    s2 = s2.strip('-:/.,;()[]{}\'"~%&|')
+                    if s2 not in {
+                            '', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on',
+                            'or', 'and', 'is', 'by', 'not', 'from', 'are', 's',
+                    }:
+                        yield s2
+
             kw = set()
             for s in strings:
                 if s is None:
                     continue
-                kw.update([s.strip('-.,;:()"[]') for s in re.split('\s|[/.,;()[\]"_]', s.lower())])
-            kw.difference_update({'', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on', 'or', 'and', 'is', 'by', 'not', 'from', 'are'})
+                kw.update(str_split(s))
             return kw
 
         def cfde_keywords(*strings):
