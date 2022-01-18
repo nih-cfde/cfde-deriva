@@ -1294,10 +1294,10 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_core_fact": {
+                  "S_pubchem_fact": {
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_compound_compound_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1313,8 +1313,8 @@
                      "markdown_name": "Subject",
                      "comment": "Subjects linked to this compound term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "subject_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1322,8 +1322,8 @@
                      "markdown_name": "Biosample",
                      "comment": "Biosamples linked to this compound term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "biosample_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1331,8 +1331,8 @@
                      "markdown_name": "File",
                      "comment": "Files linked to this compound term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "file_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1340,8 +1340,8 @@
                      "markdown_name": "Collection",
                      "comment": "Collections linked to this compound term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "collection_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   }
@@ -1453,10 +1453,10 @@
                "columns": true,
                "fkeys": true,
                "sources": {
-                  "S_core_fact": {
+                  "S_pubchem_fact": {
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_substance_substance_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1471,8 +1471,8 @@
                      "markdown_name": "Subject",
                      "comment": "Subjects linked to this substance term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "subject_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1480,8 +1480,8 @@
                      "markdown_name": "Biosample",
                      "comment": "Biosamples linked to this substance term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "biosample_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1489,8 +1489,8 @@
                      "markdown_name": "File",
                      "comment": "Files linked to this substance term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "file_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1498,8 +1498,8 @@
                      "markdown_name": "Collection",
                      "comment": "Collections linked to this substance term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "collection_pubchem_fact_fkey"]},
                         "nid"
                      ]
                   }
@@ -1634,10 +1634,10 @@
                         "nid"
                      ]
                   },
-                  "S_core_fact": {
+                  "S_gene_fact": {
                      "source": [
-                        {"inbound": ["CFDE", "core_fact_gene_gene_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
+                        {"inbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
+                        {"outbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1645,8 +1645,8 @@
                      "markdown_name": "Subject",
                      "comment": "Subjects linked to this gene term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "subject_gene_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1654,8 +1654,8 @@
                      "markdown_name": "Biosample",
                      "comment": "Biosamples linked to this gene term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "biosample_gene_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1663,8 +1663,8 @@
                      "markdown_name": "File",
                      "comment": "Files linked to this gene term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "file_gene_fact_fkey"]},
                         "nid"
                      ]
                   },
@@ -1672,8 +1672,8 @@
                      "markdown_name": "Collection",
                      "comment": "Collections linked to this gene term.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "collection_gene_fact_fkey"]},
                         "nid"
                      ]
                   }
@@ -3109,8 +3109,8 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "title": "Numeric ID of core fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -3118,6 +3118,36 @@
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["gene_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["pubchem_fact", "nid"],
                         "trgm": false
                      }
                   }
@@ -3191,6 +3221,22 @@
                   "constraint_name": "collection_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "collection_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "collection_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                }
@@ -3307,7 +3353,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                                 "path": "(gene_fact)/CFDE:gene_fact_gene/CFDE:gene/id,name,description"
                               },
                               "destination": {
                                  "name": "gene",
@@ -3317,7 +3363,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/id,name,description"
                               },
                               "destination": {
                                  "name": "substance",
@@ -3327,7 +3373,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
                               },
                               "destination": {
                                  "name": "compound",
@@ -3514,6 +3560,12 @@
                   ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
+                  },
+                  "S_gene_fact": {
+                     "source": [{"outbound": ["CFDE", "collection_gene_fact_fkey"]}, "nid" ]
+                  },
+                  "S_pubchem_fact": {
+                     "source": [{"outbound": ["CFDE", "collection_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
@@ -3848,9 +3900,9 @@
                      "markdown_name": "Substance",
                      "comment": "A substance linked to a biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
                      ]
                   },
@@ -3858,9 +3910,9 @@
                      "markdown_name": "Compound",
                      "comment": "A compound linked to a biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
                      ]
                   },
@@ -3868,9 +3920,9 @@
                      "markdown_name": "Gene",
                      "comment": "A gene linked to a biosample.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
+                        {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
                      ]
                   },
@@ -4002,6 +4054,36 @@
                   }
                },
                {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["gene_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["pubchem_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "local_id",
                   "description": "An ID representing this file, unique in combination with this file's id_namespace.",
                   "type": "string",
@@ -4076,6 +4158,22 @@
                   "constraint_name": "file_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "file_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "file_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
@@ -4191,7 +4289,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                                 "path": "(gene_fact)/CFDE:gene_fact_gene/CFDE:gene/id,name,description"
                               },
                               "destination": {
                                  "name": "gene",
@@ -4201,7 +4299,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/id,name,description"
                               },
                               "destination": {
                                  "name": "substance",
@@ -4211,7 +4309,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
                               },
                               "destination": {
                                  "name": "compound",
@@ -4399,6 +4497,12 @@
                   ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
+                  },
+                  "S_gene_fact": {
+                     "source": [{"outbound": ["CFDE", "file_gene_fact_fkey"]}, "nid" ]
+                  },
+                  "S_pubchem_fact": {
+                     "source": [{"outbound": ["CFDE", "file_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
@@ -4725,9 +4829,9 @@
                      "markdown_name": "Substance",
                      "comment": "A substance linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
                      ]
                   },
@@ -4735,9 +4839,9 @@
                      "markdown_name": "Compound",
                      "comment": "A compound linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
                      ]
                   },
@@ -4745,9 +4849,9 @@
                      "markdown_name": "Gene",
                      "comment": "A gene linked to the biosample.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
+                        {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
                      ]
                   },
@@ -4959,7 +5063,7 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
+                  "title": "Numeric ID of core fact class describing this biosample.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer",
                   "constraints": {
@@ -4968,6 +5072,36 @@
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["gene_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["pubchem_fact", "nid"],
                         "trgm": false
                      }
                   }
@@ -5009,6 +5143,22 @@
                   "constraint_name": "biosample_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "biosample_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "biosample_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                }
@@ -5085,7 +5235,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_gene/CFDE:gene/id,name,description"
+                                 "path": "(gene_fact)/CFDE:gene_fact_gene/CFDE:gene/id,name,description"
                               },
                               "destination": {
                                  "name": "gene",
@@ -5095,7 +5245,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/id,name,description"
                               },
                               "destination": {
                                  "name": "substance",
@@ -5105,7 +5255,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "(core_fact)/CFDE:core_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
+                                 "path": "(pubchem_fact)/CFDE:pubchem_fact_substance/CFDE:substance/CFDE:compound/id,name,description"
                               },
                               "destination": {
                                  "name": "compound",
@@ -5294,6 +5444,12 @@
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
                   },
+                  "S_gene_fact": {
+                     "source": [{"outbound": ["CFDE", "biosample_gene_fact_fkey"]}, "nid"]
+                  },
+                  "S_pubchem_fact": {
+                     "source": [{"outbound": ["CFDE", "biosample_pubchem_fact_fkey"]}, "nid"]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
                      "source": [
@@ -5451,9 +5607,9 @@
                      "markdown_name": "Substance",
                      "comment": "A substance linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
                      ]
                   },
@@ -5470,9 +5626,9 @@
                      "markdown_name": "Compound",
                      "comment": "A compound linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
                      ]
                   },
@@ -5717,8 +5873,8 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "title": "Numeric ID of core fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -5726,6 +5882,36 @@
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["core_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["gene_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["pubchem_fact", "nid"],
                         "trgm": false
                      }
                   }
@@ -5781,6 +5967,22 @@
                   "constraint_name": "subject_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "subject_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "subject_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                }
@@ -5968,6 +6170,12 @@
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
                   },
+                  "S_gene_fact": {
+                     "source": [{"outbound": ["CFDE", "subject_gene_fact_fkey"]}, "nid" ]
+                  },
+                  "S_pubchem_fact": {
+                     "source": [{"outbound": ["CFDE", "subject_pubchem_fact_fkey"]}, "nid" ]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
                      "source": [
@@ -6084,9 +6292,9 @@
                      "markdown_name": "Substance",
                      "comment": "A substance linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
                      ]
                   },
@@ -6103,9 +6311,9 @@
                      "markdown_name": "Compound",
                      "comment": "A compound linked to the biosample or subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]},
+                        {"sourcekey": "S_pubchem_fact"},
+                        {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
+                        {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
                      ]
                   },
@@ -6123,9 +6331,9 @@
                      "markdown_name": "Gene",
                      "comment": "A gene linked to the biosample.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]},
+                        {"sourcekey": "S_gene_fact"},
+                        {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
+                        {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
                      ]
                   },
@@ -8489,30 +8697,6 @@
                      "required": true
                   }
                },
-               {
-                  "name": "substances",
-                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
-                  "type": "object",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "compounds",
-                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
-                  "type": "object",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "genes",
-                  "description": "The numeric ID of gene qualifying the described entities.",
-                  "type": "object",
-                  "constraints": {
-                     "required": true
-                  }
-               },
 
                {
                   "name": "sexes",
@@ -8974,18 +9158,6 @@
                      "comment": "A disease CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]}, "nid"]
                   },
-                  "S_substances": {
-                     "comment": "A substance CV term associated with a set of C2M2 entities.",
-                     "source": [{"inbound": ["CFDE", "core_fact_substance_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_substance_substance_fkey"]}, "nid"]
-                  },
-                  "S_compounds": {
-                     "comment": "A compound CV term associated with a set of C2M2 entities.",
-                     "source": [{"inbound": ["CFDE", "core_fact_compound_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_compound_compound_fkey"]}, "nid"]
-                  },
-                  "S_genes": {
-                     "comment": "A gene CV term associated with a set of C2M2 entities.",
-                     "source": [{"inbound": ["CFDE", "core_fact_gene_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_gene_gene_fkey"]}, "nid"]
-                  },
                   "S_sexes": {
                      "comment": "A sex CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_sex_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_sex_sex_fkey"]}, "nid"]
@@ -9050,9 +9222,6 @@
                   {"sourcekey": "S_dccs"},
                   {"sourcekey": "S_projects"},
                   {"sourcekey": "S_diseases"},
-                  {"sourcekey": "S_substances"},
-                  {"sourcekey": "S_compounds"},
-                  {"sourcekey": "S_genes"},
                   {"sourcekey": "S_assay_types"},
                   {"sourcekey": "S_data_types"},
                   {"sourcekey": "S_file_formats"},
@@ -9128,33 +9297,6 @@
                      }
                   },
                   {
-                     "markdown_name": "Substance",
-                     "source": "substances",
-                     "comment": "Substance term qualifying the set of C2M2 entities.",
-                     "display": {
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#if (gt _substances.length \"0\")}}{{_substances.length}} values{{/if}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Compound",
-                     "source": "compounds",
-                     "comment": "Compound term qualifying the set of C2M2 entities.",
-                     "display": {
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#if (gt _compounds.length \"0\")}}{{_compounds.length}} values{{/if}}"
-                     }
-                  },
-                  {
-                     "markdown_name": "Gene",
-                     "source": "genes",
-                     "comment": "Gene term qualifying the set of C2M2 entities.",
-                     "display": {
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#if (gt _genes.length \"0\")}}{{_genes.length}} values{{/if}}"
-                     }
-                  },
-                  {
                      "markdown_name": "Granularity",
                      "source": "subject_granularities",
                      "comment": "Subject granularity term qualifying the set of C2M2 entities.",
@@ -9182,15 +9324,325 @@
                   {"sourcekey": "S_is_bundle"},
                   {"sourcekey": "S_anatomies"},
                   {"sourcekey": "S_diseases"},
-                  {"sourcekey": "S_substances"},
-                  {"sourcekey": "S_compounds"},
-                  {"sourcekey": "S_genes"},
                   {"sourcekey": "S_granularities"},
                   {"sourcekey": "S_species"},
                   {"sourcekey": "S_ncbi_taxons"},
                   {"sourcekey": "S_sexes"},
                   {"sourcekey": "S_races"},
                   {"sourcekey": "S_ethnicities"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Files in Class",
+                     "source": [{"inbound": ["CFDE", "file_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Biosamples in Class",
+                     "source": [{"inbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Subjects in Class",
+                     "source": [{"inbound": ["CFDE", "subject_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Collections in Class",
+                     "source": [{"inbound": ["CFDE", "collection_core_fact_fkey"]}, "nid"]
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "gene_fact",
+         "title": "Gene Statistics",
+         "description": "Gene-based C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of gene qualifying the described entities.",
+                  "type": "object",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_genes": {
+                     "comment": "A gene CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]}, {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]}, "nid"]
+                  }
+               }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{_nid}}}"
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_genes"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"},
+                  {"source": "num_collections"}
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "Gene",
+                     "source": "genes",
+                     "comment": "Gene term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _genes.length \"0\")}}{{_genes.length}} values{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Counts",
+                     "source": "num_files",
+                     "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
+                     "display": {
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_total_size_in_bytes}}- {{total_size_in_bytes}} bytes\n{{/_total_size_in_bytes}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}{{#_num_collections}}- {{num_collections}} collections{{/_num_collections}}"
+                     }
+                  }
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_genes"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Files in Class",
+                     "source": [{"inbound": ["CFDE", "file_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Biosamples in Class",
+                     "source": [{"inbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Subjects in Class",
+                     "source": [{"inbound": ["CFDE", "subject_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Collections in Class",
+                     "source": [{"inbound": ["CFDE", "collection_core_fact_fkey"]}, "nid"]
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "pubchem_fact",
+         "title": "PubChem Statistics",
+         "description": "PubChem-based C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "object",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "object",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_substances": {
+                     "comment": "A substance CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]}, {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]}, "nid"]
+                  },
+                  "S_compounds": {
+                     "comment": "A compound CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]}, {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]}, "nid"]
+                  }
+               }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{_nid}}}"
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_substances"},
+                  {"sourcekey": "S_compounds"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"},
+                  {"source": "num_collections"}
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "Substance",
+                     "source": "substances",
+                     "comment": "Substance term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _substances.length \"0\")}}{{_substances.length}} values{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Compound",
+                     "source": "compounds",
+                     "comment": "Compound term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _compounds.length \"0\")}}{{_compounds.length}} values{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Counts",
+                     "source": "num_files",
+                     "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
+                     "display": {
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_total_size_in_bytes}}- {{total_size_in_bytes}} bytes\n{{/_total_size_in_bytes}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}{{#_num_collections}}- {{num_collections}} collections{{/_num_collections}}"
+                     }
+                  }
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_substances"},
+                  {"sourcekey": "S_compounds"},
                   {"source": "num_files"},
                   {"source": "num_bytes"},
                   {"source": "num_biosamples"},
@@ -9456,14 +9908,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_substance",
-         "description": "An exploded representation of the core_fact.substances array column as a binary association.",
+         "name": "pubchem_fact_substance",
+         "description": "An exploded representation of the pubchem_fact.substances array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "pubchem_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a pubchem_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -9471,26 +9923,26 @@
                },
                {
                   "name": "substance",
-                  "description": "The numeric ID of a term found in the core_fact.substances array column.",
+                  "description": "The numeric ID of a term found in the pubchem_fact.substances array column.",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
-            "primaryKey": ["core_fact", "substance"],
+            "primaryKey": ["pubchem_fact", "substance"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_substance_core_fact_fkey",
+                  "fields": "pubchem_fact",
+                  "constraint_name": "pubchem_fact_substance_pubchem_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "substance",
-                  "constraint_name": "core_fact_substance_substance_fkey",
+                  "constraint_name": "pubchem_fact_substance_substance_fkey",
                   "reference": {
                      "resource": "substance",
                      "fields": "nid"
@@ -9501,14 +9953,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_compound",
-         "description": "An exploded representation of the core_fact.compounds array column as a binary association.",
+         "name": "pubchem_fact_compound",
+         "description": "An exploded representation of the pubchem_fact.compounds array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "pubchem_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a pubchem_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -9516,26 +9968,26 @@
                },
                {
                   "name": "compound",
-                  "description": "The numeric ID of a term found in the core_fact.compounds array column.",
+                  "description": "The numeric ID of a term found in the pubchem_fact.compounds array column.",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
-            "primaryKey": ["core_fact", "compound"],
+            "primaryKey": ["pubchem_fact", "compound"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_compound_core_fact_fkey",
+                  "fields": "pubchem_fact",
+                  "constraint_name": "pubchem_fact_compound_pubchem_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "compound",
-                  "constraint_name": "core_fact_compound_compound_fkey",
+                  "constraint_name": "pubchem_fact_compound_compound_fkey",
                   "reference": {
                      "resource": "compound",
                      "fields": "nid"
@@ -9546,14 +9998,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_gene",
-         "description": "An exploded representation of the core_fact.genes array column as a binary association.",
+         "name": "gene_fact_gene",
+         "description": "An exploded representation of the gene_fact.genes array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "gene_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a gene_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -9561,26 +10013,26 @@
                },
                {
                   "name": "gene",
-                  "description": "The numeric ID of a term found in the core_fact.genes array column.",
+                  "description": "The numeric ID of a term found in the gene_fact.genes array column.",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
-            "primaryKey": ["core_fact", "gene"],
+            "primaryKey": ["gene_fact", "gene"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_gene_core_fact_fkey",
+                  "fields": "gene_fact",
+                  "constraint_name": "gene_fact_gene_gene_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "gene_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "gene",
-                  "constraint_name": "core_fact_gene_gene_fkey",
+                  "constraint_name": "gene_fact_gene_gene_fkey",
                   "reference": {
                      "resource": "gene",
                      "fields": "nid"

@@ -1270,48 +1270,59 @@ LIMIT 1;
             # use the custom SQL embedded in the package
             return self.package_filename.get_data_str(path)
 
-        core_fact_assoc_arrays = {
-            'project': 'projects',
-            'dcc': 'dccs',
-            'anatomy': 'anatomies',
-            'phenotype': 'phenotypes',
-            'disease': 'diseases',
-            'substance': 'substances',
-            'compound': 'compounds',
-            'gene': 'genes',
-            'sex': 'sexes',
-            'race': 'races',
-            'ethnicity': 'ethnicities',
-            'subject_role': 'subject_roles',
-            'subject_granularity': 'subject_granularities',
-            'subject_species': 'subject_species',
-            'ncbi_taxonomy': ('ncbi_taxon', 'ncbi_taxons'),
-            'assay_type': 'assay_types',
-            'analysis_type': 'analysis_types',
-            'file_format': 'file_formats',
-            'compression_format': 'compression_formats',
-            'data_type': 'data_types',
-            'mime_type': 'mime_types',
+        fact_assoc_arrays = {
+            'core_fact_': {
+                'project': 'projects',
+                'dcc': 'dccs',
+                'anatomy': 'anatomies',
+                'phenotype': 'phenotypes',
+                'disease': 'diseases',
+                'sex': 'sexes',
+                'race': 'races',
+                'ethnicity': 'ethnicities',
+                'subject_role': 'subject_roles',
+                'subject_granularity': 'subject_granularities',
+                'subject_species': 'subject_species',
+                'ncbi_taxonomy': ('ncbi_taxon', 'ncbi_taxons'),
+                'assay_type': 'assay_types',
+                'analysis_type': 'analysis_types',
+                'file_format': 'file_formats',
+                'compression_format': 'compression_formats',
+                'data_type': 'data_types',
+                'mime_type': 'mime_types',
+            },
+            'gene_fact_': {
+                'gene': 'genes',
+            },
+            'pubchem_fact_': {
+                'substance': 'substances',
+                'compound': 'compounds',
+            }
         }
-        if tname.startswith('core_fact_') and tname[10:] in core_fact_assoc_arrays:
-            # use built-in template to unpack core_fact arrays as associations
-            acol = core_fact_assoc_arrays[tname[10:]]
-            if isinstance(acol, tuple):
-                # use custom vcol,acol pair for this assoc table
-                vcol, acol = acol
-            else:
-                # vcol is encoded in assoc table name
-                vcol = tname[10:]
-            return """
-INSERT INTO %(tname)s (core_fact, %(vcol)s)
+        for prefix, assoc_arrays in fact_assoc_arrays.items():
+            if not tname.startswith(prefix):
+                continue
+            vname = tname[len(prefix):]
+            if vname in assoc_arrays:
+                # use built-in template to unpack fact arrays as associations
+                acol = assoc_arrays[vname]
+                if isinstance(acol, tuple):
+                    # use custom vcol,acol pair for this assoc table
+                    vcol, acol = acol
+                else:
+                    # vcol repeats vname encoded in assoc tname
+                    vcol = vname
+                return """
+INSERT INTO %(tname)s (%(fname)s, %(vcol)s)
 SELECT s.nid, j.value
-FROM core_fact s
+FROM %(fname)s s
 JOIN json_each(s.%(acol)s) j
 WHERE True;
 """ % {
     "tname": tname,
     "vcol": vcol,
     "acol": acol,
+    "fname": prefix[:-1],
 }
 
         slim_vocab_tnames = {

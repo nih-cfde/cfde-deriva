@@ -40,24 +40,6 @@ FROM (
        FROM json_each(cf.diseases) disj JOIN disease dis ON (json_extract(disj.value, '$[0]') = dis.nid)
        JOIN disease_slim dis_slim ON (disj.value = dis_slim.original_term) JOIN disease dis2 ON (dis_slim.slim_term = dis.nid)),
 
-      (SELECT cfde_keywords_merge(
-         cfde_keywords_agg(subst.id, subst.name, subst.description),
-         cfde_keywords_merge_agg(subst.synonyms)
-       )
-       FROM json_each(cf.substances) substj JOIN substance subst ON (substj.value = subst.nid)),
-
-      (SELECT cfde_keywords_merge(
-        cfde_keywords_agg(cmpd.id, cmpd.name, cmpd.description),
-        cfde_keywords_merge_agg(cmpd.synonyms)
-       )
-       FROM json_each(cf.compounds) cmpdj JOIN compound cmpd ON (cmpdj.value = cmpd.nid)),
-
-      (SELECT cfde_keywords_merge(
-         cfde_keywords_agg(gn.id, gn.name, gn.description),
-         cfde_keywords_merge_agg(gn.synonyms)
-       )
-       FROM json_each(cf.genes) gnj JOIN gene gn ON (gnj.value = gn.nid)),
-
       (SELECT cfde_keywords_agg(sx.id, sx.name, sx.description)
        FROM json_each(cf.sexes) sxj JOIN sex sx ON (sxj.value = sx.nid)),
 

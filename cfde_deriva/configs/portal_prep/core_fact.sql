@@ -50,31 +50,6 @@ SELECT
     '[]'
   ) AS diseases,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.substance))
-      FROM (
-        SELECT a.substance FROM file_describes_subject fds JOIN subject_substance a ON (fds.subject = a.subject) WHERE fds.file = f.nid
-        UNION
-        SELECT a.substance FROM file_describes_biosample fdb JOIN biosample_substance a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
-      ) a
-    ),
-    '[]'
-  ) AS substances,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.compound))
-      FROM (
-        SELECT v.compound FROM file_describes_subject fds JOIN subject_substance a ON (fds.subject = a.subject) JOIN substance v ON (a.substance = v.nid) WHERE fds.file = f.nid
-        UNION
-        SELECT v.compound FROM file_describes_biosample fdb JOIN biosample_substance a ON (fdb.biosample = a.biosample) JOIN substance v ON (a.substance = v.nid) WHERE fdb.file = f.nid
-      ) a
-    ),
-    '[]'
-  ) AS compounds,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM file_describes_biosample fdb JOIN biosample_gene a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
-    ),
-    '[]'
-  ) AS genes,
-  COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.sex)) FROM file_describes_subject fds JOIN subject s ON (fds.subject = s.nid) WHERE fds.file = f.nid AND s.sex IS NOT NULL
     ),
     '[]'
@@ -152,9 +127,6 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -192,9 +164,6 @@ INSERT INTO core_fact (
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -245,9 +214,6 @@ SELECT
   ff.dccs,
   ff.phenotypes,
   ff.diseases,
-  ff.substances,
-  ff.compounds,
-  ff.genes,
   ff.sexes,
   ff.races,
   ff.ethnicities,
@@ -298,9 +264,6 @@ FROM (
     ff.dccs,
     ff.phenotypes,
     ff.diseases,
-    ff.substances,
-    ff.compounds,
-    ff.genes,
     ff.sexes,
     ff.races,
     ff.ethnicities,
@@ -357,9 +320,6 @@ WHERE u.nid = ff.nid
   AND ff.dccs = cf.dccs
   AND ff.phenotypes = cf.phenotypes
   AND ff.diseases = cf.diseases
-  AND ff.substances = cf.substances
-  AND ff.compounds = cf.compounds
-  AND ff.genes = cf.genes
   AND ff.sexes = cf.sexes
   AND ff.races = cf.races
   AND ff.ethnicities = cf.ethnicities
@@ -428,31 +388,6 @@ SELECT
     ),
     '[]'
   ) AS diseases,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.substance))
-      FROM (
-        SELECT a.substance FROM biosample_from_subject bfs JOIN subject_substance a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
-        UNION
-        SELECT a.substance FROM biosample_substance a WHERE a.biosample = b.nid
-      ) a
-    ),
-    '[]'
-  ) AS substances,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.compound))
-      FROM (
-        SELECT v.compound FROM biosample_from_subject bfs JOIN subject_substance a ON (bfs.subject = a.subject) JOIN substance v ON (a.substance = v.nid) WHERE bfs.biosample = b.nid
-        UNION
-        SELECT v.compound FROM biosample_substance a JOIN substance v ON (a.substance = v.nid) WHERE a.biosample = b.nid
-      ) a
-    ),
-    '[]'
-  ) AS compounds,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM biosample_gene a WHERE a.biosample = b.nid
-    ),
-    '[]'
-  ) AS genes,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.sex)) FROM biosample_from_subject bfs JOIN subject s ON (bfs.subject = s.nid) WHERE bfs.biosample = b.nid AND s.sex IS NOT NULL
     ),
@@ -547,9 +482,6 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -587,9 +519,6 @@ INSERT INTO core_fact (
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -640,9 +569,6 @@ SELECT
   bf.dccs,
   bf.phenotypes,
   bf.diseases,
-  bf.substances,
-  bf.compounds,
-  bf.genes,
   bf.sexes,
   bf.races,
   bf.ethnicities,
@@ -693,9 +619,6 @@ FROM (
     bf.dccs,
     bf.phenotypes,
     bf.diseases,
-    bf.substances,
-    bf.compounds,
-    bf.genes,
     bf.sexes,
     bf.races,
     bf.ethnicities,
@@ -752,9 +675,6 @@ WHERE u.nid = bf.nid
   AND bf.dccs = cf.dccs
   AND bf.phenotypes = cf.phenotypes
   AND bf.diseases = cf.diseases
-  AND bf.substances = cf.substances
-  AND bf.compounds = cf.compounds
-  AND bf.genes = cf.genes
   AND bf.sexes = cf.sexes
   AND bf.races = cf.races
   AND bf.ethnicities = cf.ethnicities
@@ -823,31 +743,6 @@ SELECT
     ),
     '[]'
   ) AS diseases,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.substance))
-      FROM (
-        SELECT a.substance FROM subject_substance a WHERE a.subject = s.nid
-        UNION
-        SELECT a.substance FROM biosample_from_subject bfs JOIN biosample_substance a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
-      ) a
-    ),
-    '[]'
-  ) AS substances,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.compound))
-      FROM (
-        SELECT v.compound FROM subject_substance a JOIN substance v ON (a.substance = v.nid) WHERE a.subject = s.nid
-        UNION
-        SELECT v.compound FROM biosample_from_subject bfs JOIN biosample_substance a ON (bfs.biosample = a.biosample) JOIN substance v ON (a.substance = v.nid) WHERE bfs.subject = s.nid
-      ) a
-    ),
-    '[]'
-  ) AS compounds,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.gene)) FROM biosample_from_subject bfs JOIN biosample_gene a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
-    ),
-    '[]'
-  ) AS genes,
   CASE WHEN s.sex IS NOT NULL THEN json_array(s.sex) ELSE '[]' END AS sexes,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT a.race)) FROM subject_race a WHERE a.subject = s.nid
@@ -934,9 +829,6 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -974,9 +866,6 @@ INSERT INTO core_fact (
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -1027,9 +916,6 @@ SELECT
   sf.dccs,
   sf.phenotypes,
   sf.diseases,
-  sf.substances,
-  sf.compounds,
-  sf.genes,
   sf.sexes,
   sf.races,
   sf.ethnicities,
@@ -1080,9 +966,6 @@ FROM (
     sf.dccs,
     sf.phenotypes,
     sf.diseases,
-    sf.substances,
-    sf.compounds,
-    sf.genes,
     sf.sexes,
     sf.races,
     sf.ethnicities,
@@ -1139,9 +1022,6 @@ WHERE u.nid = sf.nid
   AND sf.dccs = cf.dccs
   AND sf.phenotypes = cf.phenotypes
   AND sf.diseases = cf.diseases
-  AND sf.substances = cf.substances
-  AND sf.compounds = cf.compounds
-  AND sf.genes = cf.genes
   AND sf.sexes = cf.sexes
   AND sf.races = cf.races
   AND sf.ethnicities = cf.ethnicities
@@ -1227,42 +1107,6 @@ SELECT
     ),
     '[]'
   ) AS diseases,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT s.value))
-      FROM (
-        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.substances) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.substances) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.substances) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-      ) s
-    ),
-    '[]'
-  ) AS substances,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT s.value))
-      FROM (
-        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.compounds) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.compounds) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.compounds) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-      ) s
-    ),
-    '[]'
-  ) AS compounds,
-  COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT s.value))
-      FROM (
-        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.genes) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.genes) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
-        UNION
-        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.genes) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
-      ) s
-    ),
-    '[]'
-  ) AS genes,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.value))
       FROM (
@@ -1454,9 +1298,6 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -1494,9 +1335,6 @@ INSERT INTO core_fact (
     dccs,
     phenotypes,
     diseases,
-    substances,
-    compounds,
-    genes,
     sexes,
     races,
     ethnicities,
@@ -1547,9 +1385,6 @@ SELECT
   colf.dccs,
   colf.phenotypes,
   colf.diseases,
-  colf.substances,
-  colf.compounds,
-  colf.genes,
   colf.sexes,
   colf.races,
   colf.ethnicities,
@@ -1600,9 +1435,6 @@ FROM (
     colf.dccs,
     colf.phenotypes,
     colf.diseases,
-    colf.substances,
-    colf.compounds,
-    colf.genes,
     colf.sexes,
     colf.races,
     colf.ethnicities,
@@ -1659,9 +1491,6 @@ WHERE u.nid = colf.nid
   AND colf.dccs = cf.dccs
   AND colf.phenotypes = cf.phenotypes
   AND colf.diseases = cf.diseases
-  AND colf.substances = cf.substances
-  AND colf.compounds = cf.compounds
-  AND colf.genes = cf.genes
   AND colf.sexes = cf.sexes
   AND colf.races = cf.races
   AND colf.ethnicities = cf.ethnicities

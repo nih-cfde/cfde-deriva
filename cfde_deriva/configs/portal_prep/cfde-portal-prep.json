@@ -1921,8 +1921,20 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "title": "Numeric ID of core fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer"
                },
                {
@@ -2000,6 +2012,22 @@
                   }
                },
                {
+                  "fields": "gene_fact",
+                  "constraint_name": "collection_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "collection_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "id_namespace",
                   "constraint_name": "collection_id_namespace_fkey",
                   "reference": {
@@ -2031,6 +2059,18 @@
                {
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
@@ -2157,6 +2197,22 @@
                   }
                },
                {
+                  "fields": "gene_fact",
+                  "constraint_name": "file_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "file_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "id_namespace",
                   "constraint_name": "file_id_namespace_fkey",
                   "reference": {
@@ -2250,8 +2306,20 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "title": "Numeric ID of core fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
                   "type": "integer"
                },
                {
@@ -2323,6 +2391,22 @@
                   }
                },
                {
+                  "fields": "gene_fact",
+                  "constraint_name": "biosample_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "biosample_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "id_namespace",
                   "constraint_name": "biosample_id_namespace_fkey",
                   "reference": {
@@ -2377,8 +2461,20 @@
                },
                {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "title": "Numeric ID of core fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "gene_fact",
+                  "title": "Numeric ID of gene fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
                {
@@ -2460,6 +2556,22 @@
                   "constraint_name": "subject_core_fact_fkey",
                   "reference": {
                      "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "subject_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "subject_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
@@ -4040,7 +4152,7 @@
          "profile": "tabular-data-resource",
          "name": "core_fact",
          "title": "Core Statistics",
-         "description": "Core C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "description": "Core metadata properties, representing classes of core C2M2 entities characterized by the same combination of metadata concepts.",
          "schema": {
             "fields": [
                {
@@ -4105,30 +4217,6 @@
                {
                   "name": "diseases",
                   "description": "The paired numeric IDs of the (disease, association type) terms qualifiying the described entities.",
-                  "type": "array",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "substances",
-                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
-                  "type": "array",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "compounds",
-                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
-                  "type": "array",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
-                  "name": "genes",
-                  "description": "The numeric ID of gene qualifying the described entities.",
                   "type": "array",
                   "constraints": {
                      "required": true
@@ -4379,28 +4467,25 @@
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
                   "default": 0,
-                  "derivation_sql_path": "core_fact_num_subjects.sql"
+                  "derivation_sql_path": "core_fact_num_entities.sql"
                },
                {
                   "name": "num_biosamples",
                   "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_biosamples.sql"
+                  "default": 0
                },
                {
                   "name": "num_files",
                   "description": "The number of files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_files.sql"
+                  "default": 0
                },
                {
                   "name": "num_collections",
                   "description": "The number of collections with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "core_fact_num_collections.sql"
+                  "default": 0
                },
                {
                   "name": "total_size_in_bytes",
@@ -4430,9 +4515,6 @@
                "dccs",
                "phenotypes",
                "diseases",
-               "substances",
-               "compounds",
-               "genes",
                "sexes",
                "races",
                "ethnicities",
@@ -4468,6 +4550,155 @@
             ]
          },
          "derivation_sql_path": "core_fact.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "gene_fact",
+         "title": "Gene Statistics",
+         "description": "Gene C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of gene concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "gene_fact_kw.sql"
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "gene_fact_num_entities.sql"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": [
+               "genes"
+            ]
+         },
+         "derivation_sql_path": "gene_fact.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "pubchem_fact",
+         "title": "PubChem Statistics",
+         "description": "PubChem C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of substance/compound concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "pubchem_fact_kw.sql"
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "pubchem_fact_num_entities.sql"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": [
+               "substances",
+               "compounds"
+            ]
+         },
+         "derivation_sql_path": "pubchem_fact.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -4686,14 +4917,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_substance",
-         "description": "An exploded representation of the core_fact.substances array column as a binary association.",
+         "name": "pubchem_fact_substance",
+         "description": "An exploded representation of the pubchem_fact.substances array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "pubchem_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a pubchem_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4701,26 +4932,26 @@
                },
                {
                   "name": "substance",
-                  "description": "The numeric ID of a term found in the core_fact.substances array column.",
+                  "description": "The numeric ID of a term found in the pubchem_fact.substances array column.",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
-            "primaryKey": ["core_fact", "substance"],
+            "primaryKey": ["pubchem_fact", "substance"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_substance_core_fact_fkey",
+                  "fields": "pubchem_fact",
+                  "constraint_name": "pubchem_fact_substance_pubchem_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "substance",
-                  "constraint_name": "core_fact_substance_substance_fkey",
+                  "constraint_name": "pubchem_fact_substance_substance_fkey",
                   "reference": {
                      "resource": "substance",
                      "fields": "nid"
@@ -4732,14 +4963,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_compound",
-         "description": "An exploded representation of the core_fact.compounds array column as a binary association.",
+         "name": "pubchem_fact_compound",
+         "description": "An exploded representation of the pubchem_fact.compounds array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "pubchem_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a pubchem_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4747,26 +4978,26 @@
                },
                {
                   "name": "compound",
-                  "description": "The numeric ID of a term found in the core_fact.compounds array column.",
+                  "description": "The numeric ID of a term found in the pubchem_fact.compounds array column.",
                   "type": "integer",
                   "constraints": {
                      "required": true
                   }
                }
             ],
-            "primaryKey": ["core_fact", "compound"],
+            "primaryKey": ["pubchem_fact", "compound"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_compound_core_fact_fkey",
+                  "fields": "pubchem_fact",
+                  "constraint_name": "pubchem_fact_compound_pubchem_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "compound",
-                  "constraint_name": "core_fact_compound_compound_fkey",
+                  "constraint_name": "pubhchem_fact_compound_compound_fkey",
                   "reference": {
                      "resource": "compound",
                      "fields": "nid"
@@ -4778,14 +5009,14 @@
       },
       {
          "profile": "tabular-data-resource",
-         "name": "core_fact_gene",
-         "description": "An exploded representation of the core_fact.genes array column as a binary association.",
+         "name": "gene_fact_gene",
+         "description": "An exploded representation of the gnen_fact.genes array column as a binary association.",
          "schema": {
             "fields": [
                {
-                  "name": "core_fact",
+                  "name": "gene_fact",
                   "title": "Numeric ID",
-                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "description": "The numeric ID of a gene_fact record in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4800,19 +5031,19 @@
                   }
                }
             ],
-            "primaryKey": ["core_fact", "gene"],
+            "primaryKey": ["gene_fact", "gene"],
             "foreignKeys": [
                {
-                  "fields": "core_fact",
-                  "constraint_name": "core_fact_gene_core_fact_fkey",
+                  "fields": "gene_fact",
+                  "constraint_name": "gene_fact_gene_core_fact_fkey",
                   "reference": {
-                     "resource": "core_fact",
+                     "resource": "gene_fact",
                      "fields": "nid"
                   }
                },
                {
                   "fields": "gene",
-                  "constraint_name": "core_fact_gene_gene_fkey",
+                  "constraint_name": "gene_fact_gene_gene_fkey",
                   "reference": {
                      "resource": "gene",
                      "fields": "nid"
