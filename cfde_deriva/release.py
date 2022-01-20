@@ -328,23 +328,40 @@ class Release (object):
                 "phenotype_association_type",
         ]:
             logger.info("Checking %s for orphaned favorites" % (vocab_tname,))
+
+            def get_terms(url):
+                batch_size = 5000
+                after = None
+                while True:
+                    rows = self.server.get(
+                        url
+                        + '@sort(id)'
+                        + (('@after(%s)' % urlquote(after)) if after is not None else '')
+                        + ('?limit=%d' % batch_size)
+                    ).json()
+                    if not rows:
+                        break
+                    after = rows[-1]['id']
+                    for row in rows:
+                        yield row['id']
+
             favorite_terms = {
-                row['id']
-                for row in self.server.get(
+                term
+                for term in get_terms(
                         '/ermrest/catalog/registry/attributegroup/CFDE:%s/id:=%s' % (
                             urlquote('favorite_' + vocab_tname),
                             urlquote(vocab_tname),
                         )
-                ).json()
+                )
             }
             known_terms = {
-                row['id']
-                for row in self.server.get(
+                term
+                for term in get_terms(
                         '/ermrest/catalog/%s/attributegroup/CFDE:%s/id' % (
                             urlquote(cat_id),
                             urlquote(vocab_tname),
                         )
-                ).json()
+                )
             }
             orphans = favorite_terms - known_terms
             logger.info("Deleting %d orphaned terms..." % len(orphans))
