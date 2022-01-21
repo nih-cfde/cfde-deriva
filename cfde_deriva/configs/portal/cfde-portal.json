@@ -3183,10 +3183,7 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this collection",
-                  "type": "string",
-                  "constraints": {
-                     "unique": true
-                  }
+                  "type": "string"
                },
                {
                   "name": "description",
