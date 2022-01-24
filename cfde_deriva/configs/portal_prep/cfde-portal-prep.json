@@ -4144,7 +4144,7 @@
          },
          "derivation_sql_path": "collection_in_collection_transitive.sql"
       },
-      
+
       {
          "profile": "tabular-data-resource",
          "name": "core_fact",
@@ -4453,13 +4453,6 @@
                },
 
                {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "core_fact_kw.sql"
-               },
-
-               {
                   "name": "num_subjects",
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
@@ -4547,6 +4540,35 @@
             ]
          },
          "derivation_sql_path": "core_fact.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_keyword",
+         "title": "Core Keywords",
+         "description": "Core keyword metadata, representing keyword-matching corpi for classes of core C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": "core_keyword.sql"
       },
       {
          "profile": "tabular-data-resource",

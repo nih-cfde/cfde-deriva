@@ -3612,14 +3612,14 @@
             "source_definitions": {
                "columns": true,
                "fkeys": true,
+               "search-box": {"or": [
+                  {
+                     "source": [ "kw" ],
+                     "markdown_name": "project, collection, or C2M2 CV terms",
+                     "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                  }
+               ]},
                "sources": {
-                  "search-box": {"or": [
-                     {
-                        "source": [ "kw" ],
-                        "markdown_name": "project, collection, or C2M2 CV terms",
-                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
-                     }
-                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
                   },
@@ -4458,16 +4458,19 @@
             "source_definitions": {
                "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5"],
                "fkeys": false,
+               "search-box": {"or": [
+                  {
+                     "source": [ {"sourcekey": "S_core_keyword"}, "kw" ],
+                     "markdown_name": "project, collection, or C2M2 CV terms",
+                     "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
+                  }
+               ]},
                "sources": {
-                  "search-box": {"or": [
-                     {
-                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
-                        "markdown_name": "project, collection, or C2M2 CV terms",
-                        "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
-                     }
-                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
+                  },
+                  "S_core_keyword": {
+                     "source": [{"sourcekey": "S_core_fact"}, {"outbound": ["CFDE", "core_fact_keyword_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
                      "source": [{"outbound": ["CFDE", "file_gene_fact_fkey"]}, "nid" ]
@@ -5323,16 +5326,19 @@
             "source_definitions": {
                "columns": true,
                "fkeys": false,
+               "search-box": {"or": [
+                  {
+                     "source": [ {"sourcekey": "S_core_keyword"}, "kw" ],
+                     "markdown_name": "project, collection, or C2M2 CV terms",
+                     "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                  }
+               ]},
                "sources": {
-                  "search-box": {"or": [
-                     {
-                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
-                        "markdown_name": "project, collection, or C2M2 CV terms",
-                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
-                     }
-                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
+                  "S_core_keyword": {
+                     "source": [{"sourcekey": "S_core_fact"}, {"outbound": ["CFDE", "core_fact_keyword_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
                      "source": [{"outbound": ["CFDE", "biosample_gene_fact_fkey"]}, "nid"]
@@ -6000,16 +6006,19 @@
             "source_definitions": {
                "columns": true,
                "fkeys": true,
+               "search-box": {"or": [
+                  {
+                     "source": [ {"sourcekey": "S_core_keyword"}, "kw" ],
+                     "markdown_name": "project, collection, or C2M2 CV terms",
+                     "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                  }
+               ]},
                "sources": {
-                  "search-box": {"or": [
-                     {
-                        "source": [ {"sourcekey": "S_core_fact"}, "kw" ],
-                        "markdown_name": "project, collection, or C2M2 CV terms",
-                        "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
-                     }
-                  ]},
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
+                  },
+                  "S_core_keyword": {
+                     "source": [{"sourcekey": "S_core_fact"}, {"outbound": ["CFDE", "core_fact_keyword_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
                      "source": [{"outbound": ["CFDE", "subject_gene_fact_fkey"]}, "nid" ]
@@ -6727,18 +6736,18 @@
             "source_definitions": {
                "columns": true,
                "fkeys": false,
+               "search-box": {"or": [
+                  {
+                     "source": [
+                        "name",
+                        "abbreviation",
+                        "description",
+                        "id"
+                     ],
+                     "markdown_name": "project keywords"
+                  }
+               ]},
                "sources": {
-                  "search-box": {"or": [
-                     {
-                        "source": [
-                           "name",
-                           "abbreviation",
-                           "description",
-                           "id"
-                        ],
-                        "markdown_name": "project keywords"
-                     }
-                  ]},
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the project ID.",
                      "source": [{"outbound": ["CFDE", "project_id_namespace_fkey"]}, "nid"]
@@ -8730,18 +8739,6 @@
                },
 
                {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
-               },
-
-               {
                   "name": "num_subjects",
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
@@ -8774,6 +8771,14 @@
             ],
             "primaryKey": "nid",
             "foreignKeys": [
+               {
+                  "fields": "nid",
+                  "constraint_name": "core_fact_keyword_fkey",
+                  "reference": {
+                     "resource": "core_keyword",
+                     "fields": "nid"
+                  }
+               },
                {
                   "fields": "id_namespace",
                   "constraint_name": "core_fact_id_namespace_fkey",
@@ -8875,7 +8880,7 @@
          },
          "deriva": {
             "source_definitions": {
-               "columns": true,
+               "columns": false,
                "fkeys": true,
                "sources": {
                   "S_dccs": {
@@ -9093,6 +9098,38 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "core_keyword",
+         "title": "Core Keywords",
+         "description": "Core C2M2 entity keywords, representing keyword-matching corpi for classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "gene_fact",
          "title": "Gene Statistics",
          "description": "Gene-based C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
@@ -9164,7 +9201,7 @@
          },
          "deriva": {
             "source_definitions": {
-               "columns": true,
+               "columns": false,
                "fkeys": true,
                "sources": {
                   "S_genes": {
@@ -9317,7 +9354,7 @@
          },
          "deriva": {
             "source_definitions": {
-               "columns": true,
+               "columns": false,
                "fkeys": true,
                "sources": {
                   "S_substances": {

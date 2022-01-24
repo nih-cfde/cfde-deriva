@@ -11,10 +11,11 @@ FROM (
          s.name,
          s.description
       ),
-      cf.kw
+      kw.kw
     ) AS kw
   FROM collection s
   JOIN core_fact cf ON (s.core_fact = cf.nid)
+  JOIN core_keyword kw ON (cf.nid = kw.nid)
 ) s
 WHERE v.nid = s.nid
 ;
