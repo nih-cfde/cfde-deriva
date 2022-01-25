@@ -3604,6 +3604,9 @@
                "stable_key_columns": ["id"]
             },
             "table_display": {
+               "*": {
+                  "row_order": [ "core_fact", "nid" ]
+               },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
                   "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
@@ -4450,6 +4453,9 @@
                "stable_key_columns": ["id"]
             },
             "table_display": {
+               "*": {
+                  "row_order": [ "core_fact", "nid" ]
+               },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
                   "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
@@ -5313,6 +5319,9 @@
                "stable_key_columns": ["id"]
             },
             "table_display": {
+               "*": {
+                  "row_order": [ "core_fact", "nid" ]
+               },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
                   "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
@@ -5990,6 +5999,9 @@
                "stable_key_columns": ["id"]
             },
             "table_display": {
+               "*": {
+                  "row_order": [ "core_fact", "nid" ]
+               },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
                   "row_markdown_pattern": "{{#persistent_id}}{{persistent_id}}{{/persistent_id}}{{^persistent_id}}{{id}}{{/persistent_id}}"
