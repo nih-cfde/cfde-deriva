@@ -1082,8 +1082,8 @@ LIMIT 1;
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename is portal_schema_json:
-            raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackage')
+        if not self.package_filename in {portal_schema_json, registry_schema_json}:
+            raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackages')
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
         if tablenames is None:
             tablenames = set(tables_doc.keys())
@@ -1317,7 +1317,8 @@ INSERT INTO %(tname)s (%(fname)s, %(vcol)s)
 SELECT s.nid, j.value
 FROM %(fname)s s
 JOIN json_each(s.%(acol)s) j
-WHERE True;
+WHERE True
+ORDER BY j.value, s.nid;
 """ % {
     "tname": tname,
     "vcol": vcol,

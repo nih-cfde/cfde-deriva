@@ -1,19 +1,4 @@
-UPDATE core_fact AS v
-SET kw = s.kw,
--- HACK: undo usage of -1 in place of NULLs before we send to catalog
--- has nothing to do with kw but this should be done in the same column-rewriting phase
-  project = CASE WHEN v.project = -1 THEN NULL ELSE v.project END,
-  sex = CASE WHEN v.sex = -1 THEN NULL ELSE v.sex END,
-  ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
-  subject_granularity = CASE WHEN v.subject_granularity = -1 THEN NULL ELSE v.subject_granularity END,
-  anatomy = CASE WHEN v.anatomy = -1 THEN NULL ELSE v.anatomy END,
-  assay_type = CASE WHEN v.assay_type = -1 THEN NULL ELSE v.assay_type END,
-  analysis_type = CASE WHEN v.analysis_type = -1 THEN NULL ELSE v.analysis_type END,
-  file_format = CASE WHEN v.file_format = -1 THEN NULL ELSE v.file_format END,
-  compression_format = CASE WHEN v.compression_format = -1 THEN NULL ELSE v.compression_format END,
-  data_type = CASE WHEN v.data_type = -1 THEN NULL ELSE v.data_type END,
-  mime_type = CASE WHEN v.mime_type = -1 THEN NULL ELSE v.mime_type END
-FROM (
+INSERT INTO core_keyword (nid, kw)
   SELECT
     cf.nid,
     cfde_keywords_merge(
@@ -109,7 +94,21 @@ FROM (
     ) AS kw
   FROM core_fact cf
   JOIN id_namespace n ON (cf.id_namespace = n.nid)
+;
 
-) s
-WHERE v.nid = s.nid
+UPDATE core_fact AS v
+SET
+-- HACK: undo usage of -1 in place of NULLs before we send to catalog
+-- has nothing to do with kw but this should be done in the same rewrite order
+  project = CASE WHEN v.project = -1 THEN NULL ELSE v.project END,
+  sex = CASE WHEN v.sex = -1 THEN NULL ELSE v.sex END,
+  ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
+  subject_granularity = CASE WHEN v.subject_granularity = -1 THEN NULL ELSE v.subject_granularity END,
+  anatomy = CASE WHEN v.anatomy = -1 THEN NULL ELSE v.anatomy END,
+  assay_type = CASE WHEN v.assay_type = -1 THEN NULL ELSE v.assay_type END,
+  analysis_type = CASE WHEN v.analysis_type = -1 THEN NULL ELSE v.analysis_type END,
+  file_format = CASE WHEN v.file_format = -1 THEN NULL ELSE v.file_format END,
+  compression_format = CASE WHEN v.compression_format = -1 THEN NULL ELSE v.compression_format END,
+  data_type = CASE WHEN v.data_type = -1 THEN NULL ELSE v.data_type END,
+  mime_type = CASE WHEN v.mime_type = -1 THEN NULL ELSE v.mime_type END
 ;

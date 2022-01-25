@@ -38,13 +38,13 @@ SELECT
     '[]'
   ) AS phenotypes,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.slim_term, a.association_type)))
       FROM (
-        SELECT a.disease, a.association_type FROM file_describes_subject fds JOIN subject_disease a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+        SELECT sl.slim_term, a.association_type FROM file_describes_subject fds JOIN subject_disease a ON (fds.subject = a.subject) JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE fds.file = f.nid
         UNION
-        SELECT a.disease, a.association_type FROM file_describes_biosample fdb JOIN biosample_disease a ON (fdb.biosample = a.biosample) WHERE fdb.file = f.nid
+        SELECT sl.slim_term, a.association_type FROM file_describes_biosample fdb JOIN biosample_disease a ON (fdb.biosample = a.biosample) JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE fdb.file = f.nid
         UNION
-        SELECT a.disease, 0 AS association_type FROM file_in_collection fic JOIN collection_disease a ON (fic.collection = a.collection) WHERE fic.file = f.nid
+        SELECT sl.slim_term, 0 AS association_type FROM file_in_collection fic JOIN collection_disease a ON (fic.collection = a.collection) JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE fic.file = f.nid
       ) a
     ),
     '[]'
@@ -85,25 +85,33 @@ SELECT
     '[]'
   ) AS ncbi_taxons,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT b.anatomy)) FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) WHERE fdb.file = f.nid AND b.anatomy IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) JOIN anatomy_slim_union sl ON (b.anatomy = sl.original_term) WHERE fdb.file = f.nid
     ),
     '[]'
   ) AS anatomies,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
       FROM (
-        SELECT b.assay_type FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) WHERE fdb.file = f.nid AND b.assay_type IS NOT NULL
+        SELECT sl.slim_term FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) JOIN assay_type_slim_union sl ON (b.assay_type = sl.original_term) WHERE fdb.file = f.nid
         UNION
-        SELECT v.nid AS assay_type FROM assay_type v WHERE v.nid = f.assay_type
+        SELECT sl.slim_term FROM assay_type_slim_union sl WHERE sl.original_term = f.assay_type
       ) a
     ),
     '[]'
   ) AS assay_types,
 
   CASE WHEN f.analysis_type IS NOT NULL THEN json_array(f.analysis_type) ELSE '[]' END AS analysis_types,
-  CASE WHEN f.file_format IS NOT NULL THEN json_array(f.file_format) ELSE '[]' END AS file_formats,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_format_slim_union sl WHERE sl.original_term = f.file_format
+    ),
+    '[]'
+  ) AS file_formats,
   CASE WHEN f.compression_format IS NOT NULL THEN json_array(f.compression_format) ELSE '[]' END AS compression_formats,
-  CASE WHEN f.data_type   IS NOT NULL THEN json_array(f.data_type)   ELSE '[]' END AS data_types,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM data_type_slim_union sl WHERE sl.original_term = f.data_type
+    ),
+    '[]'
+  ) AS data_types,
   CASE WHEN f.mime_type   IS NOT NULL THEN json_array(f.mime_type)   ELSE '[]' END AS mime_types
 FROM file f;
 CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
@@ -377,13 +385,13 @@ SELECT
     '[]'
   ) AS phenotypes,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.slim_term, a.association_type)))
       FROM (
-        SELECT a.disease, a.association_type FROM biosample_from_subject bfs JOIN subject_disease a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+        SELECT sl.slim_term, a.association_type FROM biosample_from_subject bfs JOIN subject_disease a ON (bfs.subject = a.subject) JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE bfs.biosample = b.nid
         UNION
-        SELECT a.disease, a.association_type FROM biosample_disease a WHERE a.biosample = b.nid
+        SELECT sl.slim_term, a.association_type FROM biosample_disease a JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE a.biosample = b.nid
         UNION
-        SELECT a.disease, 0 AS association_type FROM biosample_in_collection bic JOIN collection_disease a ON (bic.collection = a.collection) WHERE bic.biosample = b.nid
+        SELECT sl.slim_term, 0 AS association_type FROM biosample_in_collection bic JOIN collection_disease a ON (bic.collection = a.collection) JOIN disease_slim_union sl ON (a.disease = sl.original_term) WHERE bic.biosample = b.nid
       ) a
     ),
     '[]'
@@ -423,13 +431,17 @@ SELECT
     ),
     '[]'
   ) AS ncbi_taxons,
-  CASE WHEN b.anatomy IS NOT NULL THEN json_array(b.anatomy) ELSE '[]' END AS anatomies,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM anatomy_slim_union sl WHERE sl.original_term = b.anatomy
+    ),
+    '[]'
+  ) AS anatomies,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
       FROM (
-        SELECT f.assay_type FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.assay_type IS NOT NULL
+        SELECT sl.slim_term FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) JOIN assay_type_slim_union sl ON (f.assay_type = sl.original_term) WHERE fdb.biosample = b.nid
         UNION
-        SELECT v.nid AS assay_type FROM assay_type v WHERE v.nid = b.assay_type
+        SELECT sl.slim_term FROM assay_type_slim_union sl WHERE sl.original_term = b.assay_type
       ) a
     ),
     '[]'
@@ -441,7 +453,7 @@ SELECT
     '[]'
   ) AS analysis_types,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT f.file_format)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.file_format IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) JOIN file_format_slim_union sl ON (sl.original_term = f.file_format) WHERE fdb.biosample = b.nid
     ),
     '[]'
   ) AS file_formats,
@@ -451,7 +463,7 @@ SELECT
     '[]'
   ) AS compression_formats,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT f.data_type)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) WHERE fdb.biosample = b.nid AND f.data_type IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) JOIN data_type_slim_union sl ON (sl.original_term = f.data_type) WHERE fdb.biosample = b.nid
     ),
     '[]'
   ) AS data_types,
@@ -732,13 +744,13 @@ SELECT
     '[]'
   ) AS phenotypes,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT json_array(a.disease, a.association_type)))
+      SELECT json_sorted(json_group_array(DISTINCT json_array(a.slim_term, a.association_type)))
       FROM (
-        SELECT a.disease, a.association_type FROM subject_disease a WHERE a.subject = s.nid
+        SELECT sl.slim_term, a.association_type FROM subject_disease a JOIN disease_slim_union sl ON (sl.original_term = a.disease) WHERE a.subject = s.nid
         UNION
-        SELECT a.disease, a.association_type FROM biosample_from_subject bfs JOIN biosample_disease a ON (bfs.biosample = a.biosample) WHERE bfs.subject = s.nid
+        SELECT sl.slim_term, a.association_type FROM biosample_from_subject bfs JOIN biosample_disease a ON (bfs.biosample = a.biosample) JOIN disease_slim_union sl ON (sl.original_term = a.disease) WHERE bfs.subject = s.nid
         UNION
-        SELECT a.disease, 0 AS association_type FROM subject_in_collection sic JOIN collection_disease a ON (sic.collection = a.collection) WHERE sic.subject = s.nid
+        SELECT sl.slim_term, 0 AS association_type FROM subject_in_collection sic JOIN collection_disease a ON (sic.collection = a.collection) JOIN disease_slim_union sl ON (sl.original_term = a.disease) WHERE sic.subject = s.nid
       ) a
     ),
     '[]'
@@ -767,16 +779,16 @@ SELECT
     '[]'
   ) AS ncbi_taxons,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT b.anatomy)) FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) WHERE bfs.subject = s.nid AND b.anatomy IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) JOIN anatomy_slim_union sl ON (sl.original_term = b.anatomy) WHERE bfs.subject = s.nid
     ),
     '[]'
   ) AS anatomies,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.assay_type))
+      SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
       FROM (
-        SELECT f.assay_type FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.assay_type IS NOT NULL
+        SELECT sl.slim_term FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) JOIN assay_type_slim_union sl ON (sl.original_term = f.assay_type) WHERE fds.subject = s.nid
         UNION
-        SELECT b.assay_type FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) WHERE bfs.subject = s.nid AND b.assay_type IS NOT NULL
+        SELECT sl.slim_term FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) JOIN assay_type_slim_union sl ON (sl.original_term = b.assay_type) WHERE bfs.subject = s.nid
       ) a
     ),
     '[]'
@@ -788,7 +800,7 @@ SELECT
     '[]'
   ) AS analysis_types,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT f.file_format)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.file_format IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) JOIN file_format_slim_union sl ON (sl.original_term = f.file_format) WHERE fds.subject = s.nid
     ),
     '[]'
   ) AS file_formats,
@@ -798,7 +810,7 @@ SELECT
     '[]'
   ) AS compression_formats,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT f.data_type)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) WHERE fds.subject = s.nid AND f.data_type IS NOT NULL
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) JOIN data_type_slim_union sl ON (sl.original_term = f.data_type) WHERE fds.subject = s.nid
     ),
     '[]'
   ) AS data_types,
@@ -1093,7 +1105,7 @@ SELECT
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT json_array(s.disease, s.association_type)))
       FROM (
-        SELECT a.disease, 0 AS association_type FROM collection_disease a WHERE a.collection = col.nid
+        SELECT sl.slim_term AS disease, 0 AS association_type FROM collection_disease a JOIN disease_slim_union sl ON (sl.original_term = a.disease) WHERE a.collection = col.nid
         UNION
         SELECT json_extract(j.value, '$[0]') AS disease, json_extract(j.value, '$[1]') AS association_type
         FROM file_in_collection fic, file f, core_fact cf, json_each(cf.diseases) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
