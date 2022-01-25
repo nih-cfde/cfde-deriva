@@ -4833,46 +4833,41 @@
                   {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the file.",
+                     "source": [ {"sourcekey": "S_core_fact"}, "project_row" ],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "File Format",
                      "comment": "The content format of the file.",
+                     "source": [  {"sourcekey": "S_core_fact"}, "file_format_row" ],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._file_format_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Data Type",
                      "comment": "The type of data represented by the file.",
+                     "source": [  {"sourcekey": "S_core_fact"}, "data_type_row" ],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._data_type_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Assay Type",
                      "comment": "Assay type used to generate the file.",
+                     "source": [  {"sourcekey": "S_core_fact"}, "assay_type_row" ],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Analysis Type",
                      "comment": "Assay type used to generate the file.",
+                     "source": [  {"sourcekey": "S_core_fact"}, "analysis_type_row" ],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._analysis_type_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   "size_in_bytes",
@@ -5629,28 +5624,25 @@
                   {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the biosample.",
+                     "source": ["S_core_fact", "project_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Anatomy",
                      "comment": "The anatomy from which the biosample is derived.",
+                     "source": ["S_core_fact", "anatomy_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._anatomy_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Assay Type",
                      "comment": "The assay type of the biosample.",
+                     "source": ["S_core_fact", "assay_type_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._assay_type_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   "local_id",
@@ -6390,39 +6382,35 @@
                   {
                      "markdown_name": "Project",
                      "comment": "The project attributed as the source of the subject.",
+                     "source": ["S_core_fact", "project_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._project_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {"sourcekey": "S_taxonomy_array"},
                   {
                      "markdown_name": "Granularity",
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
+                     "source": ["S_core_fact", "subject_granularity_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._subject_granularity_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Sex",
                      "comment": "The sex term characterizing this subject.",
+                     "source": ["S_core_fact", "sex_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._sex_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   {"sourcekey": "S_race_array"},
                   {
                      "markdown_name": "Ethnicity",
                      "comment": "The ethnicity term characterizing this subject.",
+                     "source": ["S_core_fact", "ethnicity_row"],
                      "display": {
-                        "wait_for": ["S_core_fact"],
-                        "template_engine": "handlebars",
-                        "markdown_pattern": "{{#with S_core_fact}}{{values._ethnicity_row.name}}{{/with}}"
+                        "markdown_pattern": "{{{$_self.name}}}"
                      }
                   },
                   "local_id",
