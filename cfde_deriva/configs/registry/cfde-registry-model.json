@@ -639,6 +639,65 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "datapackage_metric",
+         "title": "Datapackage Metric",
+         "description": "Coded vocabulary for a measurement concept applied to datapackages.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A globally unique ID representing this measurement concept.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "rank",
+                  "description": "An optional sorting ordinal for listing metrics in the portal",
+                  "type": "number",
+                  "default": 1000.0,
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, label for this measurement concept.",
+                  "type": "string",
+                  "constraint": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this measurement concept.",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["rank", "id"]
+         },
+         "deriva": {
+            "visible_columns": {
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "rank"}]
+               }
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "datapackage",
          "title": "Submitted Datapackage",
          "description": "Each submitted datapackage currently tracked by the CFDE-CC.",
@@ -1345,6 +1404,195 @@
                   {"sourcekey": "S_subject_granularity"},
                   {"sourcekey": "S_subject_role"}
                ]}
+            }
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_measurement",
+         "title": "Datapackage Measurement",
+         "description": "Measurement data characterizing a datapackage.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "Identifier for the datapackage being measured.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "metric_rank",
+                  "description": "Denormalized copy of metric.rank for use in portal UI,",
+                  "type": "number",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "metric",
+                  "description": "Identifier for the measurement concept being reported.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "value",
+                  "description": "Numerical measurement value being reported.",
+                  "type": "number",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               },
+               {
+                  "name": "numerator",
+                  "description": "Numerator component when reported value is a ratio.",
+                  "type": "number",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               },
+               {
+                  "name": "denominator",
+                  "description": "Denominator component when reported value is a ratio.",
+                  "type": "number",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               },
+               {
+                  "name": "comment",
+                  "description": "Auxilliary human-readable text describing the measurement.",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [ "datapackage", "metric" ],
+            "foreignKeys": [
+               {
+                  "fields": ["metric_rank", "metric"],
+                  "constraint_name": "datapackage_measurement_metric_denorm_fkey",
+                  "reference": {
+                     "resource": "datapackage_metric",
+                     "fields": [ "rank", "id" ]
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": ["metric"],
+                  "constraint_name": "datapackage_measurement_metric_fkey",
+                  "reference": {
+                     "resource": "datapackage_metric",
+                     "fields": [ "id" ]
+                  },
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_measurement_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": [ "id" ]
+                  },
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_measurement_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               },
+               "dcc_group_admin": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_measurement_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"filter": "role", "operand": "cfde_registry_grp_role:admin"},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ]
+               }
+            },
+            "table_display": {
+               "*": {
+                  "row_order": [{"column": "datapackage"}, {"column": "metric_rank"}, {"column": "metric"}]
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": false,
+               "sources": {
+                  "S_metric": {
+                     "source": [{"outbound": ["CFDE", "datapackage_measurement_metric_fkey"]}, "RID"]
+                  },
+                  "S_datapackage": {
+                     "source": [{"outbound": ["CFDE", "datapackage_measurement_datapackage_fkey"]}, "RID"]
+                  },
+                  "S_dcc": {
+                     "source": [
+                        {"sourcekey": "S_datapackage"},
+                        {"outbound": "datapackage_submitting_dcc_fkey"},
+                        "RID"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "compact": [
+                  {"sourcekey": "S_datapackage"},
+                  {"sourcekey": "S_dcc"},
+                  {"sourcekey": "S_metric"},
+                  "value"
+               ]
             }
          }
       },

@@ -61,6 +61,8 @@ activity:
 
 - `datapackage`: each row represents one C2M2 submission
 - `datapackage_table`: each row represents one TSV file of one submission
+- `datapackage_measurement`: each row represents a measurement of one submission
+- `datapackage_metric`: each row represents a measurement concept known by the system
 
 These tables are populated by release-planning and preparation:
 
