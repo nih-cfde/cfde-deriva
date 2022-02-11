@@ -6598,17 +6598,24 @@
                   }
                }
             },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": false
+            },
             "table_display": {
                "row_name": {
                   "row_markdown_pattern": "{{{dcc_abbreviation}}}: {{{dcc_name}}}"
                }
+            },
+            "visible_foreign_keys": {
+               "*": []
             },
             "visible_columns": {
                "detailed": [
                   "id",
                   "dcc_name",
                   "dcc_abbreviation",
-                  {"outbound": ["CFDE", "dcc_project_fkey"]},
+                  {"source": [{"outbound": ["CFDE", "dcc_project_fkey"]}, "nid"]},
                   "contact_name",
                   "contact_email",
                   "dcc_url",
