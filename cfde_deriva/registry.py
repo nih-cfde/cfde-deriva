@@ -13,7 +13,7 @@ from deriva.core.utils.core_utils import AttrDict
 
 from . import exception
 from .tableschema import RegistryConfigurator, authn_id, terms
-from .datapackage import CfdeDataPackage, registry_schema_json
+from .datapackage import CfdeDataPackage, registry_schema_json, tag
 
 logger = logging.getLogger(__name__)
 
@@ -744,7 +744,93 @@ class Registry (object):
         ]
         registry_datapackage.dump_data_files(resources=resources)
 
-def main(subcommand, catalog_id='registry'):
+    def upload_resource_records(self, reg_model, vocab_tname, records=[]):
+        """Upload resource record dicts to vocab table.
+
+        :param reg_model: The deriva-py ermrest Model of this registry
+        :param vocab_tname: The name of a C2M2 vocab table known by the registry
+        :param records: A list of dict-like resource records
+
+        Each record supports two fields:
+        - id: required and CURI must be found in registry's CV table already
+        - resource_markdown: markdown-formatted resource info string
+        """
+        cfde_schema = reg_model.schemas['CFDE']
+        try:
+            vocab_table = cfde_schema.tables[vocab_tname]
+        except KeyError as e:
+            raise ValueError('Unsupported resource vocabulary table name %r' % (vocab_tname,))
+
+        def existing_batches():
+            after = ''
+            while True:
+                rows = self._catalog.get('/attribute/CFDE:%s/id,resource_markdown@sort(id)%s?limit=1000' % (
+                    urlquote(vocab_tname),
+                    after
+                )).json()
+                if rows:
+                    after = '@after(%s)' % urlquote(rows[-1]['id'])
+                    yield rows
+                else:
+                    return
+
+        logger.info('Getting existing resource info for %r...' % (vocab_tname,))
+        existing = {}
+        for batch in existing_batches():
+            existing.update({ row['id']: row for row in batch })
+
+        def is_distinct(v1, v2):
+            if v1 is None:
+                return not (v2 is None)
+            elif v2 is None:
+                return True
+            else:
+                return v1 != v2
+
+        def needs_update(id=None, resource_markdown=None):
+            if id not in existing:
+                raise ValueError('Cannot set resource info for unknown %r term %r' % (vocab_tname, id))
+            return is_distinct(existing[id]['resource_markdown'], resource_markdown)
+
+        need_update = [ record for record in records if needs_update(**record) ]
+        logger.info('Found %d input records with new and different resource information' % (len(need_update),))
+
+        if need_update:
+            self._catalog.put(
+                '/attributegroup/CFDE:%s/id;resource_markdown' % (urlquote(vocab_tname),),
+                json=need_update,
+            ).json() # discard response data
+            logger.info('Updated resource information for %r' % (vocab_tname,))
+        else:
+            logger.info('Skipping %r with no resource information needing update' % (vocab_tname,))
+
+    def upload_resource_files(self, filepaths):
+        """Take input filepaths and upload as resource info for vocab terms.
+
+        :param filepaths: List of one or more filepaths we can open.
+
+        Each file path must have a basename matching a CV table name, after
+        stripping format-specific suffix. Supported format(s):
+
+        - `.json`: File is a JSON array of record objects
+
+        Input is decoded to find a set of records to be passed to
+        self.upload_resource_records.
+
+        """
+        reg_model = self._catalog.getCatalogModel()
+        for fpath in filepaths:
+            bname = os.path.basename(fpath)
+            suffix = bname.split('.')[-1]
+            vocab_tname = '.'.join(bname.split('.')[0:-1])
+            with open(fpath, 'rb') as f:
+                if suffix == 'json':
+                    records = json.load(f)
+                else:
+                    raise ValueError('Unsupported resource filepath suffix %r' % (suffix,))
+                self.upload_resource_records(reg_model, vocab_tname, records)
+
+def main(subcommand, *extra_args):
     """Perform registry maintenance.
 
     :param subcommand: A named sub-command of this utility.
@@ -758,7 +844,7 @@ def main(subcommand, catalog_id='registry'):
        - Adjust existing registry model
     - 'reconfigure' [ catalog_id ]
        - Re-configure existing registry
-    - 'delete' [ catalog_id ]
+    - 'delete' catalog_id
        - Delete an existing registry, i.e. a parallel test DB
     - 'creators-acl' [ catalog_id ]
        - Print ermrest creators ACL
@@ -766,6 +852,7 @@ def main(subcommand, catalog_id='registry'):
        - Write out *.tsv files for onboarding info in registry
     - 'fixup-fqdn' [ catalog_id ]
        - Update URLs to match FQDN service host
+    - 'upload-resources' vocabname.json...
 
     Set environment variables:
     - DERIVA_SERVERNAME to choose service host.
@@ -778,6 +865,14 @@ def main(subcommand, catalog_id='registry'):
     session_config = DEFAULT_SESSION_CONFIG.copy()
     session_config["allow_retry_on_all_methods"] = True
     server = DerivaServer('https', servername, credentials, session_config=session_config)
+
+    catalog_id = 'registry'
+    if subcommand == 'delete' and not extra_args:
+        raise ValueError('delete command requires explicit catalog_id argument')
+
+    if subcommand in { 'provision', 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn' }:
+        if extra_args:
+            catalog_id = extra_args[0]
 
     if catalog_id == '':
         catalog_id = None
@@ -798,7 +893,7 @@ def main(subcommand, catalog_id='registry'):
         ).json()["id"]
         print('Created new catalog %r' % (catalog_id,))
 
-    if subcommand in { 'provision', 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn' }:
+    if subcommand in { 'provision', 'reconfigure', 'delete', 'reprovision', 'dump-onboarding', 'fixup-fqdn', 'upload-resources' }:
         catalog = server.connect_ermrest(catalog_id)
         print('Connected to catalog %r' % catalog.catalog_id)
     else:
@@ -830,6 +925,8 @@ def main(subcommand, catalog_id='registry'):
         registry.dump_onboarding(dp)
     elif subcommand == 'fixup-fqdn':
         registry.fixup_url_hostnames(servername)
+    elif subcommand == 'upload-resources':
+        registry.upload_resource_files(extra_args)
     return 0
 
 if __name__ == '__main__':

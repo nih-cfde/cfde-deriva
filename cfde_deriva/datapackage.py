@@ -36,6 +36,9 @@ logger = logging.getLogger(__name__)
 if 'history_capture' not in tag:
     tag['history_capture'] = 'tag:isrd.isi.edu,2020:history-capture'
 
+if 'cfde_resource_src_rmt' not in tag:
+    tag['cfde_resource_src_rmt'] = 'tag:nih-cfde.org,2022:resource-src-rmt'
+
 # some special singleton strings...
 class _PackageDataName (object):
     def __init__(self, package, filename):

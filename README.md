@@ -439,7 +439,7 @@ model or data updates.
 
 #### Delete registry
 
-AN existing registry can be deleted, e.g. to remove a parallel test
+An existing registry can be deleted, e.g. to remove a parallel test
 registry.
 
 `python -m cfde_deriva.registry delete [<catalog_id>]`
@@ -459,3 +459,37 @@ FQDN.
 
 `python -m cfde_deriva.registry fixup-fqdn [<catalog_id>]`
 
+#### Upload resource markdown
+
+Curated, markdown-formatted resource information can be uploaded to
+augment vocabulary terms known by the registry.
+
+`python -m cfde_deriva.registry upload-resources vocabname.json...`
+
+One or more JSON files are supplied and must be named by a vocabulary
+table name known by the registry plus the suffix `.json`. For example:
+
+- `anatomy.json`
+- `assay_type.json`
+- `ethnicity.json`
+
+This list is not exhaustive, so see other C2M2 documentation for
+more vocabulary names.
+
+The structure of each input JSON file is an array of simple
+records:
+
+```
+[
+  {"id": "CURI", "resource_markdown": "Resource description using **markdown**."},
+  ...
+]
+```
+
+Each record identifies one existing term by its CURI `id` and supplies
+the extra `resource_markdown` payload.  Markdown often contains
+newlines and these will be escaped in the JSON payload as `\n`, a
+backslash character followed by the character `n`.
+
+As soon as uploads are completed, the results can be reviewed by
+browsing the C2M2 vocabulary tables in the submission system itself.
