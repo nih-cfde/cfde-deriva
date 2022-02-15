@@ -2004,6 +2004,21 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2069,6 +2084,21 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -2142,6 +2172,21 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2210,6 +2255,21 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -2341,6 +2401,21 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2419,6 +2494,21 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2488,6 +2578,21 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -2560,6 +2665,21 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2629,6 +2749,21 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -2709,6 +2844,21 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
                   }
                }
             ],
@@ -2798,6 +2948,21 @@
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2867,6 +3032,21 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_granularity",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2924,6 +3104,21 @@
                   "name": "description",
                   "description": "A human-readable description of this sex term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2981,6 +3176,21 @@
                   "name": "description",
                   "description": "A human-readable description of this race term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -3038,6 +3248,21 @@
                   "name": "description",
                   "description": "A human-readable description of this ethnicity term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -3221,6 +3446,21 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_role",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
