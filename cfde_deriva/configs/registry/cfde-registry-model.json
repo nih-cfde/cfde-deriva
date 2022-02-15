@@ -2007,6 +2007,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2039,6 +2040,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2089,6 +2096,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2121,6 +2129,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2175,6 +2189,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2207,6 +2222,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2260,6 +2281,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2292,6 +2314,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2404,6 +2432,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2436,6 +2465,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2497,6 +2532,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2529,6 +2565,13 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "clade",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2583,6 +2626,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2615,6 +2659,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2668,6 +2718,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2700,6 +2751,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2754,6 +2811,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2786,6 +2844,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2848,6 +2912,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2867,6 +2932,7 @@
             "foreignKeys": [
                {
                   "fields": "compound",
+                  "constraint_name": "substance_compound_fkey",
                   "reference": {
                      "resource": "compound",
                      "fields": "id"
@@ -2885,10 +2951,20 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_compound": {
+                     "source": [ {"outbound": ["CFDE", "substance_compound_fkey"]}, "RID" ]
+                  }
                }
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  {"sourcekey": "S_compound"},
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -2951,6 +3027,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -2970,6 +3047,7 @@
             "foreignKeys": [
                {
                   "fields": "organism",
+                  "constraint_name": "gene_organism_fkey",
                   "reference": {
                      "resource": "ncbi_taxonomy",
                      "fields": "id"
@@ -2988,10 +3066,20 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_organism": {
+                     "source": [ {"outbound": ["CFDE", "gene_organism_fkey"]}, "RID" ]
+                  }
                }
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  {"sourcekey": "S_organism"},
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -3035,6 +3123,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -3067,6 +3156,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -3107,6 +3202,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -3139,6 +3235,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -3179,6 +3281,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -3211,6 +3314,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -3251,6 +3360,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -3283,6 +3393,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -3449,6 +3565,7 @@
                },
                {
                   "name": "resource_markdown",
+                  "title": "Resources",
                   "description": "External resource information pre-formatted as markdown",
                   "type": "string",
                   "format": "markdown",
@@ -3483,7 +3600,8 @@
                "*": [
                   "id",
                   "name",
-                  "description"
+                  "description",
+                  "resource_markdown"
                ]
             },
             "visible_foreign_keys": {
