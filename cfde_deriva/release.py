@@ -473,6 +473,7 @@ class Release (object):
                 progress=progress.setdefault('etl', {}),
                 attach={'submission': self.ingest_sqlite_filename},
             )
+            Submission.download_resource_markdown_to_sqlite(self.registry, self.portal_prep_sqlite_filename)
             logger.info('Uploading all release content...')
             self.dump_progress(progress)
             Submission.upload_sqlite_content(catalog, self.portal_prep_sqlite_filename, progress=progress.setdefault('upload', {}))

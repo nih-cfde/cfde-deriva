@@ -426,6 +426,7 @@ class Submission (object):
 
             self.prepare_sqlite_derived_data(self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
             self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
+            self.download_resource_markdown_to_sqlite(self.registry, self.portal_prep_sqlite_filename)
 
             # this needs project_root from prepare_sqlite_derived_data...
             next_error_state = terms.cfde_registry_dp_status.content_error
@@ -1067,6 +1068,83 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
+
+    @classmethod
+    def download_resource_markdown_to_sqlite(cls, registry, portal_prep_filename):
+        """Retrieve resource_markdown content from registry into corresponding sqlite term records.
+
+        :param registry: The Registry instance for the submission system
+        :param portal_prep_filename: The sqlite3 file for the loaded and ETL'd submission content.
+        """
+        registry_dp = CfdeDataPackage(registry_schema_json)
+        registry_dp.set_catalog(registry._catalog)
+
+        with sqlite3.connect(portal_prep_filename) as conn:
+            cur = conn.cursor()
+            logger.info('Retrieving registry vocabulary resource_markdown content...')
+            for table in registry_dp.cat_cfde_schema.tables.values():
+                # skip tables that don't have right structure in registry
+                if {'id', 'name', 'description', 'resource_markdown'} - set(table.columns.elements.keys()):
+                    continue
+
+                # skip tables that don't have right structure in sqlite
+                cur.execute("""
+SELECT true
+FROM sqlite_master t
+JOIN pragma_table_info(%(tname)s) c ON (True)
+WHERE t.type = 'table'
+  AND t.name = %(tname)s
+  AND c.name = 'resource_markdown';
+""" % {
+    'tname': sql_literal(table.name),
+})
+                found = cur.fetchone()
+                if found is None:
+                    continue
+
+                cur.executescript("""
+CREATE TEMP TABLE IF NOT EXISTS temp_resource_markdown (
+  id text PRIMARY KEY,
+  resource_markdown text
+);
+DELETE FROM temp_resource_markdown;
+""")
+                def get_batches():
+                    after = ''
+                    while True:
+                        rows = registry_dp.catalog.get(
+                            '/attribute/CFDE:%s/!resource_markdown::null::/id,resource_markdown@sort(id)%s?limit=500' % (
+                                urlquote(table.name),
+                                after,
+                            )
+                        ).json()
+                        if rows:
+                            after = '@after(%s)' % (urlquote(rows[-1]['id']),)
+                            yield rows
+                        else:
+                            break
+
+                for batch in get_batches():
+                    cur.execute("""
+INSERT INTO temp_resource_markdown (id, resource_markdown)
+VALUES %(values)s;
+""" % {
+    'values': ', '.join([
+        '(%s, %s)' % (sql_literal(row['id']), sql_literal(row['resource_markdown']))
+        for row in batch
+    ])
+})
+                cur.execute("""
+UPDATE %(tname)s AS v
+SET resource_markdown = t.resource_markdown
+FROM temp_resource_markdown t
+WHERE v.id = t.id;
+""" % {
+    'tname': sql_identifier(table.name),
+})
+                cur.execute("SELECT count(*) FROM temp_resource_markdown;")
+                nrows = cur.fetchone()[0]
+                logger.info('Stored resource_markdown for %s rows of %r' % (nrows, table.name,))
 
     @classmethod
     def record_vocab_usage(cls, registry, portal_prep_filename, id):
