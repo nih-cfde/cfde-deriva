@@ -185,7 +185,7 @@ helper routine in the release submodule.
 
 `python -m cfde_deriva.release rebuild-submissions <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -272,7 +272,7 @@ is supplied in place of the `new` keyword:
 
 `python -m 'cfde_deriva.release' draft <release_id> [<description>]`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 - description is a short, human-readable string which will be visible in the release registry
@@ -291,7 +291,7 @@ built into a catalog using:
 
 `python -m 'cfde_deriva.release' build <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -331,7 +331,7 @@ data content.
 
 `python -m 'cfde_deriva.release' reconfigure <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -346,7 +346,7 @@ over time.
 
 `python -m 'cfde_deriva.release' publish <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -371,6 +371,20 @@ known terms.
 `python -m 'cfde_deriva.release' prune-favorites <release_id>`
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
+
+#### Release refresh resource markdown
+
+The vocabulary term resource markdown content in a release can be
+refreshed to match the latest in the registry.
+
+`python -m cfde_deriva.release refresh-resources <release_id>`
+
+Command-line arguments:
+
+- release_id is a `CFDE`.`release.`id` key from the registry
+
+The release must already be in a content-ready or released
+state to allow refresh.
 
 #### Release purge
 

@@ -378,6 +378,95 @@ class Release (object):
                 )
             logger.info("Deleted orphans %r for %s" % (orphans, vocab_tname,))
 
+    def refresh_resource_markdown(self):
+        """Refresh the vocabulary resource_markdown content with latest in registry.
+
+        This mechanism is fragile and will break if invoked against a
+        release that does not have the new resource_markdown fields in
+        its schema.
+
+        """
+        rel_row = self.rel_row
+        cat_id = self.catalog_id
+
+        if rel_row.get('status') not in {
+                terms.cfde_registry_rel_status.content_ready,
+                terms.cfde_registry_rel_status.public_release, # eventual consistency/idempotence
+        }:
+            raise exception.StateError('Release %(id)s status=%(status)r not safe for refreshing resource markdown' % rel_row)
+
+        for vocab_tname in [
+                "anatomy",
+                "disease",
+                "compound",
+                "substance",
+                "gene",
+                "assay_type",
+                "analysis_type",
+                "data_type",
+                "file_format",
+                "ncbi_taxonomy",
+                "phenotype",
+                "subject_granularity",
+                "subject_role",
+                "sex",
+                "race",
+                "ethnicity",
+        ]:
+            authoritative = {}
+            existing = {}
+
+            def get_batches(baseurl, filterpart=''):
+                after = ''
+                while True:
+                    rows = self.server.get(
+                        baseurl
+                        + '/attribute/CFDE:' + urlquote(vocab_tname)
+                        + filterpart
+                        + '/id,resource_markdown'
+                        + '@sort(id)'
+                        + after
+                        + '?limit=500'
+                    ).json()
+                    if rows:
+                        after = '@after(%s)' % (urlquote(rows[-1]['id']),)
+                        yield rows
+                    else:
+                        break
+
+            # only get authoritative terms w/ non-null resource info
+            for batch in get_batches('/ermrest/catalog/registry', '/!resource_markdown::null::'):
+                authoritative.update({
+                    row['id']: row['resource_markdown']
+                    for row in batch
+                })
+
+            # get all release terms since we need to know which IDs exist
+            for batch in get_batches('/ermrest/catalog/%s' % (urlquote(cat_id),)):
+                existing.update({
+                    row['id']: row['resource_markdown']
+                    for row in batch
+                })
+
+            need_update = [
+                {'id': k, 'resource_markdown': authoritative.get(k)}
+                for k, v in existing.items()
+                if v != authoritative.get(k)
+            ]
+            nrows = len(need_update)
+
+            while need_update:
+                self.server.put(
+                    '/ermrest/catalog/%s/attributegroup/CFDE:%s/id;resource_markdown' % (
+                        urlquote(cat_id),
+                        urlquote(vocab_tname),
+                    ),
+                    json=need_update[0:500],
+                ).json() # discard response content
+                need_update = need_update[500:]
+
+            logger.info("Refreshed %d resource_markdown values for %r..." % (nrows, vocab_tname,))
+
     def build(self):
         """Idempotently run release-build processing lifecycle.
 
@@ -560,7 +649,6 @@ class Release (object):
         """
         return '%s/progress/%s.json' % (self.content_path_root, self.release_id)
 
-
 def main(subcommand, *args):
     """Ugly test-harness for data release.
 
@@ -586,8 +674,10 @@ def main(subcommand, *args):
        - Revise policy/presentation config on existing catalog
     - 'publish' release_id
        - Adjust the /ermrest/catalog/1 alias to point to the identified release's catalog
-    - 'prune' release_id
+    - 'prune-favorites' release_id
        - Remove user favorite terms from the registry for terms not present in release
+    - 'refresh-resources' release_id
+       - Update release's CV terms with latest resource_markdown content in registry
     - 'purge' release_id
        - Purge release's backing ermrest catalog storage and update release record status
     - 'purge-auto'
@@ -671,7 +761,7 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'analyze', 'prune-favorites'}:
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'analyze', 'prune-favorites', 'refresh-resources'}:
         if len(args) < 1:
             raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
@@ -705,6 +795,9 @@ def main(subcommand, *args):
         elif subcommand == 'prune-favorites':
             release.prune_favorites()
             print("Favorites pruned based on release")
+        elif subcommand == 'refresh-resources':
+            release.refresh_resource_markdown()
+            print("Resource markdown refreshed on release")
         elif subcommand == 'analyze':
             catalog = server.connect_ermrest(release.catalog_id)
             r = catalog.post('/?analyze')
