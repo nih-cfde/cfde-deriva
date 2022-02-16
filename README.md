@@ -185,7 +185,7 @@ helper routine in the release submodule.
 
 `python -m cfde_deriva.release rebuild-submissions <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -272,7 +272,7 @@ is supplied in place of the `new` keyword:
 
 `python -m 'cfde_deriva.release' draft <release_id> [<description>]`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 - description is a short, human-readable string which will be visible in the release registry
@@ -291,7 +291,7 @@ built into a catalog using:
 
 `python -m 'cfde_deriva.release' build <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -331,7 +331,7 @@ data content.
 
 `python -m 'cfde_deriva.release' reconfigure <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -346,7 +346,7 @@ over time.
 
 `python -m 'cfde_deriva.release' publish <release_id>`
 
-Command-like arguments:
+command-line arguments:
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
 
@@ -371,6 +371,20 @@ known terms.
 `python -m 'cfde_deriva.release' prune-favorites <release_id>`
 
 - release_id is a `CFDE`.`release`.`id` key from the registry
+
+#### Release refresh resource markdown
+
+The vocabulary term resource markdown content in a release can be
+refreshed to match the latest in the registry.
+
+`python -m cfde_deriva.release refresh-resources <release_id>`
+
+Command-line arguments:
+
+- release_id is a `CFDE`.`release.`id` key from the registry
+
+The release must already be in a content-ready or released
+state to allow refresh.
 
 #### Release purge
 
@@ -439,7 +453,7 @@ model or data updates.
 
 #### Delete registry
 
-AN existing registry can be deleted, e.g. to remove a parallel test
+An existing registry can be deleted, e.g. to remove a parallel test
 registry.
 
 `python -m cfde_deriva.registry delete [<catalog_id>]`
@@ -459,3 +473,37 @@ FQDN.
 
 `python -m cfde_deriva.registry fixup-fqdn [<catalog_id>]`
 
+#### Upload resource markdown
+
+Curated, markdown-formatted resource information can be uploaded to
+augment vocabulary terms known by the registry.
+
+`python -m cfde_deriva.registry upload-resources vocabname.json...`
+
+One or more JSON files are supplied and must be named by a vocabulary
+table name known by the registry plus the suffix `.json`. For example:
+
+- `anatomy.json`
+- `assay_type.json`
+- `ethnicity.json`
+
+This list is not exhaustive, so see other C2M2 documentation for
+more vocabulary names.
+
+The structure of each input JSON file is an array of simple
+records:
+
+```
+[
+  {"id": "CURI", "resource_markdown": "Resource description using **markdown**."},
+  ...
+]
+```
+
+Each record identifies one existing term by its CURI `id` and supplies
+the extra `resource_markdown` payload.  Markdown often contains
+newlines and these will be escaped in the JSON payload as `\n`, a
+backslash character followed by the character `n`.
+
+As soon as uploads are completed, the results can be reviewed by
+browsing the C2M2 vocabulary tables in the submission system itself.
