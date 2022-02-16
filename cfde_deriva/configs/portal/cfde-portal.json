@@ -203,6 +203,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -274,6 +290,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -342,6 +364,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -350,6 +388,81 @@
          "deriva": {
             "table_config": {
                "stable_key_columns": ["id"]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_analysis_type_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_analysis_type_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this analysis type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this analysis type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Cllections referencing this analysis type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files referencing this analysis type.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_file"}
+               ]
             }
          }
       },
@@ -409,6 +522,22 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -480,6 +609,13 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "clade",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -565,6 +701,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -638,6 +790,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -723,6 +881,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -792,6 +966,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -877,6 +1057,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -946,6 +1142,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -1031,6 +1233,22 @@
                         "trgm": true
                      }
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1111,6 +1329,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -1181,6 +1405,22 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -1265,6 +1505,12 @@
                   "name",
                   "description"
                ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
                "filter": {"and": [
                   {"source": "id"},
                   {"source": "name"},
@@ -1335,6 +1581,22 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
                      }
                   }
                }
@@ -1416,6 +1678,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -1494,6 +1762,22 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
                   }
                }
             ],
@@ -1575,7 +1859,8 @@
                   "id",
                   "name",
                   {"sourcekey": "S_compound"},
-                  "description"
+                  "description",
+                  "resource_markdown"
                ],
                "compact": [
                   "id",
@@ -1658,6 +1943,22 @@
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1690,6 +1991,9 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_organism": {
+                     "source": [ {"outbound": ["CFDE", "gene_organism_fkey"]}, "nid" ]
+                  },
                   "S_phenotype": {
                      "markdown_name": "Phenotype",
                      "comment": "Phenotypes linked to this gene term.",
@@ -1746,6 +2050,13 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  {"sourcekey": "S_organism"},
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"
@@ -1924,6 +2235,22 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_role",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -1986,6 +2313,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -2043,6 +2376,22 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_granularity",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2105,6 +2454,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -2162,6 +2517,22 @@
                   "name": "description",
                   "description": "A human-readable description of this sex",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2224,6 +2595,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -2283,6 +2660,22 @@
                   "name": "description",
                   "description": "A human-readable description of this race",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2345,6 +2738,12 @@
                "*": [
                   "id",
                   "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
                   "description"
                ],
                "filter": {"and": [
@@ -2404,6 +2803,22 @@
                   "name": "description",
                   "description": "A human-readable description of this ethnicity",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -2464,6 +2879,12 @@
             },
             "visible_columns": {
                "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
                   "id",
                   "name",
                   "description"

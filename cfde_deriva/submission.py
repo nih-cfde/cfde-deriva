@@ -416,6 +416,7 @@ class Submission (object):
             self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
+            # TODO: remove this deprecated compatibility transform from code?
             next_error_state = terms.cfde_registry_dp_status.ops_error
             try:
                 self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
@@ -1112,7 +1113,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
                     'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
                 },
-                skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid'},
+                skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid', 'resource_markdown'},
             )
             logger.info('Recording submission vocabulary usage in registry...')
             cur = conn.cursor()

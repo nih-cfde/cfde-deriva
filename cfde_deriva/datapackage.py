@@ -1661,6 +1661,7 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
         # raise KeyError if we encounter an unmapped type!
         return {
             'text': 'text',
+            'markdown': 'text',
             'timestamptz': 'datetime',
             'date': 'date',
             'int8': 'int8',
