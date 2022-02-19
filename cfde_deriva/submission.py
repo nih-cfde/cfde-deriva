@@ -22,11 +22,11 @@ from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
 
-from deriva.core import DerivaServer, get_credential, init_logging, urlquote, topo_sorted
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tnames_topo_sorted
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tables_topo_sorted
 from .cfde_login import get_archive_headers_map
 
 
@@ -1170,22 +1170,25 @@ WHERE v.id = t.id;
             registry_dp.load_sqlite_tables(
                 conn,
                 onconflict='update',
-                tablenames={
-                    'anatomy',
-                    'assay_type',
-                    'data_type',
-                    'disease',
-                    'file_format',
-                    'mime_type',
-                    'ncbi_taxonomy',
-                    'compound',
-                    'substance',
-                    'gene',
-                    'analysis_type',
-                    'phenotype',
-                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
-                    # which are closed enums for the DCCs...
-                },
+                tables=[
+                    registry_dp.doc_cfde_schema.tables[tname]
+                    for tname in [
+                            'anatomy',
+                            'assay_type',
+                            'data_type',
+                            'disease',
+                            'file_format',
+                            'mime_type',
+                            'ncbi_taxonomy',
+                            'compound',
+                            'substance',
+                            'gene',
+                            'analysis_type',
+                            'phenotype',
+                            # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
+                            # which are closed enums for the DCCs...
+                    ]
+                ],
                 # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
                 table_queries={
                     'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',

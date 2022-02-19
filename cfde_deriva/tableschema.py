@@ -797,13 +797,13 @@ def make_id(*components):
                 return result
     raise NotImplementedError('Could not generate valid ID for components "%r"' % expanded)
 
-def make_key(tname, cols):
+def make_key(sname, tname, cols):
     return Key.define(
         cols,
-        constraint_names=[[ schema_name, make_id(tname, cols, 'key') ]],
+        constraint_names=[[ sname, make_id(tname, cols, 'key') ]],
     )
 
-def make_fkey(tname, fkdef, trusted=False):
+def make_fkey(sname, tname, fkdef, trusted=False):
     fkcols = fkdef.pop("fields")
     fkcols = [fkcols] if isinstance(fkcols, str) else fkcols
     reference = fkdef.pop("reference")
@@ -848,7 +848,7 @@ def make_fkey(tname, fkdef, trusted=False):
         pkschema,
         pktable,
         pkcols,
-        constraint_names=[[ schema_name, constraint_name ]],
+        constraint_names=[[ sname, constraint_name ]],
         on_delete=on_delete,
         on_update=on_update,
         annotations=annotations,
@@ -856,7 +856,7 @@ def make_fkey(tname, fkdef, trusted=False):
         acl_bindings=acl_bindings,
     )
 
-def make_table(tdef_resource, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
+def make_table(sname, tdef_resource, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
     if provide_system is None:
         provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
 
@@ -873,7 +873,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         system_columns = Table.system_column_defs()
         # bypass bug in deriva-py producing invalid default constraint name for system key
         #system_keys = Table.system_key_defs()
-        system_keys = [ make_key(tname, ['RID']) ]
+        system_keys = [ make_key(sname, tname, ['RID']) ]
         # customize the system column templates...
         for col in system_columns:
             cname = col['name']
@@ -895,7 +895,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         system_fkeys = [
             ForeignKey.define(
                 [cname], 'public', 'ERMrest_Client', ['ID'],
-                constraint_names=[[ schema_name, make_id(tname, cname, 'fkey') ]]
+                constraint_names=[[ sname, make_id(tname, cname, 'fkey') ]]
             )
             for cname in ['RCB', 'RMB']
         ]
@@ -906,7 +906,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
 
     if provide_nid:
         system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
-        system_keys.append(make_key(tname, ['nid']))
+        system_keys.append(make_key(sname, tname, ['nid']))
 
     # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints
     keys = {
@@ -917,11 +917,11 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
-        keys.setdefault(frozenset(pk), make_key(tname, pk))
+        keys.setdefault(frozenset(pk), make_key(sname, tname, pk))
     tdef_fields = tdef.pop("fields", None)
     for cdef in tdef_fields:
         if cdef.get("constraints", {}).pop("unique", False):
-            keys.setdefault(frozenset([cdef["name"]]), make_key(tname, [cdef["name"]]))
+            keys.setdefault(frozenset([cdef["name"]]), make_key(sname, tname, [cdef["name"]]))
     keys = list(keys.values())
     tdef_fkeys = tdef.pop("foreignKeys", [])
 
@@ -968,7 +968,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         for i in range(len(fkeys))
     }
     for fkdef in tdef_fkeys:
-        fkey = make_fkey(tname, fkdef, trusted=trusted)
+        fkey = make_fkey(sname, tname, fkdef, trusted=trusted)
         fkmap = frozenset(zip(
             [ v['column_name'] for v in fkey['foreign_key_columns'] ],
             [ (v.get('schema_name'), v.get('table_name'), v['column_name']) for v in fkey['referenced_columns'] ]
@@ -1033,7 +1033,7 @@ def make_model(tableschema, configurator, trusted=False):
                         tag["indexing_preferences"]: indexing_preferences
                     }
                 })
-        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
+        schemas[sname]["tables"][tname] = make_table(sname, tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
     return {
         "schemas": schemas,
         "annotations": annotations,
