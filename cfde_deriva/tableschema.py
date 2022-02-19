@@ -142,6 +142,7 @@ class CatalogConfigurator (object):
     }
     schema_acls = {
         "CFDE": { "select": [ authn_id.cfde_portal_admin ] },
+        "raw": { "select": [ authn_id.cfde_portal_admin ] },
         "public": { "select": [] },
     }
     schema_table_acls = {}
@@ -443,6 +444,7 @@ class ReleaseConfigurator (CatalogConfigurator):
         CatalogConfigurator.schema_acls,
         {
             "CFDE": { "select": ["*"] },
+            "raw": { "select": ["*"] },
         }
     )
 
@@ -472,6 +474,7 @@ class ReviewConfigurator (CatalogConfigurator):
             CatalogConfigurator.schema_acls,
             {
                 "CFDE": { "select": list(cfde_portal_viewers) },
+                "raw": { "select": list(cfde_portal_viewers) },
             }
         )
         if self.registry is not None and self.submission_id is not None:
