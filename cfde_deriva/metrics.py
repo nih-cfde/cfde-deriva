@@ -54,6 +54,7 @@ def register_datapackage_metrics(registry_catalog, records):
     Optional fields will be populated with the default if omitted:
     - rank: floating point ordinal for sorting metrics
     - description: a longer human-readable explanation of a metric
+    - hide: boolean "true" to suppress metric displays in portal
 
     This will insert new metrics not already known by the registry but
     will leave existing metrics unmodified (using existing registry
@@ -67,6 +68,7 @@ def register_datapackage_metrics(registry_catalog, records):
         curi = _get_required(record, 'id')
         name = _get_required(record, 'name')
         rank = record.get('rank', 1000.0) # HACK, use same default as in registry schema
+        hide = record.get('hide', False)  # HACK, use same default as in registry schema
         description = record.get('description')
         if curi in by_id:
             raise ValueError('records cannot share "id" field %r' % (curi,))

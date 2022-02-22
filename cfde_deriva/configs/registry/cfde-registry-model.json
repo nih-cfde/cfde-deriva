@@ -655,9 +655,18 @@
                },
                {
                   "name": "rank",
-                  "description": "An optional sorting ordinal for listing metrics in the portal",
+                  "description": "A sorting ordinal for listing metrics in the portal",
                   "type": "number",
                   "default": 1000.0,
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "hide",
+                  "description": "Whether to hide the metric in portal FAIR displays",
+                  "type": "boolean",
+                  "default": false,
                   "constraints": {
                      "required": true
                   }
