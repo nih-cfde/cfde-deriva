@@ -99,7 +99,7 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
 
     A term record has the following mandatory fields:
     - metric: CURI-like global id for a metric
-    - value: floating point measurement value
+    - value: floating point measurement value (or null if not measurable)
 
     Optional fields will be populated with None if omitted:
     - numerator: floating point numerator for ratio-based values

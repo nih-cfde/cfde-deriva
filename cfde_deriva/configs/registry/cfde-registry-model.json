@@ -1467,9 +1467,6 @@
                   "name": "value",
                   "description": "Numerical measurement value being reported.",
                   "type": "number",
-                  "constraints": {
-                     "required": true
-                  },
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
