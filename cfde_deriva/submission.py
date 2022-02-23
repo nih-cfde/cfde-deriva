@@ -1079,7 +1079,7 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             logger.debug('Idempotently uploading raw data from %s' % (sqlite_filename,))
             canon_dp = CfdeDataPackage(portal_schema_json)
             canon_dp.set_catalog(catalog)
-            tables = canon_dp.doc_model_root.schemas['raw'].tables.values()
+            tables = canon_dp.doc_model_root.schemas['c2m2'].tables.values()
             canon_dp.load_sqlite_tables(conn, onconflict='skip', tables=tables, table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
@@ -1302,7 +1302,7 @@ WHERE id IS NOT NULL
                 if 'CFDE' in review_model.schemas:
                     logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
                     tables = list(review_model.schemas['CFDE'].tables.values())
-                    tables.extend(review_model.schemas['raw'].tables.values())
+                    tables.extend(review_model.schemas['c2m2'].tables.values())
                     for table in reversed(tables_topo_sorted(tables)):
                         submission.review_catalog.delete('/schema/%s/table/%s' % (
                             urlquote(table.schema.name),

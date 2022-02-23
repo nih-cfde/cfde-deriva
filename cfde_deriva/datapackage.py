@@ -1,12 +1,10 @@
 
 import os
-import io
 import sys
 import re
 import json
 import csv
 import logging
-import pkgutil
 import itertools
 from collections import UserString
 import sqlite3
@@ -16,7 +14,7 @@ from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, bui
 import requests
 
 from . import tableschema
-from .configs import submission, portal_prep, portal, registry
+from .tableschema import PackageDataName, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json
 from .exception import IncompatibleDatapackageModel, InvalidDatapackage
 
 """
@@ -39,42 +37,6 @@ if 'history_capture' not in tag:
 if 'cfde_resource_src_rmt' not in tag:
     tag['cfde_resource_src_rmt'] = 'tag:nih-cfde.org,2022:resource-src-rmt'
 
-# some special singleton strings...
-class _PackageDataName (object):
-    def __init__(self, package, filename):
-        self.package = package
-        self.filename = filename
-
-    def __str__(self):
-        return self.filename
-
-    def get_data(self, key=None):
-        """Get named content as raw buffer
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        if key is None:
-            key = self.filename
-        return pkgutil.get_data(self.package.__name__, key)
-
-    def get_data_str(self, key=None):
-        """Get named content as unicode decoded str
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        return self.get_data(key).decode()
-
-    def get_data_stringio(self, key=None):
-        """Get named content as unicode decoded StringIO buffer object
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        return io.StringIO(self.get_data_str(key))
-
-submission_schema_json = _PackageDataName(submission, 'c2m2-datapackage.json')
-portal_prep_schema_json = _PackageDataName(portal_prep, 'cfde-portal-prep.json')
-portal_schema_json = _PackageDataName(portal, 'cfde-portal.json')
-registry_schema_json = _PackageDataName(registry, 'cfde-registry-model.json')
 
 def sql_identifier(s):
     return '"%s"' % (s.replace('"', '""'),)
@@ -147,7 +109,7 @@ class CfdeDataPackage (object):
           - portal_schema_json
           - registry_schema_json
         """
-        if not isinstance(package_filename, (str, _PackageDataName)):
+        if not isinstance(package_filename, (str, PackageDataName)):
             raise TypeError('package_filename must be a str filepath or built-in package data name')
         if not isinstance(configurator, (tableschema.CatalogConfigurator, type(None))):
             raise TypeError('configurator must be an instance of tableschema.CatalogConfigurator or None')
@@ -163,7 +125,7 @@ class CfdeDataPackage (object):
         self.cat_has_history_control = None
 
         # load 2 copies... first is mutated during translation
-        if isinstance(package_filename, _PackageDataName):
+        if isinstance(package_filename, PackageDataName):
             package_def = json.loads(package_filename.get_data_str())
             self.package_def = json.loads(package_filename.get_data_str())
         else:
@@ -172,11 +134,11 @@ class CfdeDataPackage (object):
             with open(self.package_filename, 'r') as f:
                 self.package_def = json.load(f)
 
-        self.model_doc = tableschema.make_model(package_def, configurator=self.configurator, trusted=isinstance(self.package_filename, _PackageDataName))
+        self.model_doc = tableschema.make_model(package_def, configurator=self.configurator, trusted=isinstance(self.package_filename, PackageDataName))
         self.doc_model_root = Model(None, self.model_doc)
         self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
-        if not set(self.model_doc['schemas']).issubset({'CFDE', 'public', 'raw'}):
+        if not set(self.model_doc['schemas']).issubset({'CFDE', 'public', 'c2m2'}):
             raise ValueError('Unexpected schema set in data package: %s' % (set(self.model_doc['schemas']),))
 
     def set_catalog(self, catalog, registry=None):
@@ -351,7 +313,7 @@ class CfdeDataPackage (object):
                         # HACK: prepare to allow registry upgrades w/ new non-null columns
                         cdoc_orig = dict(cdoc)
                         upgrade_data_path = cdoc.get('annotations', {}).get(self.schema_tag, {}).get('schema_upgrade_data_path')
-                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                        if upgrade_data_path and isinstance(self.package_filename, PackageDataName):
                             cdoc['nullok'] = True
 
                         self.catalog.post(
@@ -361,7 +323,7 @@ class CfdeDataPackage (object):
                         logger.info("Added column %s.%s.%s" % (nschema.name, ntable.name, ncolumn.name))
 
                         # apply built-in upgrade data to new column
-                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                        if upgrade_data_path and isinstance(self.package_filename, PackageDataName):
                             with self.package_filename.get_data_stringio(upgrade_data_path) as upgrade_tsv:
                                 reader = csv.reader(upgrade_tsv, delimiter='\t')
                                 header = next(reader)
@@ -731,7 +693,7 @@ class CfdeDataPackage (object):
             if "path" not in resource:
                 continue
             def open_package():
-                if isinstance(self.package_filename, _PackageDataName):
+                if isinstance(self.package_filename, PackageDataName):
                     path = resource["path"]
                     if self.package_filename is registry_schema_json and path.startswith("/submission/"):
                         # allow absolute path to reference submission package
@@ -854,7 +816,7 @@ class CfdeDataPackage (object):
                 continue
             logger.debug('Importing table "%s" into sqlite...' % table.name)
             def open_package():
-                if isinstance(self.package_filename, _PackageDataName):
+                if isinstance(self.package_filename, PackageDataName):
                     return self.package_filename.get_data_stringio(resource["path"])
                 else:
                     fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
