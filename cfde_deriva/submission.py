@@ -22,11 +22,11 @@ from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
 
-from deriva.core import DerivaServer, get_credential, init_logging, urlquote, topo_sorted
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tnames_topo_sorted
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tables_topo_sorted
 from .cfde_login import get_archive_headers_map
 
 
@@ -434,6 +434,7 @@ class Submission (object):
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
+            self.upload_sqlite_raw_content(self.review_catalog, self.ingest_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
@@ -1070,6 +1071,18 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
+    def upload_sqlite_raw_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None, progress=None):
+        """Idempotently upload orignal datapackage content in sqlite db into review catalog."""
+        if progress is None:
+            progress = dict()
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Idempotently uploading raw data from %s' % (sqlite_filename,))
+            canon_dp = CfdeDataPackage(portal_schema_json)
+            canon_dp.set_catalog(catalog)
+            tables = canon_dp.doc_model_root.schemas['c2m2'].tables.values()
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', tables=tables, table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
+
+    @classmethod
     def download_resource_markdown_to_sqlite(cls, registry, portal_prep_filename):
         """Retrieve resource_markdown content from registry into corresponding sqlite term records.
 
@@ -1170,22 +1183,25 @@ WHERE v.id = t.id;
             registry_dp.load_sqlite_tables(
                 conn,
                 onconflict='update',
-                tablenames={
-                    'anatomy',
-                    'assay_type',
-                    'data_type',
-                    'disease',
-                    'file_format',
-                    'mime_type',
-                    'ncbi_taxonomy',
-                    'compound',
-                    'substance',
-                    'gene',
-                    'analysis_type',
-                    'phenotype',
-                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
-                    # which are closed enums for the DCCs...
-                },
+                tables=[
+                    registry_dp.doc_cfde_schema.tables[tname]
+                    for tname in [
+                            'anatomy',
+                            'assay_type',
+                            'data_type',
+                            'disease',
+                            'file_format',
+                            'mime_type',
+                            'ncbi_taxonomy',
+                            'compound',
+                            'substance',
+                            'gene',
+                            'analysis_type',
+                            'phenotype',
+                            # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
+                            # which are closed enums for the DCCs...
+                    ]
+                ],
                 # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
                 table_queries={
                     'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
@@ -1285,10 +1301,15 @@ WHERE id IS NOT NULL
                 review_model = submission.review_catalog.getCatalogModel()
                 if 'CFDE' in review_model.schemas:
                     logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
-                    for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
-                        submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
-                    logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
-                    Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
+                    tables = list(review_model.schemas['CFDE'].tables.values())
+                    tables.extend(review_model.schemas['c2m2'].tables.values())
+                    for table in reversed(tables_topo_sorted(tables)):
+                        submission.review_catalog.delete('/schema/%s/table/%s' % (
+                            urlquote(table.schema.name),
+                            urlquote(table.name),
+                        ))
+                logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
+                Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
         #
         submission.ingest()
 

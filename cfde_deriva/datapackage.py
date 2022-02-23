@@ -1,12 +1,10 @@
 
 import os
-import io
 import sys
 import re
 import json
 import csv
 import logging
-import pkgutil
 import itertools
 from collections import UserString
 import sqlite3
@@ -16,7 +14,7 @@ from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, bui
 import requests
 
 from . import tableschema
-from .configs import submission, portal_prep, portal, registry
+from .tableschema import PackageDataName, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json
 from .exception import IncompatibleDatapackageModel, InvalidDatapackage
 
 """
@@ -39,42 +37,6 @@ if 'history_capture' not in tag:
 if 'cfde_resource_src_rmt' not in tag:
     tag['cfde_resource_src_rmt'] = 'tag:nih-cfde.org,2022:resource-src-rmt'
 
-# some special singleton strings...
-class _PackageDataName (object):
-    def __init__(self, package, filename):
-        self.package = package
-        self.filename = filename
-
-    def __str__(self):
-        return self.filename
-
-    def get_data(self, key=None):
-        """Get named content as raw buffer
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        if key is None:
-            key = self.filename
-        return pkgutil.get_data(self.package.__name__, key)
-
-    def get_data_str(self, key=None):
-        """Get named content as unicode decoded str
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        return self.get_data(key).decode()
-
-    def get_data_stringio(self, key=None):
-        """Get named content as unicode decoded StringIO buffer object
-
-        :param key: Alternate name to lookup in package instead of self
-        """
-        return io.StringIO(self.get_data_str(key))
-
-submission_schema_json = _PackageDataName(submission, 'c2m2-datapackage.json')
-portal_prep_schema_json = _PackageDataName(portal_prep, 'cfde-portal-prep.json')
-portal_schema_json = _PackageDataName(portal, 'cfde-portal.json')
-registry_schema_json = _PackageDataName(registry, 'cfde-registry-model.json')
 
 def sql_identifier(s):
     return '"%s"' % (s.replace('"', '""'),)
@@ -102,21 +64,33 @@ def make_session_config():
     })
     return session_config
 
-def tnames_topo_sorted(tables):
-    """Return table names from model topologically sorted to put dependant after references tables.
+def tables_topo_sorted(tables):
+    """Return tables topologically sorted to put dependant after references tables.
 
-    :param tables: dict-like map of table instances
+    :param tables: iterable of table instances
     """
+    def tname(table):
+        return (
+            table.schema.name,
+            table.name
+        )
     def target_tname(fkey):
-        return fkey.referenced_columns[0].table.name
-    return topo_sorted({
-        table.name: [
-            target_tname(fkey)
-            for fkey in table.foreign_keys
-            if target_tname(fkey) != table.name and target_tname(fkey) in tables
-        ]
-        for table in tables.values()
-    })
+        return (
+            fkey.referenced_columns[0].table.schema.name,
+            fkey.referenced_columns[0].table.name
+        )
+    name_map = { tname(table): table for table in tables }
+    return [
+        name_map[tname_pair]
+        for tname_pair in topo_sorted({
+                tname(table): [
+                    target_tname(fkey)
+                    for fkey in table.foreign_keys
+                    if target_tname(fkey) != tname(table) and target_tname(fkey) in name_map
+                ]
+                for table in tables
+        })
+    ]
 
 class CfdeDataPackage (object):
     # the translation stores frictionless table resource metadata under this annotation
@@ -135,7 +109,7 @@ class CfdeDataPackage (object):
           - portal_schema_json
           - registry_schema_json
         """
-        if not isinstance(package_filename, (str, _PackageDataName)):
+        if not isinstance(package_filename, (str, PackageDataName)):
             raise TypeError('package_filename must be a str filepath or built-in package data name')
         if not isinstance(configurator, (tableschema.CatalogConfigurator, type(None))):
             raise TypeError('configurator must be an instance of tableschema.CatalogConfigurator or None')
@@ -151,7 +125,7 @@ class CfdeDataPackage (object):
         self.cat_has_history_control = None
 
         # load 2 copies... first is mutated during translation
-        if isinstance(package_filename, _PackageDataName):
+        if isinstance(package_filename, PackageDataName):
             package_def = json.loads(package_filename.get_data_str())
             self.package_def = json.loads(package_filename.get_data_str())
         else:
@@ -160,11 +134,11 @@ class CfdeDataPackage (object):
             with open(self.package_filename, 'r') as f:
                 self.package_def = json.load(f)
 
-        self.model_doc = tableschema.make_model(package_def, configurator=self.configurator, trusted=isinstance(self.package_filename, _PackageDataName))
+        self.model_doc = tableschema.make_model(package_def, configurator=self.configurator, trusted=isinstance(self.package_filename, PackageDataName))
         self.doc_model_root = Model(None, self.model_doc)
         self.doc_cfde_schema = self.doc_model_root.schemas.get('CFDE')
 
-        if not set(self.model_doc['schemas']).issubset({'CFDE', 'public'}):
+        if not set(self.model_doc['schemas']).issubset({'CFDE', 'public', 'c2m2'}):
             raise ValueError('Unexpected schema set in data package: %s' % (set(self.model_doc['schemas']),))
 
     def set_catalog(self, catalog, registry=None):
@@ -339,7 +313,7 @@ class CfdeDataPackage (object):
                         # HACK: prepare to allow registry upgrades w/ new non-null columns
                         cdoc_orig = dict(cdoc)
                         upgrade_data_path = cdoc.get('annotations', {}).get(self.schema_tag, {}).get('schema_upgrade_data_path')
-                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                        if upgrade_data_path and isinstance(self.package_filename, PackageDataName):
                             cdoc['nullok'] = True
 
                         self.catalog.post(
@@ -349,7 +323,7 @@ class CfdeDataPackage (object):
                         logger.info("Added column %s.%s.%s" % (nschema.name, ntable.name, ncolumn.name))
 
                         # apply built-in upgrade data to new column
-                        if upgrade_data_path and isinstance(self.package_filename, _PackageDataName):
+                        if upgrade_data_path and isinstance(self.package_filename, PackageDataName):
                             with self.package_filename.get_data_stringio(upgrade_data_path) as upgrade_tsv:
                                 reader = csv.reader(upgrade_tsv, delimiter='\t')
                                 header = next(reader)
@@ -633,14 +607,6 @@ class CfdeDataPackage (object):
 
         return row2dict
 
-    def data_tnames_topo_sorted(self, source_schema=None):
-        tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        return tnames_topo_sorted({
-            tname: table
-            for tname, table in source_schema.tables.items()
-            if tname in tables_doc
-        })
-
     def dump_data_files(self, resources=None, dump_dir=None):
         """Dump resources to TSV files (inverse of normal load process)
 
@@ -720,15 +686,14 @@ class CfdeDataPackage (object):
         :param onconflict: ERMrest onconflict query parameter to emulate (default abort)
         """
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+        for table in tables_topo_sorted(self.doc_cfde_schema.tables.values()):
             # we are doing a clean load of data in fkey dependency order
-            table = self.doc_cfde_schema.tables[tname]
-            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-            logger.debug('Loading table "%s"...' % tname)
+            resource = tables_doc[table.name]["annotations"].get(self.resource_tag, {})
+            logger.debug('Loading table "%s"...' % table.name)
             if "path" not in resource:
                 continue
             def open_package():
-                if isinstance(self.package_filename, _PackageDataName):
+                if isinstance(self.package_filename, PackageDataName):
                     path = resource["path"]
                     if self.package_filename is registry_schema_json and path.startswith("/submission/"):
                         # allow absolute path to reference submission package
@@ -841,18 +806,17 @@ class CfdeDataPackage (object):
         if progress is None:
             progress = dict()
         tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
+        for table in tables_topo_sorted(self.doc_cfde_schema.tables.values()):
             # we are doing a clean load of data in fkey dependency order
-            table = self.doc_cfde_schema.tables[tname]
-            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+            resource = tables_doc[table.name]["annotations"].get(self.resource_tag, {})
             if "path" not in resource:
                 continue
-            if progress.get(tname):
-                logger.info("Skipping sqlite import for %s due to existing progress marker" % tname)
+            if progress.get(table.name):
+                logger.info("Skipping sqlite import for %s due to existing progress marker" % table.name)
                 continue
-            logger.debug('Importing table "%s" into sqlite...' % tname)
+            logger.debug('Importing table "%s" into sqlite...' % table.name)
             def open_package():
-                if isinstance(self.package_filename, _PackageDataName):
+                if isinstance(self.package_filename, PackageDataName):
                     return self.package_filename.get_data_stringio(resource["path"])
                 else:
                     fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
@@ -923,7 +887,7 @@ class CfdeDataPackage (object):
                             logger.error("Table %s data load FAILED from "
                                          "%s: %s" % (table.name, self.package_filename, e))
                             raise
-                    progress[tname] = True
+                    progress[table.name] = True
                     logger.info("All data for table %s loaded from %s." % (table.name, self.package_filename))
             except UnicodeDecodeError as e:
                 if table_error_callback:
@@ -956,26 +920,25 @@ class CfdeDataPackage (object):
         cur = None
         try:
             cur = conn.cursor()
-            for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
-                if tname not in tablenames:
+            for table in tables_topo_sorted(self.doc_cfde_schema.tables.values()):
+                if table.name not in tablenames:
                     continue
 
-                table = self.doc_cfde_schema.tables[tname]
-                sql_checks = self.doc_cfde_schema.tables[tname].annotations.get(self.resource_tag, {}).get('check_sql_paths', [])
+                sql_checks = table.annotations.get(self.resource_tag, {}).get('check_sql_paths', [])
                 skip_checks = json.loads(os.getenv('CFDE_SKIP_SQL_CHECKS', '{}'))
-                resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
+                resource = tables_doc[table.name]["annotations"].get(self.resource_tag, {})
 
-                progress.setdefault(tname, {})
+                progress.setdefault(table.name, {})
 
                 for path in sql_checks:
                     if skip_checks is True or skip_checks.get(path[0:-4]):
-                        logger.info('Skipping custom SQL check %r for table %r due to CFDE_SKIP_SQL_CHECKS env. var.' % (path, tname))
+                        logger.info('Skipping custom SQL check %r for table %r due to CFDE_SKIP_SQL_CHECKS env. var.' % (path, table.name))
                         continue
-                    progress[tname].setdefault(path, None)
-                    if progress[tname][path] is not None:
-                        logger.info('Skipping custom SQL check %r for table %r due to progress marker' % (path, tname))
+                    progress[table.name].setdefault(path, None)
+                    if progress[table.name][path] is not None:
+                        logger.info('Skipping custom SQL check %r for table %r due to progress marker' % (path, table.name))
                         continue
-                    logger.info('Running custom SQL check %r for table %r' % (path, tname,))
+                    logger.info('Running custom SQL check %r for table %r' % (path, table.name,))
                     sql = self.package_filename.get_data_str(path)
                     cur.execute(sql)
                     row = cur.fetchone()
@@ -987,25 +950,25 @@ class CfdeDataPackage (object):
                             example_data,
                             (' (and %s others...)' % (count - 1)) if count > 1 else '',
                         )
-                        errors_by_tname.setdefault(tname, []).append(mesg)
+                        errors_by_tname.setdefault(table.name, []).append(mesg)
                         if first_error_mesg is None:
-                            first_error_mesg = 'Table %s %s' % (tname, mesg)
-                        logger.error('custom SQL check %r for table %r ERROR: %s' % (path, tname, mesg))
-                        progress[tname][path] = False
+                            first_error_mesg = 'Table %s %s' % (table.name, mesg)
+                        logger.error('custom SQL check %r for table %r ERROR: %s' % (path, table.name, mesg))
+                        progress[table.name][path] = False
                     else:
-                        logger.info('custom SQL check %r for table %r OK' % (path, tname))
-                        progress[tname][path] = True
+                        logger.info('custom SQL check %r for table %r OK' % (path, table.name))
+                        progress[table.name][path] = True
 
                 if table.foreign_keys:
-                    logger.info('Checking foreign keys for table %r' % (tname,))
+                    logger.info('Checking foreign keys for table %r' % (table.name,))
                 for fkey in table.foreign_keys:
                     if fkey.pk_table.schema.name != table.schema.name:
                         # only consider single schema in this sqite db
-                        progress[tname][fkey.constraint_name] = 'skip'
+                        progress[table.name][fkey.constraint_name] = 'skip'
                         logger.info("Skipping foreign key %r which references outside schema %r" % (fkey.constraint_name, table.schema.name))
                         continue
-                    progress[tname].setdefault(fkey.constraint_name, None)
-                    if progress[tname][fkey.constraint_name] is not None:
+                    progress[table.name].setdefault(fkey.constraint_name, None)
+                    if progress[table.name][fkey.constraint_name] is not None:
                         logger.info("Skipping foreign key %r due to progress marker" % (fkey.constraint_name,))
                         continue
                     col_map = list(fkey.column_map.items())
@@ -1052,18 +1015,18 @@ LIMIT 1;
                             (' (and %s others...)' % (row[0] - 1)) if row[0] > 1 else '',
                             fkey.pk_table.name,
                         )
-                        errors_by_tname.setdefault(tname, []).append(mesg)
+                        errors_by_tname.setdefault(table.name, []).append(mesg)
                         if first_error_mesg is None:
-                            first_error_mesg = 'Table %s %s' % (tname, mesg)
+                            first_error_mesg = 'Table %s %s' % (table.name, mesg)
                         logger.error('foreign key %r ERROR: %s' % (fkey.constraint_name, mesg))
-                        progress[tname][fkey.constraint_name] = False
+                        progress[table.name][fkey.constraint_name] = False
                     else:
                         logger.info("foreign key %r OK" % (fkey.constraint_name,))
-                        progress[tname][fkey.constraint_name] = True
+                        progress[table.name][fkey.constraint_name] = True
 
-                if tname in errors_by_tname:
+                if table.name in errors_by_tname:
                     if table_error_callback:
-                        table_error_callback(tname, resource.get('path'), '; '.join(errors_by_tname[tname]))
+                        table_error_callback(table.name, resource.get('path'), '; '.join(errors_by_tname[table.name]))
 
             if errors_by_tname:
                 raise InvalidDatapackage('Errors found in %s tables %r. First error: %s' % (len(errors_by_tname), list(errors_by_tname), first_error_mesg))
@@ -1071,14 +1034,14 @@ LIMIT 1;
             if cur is not None:
                 cur.close()
 
-    def load_sqlite_tables(self, conn, onconflict='abort', table_done_callback=None, table_error_callback=None, tablenames=None, progress=None, table_queries={}, skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB'}):
+    def load_sqlite_tables(self, conn, onconflict='abort', tables=None, table_done_callback=None, table_error_callback=None, progress=None, table_queries={}, skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB'}):
         """Load tabular data from sqlite table into corresponding catalog table.
 
         :param conn: Existing sqlite3 connection to use as data source.
         :param onconflict: ERMrest onconflict query parameter for entity POST (default 'abort')
+        :param tables: Iterable of table instances from self.doc_model_root (default None means self.doc_cfde_schema.tables.values())
         :param table_done_callback: Optional callback to signal completion of one table, lambda tname, tpath: ...
         :param table_error_callback: Optional callback to signal error for one table, lambda tname, tpath, msg: ...
-        :param tablenames: Optional set of tablenames to load (default None means load all tables)
         :param progress: Optional, mutable progress/restart-marker dictionary
         :param table_queries: Optional, override source SQL query for specific table names
         :param skip_cols: Optiona, override set of column names to ignore (default ERMrest system columns)
@@ -1087,27 +1050,27 @@ LIMIT 1;
             progress = dict()
         if not self.package_filename in {portal_schema_json, registry_schema_json}:
             raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackages')
-        tables_doc = self.model_doc['schemas']['CFDE']['tables']
-        if tablenames is None:
-            tablenames = set(tables_doc.keys())
+        if tables is None:
+            tables = self.doc_cfde_schema.tables.values()
         cur = conn.cursor()
-        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
-            # we are copying sqlite table content to catalog under same table name
-            table = self.doc_cfde_schema.tables[tname]
-            resource = tables_doc[tname]["annotations"].get(self.resource_tag, {})
-
-            if tname not in tablenames:
-                # skip tables excluded in caller-supplied tablenames list
-                continue
-
-            cur.execute("SELECT true FROM sqlite_master WHERE type = 'table' AND name = %s" % (sql_literal(tname),))
+        for table in tables_topo_sorted(tables):
+            # we are loading a catalog table from a sqlite table with the same table name
+            cur.execute("SELECT true FROM sqlite_master WHERE type = 'table' AND name = %s" % (sql_literal(table.name),))
             found = cur.fetchone()
             if found is None:
                 # skip tables that don't exist in sqlite
                 continue
 
-            logger.debug('Loading table "%s" from sqlite to catalog...' % tname)
-            entity_url = "/entity/CFDE:%s?onconflict=%s" % (
+            resource = self.model_doc["schemas"] \
+                           .get(table.schema.name, {}) \
+                           .get("tables", {}) \
+                           .get(table.name, {}) \
+                           .get("annotations", {}) \
+                           .get(self.resource_tag, {})
+
+            logger.debug('Loading table %r.%r from sqlite to catalog...' % (table.schema.name, table.name))
+            entity_url = "/entity/%s:%s?onconflict=%s" % (
+                urlquote(table.schema.name),
                 urlquote(table.name),
                 {
                     'abort': 'abort',
@@ -1119,7 +1082,8 @@ LIMIT 1;
             cols = [ col for col in table.columns if col.name not in skip_cols ]
             colnames = [ col.name for col in cols ]
             # HACK: this ONLY works for our vocab-like tables keyed by 'id'
-            update_url = "/attributegroup/CFDE:%s/id;%s" % (
+            update_url = "/attributegroup/%s:%s/id;%s" % (
+                urlquote(table.schema.name),
                 urlquote(table.name),
                 ",".join([ cname for cname in colnames if cname != 'id']),
             )
@@ -1128,7 +1092,7 @@ LIMIT 1;
                 (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb') else lambda x: x
                 for col in cols
             ]
-            position = progress.get(tname, None)
+            position = progress.get(table.name, None)
 
             if position is not None:
                 logger.info("Restarting after %r due to existing restart marker" % (position,))
@@ -1189,7 +1153,8 @@ LIMIT 1;
                     def get_existing_batch():
                         nonlocal eposition
                         r = self.catalog.get(
-                            "/attribute/CFDE:%s/%s@sort(id)%s?limit=%d" % (
+                            "/attribute/%s:%s/%s@sort(id)%s?limit=%d" % (
+                                urlquote(table.schema.name),
                                 urlquote(table.name),
                                 ",".join([ urlquote(cname) for cname in colnames ]),
                                 ("@after(%s)" % urlquote(eposition)) if eposition is not None else "",
@@ -1245,7 +1210,7 @@ LIMIT 1;
                             r = self.catalog.put(update_url, json=batch).json()
                             logger.debug("PUT /attributegroup/ sent for %d existing rows" % len(batch))
 
-                    progress[tname] = marker
+                    progress[table.name] = marker
                     nrows += blen
                     logger.info("Batch of %d rows loaded for %s (%d cumulative)" % (blen, table.name, nrows))
 
@@ -1573,8 +1538,8 @@ FROM %(srcschema)s.%(tname)s src
             resource['name']: resource
             for resource in self.package_def['resources']
         }
-        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
-            resource = tables_map[tname]
+        for table in tables_topo_sorted(self.doc_cfde_schema.tables.values()):
+            resource = tables_map[table.name]
             for column in resource['schema']['fields']:
                 if 'derivation_sql_path' in column and do_etl_columns:
                     if progress.setdefault("columns", {}).setdefault(resource["name"], {}).get(column["name"], False):
@@ -1600,8 +1565,8 @@ FROM %(srcschema)s.%(tname)s src
 
         Caller should manage transactions if desired.
         """
-        for tname in self.data_tnames_topo_sorted(source_schema=self.doc_cfde_schema):
-            for sql in self.table_sqlite_ddl(self.doc_cfde_schema.tables[tname]):
+        for table in tables_topo_sorted(self.doc_cfde_schema.tables.values()):
+            for sql in self.table_sqlite_ddl(self.doc_cfde_schema.tables[table.name]):
                 conn.execute(sql)
 
     def table_sqlite_ddl(self, table):
