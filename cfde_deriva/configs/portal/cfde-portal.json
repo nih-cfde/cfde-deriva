@@ -11777,8 +11777,8 @@
                         "outputs": [
                            {
                               "source": {
-                                 "api": "attribute",
-                                 "path": "personal_collection_file/F:=file/cf:=(core_fact)/i:=(cf:id_namespace)/p:=(cf:project)/pi:=(p:id_namespace)/ff:=left(cf:file_format)=(CFDE:file_format:nid)/fcf:=left(cf:compression_format)=(CFDE:file_format:nid)/dt:=left(cf:data_type)=(CFDE:data_type:nid)/at:=left(cf:assay_type)=(CFDE:assay_type:nid)/mt:=left(cf:mime_type)=(CFDE:mime_type:nid)/bc:=left(F:bundle_collection)=(CFDE:collection:nid)/left(core_fact)=(CFDE:core_fact:nid)/i3:=left(id_namespace)=(CFDE:id_namespace:nid)/$F/id_namespace:=i:id,local_id,project_id_namespace:=pi:id,project_local_id:=p:local_id,persistent_id,creation_time,size_in_bytes,uncompressed_size_in_bytes,sha256,md5,filename,file_format:=ff:id,compression_format:=fcf:id,data_type:=dt:id,assay_type:=at:id,mime_type:=mt:id,bundle_collection_id_namespace:=i3:id,bundle_collection_local_id:=bc:local_id"
+                                 "api": "entity",
+                                 "path": "personal_collection_file/CFDE:file/c2m2:file"
                               },
                               "destination": {
                                  "name": "file",
