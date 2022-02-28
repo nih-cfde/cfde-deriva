@@ -129,6 +129,11 @@
                   "name": "bundle_collection_local_id",
                   "description": "If this file is a bundle encoding more than one sub-file, this field gives the local_id of a collection listing the bundle's sub-file contents. Null otherwise.",
                   "type": "string"
+               },
+               {
+                  "name": "ras_permissions",
+                  "description": "A string identifying access control information for this file compatible with RAS user-level access control metadata",
+                  "type": "string"
                }
             ],
             "missingValues": [ "" ],
@@ -813,12 +818,20 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this collection",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this collection",
                   "type": "string"
+               },
+               {
+                  "name": "has_time_series_data",
+                  "description": "Does this collection contain time-series data? (allowed values: [true|false|null] -- true == yes, contains time-series data; false == no, doesn't contain time-series data; null == no info provided)",
+                  "type": "boolean"
                }
             ],
             "missingValues": [ "" ],
@@ -1789,6 +1802,390 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "collection_gene",
+         "title": "collection_gene",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a gene and a C2M2 collection containing experimental resources directly related to the study of that gene",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "An Ensembl term ID describing this gene",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_gene_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "constraint_name": "collection_gene_gene_fkey",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_compound",
+         "title": "collection_compound",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a compound and a C2M2 collection containing experimental resources directly related to the study of that compound",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "compound",
+                  "description": "A PubChem or GlyTouCan term ID describing this compound",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "compound"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_compound_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "compound",
+                  "constraint_name": "collection_compound_compound_fkey",
+                  "reference": {
+                     "resource": "compound",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_substance",
+         "title": "collection_substance",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a substance and a C2M2 collection containing experimental resources directly related to the study of that substance",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "substance",
+                  "description": "A PubChem term ID describing this substance",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "substance"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_substance_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "substance",
+                  "constraint_name": "collection_substance_substance_fkey",
+                  "reference": {
+                     "resource": "substance",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_taxonomy",
+         "title": "collection_taxonomy",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a taxon and a C2M2 collection containing experimental resources directly related to the study of that taxon",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "taxon",
+                  "description": "An NCBI Taxonomy Database ID identifying this taxon",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "taxon"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_name": "collection_taxonomy_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "taxon",
+                  "constraint_name": "collection_taxonomy_taxonomy_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_anatomy",
+         "title": "collection_anatomy",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between an UBERON anatomical term and a C2M2 collection containing experimental resources directly related to the study of the anatomical concept described by that term",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "An UBERON term ID",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "anatomy"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_Name": "collection_anatomy_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_Name": "collection_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_protein",
+         "title": "collection_protein",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a protein and a C2M2 collection containing experimental resources directly related to the study of that protein",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection_id_namespace",
+                  "description": "Identifier namespace for this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "collection_local_id",
+                  "description": "The ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein",
+                  "description": "A UniProtKB term ID describing this protein",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection_id_namespace",
+               "collection_local_id",
+               "protein"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": [ "collection_id_namespace", "collection_local_id" ],
+                  "constraint_nmae": "collection_protein_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": [ "id_namespace", "local_id" ]
+                  }
+               },
+               {
+                  "fields": "protein",
+                  "constraint_nmae": "collection_protein_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_phenotype",
          "title": "subject_phenotype",
          "dialect": {
@@ -2703,12 +3100,12 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "List of PubChem 'compound' terms (normalized chemical structures) associated with PubChem 'substance' terms (specific formulations of chemical materials) directly referenced in this C2M2 submission",
+         "description": "List of (i) GlyTouCan terms or (ii) PubChem 'compound' terms (normalized chemical structures) referenced in this submission; (ii) will include all PubChem 'compound' terms associated with any PubChem 'substance' terms (specific formulations of chemical materials) directly referenced in this submission, in addition to any 'compound' terms directly referenced",
          "schema": {
             "fields": [
                {
                   "name": "id",
-                  "description": "A PubChem compound ID (CID)",
+                  "description": "A GlyTouCan ID or a PubChem compound ID (CID)",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -2717,7 +3114,7 @@
                },
                {
                   "name": "name",
-                  "description": "A short, human-readable, machine-read-friendly label for this PubChem CID",
+                  "description": "A short, human-readable, machine-read-friendly label for this compound",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -2726,12 +3123,12 @@
                },
                {
                   "name": "description",
-                  "description": "A human-readable description of this PubChem CID",
+                  "description": "A human-readable description of this compound",
                   "type": "string"
                },
                {
                   "name": "synonyms",
-                  "description": "A list of synonyms for this PubChem CID",
+                  "description": "A list of synonyms for this compound",
                   "type": "array"
                }
             ],
@@ -2847,7 +3244,7 @@
                },
                {
                   "name": "organism",
-                  "description": "An NCBI Taxonomy Database ID identifying this gene's source organism (e.g. 'NCBItxid9606'",
+                  "description": "An NCBI Taxonomy Database ID identifying this gene's source organism (e.g. 'NCBItxid9606')",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -2862,6 +3259,126 @@
                   "fields": "organism",
                   "reference": {
                      "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein",
+         "title": "protein",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "List of UniProtKB proteins directly referenced in this C2M2 submission",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A UniProt Knowledgebase (UniProtKB) protein ID (e.g. 'P94485')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A description of this protein",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of alternate names for this protein",
+                  "type": "array"
+               },
+               {
+                  "name": "organism",
+                  "description": "OPTIONAL: An NCBI Taxonomy Database ID identifying this protein's source organism (e.g. 'NCBItxid9606')",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^NCBI:txid[0-9]+$"
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "organism",
+                  "constraint_name": "protein_organism_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein_gene",
+         "title": "protein_gene",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "Association between a UniProtKB protein term and an Ensembl term identifying a gene encoding that protein",
+         "schema": {
+            "fields": [
+               {
+                  "name": "protein",
+                  "description": "A UniProt Knowledgebase (UniProtKB) protein ID (e.g. 'P94485')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "An Ensembl gene ID (e.g. 'ENSG00000012048')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "protein",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "protein",
+                  "constraint_name": "protein_gene_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "constraint_name": "protein_gene_gene_fkey",
+                  "reference": {
+                     "resource": "gene",
                      "fields": "id"
                   }
                }
