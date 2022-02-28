@@ -1172,6 +1172,16 @@
                      ],
                      "entity": true
                   },
+                  "S_protein": {
+                     "markdown_name": "Protein",
+                     "comment": "Protein terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_protein_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_protein_protein_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_ncbi_taxonomy": {
                      "markdown_name": "Taxonomy",
                      "comment": "Taxonomy terms used in submission",
@@ -1268,6 +1278,7 @@
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_protein"},
                   {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_phenotype_assoc_type"},
                   {"sourcekey": "S_race"},
@@ -2561,6 +2572,18 @@
                "columns": true,
                "fkeys": true,
                "sources": {
+                  "S_gene": {
+                     "source": [
+                        {"inbound": ["CFDE", "gene_organism_fkey"]},
+                        "RID"
+                     ]
+                  },
+                  "S_protein": {
+                     "source": [
+                        {"inbound": ["CFDE", "protein_organism_fkey"]},
+                        "RID"
+                     ]
+                  }
                }
             },
             "visible_columns": {
@@ -2579,6 +2602,8 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_protein"}
                ]
             }
          }
@@ -3068,6 +3093,115 @@
                "sources": {
                   "S_organism": {
                      "source": [ {"outbound": ["CFDE", "gene_organism_fkey"]}, "RID" ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  {"sourcekey": "S_organism"},
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein",
+         "title": "protein",
+         "description": "List of UniProtKB proteins directly referenced in this C2M2 submission",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "A UniProt Knowledgebase (UniProtKB) protein ID (e.g. 'P94485')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A description of this protein",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of alternate names for this protein",
+                  "type": "array"
+               },
+               {
+                  "name": "organism",
+                  "description": "OPTIONAL: An NCBI Taxonomy Database ID identifying this protein's source organism (e.g. 'NCBItxid9606')",
+                  "type": "string",
+                  "constraints": {
+                     "pattern": "^NCBI:txid[0-9]+$"
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id",
+            "foreignKeys": [
+               {
+                  "fields": "organism",
+                  "constraint_name": "protein_organism_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "id"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_organism": {
+                     "source": [ {"outbound": ["CFDE", "protein_organism_fkey"]}, "RID" ]
                   }
                }
             },
@@ -4045,6 +4179,78 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "datapackage_protein",
+         "title": "Datapackage Protein",
+         "description": "An association of a protein term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein",
+                  "description": "The referenced protein term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "protein"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_protein_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "protein",
+                  "constraint_name": "datapackage_protein_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_protein_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "datapackage_assay_type",
          "title": "Datapackage Assay Type",
          "description": "An association of an assay type term used by a datapackage submission.",
@@ -4564,7 +4770,7 @@
                },
                {
                   "name": "sex",
-                  "description": "The referenced gene term ID.",
+                  "description": "The referenced sex term ID.",
                   "type": "string",
                   "constraints": {
                      "required": true
