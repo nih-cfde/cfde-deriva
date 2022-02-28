@@ -22,11 +22,11 @@ from bdbag import bdbag_api
 from bdbag.bdbagit import BagError, BagValidationError
 import frictionless
 
-from deriva.core import DerivaServer, get_credential, init_logging, urlquote, topo_sorted
+from deriva.core import DerivaServer, get_credential, init_logging, urlquote
 
 from . import exception, tableschema
 from .registry import Registry, WebauthnUser, WebauthnAttribute, nochange, terms
-from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tnames_topo_sorted
+from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json, sql_literal, sql_identifier, make_session_config, tables_topo_sorted
 from .cfde_login import get_archive_headers_map
 
 
@@ -416,6 +416,7 @@ class Submission (object):
             self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
+            # TODO: remove this deprecated compatibility transform from code?
             next_error_state = terms.cfde_registry_dp_status.ops_error
             try:
                 self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
@@ -425,6 +426,7 @@ class Submission (object):
 
             self.prepare_sqlite_derived_data(self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
             self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
+            self.download_resource_markdown_to_sqlite(self.registry, self.portal_prep_sqlite_filename)
 
             # this needs project_root from prepare_sqlite_derived_data...
             next_error_state = terms.cfde_registry_dp_status.content_error
@@ -432,6 +434,7 @@ class Submission (object):
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
+            self.upload_sqlite_raw_content(self.review_catalog, self.ingest_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,
@@ -1068,6 +1071,95 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             canon_dp.load_sqlite_tables(conn, onconflict='skip', table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
+    def upload_sqlite_raw_content(cls, catalog, sqlite_filename, table_done_callback=None, table_error_callback=None, progress=None):
+        """Idempotently upload orignal datapackage content in sqlite db into review catalog."""
+        if progress is None:
+            progress = dict()
+        with sqlite3.connect(sqlite_filename) as conn:
+            logger.debug('Idempotently uploading raw data from %s' % (sqlite_filename,))
+            canon_dp = CfdeDataPackage(portal_schema_json)
+            canon_dp.set_catalog(catalog)
+            tables = canon_dp.doc_model_root.schemas['c2m2'].tables.values()
+            canon_dp.load_sqlite_tables(conn, onconflict='skip', tables=tables, table_done_callback=table_done_callback, table_error_callback=table_error_callback, progress=progress)
+
+    @classmethod
+    def download_resource_markdown_to_sqlite(cls, registry, portal_prep_filename):
+        """Retrieve resource_markdown content from registry into corresponding sqlite term records.
+
+        :param registry: The Registry instance for the submission system
+        :param portal_prep_filename: The sqlite3 file for the loaded and ETL'd submission content.
+        """
+        registry_dp = CfdeDataPackage(registry_schema_json)
+        registry_dp.set_catalog(registry._catalog)
+
+        with sqlite3.connect(portal_prep_filename) as conn:
+            cur = conn.cursor()
+            logger.info('Retrieving registry vocabulary resource_markdown content...')
+            for table in registry_dp.cat_cfde_schema.tables.values():
+                # skip tables that don't have right structure in registry
+                if {'id', 'name', 'description', 'resource_markdown'} - set(table.columns.elements.keys()):
+                    continue
+
+                # skip tables that don't have right structure in sqlite
+                cur.execute("""
+SELECT true
+FROM sqlite_master t
+JOIN pragma_table_info(%(tname)s) c ON (True)
+WHERE t.type = 'table'
+  AND t.name = %(tname)s
+  AND c.name = 'resource_markdown';
+""" % {
+    'tname': sql_literal(table.name),
+})
+                found = cur.fetchone()
+                if found is None:
+                    continue
+
+                cur.executescript("""
+CREATE TEMP TABLE IF NOT EXISTS temp_resource_markdown (
+  id text PRIMARY KEY,
+  resource_markdown text
+);
+DELETE FROM temp_resource_markdown;
+""")
+                def get_batches():
+                    after = ''
+                    while True:
+                        rows = registry_dp.catalog.get(
+                            '/attribute/CFDE:%s/!resource_markdown::null::/id,resource_markdown@sort(id)%s?limit=500' % (
+                                urlquote(table.name),
+                                after,
+                            )
+                        ).json()
+                        if rows:
+                            after = '@after(%s)' % (urlquote(rows[-1]['id']),)
+                            yield rows
+                        else:
+                            break
+
+                for batch in get_batches():
+                    cur.execute("""
+INSERT INTO temp_resource_markdown (id, resource_markdown)
+VALUES %(values)s;
+""" % {
+    'values': ', '.join([
+        '(%s, %s)' % (sql_literal(row['id']), sql_literal(row['resource_markdown']))
+        for row in batch
+    ])
+})
+                cur.execute("""
+UPDATE %(tname)s AS v
+SET resource_markdown = t.resource_markdown
+FROM temp_resource_markdown t
+WHERE v.id = t.id;
+""" % {
+    'tname': sql_identifier(table.name),
+})
+                cur.execute("SELECT count(*) FROM temp_resource_markdown;")
+                nrows = cur.fetchone()[0]
+                logger.info('Stored resource_markdown for %s rows of %r' % (nrows, table.name,))
+
+    @classmethod
     def record_vocab_usage(cls, registry, portal_prep_filename, id):
         """Upload vocabulary information to registry.
 
@@ -1091,28 +1183,31 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
             registry_dp.load_sqlite_tables(
                 conn,
                 onconflict='update',
-                tablenames={
-                    'anatomy',
-                    'assay_type',
-                    'data_type',
-                    'disease',
-                    'file_format',
-                    'mime_type',
-                    'ncbi_taxonomy',
-                    'compound',
-                    'substance',
-                    'gene',
-                    'analysis_type',
-                    'phenotype',
-                    # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
-                    # which are closed enums for the DCCs...
-                },
+                tables=[
+                    registry_dp.doc_cfde_schema.tables[tname]
+                    for tname in [
+                            'anatomy',
+                            'assay_type',
+                            'data_type',
+                            'disease',
+                            'file_format',
+                            'mime_type',
+                            'ncbi_taxonomy',
+                            'compound',
+                            'substance',
+                            'gene',
+                            'analysis_type',
+                            'phenotype',
+                            # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
+                            # which are closed enums for the DCCs...
+                    ]
+                ],
                 # HACK: custom ETL we need to undo portal_prep normalization when copying to registry in native C2M2 form
                 table_queries={
                     'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
                     'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
                 },
-                skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid'},
+                skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid', 'resource_markdown'},
             )
             logger.info('Recording submission vocabulary usage in registry...')
             cur = conn.cursor()
@@ -1206,10 +1301,15 @@ WHERE id IS NOT NULL
                 review_model = submission.review_catalog.getCatalogModel()
                 if 'CFDE' in review_model.schemas:
                     logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
-                    for tname in reversed(tnames_topo_sorted(review_model.schemas['CFDE'].tables)):
-                        submission.review_catalog.delete('/schema/CFDE/table/%s' % urlquote(tname))
-                    logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
-                    Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
+                    tables = list(review_model.schemas['CFDE'].tables.values())
+                    tables.extend(review_model.schemas['c2m2'].tables.values())
+                    for table in reversed(tables_topo_sorted(tables)):
+                        submission.review_catalog.delete('/schema/%s/table/%s' % (
+                            urlquote(table.schema.name),
+                            urlquote(table.name),
+                        ))
+                logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
+                Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
         #
         submission.ingest()
 

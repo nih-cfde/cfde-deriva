@@ -518,6 +518,12 @@
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -569,6 +575,12 @@
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the OBI metadata",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -627,6 +639,12 @@
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -686,6 +704,12 @@
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -745,6 +769,12 @@
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -804,6 +834,12 @@
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -864,6 +900,12 @@
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the Disease Ontology metadata",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -915,6 +957,12 @@
                   "name": "synonyms",
                   "description": "A list of synonyms for this term as identified by the Human Phenotype Ontology metadata",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -966,6 +1014,12 @@
                   "name": "synonyms",
                   "description": "A list of synonyms for this PubChem CID",
                   "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1025,6 +1079,12 @@
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1093,6 +1153,12 @@
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1189,6 +1255,12 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_role",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1234,6 +1306,12 @@
                   "name": "description",
                   "description": "A human-readable description of this subject_granularity",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1276,6 +1354,12 @@
                   "name": "description",
                   "description": "A human-readable description of this sex term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1318,6 +1402,12 @@
                   "name": "description",
                   "description": "A human-readable description of this race term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],
@@ -1360,6 +1450,12 @@
                   "name": "description",
                   "description": "A human-readable description of this ethnicity term",
                   "type": "string"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
                }
             ],
             "missingValues": [ "" ],

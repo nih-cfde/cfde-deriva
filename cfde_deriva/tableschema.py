@@ -3,15 +3,19 @@
 """Translate basic Frictionless Table-Schema table definitions to Deriva."""
 
 import os
+import io
 import sys
 import json
 import hashlib
 import base64
 import logging
 import requests
+import pkgutil
 
 from deriva.core import tag, AttrDict, init_logging
 from deriva.core.ermrest_model import builtin_types, Model, Table, Column, Key, ForeignKey
+
+from .configs import submission, portal_prep, portal, registry
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +92,116 @@ terms = _attrdict_from_strings(
     'cfde_registry_rel_status:ops-error',
 )
 
+# some special singleton strings...
+class PackageDataName (object):
+    def __init__(self, package, filename):
+        self.package = package
+        self.filename = filename
+
+    def __str__(self):
+        return self.filename
+
+    def get_data(self, key=None):
+        """Get named content as raw buffer
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        if key is None:
+            key = self.filename
+        return pkgutil.get_data(self.package.__name__, key)
+
+    def get_data_str(self, key=None):
+        """Get named content as unicode decoded str
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        return self.get_data(key).decode()
+
+    def get_data_stringio(self, key=None):
+        """Get named content as unicode decoded StringIO buffer object
+
+        :param key: Alternate name to lookup in package instead of self
+        """
+        return io.StringIO(self.get_data_str(key))
+
+submission_schema_json = PackageDataName(submission, 'c2m2-datapackage.json')
+portal_prep_schema_json = PackageDataName(portal_prep, 'cfde-portal-prep.json')
+registry_schema_json = PackageDataName(registry, 'cfde-registry-model.json')
+
+class PortalPackageDataName (PackageDataName):
+    def get_data(self, key=None):
+        if key is None:
+            key = self.filename
+        buf = super(PortalPackageDataName, self).get_data(key)
+        if key != self.filename:
+            return buf
+        # augment the portal model we return w/ c2m2 submission tables
+        portal_doc = json.loads(buf.decode())
+        portal_resources = portal_doc['resources']
+
+        c2m2_doc = json.loads(submission_schema_json.get_data_str())
+        c2m2_resources = c2m2_doc['resources']
+
+        for resource in c2m2_resources:
+            if 'resourceSchema' in resource:
+                # skip tables not in default CFDE schema...
+                continue
+
+            if resource['name'] in {
+                    'primary_dcc_contact',
+            }:
+                # skip tables we explicitly don't want
+                continue
+
+            # customize resource for use in c2m2 schema of portal
+            resource['resourceSchema'] = 'c2m2'
+            resource['description'] = 'C2M2 formatted %(name)s data' % resource
+            resource['deriva'] = {
+                "indexing_preferences": {
+                    "btree": False,
+                    "trgm": False
+                }
+            }
+            rschema = resource['schema']
+            for field in rschema['fields']:
+                # we don't want c2m2 unique constraints and their implied indices
+                field.get('constraints', {}).pop('unique', None)
+            rschema['fields'] = [
+                {
+                    "name": "nid",
+                    "title": "Numeric ID",
+                    "type": "integer",
+                    "constraints": {
+                        "required": True,
+                        "unique": True
+                    }
+                }
+            ] + [
+                fdoc
+                for fdoc in rschema['fields']
+                # HACK: skip synonyms to reduce DB and export bloat...
+                if fdoc['name'] != 'synonyms'
+            ]
+            rschema['primaryKey'] = [ "nid" ]
+            rschema['foreignKeys'] = [
+                {
+                    "fields": "nid",
+                    "constraint_name": "%(name)s_nid_fkey" % resource,
+                    "reference": {
+                        "resourceSchema": "CFDE",
+                        "resource": resource['name'],
+                        "fields": "nid"
+                    }
+                }
+            ]
+            # add to portal table list
+            portal_resources.append(resource)
+
+        # return as UTF8 bytes to meet get_data() method signature...
+        return json.dumps(portal_doc).encode('utf8')
+
+portal_schema_json = PortalPackageDataName(portal, 'cfde-portal.json')
+
 def acls_union(*sources):
     """Produce union of aclsets"""
     acls = {}
@@ -142,6 +256,7 @@ class CatalogConfigurator (object):
     }
     schema_acls = {
         "CFDE": { "select": [ authn_id.cfde_portal_admin ] },
+        "c2m2": { "select": [ authn_id.cfde_portal_admin ] },
         "public": { "select": [] },
     }
     schema_table_acls = {}
@@ -443,6 +558,7 @@ class ReleaseConfigurator (CatalogConfigurator):
         CatalogConfigurator.schema_acls,
         {
             "CFDE": { "select": ["*"] },
+            "c2m2": { "select": ["*"] },
         }
     )
 
@@ -472,6 +588,7 @@ class ReviewConfigurator (CatalogConfigurator):
             CatalogConfigurator.schema_acls,
             {
                 "CFDE": { "select": list(cfde_portal_viewers) },
+                "c2m2": { "select": list(cfde_portal_viewers) },
             }
         )
         if self.registry is not None and self.submission_id is not None:
@@ -797,13 +914,13 @@ def make_id(*components):
                 return result
     raise NotImplementedError('Could not generate valid ID for components "%r"' % expanded)
 
-def make_key(tname, cols):
+def make_key(sname, tname, cols):
     return Key.define(
         cols,
-        constraint_names=[[ schema_name, make_id(tname, cols, 'key') ]],
+        constraint_names=[[ sname, make_id(tname, cols, 'key') ]],
     )
 
-def make_fkey(tname, fkdef, trusted=False):
+def make_fkey(sname, tname, fkdef, trusted=False):
     fkcols = fkdef.pop("fields")
     fkcols = [fkcols] if isinstance(fkcols, str) else fkcols
     reference = fkdef.pop("reference")
@@ -848,7 +965,7 @@ def make_fkey(tname, fkdef, trusted=False):
         pkschema,
         pktable,
         pkcols,
-        constraint_names=[[ schema_name, constraint_name ]],
+        constraint_names=[[ sname, constraint_name ]],
         on_delete=on_delete,
         on_update=on_update,
         annotations=annotations,
@@ -856,7 +973,7 @@ def make_fkey(tname, fkdef, trusted=False):
         acl_bindings=acl_bindings,
     )
 
-def make_table(tdef_resource, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
+def make_table(sname, tdef_resource, configurator, trusted=False, history_capture=False, provide_system=None, provide_nid=True):
     if provide_system is None:
         provide_system = not (os.getenv('SKIP_SYSTEM_COLUMNS', 'true').lower() == 'true')
 
@@ -873,7 +990,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         system_columns = Table.system_column_defs()
         # bypass bug in deriva-py producing invalid default constraint name for system key
         #system_keys = Table.system_key_defs()
-        system_keys = [ make_key(tname, ['RID']) ]
+        system_keys = [ make_key(sname, tname, ['RID']) ]
         # customize the system column templates...
         for col in system_columns:
             cname = col['name']
@@ -895,7 +1012,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         system_fkeys = [
             ForeignKey.define(
                 [cname], 'public', 'ERMrest_Client', ['ID'],
-                constraint_names=[[ schema_name, make_id(tname, cname, 'fkey') ]]
+                constraint_names=[[ sname, make_id(tname, cname, 'fkey') ]]
             )
             for cname in ['RCB', 'RMB']
         ]
@@ -906,7 +1023,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
 
     if provide_nid:
         system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
-        system_keys.append(make_key(tname, ['nid']))
+        system_keys.append(make_key(sname, tname, ['nid']))
 
     # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints
     keys = {
@@ -917,11 +1034,11 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
     if isinstance(pk, str):
         pk = [pk]
     if isinstance(pk, list):
-        keys.setdefault(frozenset(pk), make_key(tname, pk))
+        keys.setdefault(frozenset(pk), make_key(sname, tname, pk))
     tdef_fields = tdef.pop("fields", None)
     for cdef in tdef_fields:
         if cdef.get("constraints", {}).pop("unique", False):
-            keys.setdefault(frozenset([cdef["name"]]), make_key(tname, [cdef["name"]]))
+            keys.setdefault(frozenset([cdef["name"]]), make_key(sname, tname, [cdef["name"]]))
     keys = list(keys.values())
     tdef_fkeys = tdef.pop("foreignKeys", [])
 
@@ -968,7 +1085,7 @@ def make_table(tdef_resource, configurator, trusted=False, history_capture=False
         for i in range(len(fkeys))
     }
     for fkdef in tdef_fkeys:
-        fkey = make_fkey(tname, fkdef, trusted=trusted)
+        fkey = make_fkey(sname, tname, fkdef, trusted=trusted)
         fkmap = frozenset(zip(
             [ v['column_name'] for v in fkey['foreign_key_columns'] ],
             [ (v.get('schema_name'), v.get('table_name'), v['column_name']) for v in fkey['referenced_columns'] ]
@@ -1033,7 +1150,7 @@ def make_model(tableschema, configurator, trusted=False):
                         tag["indexing_preferences"]: indexing_preferences
                     }
                 })
-        schemas[sname]["tables"][tname] = make_table(tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
+        schemas[sname]["tables"][tname] = make_table(sname, tdef, configurator, trusted=trusted, history_capture=history_capture, provide_system=provide_system, provide_nid=provide_nid)
     return {
         "schemas": schemas,
         "annotations": annotations,
@@ -1043,19 +1160,20 @@ def make_model(tableschema, configurator, trusted=False):
 def main():
     """Translate basic Frictionless Table-Schema table definitions to Deriva.
 
-    - Reads table-schema JSON on standard input
+    - Reads builtin table-schema JSON selected by CLI
     - Writes deriva schema JSON on standard output
 
     The output JSON is suitable for POST to an /ermrest/catalog/N/schema
     resource on a fresh, empty catalog.
 
-    Arguments:  [ { 'registry' | 'review' | 'release' } [ 'trusted' ] ]
+    Arguments:  { 'registry' | 'review' | 'release' | 'portal_prep' | 'submission' }
 
     Examples:
 
-    python3 -m cfde_deriva.tableschema release trusted < configs/portal/c2m2-level1-portal-model.json
-    python3 -m cfde_deriva.tableschema review < configs/portal/c2m2-level1-portal-model.json
-    python3 -m cfde_deriva.tableschema registry trusted < configs/registry/cfde-registry-model.json
+    python3 -m cfde_deriva.tableschema release
+    python3 -m cfde_deriva.tableschema review
+    python3 -m cfde_deriva.tableschema registry
+    SKIP_SYSTEM_COLUMNS=true python3 -m cfde_deriva.tableschema etl
 
     Optionally:
 
@@ -1065,21 +1183,30 @@ def main():
 """
     init_logging(logging.INFO)
 
-    if len(sys.argv) < 2:
-        raise ValueError('missing required catalog-type argument: registry | review | release')
+    if len(sys.argv) < 1:
+        raise ValueError('missing required catalog-type argument: registry | review | release | portal_prep | submission')
+
+    buf = {
+        'release': portal_schema_json,
+        'review': portal_schema_json,
+        'registry': registry_schema_json,
+        'portal_prep': portal_prep_schema_json,
+        'submission': submission_schema_json,
+    }[sys.argv[1]].get_data_str()
 
     configurator = {
         'release': ReleaseConfigurator,
         'review': ReviewConfigurator,
         'registry': RegistryConfigurator,
-    }[sys.argv[1]]()
+    }.get(
+        sys.argv[1],
+        # HACK, set default so we can do something for non-catalog schemas
+        ReleaseConfigurator
+    )()
 
-    if len(sys.argv) > 2:
-        trusted = sys.argv[2].lower() == 'trusted'
-    else:
-        trusted = False
+    trusted = True
 
-    json.dump(Model(None, make_model(json.load(sys.stdin), configurator, trusted)).prejson(), sys.stdout, indent=2)
+    json.dump(Model(None, make_model(json.loads(buf), configurator, trusted)).prejson(), sys.stdout, indent=2)
     return 0
 
 if __name__ == '__main__':
