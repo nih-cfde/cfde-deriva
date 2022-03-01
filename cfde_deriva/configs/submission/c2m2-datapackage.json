@@ -2047,7 +2047,7 @@
                },
                {
                   "fields": "taxon",
-                  "constraint_name": "collection_taxonomy_taxonomy_fkey",
+                  "constraint_name": "collection_taxonomy_taxon_fkey",
                   "reference": {
                      "resource": "ncbi_taxonomy",
                      "fields": "id"
@@ -2167,7 +2167,7 @@
             "foreignKeys": [
                {
                   "fields": [ "collection_id_namespace", "collection_local_id" ],
-                  "constraint_nmae": "collection_protein_collection_fkey",
+                  "constraint_name": "collection_protein_collection_fkey",
                   "reference": {
                      "resource": "collection",
                      "fields": [ "id_namespace", "local_id" ]
@@ -2175,7 +2175,7 @@
                },
                {
                   "fields": "protein",
-                  "constraint_nmae": "collection_protein_protein_fkey",
+                  "constraint_name": "collection_protein_protein_fkey",
                   "reference": {
                      "resource": "protein",
                      "fields": "id"
