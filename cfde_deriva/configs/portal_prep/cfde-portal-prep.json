@@ -5622,8 +5622,54 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "protein_fact_protein",
+         "description": "An exploded representation of the protein_fact.proteins array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "protein_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a protein_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein",
+                  "description": "The numeric ID of a term found in the core_fact.proteins array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["protein_fact", "protein"],
+            "foreignKeys": [
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "protein_fact_protein_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein",
+                  "constraint_name": "protein_fact_protein_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "gene_fact_gene",
-         "description": "An exploded representation of the gnen_fact.genes array column as a binary association.",
+         "description": "An exploded representation of the gene_fact.genes array column as a binary association.",
          "schema": {
             "fields": [
                {
@@ -5648,7 +5694,7 @@
             "foreignKeys": [
                {
                   "fields": "gene_fact",
-                  "constraint_name": "gene_fact_gene_core_fact_fkey",
+                  "constraint_name": "gene_fact_gene_gene_fact_fkey",
                   "reference": {
                      "resource": "gene_fact",
                      "fields": "nid"

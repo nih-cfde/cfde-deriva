@@ -1215,7 +1215,8 @@ WHERE v.id = t.id;
             cur = conn.cursor()
             cur.arraysize = CfdeDataPackage.batch_size
             for src_sql, dst_tname, dst_cname in [
-                    ('SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN anatomy v ON (cf.anatomy = v.nid)',
+                    ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN anatomy v ON (cf.anatomy = v.nid)
+                    UNION SELECT v.id FROM collection_anatomy a JOIN anatomy v ON (a.anatomy = v.nid)""",
                      'datapackage_anatomy', 'anatomy'),
                     ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)
                     UNION SELECT v.id FROM file e      JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)""",
@@ -1227,17 +1228,21 @@ WHERE v.id = t.id;
                     UNION SELECT v.id FROM collection_disease a JOIN disease v ON (a.disease = v.nid)""",
                      'datapackage_disease', 'disease'),
                     ("""  SELECT v1.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)
-                    UNION SELECT v1.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)""",
+                    UNION SELECT v1.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)
+                    UNION SELECT v1.id FROM collection_substance a JOIN substance v2 ON (a.substance = v2.nid) JOIN compound v1 ON (v2.compound = v1.nid)
+                    UNION SELECT v1.id FROM collection_compound a JOIN compound v1 ON (a.compound = v1.nid)""",
                      'datapackage_compound', 'compound'),
                     ("""  SELECT v2.id FROM subject_substance a   JOIN substance v2 ON (a.substance = v2.nid)
-                    UNION SELECT v2.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid)""",
+                    UNION SELECT v2.id FROM biosample_substance a JOIN substance v2 ON (a.substance = v2.nid)
+                    UNION SELECT v2.id FROM collection_substance a JOIN substance v2 ON (a.substance = v2.nid)""",
                      'datapackage_substance', 'substance'),
                     ("""SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.file_format = v.nid)
                     UNION SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN file_format v ON (cf.compression_format = v.nid)""",
                      'datapackage_file_format', 'file_format'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN mime_type v ON (cf.mime_type = v.nid)',
                      'datapackage_mime_type', 'mime_type'),
-                    ('SELECT v.id FROM subject_role_taxonomy a JOIN ncbi_taxonomy v ON (a.taxon = v.nid)',
+                    ("""  SELECT v.id FROM subject_role_taxonomy a JOIN ncbi_taxonomy v ON (a.taxon = v.nid)
+                    UNION SELECT v.id FROM collection_taxonomy a JOIN ncbi_taxonomy v ON (a.taxon = v.nid)""",
                      'datapackage_ncbi_taxonomy', 'ncbi_taxonomy'),
                     ('SELECT v.id FROM subject e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN subject_granularity v ON (cf.subject_granularity = v.nid)',
                      'datapackage_subject_granularity', 'subject_granularity'),
@@ -1249,7 +1254,9 @@ WHERE v.id = t.id;
                      'datapackage_ethnicity', 'ethnicity'),
                     ('SELECT v.id FROM subject_role_taxonomy a JOIN subject_role v ON (a.role = v.nid)',
                      'datapackage_subject_role', 'subject_role'),
-                    ("""  SELECT v.id FROM biosample_gene a JOIN gene v ON (a.gene = v.nid)""",
+                    ("""  SELECT v.id FROM biosample_gene a JOIN gene v ON (a.gene = v.nid)
+                    UNION SELECT v.id FROM collection_gene a JOIN gene v ON (a.gene = v.nid)
+                    UNION SELECT v.id FROM protein_gene a JOIN gene v ON (a.gene = v.nid)""",
                      'datapackage_gene', 'gene'),
                     ("""  SELECT v.id FROM collection_protein a JOIN protein v ON (a.protein = v.nid)
                     UNUON SELECT v.id FROM protein_gene a JOIN protein v ON (a.protein = v.nid)

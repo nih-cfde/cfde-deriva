@@ -92,6 +92,8 @@ SELECT
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.value))
       FROM (
+        SELECT a.gene AS value FROM collection_gene a WHERE a.collection = col.nid
+        UNION
         SELECT j.value FROM file_in_collection fic, file f, gene_fact gf, json_each(gf.genes) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.gene_fact = gf.nid
         UNION
         SELECT j.value FROM biosample_in_collection bic, biosample b, gene_fact gf, json_each(gf.genes) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.gene_fact = gf.nid
@@ -102,7 +104,7 @@ SELECT
     '[]'
   ) AS genes
 FROM collection col;
-CREATE INDEX IF NOT EXISTS collection_pfacts_combo_idx ON collection_gfacts(
+CREATE INDEX IF NOT EXISTS collection_gfacts_combo_idx ON collection_gfacts(
     genes
 );
 INSERT INTO gene_fact (

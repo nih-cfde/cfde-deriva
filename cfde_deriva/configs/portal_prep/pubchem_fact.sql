@@ -149,6 +149,8 @@ SELECT
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.value))
       FROM (
+        SELECT a.substance AS value FROM collection_substance a WHERE a.collection = col.nid
+        UNION
         SELECT j.value FROM file_in_collection fic, file f, pubchem_fact pcf, json_each(pcf.substances) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.pubchem_fact = pcf.nid
         UNION
         SELECT j.value FROM biosample_in_collection bic, biosample b, pubchem_fact pcf, json_each(pcf.substances) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.pubchem_fact = pcf.nid
@@ -161,6 +163,10 @@ SELECT
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.value))
       FROM (
+        SELECT a.compound AS value FROM collection_compound a WHERE a.collection = col.nid
+        UNION
+        SELECT v.compound AS value FROM collection_substance a JOIN substance v ON (a.substance = v.nid) WHERE a.collection = col.nid
+        UNION
         SELECT j.value FROM file_in_collection fic, file f, pubchem_fact pcf, json_each(pcf.compounds) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.pubchem_fact = pcf.nid
         UNION
         SELECT j.value FROM biosample_in_collection bic, biosample b, pubchem_fact pcf, json_each(pcf.compounds) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.pubchem_fact = pcf.nid
