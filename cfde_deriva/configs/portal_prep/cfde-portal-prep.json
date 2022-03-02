@@ -5245,6 +5245,76 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "protein_fact",
+         "title": "Protein Statistics",
+         "description": "Protein C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of protein concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "protein_fact_kw.sql"
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "protein_fact_num_entities.sql"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": [
+               "proteins"
+            ]
+         },
+         "derivation_sql_path": "protein_fact.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "core_fact_project",
          "description": "An exploded representation of the core_fact.projects array column as a binary association.",
          "schema": {
