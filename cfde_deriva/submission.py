@@ -1198,6 +1198,7 @@ WHERE v.id = t.id;
                             'gene',
                             'analysis_type',
                             'phenotype',
+                            'protein',
                             # don't need to update subject_role/subject_granularity/sex/race/ethnicity/assoc types
                             # which are closed enums for the DCCs...
                     ]
@@ -1206,6 +1207,7 @@ WHERE v.id = t.id;
                 table_queries={
                     'substance': '(SELECT s.nid, s.id, s.name, s.description, s.synonyms, c.id AS compound FROM substance s JOIN compound c ON (s.compound = c.nid))',
                     'gene': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM gene g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
+                    'protein': '(SELECT g.nid, g.id, g.name, g.description, g.synonyms, t.id AS organism FROM protein g JOIN ncbi_taxonomy t ON (g.organism = t.nid))',
                 },
                 skip_cols={'RID', 'RCT', 'RMT', 'RCB', 'RMB', 'nid', 'resource_markdown'},
             )
@@ -1249,6 +1251,10 @@ WHERE v.id = t.id;
                      'datapackage_subject_role', 'subject_role'),
                     ("""  SELECT v.id FROM biosample_gene a JOIN gene v ON (a.gene = v.nid)""",
                      'datapackage_gene', 'gene'),
+                    ("""  SELECT v.id FROM collection_protein a JOIN protein v ON (a.protein = v.nid)
+                    UNUON SELECT v.id FROM protein_gene a JOIN protein v ON (a.protein = v.nid)
+                    """,
+                     'datapackage_protein', 'protein'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN analysis_type v ON (cf.analysis_type = v.nid)',
                      'datapackage_analysis_type', 'analysis_type'),
                     ("""  SELECT v.id FROM subject_phenotype a    JOIN phenotype v ON (a.phenotype = v.nid)

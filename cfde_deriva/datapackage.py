@@ -1265,6 +1265,9 @@ LIMIT 1;
             'pubchem_fact_': {
                 'substance': 'substances',
                 'compound': 'compounds',
+            },
+            'protein_fact_': {
+                'protein': 'proteins',
             }
         }
         for prefix, assoc_arrays in fact_assoc_arrays.items():
