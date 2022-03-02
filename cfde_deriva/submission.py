@@ -431,6 +431,7 @@ class Submission (object):
             # this needs project_root from prepare_sqlite_derived_data...
             next_error_state = terms.cfde_registry_dp_status.content_error
             self.validate_submission_dcc_table(self.portal_prep_sqlite_filename, self.submitting_dcc_id)
+            self.validate_collection_names(self.portal_prep_sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
             self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
@@ -891,6 +892,23 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                     id_namespace,
                     local_id
                 ))
+
+    @classmethod
+    def validate_collection_names(cls, sqlite_filename):
+        """Validate that collection.name is unique within this submission"""
+        with sqlite3.connect(sqlite_filename) as conn:
+            cur = conn.cursor()
+            cur.execute("""
+SELECT "name", count(*)
+FROM collection
+WHERE "name" IS NOT NULL
+GROUP BY "name"
+HAVING count(*) > 1
+ORDER BY count(*) DESC;
+""")
+            for row in cur:
+                nm, cnt = row
+                raise exception.InvalidDatapackage('Submission collection.name = %r occurs %d times, but must be unique within a single submission' % (nm, cnt))
 
     @classmethod
     def _test_get_sqlite_etl_sql(cls):
