@@ -2003,6 +2003,15 @@
                         "nid"
                      ]
                   },
+                  "S_protein": {
+                     "markdown_name": "Protein",
+                     "comment": "Proteins linked to this gene term.",
+                     "source": [
+                        {"inbound": ["CFDE", "protein_gene_gene_fkey"]},
+                        {"outbound": ["CFDE", "protein_gene_protein_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_gene_fact": {
                      "source": [
                         {"inbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
@@ -2074,9 +2083,171 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_phenotype"},
+                  {"sourcekey": "S_protein"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein",
+         "title": "Protein",
+         "description": "List of UniProtKB terms associated with C2M2 collections",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this protein in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "A UniProt Knowledgebase (UniProtKB) protein ID (e.g. 'P94485')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this protein",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "organism",
+                  "description": "OPTIONAL: The numeric ID of the taxon identifying this protein's source organism",
+                  "type": "integer"
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information registered with the CFDE-CC",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid",
+            "foreignKeys": [
+               {
+                  "fields": "organism",
+                  "constraint_name": "protein_organism_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "deriva": {
+            "table_config": {
+               "stable_key_columns": ["id"],
+               "user_favorites_disabled": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_protein",
+                     "favorited_key_columns": ["protein"],
+                     "user_id_column": "user_id"
+                  }
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_organism": {
+                     "source": [ {"outbound": ["CFDE", "protein_organism_fkey"]}, "nid" ]
+                  },
+                  "S_gene": {
+                     "markdown_name": "Gene",
+                     "comment": "Genes linked to this protein term.",
+                     "source": [
+                        {"inbound": ["CFDE", "protein_gene_protein_fkey"]},
+                        {"outbound": ["CFDE", "protein_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_protein_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "protein_fact_protein_protein_fkey"]},
+                        {"outbound": ["CFDE", "protein_fact_protein_protein_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections linked to this protein term.",
+                     "source": [
+                        {"sourcekey": "S_protein_fact"},
+                        {"inbound": ["CFDE", "collection_protein_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  {"sourcekey": "S_organism"},
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_collection"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_collection"}
                ]
             }
          }
@@ -3639,6 +3810,21 @@
                   }
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "creation_time",
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this collection's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
                   "type": "datetime",
@@ -3669,12 +3855,20 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this collection",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this collection",
                   "type": "string"
+               },
+               {
+                  "name": "has_time_series_data",
+                  "description": "Does this collection contain time-series data? (allowed values: [true|false|null] -- true == yes, contains time-series data; false == no, doesn't contain time-series data; null == no info provided)",
+                  "type": "boolean"
                },
                {
                   "name": "id",
@@ -3720,6 +3914,14 @@
                   "constraint_name": "collection_pubchem_fact_fkey",
                   "reference": {
                      "resource": "pubchem_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "collection_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
                      "fields": "nid"
                   }
                }
@@ -4093,6 +4295,9 @@
                   "S_pubchem_fact": {
                      "source": [{"outbound": ["CFDE", "collection_pubchem_fact_fkey"]}, "nid" ]
                   },
+                  "S_protein_fact": {
+                     "source": [{"outbound": ["CFDE", "collection_protein_fact_fkey"]}, "nid" ]
+                  },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
                      "source": [
@@ -4361,6 +4566,15 @@
                         "nid"
                      ]
                   },
+                  "S_protein_assoc": {
+                     "markdown_name": "Protein",
+                     "comment": "A protein linked to the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_protein_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_protein_protein_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_creation_time": {
                      "comment": "The time when the collection was created.",
                      "source": "creation_time"
@@ -4420,6 +4634,8 @@
                   {"sourcekey": "S_creation_time"},
                   {"sourcekey": "S_disease_assoc"},
                   {"sourcekey": "S_phenotype_assoc"},
+                  {"sourcekey": "S_protein_assoc"},
+                  "has_time_series_data",
                   {
                      "source": [
                         {"inbound": ["CFDE", "collection_in_collection_subset_fkey"]},
@@ -4441,12 +4657,16 @@
                   {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_compound"},
+                  {"sourcekey": "S_protein_assoc"},
                   {"sourcekey": "S_gene"},
                   {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularities"},
                   {"sourcekey": "S_subject_role"},
+                  {
+                     "source": [ "has_time_series_data" ]
+                  },
                   {
                      "markdown_name": "Collection Creation Time",
                      "sourcekey": "S_creation_time"
@@ -4565,10 +4785,12 @@
                {
                   "name": "filename",
                   "description": "A filename with no prepended PATH information.",
-                  "type": "string",
-                  "constraints": {
-                     "pattern": "^[^\/\\:]+$"
-                  }
+                  "type": "string"
+               },
+               {
+                  "name": "ras_permissions",
+                  "description": "A string identifying access control information for this file compatible with RAS user-level access control metadata",
+                  "type": "string"
                },
                {
                   "name": "bundle_collection",
@@ -4980,6 +5202,18 @@
                      ],
                      "entity": false
                   },
+                  "S_ras_permissions": {
+                     "source": [ "ras_permissions" ]
+                  },
+                  "S_has_ras_permissions": {
+                     "markdown_name": "Has RAS Permissions",
+                     "comment": "The file specifies RAS permission requirements.",
+                     "source": [
+                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
+                        "has_ras_permissions"
+                     ],
+                     "entity": false
+                  },
                   "S_bundle_collection": {
                      "markdown_name": "Bundle Collection",
                      "comment": "The collection describing the contents of this bundle (archive) file.",
@@ -5366,6 +5600,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
+                  {"sourcekey": "S_ras_permissions"},
                   "sha256",
                   "md5"
                ],
@@ -5400,6 +5635,7 @@
                   },
                   {"source": "size_in_bytes"},
                   {"sourcekey": "S_has_persistent_id"},
+                  {"sourcekey": "S_has_ras_permissions"},
                   {"sourcekey": "S_is_bundle"},
                   {"source": "uncompressed_size_in_bytes"},
                   {"sourcekey": "S_compression_format"}
@@ -8290,6 +8526,330 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "collection_gene",
+         "title": "collection_gene",
+         "description": "Association between a gene and a C2M2 collection containing experimental resources directly related to the study of that gene",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "An numeric ID describing this gene",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["gene", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_gene_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "constraint_name": "collection_gene_gene_fkey",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_compound",
+         "title": "collection_compound",
+         "description": "Association between a compound and a C2M2 collection containing experimental resources directly related to the study of that compound",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "compound",
+                  "description": "A numeric describing this compound",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["compound", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "compound"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_compound_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "compound",
+                  "constraint_name": "collection_compound_compound_fkey",
+                  "reference": {
+                     "resource": "compound",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_substance",
+         "title": "collection_substance",
+         "description": "Association between a substance and a C2M2 collection containing experimental resources directly related to the study of that substance",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "substance",
+                  "description": "A numeric ID describing this substance",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["substance", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "substance"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_substance_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "substance",
+                  "constraint_name": "collection_substance_substance_fkey",
+                  "reference": {
+                     "resource": "substance",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_taxonomy",
+         "title": "collection_taxonomy",
+         "description": "Association between a taxon and a C2M2 collection containing experimental resources directly related to the study of that taxon",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "taxon",
+                  "description": "An numeric ID identifying this taxon",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["taxon", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "taxon"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_taxonomy_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "taxon",
+                  "constraint_name": "collection_taxonomy_taxon_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_anatomy",
+         "title": "collection_anatomy",
+         "description": "Association between an UBERON anatomical term and a C2M2 collection containing experimental resources directly related to the study of the anatomical concept described by that term",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "anatomy",
+                  "description": "An UBERON term numeric ID",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["anatomy", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": [
+               "collection",
+               "anatomy"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_Name": "collection_anatomy_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "anatomy",
+                  "constraint_Name": "collection_anatomy_anatomy_fkey",
+                  "reference": {
+                     "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_protein",
+         "title": "collection_protein",
+         "description": "Association between a protein and a C2M2 collection containing experimental resources directly related to the study of that protein",
+         "schema": {
+            "fields": [
+               {
+                  "name": "collection",
+                  "description": "The numeric ID of this collection",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein",
+                  "description": "The numeric ID describing this protein",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primarykey": [
+               "collection",
+               "protein"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_protein_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein",
+                  "constraint_name": "collection_protein_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "subject_phenotype",
          "title": "subject_phenotype",
          "description": "Association between a C2M2 subject and a phenotype positively OR negatively clinically identified for that subject",
@@ -8539,6 +9099,54 @@
                },
                {
                   "fields": "gene",
+                  "reference": {
+                     "resource": "gene",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein_gene",
+         "title": "protein_gene",
+         "description": "Association between a UniProtKB protein term and an Ensembl term identifying a gene encoding that protein",
+         "schema": {
+            "fields": [
+               {
+                  "name": "protein",
+                  "description": "A UniProt Knowledgebase (UniProtKB) protein term numeric ID",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene",
+                  "description": "An Ensembl gene term numeric ID",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": [
+               "protein",
+               "gene"
+            ],
+            "foreignKeys": [
+               {
+                  "fields": "protein",
+                  "constraint_name": "protein_gene_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene",
+                  "constraint_name": "protein_gene_gene_fkey",
                   "reference": {
                      "resource": "gene",
                      "fields": "nid"
@@ -8905,6 +9513,14 @@
                {
                   "name": "has_persistent_id",
                   "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "has_ras_permissions",
+                  "description": "Boolean true when described entities specify RAS permission requirements.",
                   "type": "boolean",
                   "constraints": {
                      "required": true
@@ -10275,6 +10891,57 @@
                   "constraint_name": "pubchem_fact_compound_compound_fkey",
                   "reference": {
                      "resource": "compound",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein_fact_protein",
+         "description": "An exploded representation of the protein_fact.proteins array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "protein_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a protein_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein",
+                  "description": "The numeric ID of a term found in the protein_fact.proteins array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein", "protein_fact"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": ["protein_fact", "protein"],
+            "foreignKeys": [
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "protein_fact_protein_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein",
+                  "constraint_name": "protein_fact_protein_protein_fkey",
+                  "reference": {
+                     "resource": "protein",
                      "fields": "nid"
                   }
                }

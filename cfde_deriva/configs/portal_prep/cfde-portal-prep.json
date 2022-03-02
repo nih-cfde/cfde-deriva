@@ -5020,6 +5020,7 @@
                "id_namespace",
                "is_bundle",
                "has_persistent_id",
+               "has_ras_permissions",
 
                "project",
                "sex",
