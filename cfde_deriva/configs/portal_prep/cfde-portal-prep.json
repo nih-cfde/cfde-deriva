@@ -4711,6 +4711,14 @@
                   }
                },
                {
+                  "name": "has_ras_permissions",
+                  "description": "Boolean true when described entities specify RAS permission requirements.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
                   "type": "array",
