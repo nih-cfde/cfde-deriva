@@ -3767,7 +3767,7 @@
                {
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "description": "Numeric, surrogate key representing this collection's core metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -3782,7 +3782,7 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "description": "Numeric, surrogate key representing this collection's gene metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -3795,24 +3795,9 @@
                   }
                },
                {
-                  "name": "pubchem_fact",
-                  "title": "Numeric ID of pubchem fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true
-                  },
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": ["pubchem_fact", "nid"],
-                        "trgm": false
-                     }
-                  }
-               },
-               {
                   "name": "protein_fact",
                   "title": "Numeric ID of protein fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "description": "Numeric, surrogate key representing this collection's protein metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -3820,6 +3805,21 @@
                   "deriva": {
                      "indexing_preferences": {
                         "btree": ["protein_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "title": "Numeric ID of pubchem fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection's pubchem metadata in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["pubchem_fact", "nid"],
                         "trgm": false
                      }
                   }
@@ -3910,18 +3910,18 @@
                   }
                },
                {
-                  "fields": "pubchem_fact",
-                  "constraint_name": "collection_pubchem_fact_fkey",
-                  "reference": {
-                     "resource": "pubchem_fact",
-                     "fields": "nid"
-                  }
-               },
-               {
                   "fields": "protein_fact",
                   "constraint_name": "collection_protein_fact_fkey",
                   "reference": {
                      "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "collection_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
                      "fields": "nid"
                   }
                }
@@ -4695,7 +4695,7 @@
                {
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this file's core metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4710,7 +4710,7 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this file's gene metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4723,9 +4723,24 @@
                   }
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this fie.",
+                  "description": "Numeric, surrogate key representing this file's protein metadata in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "pubchem_fact",
                   "title": "Numeric ID of pubchem fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this file's pubchem metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -4822,6 +4837,14 @@
                   "constraint_name": "file_gene_fact_fkey",
                   "reference": {
                      "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "file_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
                      "fields": "nid"
                   }
                },
@@ -5663,7 +5686,7 @@
                {
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this biosample's core metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -5678,7 +5701,7 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this biosample's gene metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -5691,9 +5714,24 @@
                   }
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this biosample's protein metadata in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "pubchem_fact",
                   "title": "Numeric ID of pubchem fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "description": "Numeric, surrogate key representing this biosample's pubchem metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -5750,6 +5788,14 @@
                   "constraint_name": "biosample_gene_fact_fkey",
                   "reference": {
                      "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "biosample_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
                      "fields": "nid"
                   }
                },
@@ -6436,7 +6482,7 @@
                {
                   "name": "core_fact",
                   "title": "Numeric ID of core fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "description": "Numeric, surrogate key representing this subject's core metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -6451,7 +6497,7 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "description": "Numeric, surrogate key representing this subject's gene metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -6464,9 +6510,24 @@
                   }
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject's protein metadata in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["protein_fact", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "pubchem_fact",
                   "title": "Numeric ID of pubchem fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "description": "Numeric, surrogate key representing this subject's pubchem metadata in the portal.",
                   "type": "integer",
                   "constraints": {
                      "required": true
@@ -6537,6 +6598,14 @@
                   "constraint_name": "subject_gene_fact_fkey",
                   "reference": {
                      "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "subject_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
                      "fields": "nid"
                   }
                },
@@ -10532,6 +10601,146 @@
                ],
                "filter": {"and": [
                   {"sourcekey": "S_compounds"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {
+                     "markdown_name": "Files in Class",
+                     "source": [{"inbound": ["CFDE", "file_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Biosamples in Class",
+                     "source": [{"inbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Subjects in Class",
+                     "source": [{"inbound": ["CFDE", "subject_core_fact_fkey"]}, "nid"]
+                  },
+                  {
+                     "markdown_name": "Collections in Class",
+                     "source": [{"inbound": ["CFDE", "collection_core_fact_fkey"]}, "nid"]
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "protein_fact",
+         "title": "Protein Statistics",
+         "description": "Protein C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of protein concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "protein_fact_kw.sql"
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0,
+                  "derivation_sql_path": "protein_fact_num_entities.sql"
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "source_definitions": {
+               "columns": false,
+               "fkeys": true,
+               "sources": {
+                  "S_proteins": {
+                     "comment": "A protein CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "protein_fact_protein_protein_fact_fkey"]}, {"outbound": ["CFDE", "protein_fact_protein_protein_fkey"]}, "nid"]
+                  }
+               }
+            },
+            "table_display": {
+               "row_name": {
+                  "row_markdown_pattern": "{{{_nid}}}"
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  {"sourcekey": "S_proteins"},
+                  {"source": "num_files"},
+                  {"source": "num_bytes"},
+                  {"source": "num_biosamples"},
+                  {"source": "num_subjects"},
+                  {"source": "num_collections"}
+               ],
+               "compact": [
+                  {
+                     "markdown_name": "Protein",
+                     "source": "proteins",
+                     "comment": "Protein term qualifying the set of C2M2 entities.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _proteins.length \"0\")}}{{_proteins.length}} values{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Counts",
+                     "source": "num_files",
+                     "comment": "Summary counts of file, biosample, and subjects related to each combination of metadata terms.",
+                     "display": {
+                        "markdown_pattern": "{{#_num_files}}- {{num_files}} files\n{{/_num_files}}{{#_total_size_in_bytes}}- {{total_size_in_bytes}} bytes\n{{/_total_size_in_bytes}}{{#_num_biosamples}}- {{num_biosamples}} biosamples\n{{/_num_biosamples}}{{#_num_subjects}}- {{num_subjects}} subjects\n{{/_num_subjects}}{{#_num_collections}}- {{num_collections}} collections{{/_num_collections}}"
+                     }
+                  }
+               ],
+               "filter": {"and": [
+                  {"sourcekey": "S_proteins"},
                   {"source": "num_files"},
                   {"source": "num_bytes"},
                   {"source": "num_biosamples"},

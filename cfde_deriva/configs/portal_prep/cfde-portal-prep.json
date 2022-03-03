@@ -2100,6 +2100,12 @@
                   "type": "integer"
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this collection.",
+                  "description": "Numeric, surrogate key representing this collection in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "pubchem_fact",
                   "title": "Numeric ID of pubchem fact class describing this collection.",
                   "description": "Numeric, surrogate key representing this collection in the portal.",
@@ -2193,6 +2199,14 @@
                   }
                },
                {
+                  "fields": "protein_fact",
+                  "constraint_name": "collection_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "pubchem_fact",
                   "constraint_name": "collection_pubchem_fact_fkey",
                   "reference": {
@@ -2238,6 +2252,12 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this file.",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this file.",
                   "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
@@ -2383,6 +2403,14 @@
                   }
                },
                {
+                  "fields": "protein_fact",
+                  "constraint_name": "file_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "pubchem_fact",
                   "constraint_name": "file_pubchem_fact_fkey",
                   "reference": {
@@ -2495,6 +2523,12 @@
                   "type": "integer"
                },
                {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this biosample.",
+                  "description": "Numeric, surrogate key representing this biosample in the portal.",
+                  "type": "integer"
+               },
+               {
                   "name": "pubchem_fact",
                   "title": "Numeric ID of pubchem fact class describing this biosample.",
                   "description": "Numeric, surrogate key representing this biosample in the portal.",
@@ -2577,6 +2611,14 @@
                   }
                },
                {
+                  "fields": "protein_fact",
+                  "constraint_name": "biosample_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "pubchem_fact",
                   "constraint_name": "biosample_pubchem_fact_fkey",
                   "reference": {
@@ -2646,6 +2688,12 @@
                {
                   "name": "gene_fact",
                   "title": "Numeric ID of gene fact class describing this subject.",
+                  "description": "Numeric, surrogate key representing this subject in the portal.",
+                  "type": "integer"
+               },
+               {
+                  "name": "protein_fact",
+                  "title": "Numeric ID of protein fact class describing this subject.",
                   "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
@@ -2742,6 +2790,14 @@
                   "constraint_name": "subject_gene_fact_fkey",
                   "reference": {
                      "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "subject_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
                      "fields": "nid"
                   }
                },
