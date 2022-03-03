@@ -10771,6 +10771,124 @@
       },
       {
          "profile": "tabular-data-resource",
+         "name": "combined_fact",
+         "title": "Combined Statistics",
+         "description": "Combined C2M2 entity facts, representing classes of C2M2 entities characterized by the same combination of metadata concepts.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "core_fact",
+                  "description": "The numeric ID of the core_fact class qualifiying the described entities.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "gene_fact",
+                  "description": "The numeric ID of the gene_fact class qualifiying the described entities.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "protein_fact",
+                  "description": "The numeric ID of the protein_fact class qualifiying the described entities.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "pubchem_fact",
+                  "description": "The numeric ID of the pubchem_fact class qualifiying the described entities.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+
+               {
+                  "name": "num_subjects",
+                  "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_biosamples",
+                  "description": "The number of biosamples with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_files",
+                  "description": "The number of files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "num_collections",
+                  "description": "The number of collections with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               },
+               {
+                  "name": "total_size_in_bytes",
+                  "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
+                  "type": "integer",
+                  "default": 0
+               }
+            ],
+            "primaryKey": "nid",
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "combined_fact_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "gene_fact",
+                  "constraint_name": "combined_fact_gene_fact_fkey",
+                  "reference": {
+                     "resource": "gene_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "protein_fact",
+                  "constraint_name": "combined_fact_protein_fact_fkey",
+                  "reference": {
+                     "resource": "protein_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "pubchem_fact",
+                  "constraint_name": "combined_fact_pubchem_fact_fkey",
+                  "reference": {
+                     "resource": "pubchem_fact",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
          "name": "core_fact_project",
          "description": "An exploded representation of the core_fact.projects array column as a binary association.",
          "schema": {
