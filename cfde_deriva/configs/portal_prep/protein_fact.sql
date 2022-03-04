@@ -1,7 +1,6 @@
 
 INSERT INTO protein_fact (proteins)
 VALUES ('[]')
-WHERE True
 ON CONFLICT DO NOTHING
 ;
 
@@ -22,10 +21,10 @@ SELECT
   col.nid,
 
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      SELECT json_sorted(json_group_array(DISTINCT s.protein))
       FROM (
-        SELECT j.value FROM collection_protein cpr WHERE cpr.collection = col.nid
-      )
+        SELECT cpr.protein FROM collection_protein cpr WHERE cpr.collection = col.nid
+      ) s
     ),
     '[]'
   ) AS proteins

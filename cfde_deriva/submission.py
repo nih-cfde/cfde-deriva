@@ -1277,7 +1277,7 @@ WHERE v.id = t.id;
                     UNION SELECT v.id FROM protein_gene a JOIN gene v ON (a.gene = v.nid)""",
                      'datapackage_gene', 'gene'),
                     ("""  SELECT v.id FROM collection_protein a JOIN protein v ON (a.protein = v.nid)
-                    UNUON SELECT v.id FROM protein_gene a JOIN protein v ON (a.protein = v.nid)
+                    UNION SELECT v.id FROM protein_gene a JOIN protein v ON (a.protein = v.nid)
                     """,
                      'datapackage_protein', 'protein'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN analysis_type v ON (cf.analysis_type = v.nid)',

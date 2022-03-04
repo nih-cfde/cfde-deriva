@@ -8819,7 +8819,7 @@
                {
                   "name": "collection",
                   "description": "The numeric ID of this collection",
-                  "type": "string",
+                  "type": "integer",
                   "constraints": {
                      "required": true
                   }

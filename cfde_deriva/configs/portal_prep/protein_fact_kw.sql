@@ -8,7 +8,7 @@ FROM (
          cfde_keywords_agg(pr.id, pr.name, pr.description),
          cfde_keywords_merge_agg(pr.synonyms)
        )
-       FROM json_each(prf.proteins) prj JOIN protien pr ON (prj.value = pr.nid))
+       FROM json_each(prf.proteins) prj JOIN protein pr ON (prj.value = pr.nid))
     ) AS kw
   FROM protein_fact prf
 ) s
