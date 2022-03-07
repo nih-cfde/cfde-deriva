@@ -31,8 +31,10 @@ SELECT
   count(*),
   sum(size_in_bytes)
 FROM file
+WHERE true
 GROUP BY core_fact, gene_fact, protein_fact, pubchem_fact
-ON CONFLICT DO UPDATE
+ON CONFLICT (core_fact, gene_fact, protein_fact, pubchem_fact)
+DO UPDATE
 SET num_files = EXCLUDED.num_files,
     total_size_in_bytes = EXCLUDED.total_size_in_bytes
 ;
@@ -51,8 +53,10 @@ SELECT
   pubchem_fact,
   count(*)
 FROM biosample
+WHERE true
 GROUP BY core_fact, gene_fact, protein_fact, pubchem_fact
-ON CONFLICT DO UPDATE
+ON CONFLICT (core_fact, gene_fact, protein_fact, pubchem_fact)
+DO UPDATE
 SET num_biosamples = EXCLUDED.num_biosamples
 ;
 
@@ -70,7 +74,9 @@ SELECT
   pubchem_fact,
   count(*)
 FROM subject
+WHERE true
 GROUP BY core_fact, gene_fact, protein_fact, pubchem_fact
-ON CONFLICT DO UPDATE
+ON CONFLICT (core_fact, gene_fact, protein_fact, pubchem_fact)
+DO UPDATE
 SET num_subjects = EXCLUDED.num_subjects
 ;
