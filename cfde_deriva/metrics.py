@@ -151,7 +151,7 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
                 by_metric.get(row['metric'], {}),
                 ['value', 'numerator', 'denominator', 'comment']
         )
-    }
+    ]
 
     registry_catalog.put(
         '/attributegroup/CFDE:datapackage_measurement/datapackage,metric;value,numerator,denominator,comment',
