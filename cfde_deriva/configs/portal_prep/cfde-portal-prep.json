@@ -5207,8 +5207,7 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "gene_fact_kw.sql"
+                  "type": "array"
                },
 
                {
@@ -5285,8 +5284,7 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "pubchem_fact_kw.sql"
+                  "type": "array"
                },
 
                {
@@ -5356,8 +5354,7 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "protein_fact_kw.sql"
+                  "type": "array"
                },
 
                {
