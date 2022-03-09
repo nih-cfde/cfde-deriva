@@ -2088,27 +2088,24 @@
                   }
                },
                {
+                  "name": "combined_fact",
+                  "description": "Numeric, surrogate key representing the metadata class of this collection.",
+                  "type": "integer"
+               },
+               {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer"
                },
                {
                   "name": "gene_fact",
-                  "title": "Numeric ID of gene fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer"
                },
                {
                   "name": "protein_fact",
-                  "title": "Numeric ID of protein fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer"
                },
                {
                   "name": "pubchem_fact",
-                  "title": "Numeric ID of pubchem fact class describing this collection.",
-                  "description": "Numeric, surrogate key representing this collection in the portal.",
                   "type": "integer"
                },
                {
@@ -2183,6 +2180,14 @@
             "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
+                  "fields": "combined_fact",
+                  "constraint_name": "collection_combined_fact_fkey",
+                  "reference": {
+                     "resource": "combined_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "core_fact",
                   "constraint_name": "collection_core_fact_fkey",
                   "reference": {
@@ -2244,27 +2249,24 @@
                   }
                },
                {
+                  "name": "combined_fact",
+                  "description": "Numeric, surrogate key representing the metadata class of this file.",
+                  "type": "integer"
+               },
+               {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
                {
                   "name": "gene_fact",
-                  "title": "Numeric ID of gene fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
                {
                   "name": "protein_fact",
-                  "title": "Numeric ID of protein fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
                {
                   "name": "pubchem_fact",
-                  "title": "Numeric ID of pubchem fact class describing this file.",
-                  "description": "Numeric, surrogate key representing this file in the portal.",
                   "type": "integer"
                },
                {
@@ -2386,6 +2388,14 @@
             "missingValues": [ "" ],
             "primaryKey": [ "nid" ],
             "foreignKeys": [
+               {
+                  "fields": "combined_fact",
+                  "constraint_name": "file_combined_fact_fkey",
+                  "reference": {
+                     "resource": "combined_fact",
+                     "fields": "nid"
+                  }
+               },
                {
                   "fields": "core_fact",
                   "constraint_name": "file_core_fact_fkey",
@@ -2511,27 +2521,24 @@
                   }
                },
                {
+                  "name": "combined_fact",
+                  "description": "Numeric, surrogate key representing the metadata class of this biosample.",
+                  "type": "integer"
+               },
+               {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this biosample in the portal.",
                   "type": "integer"
                },
                {
                   "name": "gene_fact",
-                  "title": "Numeric ID of gene fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this biosample in the portal.",
                   "type": "integer"
                },
                {
                   "name": "protein_fact",
-                  "title": "Numeric ID of protein fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this biosample in the portal.",
                   "type": "integer"
                },
                {
                   "name": "pubchem_fact",
-                  "title": "Numeric ID of pubchem fact class describing this biosample.",
-                  "description": "Numeric, surrogate key representing this biosample in the portal.",
                   "type": "integer"
                },
                {
@@ -2594,6 +2601,14 @@
             "missingValues": [ "" ],
             "primaryKey": [ "nid" ],
             "foreignKeys": [
+               {
+                  "fields": "combined_fact",
+                  "constraint_name": "biosample_combined_fact_fkey",
+                  "reference": {
+                     "resource": "combined_fact",
+                     "fields": "nid"
+                  }
+               },
                {
                   "fields": "core_fact",
                   "constraint_name": "biosample_core_fact_fkey",
@@ -2680,27 +2695,24 @@
                   }
                },
                {
+                  "name": "combined_fact",
+                  "description": "Numeric, surrogate key representing the metadata class of this subject.",
+                  "type": "integer"
+               },
+               {
                   "name": "core_fact",
-                  "title": "Numeric ID of core fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
                {
                   "name": "gene_fact",
-                  "title": "Numeric ID of gene fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
                {
                   "name": "protein_fact",
-                  "title": "Numeric ID of protein fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
                {
                   "name": "pubchem_fact",
-                  "title": "Numeric ID of pubchem fact class describing this subject.",
-                  "description": "Numeric, surrogate key representing this subject in the portal.",
                   "type": "integer"
                },
                {
@@ -2777,6 +2789,14 @@
             "missingValues": [ "" ],
             "primaryKey": [ "nid" ],
             "foreignKeys": [
+               {
+                  "fields": "combined_fact",
+                  "constraint_name": "subject_combined_fact_fkey",
+                  "reference": {
+                     "resource": "combined_fact",
+                     "fields": "nid"
+                  }
+               },
                {
                   "fields": "core_fact",
                   "constraint_name": "subject_core_fact_fkey",
@@ -5457,6 +5477,12 @@
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
                   "default": 0
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array",
+                  "derivation_sql_path": "combined_fact_kw.sql"
                }
             ],
             "primaryKey": [
