@@ -3901,7 +3901,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid" ],
+            "primaryKey": [ "nid", "combined_fact" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -4312,16 +4312,16 @@
                      "source": [{"outbound": ["CFDE", "collection_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"outbound": ["CFDE", "collection_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"outbound": ["CFDE", "collection_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_protein_fact": {
-                     "source": [{"outbound": ["CFDE", "collection_protein_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_protein_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
@@ -4857,7 +4857,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "combined_fact", "nid" ],
+            "primaryKey": [ "nid", "combined_fact" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -5234,13 +5234,13 @@
                      "source": [{"outbound": ["CFDE", "file_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"outbound": ["CFDE", "file_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"outbound": ["CFDE", "file_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
@@ -5826,7 +5826,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "combined_fact", "nid" ],
+            "primaryKey": [ "nid", "combined_fact" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -6164,13 +6164,13 @@
                      "source": [{"outbound": ["CFDE", "biosample_combined_fact_fkey"]}, "nid"]
                   },
                   "S_core_fact": {
-                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
-                     "source": [{"outbound": ["CFDE", "biosample_gene_fact_fkey"]}, "nid"]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid"]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"outbound": ["CFDE", "biosample_pubchem_fact_fkey"]}, "nid"]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid"]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
@@ -6654,7 +6654,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "combined_fact", "nid" ],
+            "primaryKey": [ "nid", "combined_fact" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -6904,13 +6904,13 @@
                      "source": [{"outbound": ["CFDE", "subject_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"outbound": ["CFDE", "subject_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"outbound": ["CFDE", "subject_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
@@ -10364,37 +10364,6 @@
             }
          }
       },
-      {
-         "profile": "tabular-data-resource",
-         "name": "core_keyword",
-         "title": "Core Keywords",
-         "description": "Core C2M2 entity keywords, representing keyword-matching corpi for classes of C2M2 entities characterized by the same combination of metadata concepts.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this fact record in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
-               }
-            ]
-         }
-      },
 
       {
          "profile": "tabular-data-resource",
@@ -10419,18 +10388,6 @@
                   "type": "object",
                   "constraints": {
                      "required": true
-                  }
-               },
-
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
                   }
                },
 
@@ -10572,18 +10529,6 @@
                   "type": "object",
                   "constraints": {
                      "required": true
-                  }
-               },
-
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
                   }
                },
 
@@ -10731,17 +10676,6 @@
                   "type": "array",
                   "constraints": {
                      "required": true
-                  }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
                   }
                },
 
