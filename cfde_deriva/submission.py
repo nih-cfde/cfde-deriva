@@ -434,8 +434,8 @@ class Submission (object):
             self.validate_collection_names(self.portal_prep_sqlite_filename)
 
             next_error_state = terms.cfde_registry_dp_status.ops_error
-            self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
             self.upload_sqlite_raw_content(self.review_catalog, self.ingest_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
+            self.upload_sqlite_content(self.review_catalog, self.portal_prep_sqlite_filename, table_done_callback=dpt_update2, table_error_callback=dpt_error2)
 
             review_browse_url = '%s/chaise/recordset/#%s/CFDE:file' % (
                 self.review_catalog._base_server_uri,

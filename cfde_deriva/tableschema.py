@@ -138,6 +138,11 @@ class PortalPackageDataName (PackageDataName):
         # augment the portal model we return w/ c2m2 submission tables
         portal_doc = json.loads(buf.decode())
         portal_resources = portal_doc['resources']
+        portal_cfde_tables = {
+            resource['name']: resource
+            for resource in portal_resources
+            if 'resourceSchema' not in resource
+        }
 
         c2m2_doc = json.loads(submission_schema_json.get_data_str())
         c2m2_resources = c2m2_doc['resources']
@@ -183,17 +188,26 @@ class PortalPackageDataName (PackageDataName):
                 if fdoc['name'] != 'synonyms'
             ]
             rschema['primaryKey'] = [ "nid" ]
-            rschema['foreignKeys'] = [
-                {
-                    "fields": "nid",
-                    "constraint_name": "%(name)s_nid_fkey" % resource,
-                    "reference": {
-                        "resourceSchema": "CFDE",
-                        "resource": resource['name'],
-                        "fields": "nid"
+            rschema['foreignKeys'] = [ ]
+
+            # add fkey we can traverse with Chaise  CFDE.foo -> c2m2.foo
+            if resource['name'] in {
+                    'collection', 'file', 'biosample', 'subject',
+                    'project', 'dcc',
+            }:
+                portal_schema = portal_cfde_tables[ resource['name'] ]['schema']
+                portal_schema.setdefault("foreignKeys", []).append(
+                    {
+                        "fields": "nid",
+                        "constraint_name": "%(name)s_nid_c2m2_fkey" % resource,
+                        "reference": {
+                            "resourceSchema": "c2m2",
+                            "resource": resource['name'],
+                            "fields": "nid"
+                        }
                     }
-                }
-            ]
+                )
+
             # add to portal table list
             portal_resources.append(resource)
 
