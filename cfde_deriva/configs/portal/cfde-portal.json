@@ -4299,11 +4299,18 @@
                "search-box": {"or": [
                   {
                      "source": [ "kw" ],
-                     "markdown_name": "project, collection, or C2M2 CV terms",
+                     "markdown_name": "collection",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
+                  },
+                  {
+                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "markdown_name": "project, or C2M2 CV terms"
                   }
                ]},
                "sources": {
+                  "S_combined_fact": {
+                     "source": [{"outbound": ["CFDE", "collection_combined_fact_fkey"]}, "nid" ]
+                  },
                   "S_core_fact": {
                      "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
                   },
