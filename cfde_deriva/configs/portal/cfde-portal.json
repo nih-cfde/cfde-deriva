@@ -3986,6 +3986,66 @@
                            {
                               "source": {
                                  "api": "entity",
+                                 "path": "CFDE:collection_gene/(nid)=(c2m2:collection_gene:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_gene",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "CFDE:collection_compound/(nid)=(c2m2:collection_compound:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_compound",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "CFDE:collection_substance/(nid)=(c2m2:collection_substance:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_substance",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "CFDE:collection_taxonomy/(nid)=(c2m2:collection_taxonomy:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_taxonomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "CFDE:collection_anatomy/(nid)=(c2m2:collection_anatomy:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_anatomy",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "CFDE:collection_protein/(nid)=(c2m2:collection_protein:nid)"
+                              },
+                              "destination": {
+                                 "name": "collection_protein",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
                                  "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(c2m2:project:nid)"
                               },
                               "destination": {
@@ -4110,6 +4170,16 @@
                               },
                               "destination": {
                                  "name": "compound",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "(protein_fact)/CFDE:protein_fact_protein/(protein)=(c2m2:protein:nid)"
+                              },
+                              "destination": {
+                                 "name": "protein",
                                  "type": "csv"
                               }
                            },
