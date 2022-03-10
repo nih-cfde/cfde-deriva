@@ -5282,7 +5282,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "core_fact", "nid" ]
+                  "row_order": [ "combined_fact", "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
