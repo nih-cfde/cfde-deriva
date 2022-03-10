@@ -3966,7 +3966,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:collection_disease/c2m2:collection_disease"
+                                 "path": "CFDE:collection_disease/(nid)=(c2m2:collection_disease:nid)"
                               },
                               "destination": {
                                  "name": "collection_disease",
@@ -3976,7 +3976,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:collection_phenotype/c2m2:collection_phenotype"
+                                 "path": "CFDE:collection_phenotype/(nid)=(c2m2:collection_phenotype:nid)"
                               },
                               "destination": {
                                  "name": "collection_phenotype",
@@ -3996,7 +3996,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/c2m2:project_in_project"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/(nid)=(c2m2:project_in_project:nid)"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -4116,7 +4116,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_disease:biosample)/c2m2:biosample_disease"
+                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_disease:biosample)/(nid)=(c2m2:biosample_disease:nid)"
                               },
                               "destination": {
                                  "name": "biosample_disease",
@@ -4126,7 +4126,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_gene:biosample)/c2m2:biosample_gene"
+                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_gene:biosample)/(nid)=(c2m2:biosample_gene:nid)"
                               },
                               "destination": {
                                  "name": "biosample_gene",
@@ -4136,7 +4136,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_substance:biosample)/c2m2:biosample_substance"
+                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_substance:biosample)/(nid)=(c2m2:biosample_substance:nid)"
                               },
                               "destination": {
                                  "name": "biosample_substance",
@@ -4146,7 +4146,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_from_subject:biosample)/c2m2:biosample_from_subject"
+                                 "path": "CFDE:biosample_in_collection/(biosample)=(CFDE:biosample_from_subject:biosample)/(nid)=(c2m2:biosample_from_subject:nid)"
                               },
                               "destination": {
                                  "name": "biosample_from_subject",
@@ -4176,7 +4176,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_role_taxonomy:subject)/c2m2:subject_role_taxonomy"
+                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_role_taxonomy:subject)/(nid)=(c2m2:subject_role_taxonomy:nid)"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -4236,7 +4236,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_race:subject)/c2m2:subject_race"
+                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_race:subject)/(nid)=(c2m2:subject_race:nid)"
                               },
                               "destination": {
                                  "name": "subject_race",
@@ -4246,7 +4246,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_substance:subject)/c2m2:subject_substance"
+                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_substance:subject)/(nid)=(c2m2:subject_substance:nid)"
                               },
                               "destination": {
                                  "name": "subject_substance",
@@ -4256,7 +4256,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_disease:subject)/c2m2:subject_disease"
+                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_disease:subject)/(nid)=(c2m2:subject_disease:nid)"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -4266,7 +4266,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_phenotype:subject)/c2m2:subject_phenotype"
+                                 "path": "CFDE:subject_in_collection/(subject)=(CFDE:subject_phenotype:subject)/(nid)=(c2m2:subject_phenotype:nid)"
                               },
                               "destination": {
                                  "name": "subject_phenotype",
@@ -4941,7 +4941,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "cf:=(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/c2m2:project_in_project"
+                                 "path": "cf:=(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/(nid)=(c2m2:project_in_project:nid)"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -5041,7 +5041,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_disease:biosample)/c2m2:biosample_disease"
+                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_disease:biosample)/(nid)=(c2m2:biosample_disease:nid)"
                               },
                               "destination": {
                                  "name": "biosample_disease",
@@ -5051,7 +5051,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_gene:biosample)/c2m2:biosample_gene"
+                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_gene:biosample)/(nid)=(c2m2:biosample_gene:nid)"
                               },
                               "destination": {
                                  "name": "biosample_gene",
@@ -5061,7 +5061,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_substance:biosample)/c2m2:biosample_substance"
+                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_substance:biosample)/(nid)=(c2m2:biosample_substance:nid)"
                               },
                               "destination": {
                                  "name": "biosample_substance",
@@ -5071,7 +5071,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_from_subject:biosample)/c2m2:biosample_from_subject"
+                                 "path": "CFDE:file_describes_biosample/(biosample)=(CFDE:biosample_from_subject:biosample)/(nid)=(c2m2:biosample_from_subject:nid)"
                               },
                               "destination": {
                                  "name": "biosample_from_subject",
@@ -5102,7 +5102,7 @@
 
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_subject/(subject)/CFDE:subject_role_taxonomy/c2m2:subject_role_taxonomy"
+                                 "path": "CFDE:file_describes_subject/(subject)/CFDE:subject_role_taxonomy/(nid)=(c2m2:subject_role_taxonomy:nid)"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -5162,7 +5162,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_race:subject)/c2m2:subject_race"
+                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_race:subject)/(nid)=(c2m2:subject_race:nid)"
                               },
                               "destination": {
                                  "name": "subject_race",
@@ -5172,7 +5172,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_substance:subject)/c2m2:subject_substance"
+                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_substance:subject)/(nid)=(c2m2:subject_substance:nid)"
                               },
                               "destination": {
                                  "name": "subject_substance",
@@ -5182,7 +5182,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_disease:subject)/c2m2:subject_disease"
+                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_disease:subject)/(nid)=(c2m2:subject_disease:nid)"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -5192,7 +5192,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_phenotype:subject)/c2m2:subject_phenotype"
+                                 "path": "CFDE:file_describes_subject/(subject)=(CFDE:subject_phenotype:subject)/(nid)=(c2m2:subject_phenotype:nid)"
                               },
                               "destination": {
                                  "name": "subject_phenotype",
@@ -5901,7 +5901,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/c2m2:project_in_project"
+                                 "path": "(core_fact)/CFDE:core_fact_project/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/(nid)=(c2m2:project_in_project:nid)"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -5971,7 +5971,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_disease/c2m2:biosample_disease"
+                                 "path": "CFDE:biosample_disease/(nid)=(c2m2:biosample_disease:nid)"
                               },
                               "destination": {
                                  "name": "biosample_disease",
@@ -5981,7 +5981,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_gene/c2m2:biosample_gene"
+                                 "path": "CFDE:biosample_gene/(nid)=(c2m2:biosample_gene:nid)"
                               },
                               "destination": {
                                  "name": "biosample_gene",
@@ -5991,7 +5991,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_substance/c2m2:biosample_substance"
+                                 "path": "CFDE:biosample_substance/(nid)=(c2m2:biosample_substance:nid)"
                               },
                               "destination": {
                                  "name": "biosample_substance",
@@ -6001,7 +6001,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/c2m2:biosample_from_subject"
+                                 "path": "CFDE:biosample_from_subject/(nid)=(c2m2:biosample_from_subject:nid)"
                               },
                               "destination": {
                                  "name": "biosample_from_subject",
@@ -6032,7 +6032,7 @@
 
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_role_taxonomy:subject)/c2m2:subject_role_taxonomy"
+                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_role_taxonomy:subject)/(nid)=(c2m2:subject_role_taxonomy:nid)"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -6092,7 +6092,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_race:subject)/c2m2:subject_race"
+                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_race:subject)/(nid)=(c2m2:subject_race:nid)"
                               },
                               "destination": {
                                  "name": "subject_race",
@@ -6102,7 +6102,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_substance:subject)/c2m2:subject_substance"
+                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_substance:subject)/(nid)=(c2m2:subject_substance:nid)"
                               },
                               "destination": {
                                  "name": "subject_substance",
@@ -6112,7 +6112,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_disease:subject)/c2m2:subject_disease"
+                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_disease:subject)/(nid)=(c2m2:subject_disease:nid)"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -6122,7 +6122,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_phenotype:subject)/c2m2:subject_phenotype"
+                                 "path": "CFDE:biosample_from_subject/(subject)=(CFDE:subject_phenotype:subject)/(nid)=(c2m2:subject_phenotype:nid)"
                               },
                               "destination": {
                                  "name": "subject_phenotype",
@@ -6729,7 +6729,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/c2m2:project_in_project"
+                                 "path": "(core_fact)/(project)=(CFDE:project_in_project_transitive:member_project)/(leader_project)=(CFDE:project_in_project:child_project)/(nid)=(c2m2:project_in_project:nid)"
                               },
                               "destination": {
                                  "name": "project_in_project",
@@ -6750,7 +6750,7 @@
 
                               "source": {
                                  "api": "entity",
-                                 "path": "(CFDE:subject_role_taxonomy:subject)/c2m2:subject_role_taxonomy"
+                                 "path": "(CFDE:subject_role_taxonomy:subject)/(nid)=(c2m2:subject_role_taxonomy:nid)"
                               },
                               "destination": {
                                  "name": "subject_role_taxonomy",
@@ -6812,7 +6812,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_race/c2m2:subject_race"
+                                 "path": "CFDE:subject_race/(nid)=(c2m2:subject_race:nid)"
                               },
                               "destination": {
                                  "name": "subject_race",
@@ -6822,7 +6822,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_substance/c2m2:subject_substance"
+                                 "path": "CFDE:subject_substance/(nid)=(c2m2:subject_substance:nid)"
                               },
                               "destination": {
                                  "name": "subject_substance",
@@ -6832,7 +6832,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_disease/c2m2:subject_disease"
+                                 "path": "CFDE:subject_disease/(nid)=(c2m2:subject_disease:nid)"
                               },
                               "destination": {
                                  "name": "subject_disease",
@@ -6842,7 +6842,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "CFDE:subject_phenotype/c2m2:subject_phenotype"
+                                 "path": "CFDE:subject_phenotype/(nid)=(c2m2:subject_phenotype:nid)"
                               },
                               "destination": {
                                  "name": "subject_phenotype",
@@ -12825,7 +12825,7 @@
                            {
                               "source": {
                                  "api": "entity",
-                                 "path": "personal_collection_file/CFDE:file/c2m2:file"
+                                 "path": "personal_collection_file/CFDE:file/(nid)=(c2m2:file:nid)"
                               },
                               "destination": {
                                  "name": "file",
