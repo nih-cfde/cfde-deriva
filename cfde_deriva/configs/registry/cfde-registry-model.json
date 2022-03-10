@@ -651,6 +651,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -690,6 +695,12 @@
             "primaryKey": ["rank", "id"]
          },
          "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
             "visible_columns": {
                "compact": [
                   "id",
