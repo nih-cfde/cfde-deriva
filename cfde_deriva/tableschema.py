@@ -769,6 +769,7 @@ class RegistryConfigurator (CatalogConfigurator):
                     "name": "Submission System Vocabulary",
                     "children": [
                         { "name": "Datapackage status", "url": "/chaise/recordset/#registry/CFDE:datapackage_status" },
+                        { "name": "FAIR metric", "url": "/chaise/recordset/#registry/CFDE:datapackage_metric"},
                         { "name": "Table status", "url": "/chaise/recordset/#registry/CFDE:datapackage_table_status" },
                         { "name": "Approval status", "url": "/chaise/recordset/#registry/CFDE:approval_status" },
                         { "name": "Group role", "url": "/chaise/recordset/#registry/CFDE:group_role" },
