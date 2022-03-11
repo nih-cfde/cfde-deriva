@@ -11,7 +11,7 @@ access scenarios:
 
 """
 
-from deriva.core import urlquote
+from deriva.core import urlquote, DEFAULT_HEADERS
 
 def _get_required(d, k):
     v = d[k]
@@ -158,8 +158,15 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
         json=need_update,
     ).json() # discard response data
 
-def get_datapackage_measurements(registry_catalog, submission_id):
+def get_datapackage_measurements(registry_catalog, submission_id, headers=DEFAULT_HEADERS):
     """Return a sorted list of all measurement data for a given datapackage.
+
+    :param registry_catalog: An ErmrestCatalog instance bound to catalog_id='registry'
+    :param submission_id: The (UUID) id of a submission record in the registry_catalog
+    :param headers: A dict-like HTTP request headers object to override the defaults
+
+    The optional headers may be used to pass different credentials in
+    each request.
 
     Result is a list of dict-like measurements with fields:
     - datapackage: UUID-like submission id
@@ -175,6 +182,7 @@ def get_datapackage_measurements(registry_catalog, submission_id):
     Results are sorted by:
     - ascending metric_rank as primary sort key
     - ascending name as secondary sort key to break ties
+
     """
     _check_submission_id(registry_catalog, submission_id)
 
@@ -183,5 +191,6 @@ def get_datapackage_measurements(registry_catalog, submission_id):
         + ('/datapackage=%s' % urlquote(submission_id))
         + '/V:datapackage,V:metric;V:metric_rank,M:name,M:description'
         + ',V:value,V:numerator,V:denominator,V:comment'
-        + '@sort(metric_rank,name)'
+        + '@sort(metric_rank,name)',
+        headers=headers,
     ).json()
