@@ -1151,6 +1151,11 @@
                      "comment": "Tabular data resources included in this submission.",
                      "source": [{"inbound": ["CFDE", "datapackage_table_datapackage_fkey"]}, "RID"]
                   },
+                  "S_datapackage_measurements": {
+                     "markdown_name": "FAIR Assessment",
+                     "comment": "Assessment values (measurements) for various FAIR assessment metrics applied to this submission.",
+                     "source": [{"inbound": ["CFDE", "datapackage_measurement_datapackage_fkey"]}, "RID"]
+                  },
                   "S_anatomy": {
                      "markdown_name": "Anatomy",
                      "comment": "Anatomy terms used in submission",
@@ -1337,6 +1342,7 @@
                "*": [
                   {"sourcekey": "S_releases"},
                   {"sourcekey": "S_datapackage_tables"},
+                  {"sourcekey": "S_datapackage_measurements"},
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_assay_type"},
@@ -1481,6 +1487,13 @@
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "column_display": {
+                        "*": {
+                           "pre_format": {
+                              "format": "%'f"
+                           }
+                        }
                      }
                   }
                },
@@ -1491,6 +1504,13 @@
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "column_display": {
+                        "*": {
+                           "pre_format": {
+                              "format": "%'f"
+                           }
+                        }
                      }
                   }
                },
@@ -1501,6 +1521,13 @@
                   "deriva": {
                      "acls": {
                         "update": [ "cfde_portal_admin", "cfde_submission_pipeline" ]
+                     },
+                     "column_display": {
+                        "*": {
+                           "pre_format": {
+                              "format": "%'f"
+                           }
+                        }
                      }
                   }
                },
@@ -1604,11 +1631,20 @@
                }
             },
             "visible_columns": {
+               "compact/brief": [
+                  {"sourcekey": "S_datapackage"},
+                  {"sourcekey": "S_metric"},
+                  "value",
+                  "denominator"
+               ],
                "compact": [
                   {"sourcekey": "S_datapackage"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_metric"},
-                  "value"
+                  "value",
+                  "numerator",
+                  "denominator",
+                  "comment"
                ]
             }
          }
