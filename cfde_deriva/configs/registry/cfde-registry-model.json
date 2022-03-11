@@ -1076,7 +1076,7 @@
                      "comment": "Identifying information for submission.",
                      "source": "submission_time",
                      "display": {
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission Time | {{submission_time}} |\n| Submission ID | {{id}} |\n| Description | {{description}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Review Submission | {{#_review_browse_url}}[Browse Datapackage]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[View Summary Page]({{.}}){{/_review_summary_url}} |\n"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Submission Time | {{submission_time}} |\n| Submission ID | {{id}} |\n| Description | {{description}} |\n| Submitter | {{$fkeys.CFDE.datapackage_submitting_user_fkey.rowName}} |\n| DCC | {{$fkeys.CFDE.datapackage_submitting_dcc_fkey.rowName}} |\n| Review Submission | {{#_review_browse_url}}[Browse Datapackage]({{.}}), {{/_review_browse_url}}{{#_review_summary_url}}[View Summary Page]({{.}}){{/_review_summary_url}} |\n\n"
                      }
                   },
                   "S_status_extra": {
@@ -1086,7 +1086,7 @@
                      "display": {
                         "wait_for": [ "S_release_status_array" ],
                         "template_engine": "handlebars",
-                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| DCC Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} |\n| Release Status | {{S_release_status_array.0.rowName}} |\n{{#if diagnostics}}| Diagnostics | :span:{{{diagnostics}}}:/span: |\n{{/if}}| Download | [Raw Data]({{{_datapackage_url}}})|\n"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Ingest Status | {{{$fkeys.CFDE.datapackage_status_fkey.rowName}}}|\n| DCC Approval Status | {{$fkeys.CFDE.datapackage_dcc_approval_status_fkey.rowName}} |\n| Release Status | {{S_release_status_array.0.rowName}} |\n{{#if diagnostics}}| Diagnostics | :span:{{{diagnostics}}}:/span: |\n{{/if}}| Download | [Raw Data]({{{_datapackage_url}}})|\n\n"
                      }
                   },
                   "S_dcc_approval_status": {
@@ -1919,7 +1919,7 @@
                      "markdown_name": "Release",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "| | |\n|---|---|---|\n| Creation Time | {{RCT}} |\n| Release Time | {{release_time}}|\n| Release ID | {{id}}|\n| Description | {{description}}|\n| Preview | {{#if _browse_url}}[Browse Release]({{_browse_url}}){{/if}}{{#if _summary_url}}, [View Dashboard Page]({{_summary_url}}){{/if}} |\n"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Creation Time | {{RCT}} |\n| Release Time | {{release_time}} |\n| Release ID | {{id}} |\n| Description | {{description}} |\n| Preview | {{#if _browse_url}}[Browse Release]({{_browse_url}}){{/if}}{{#if _summary_url}}, [View Dashboard Page]({{_summary_url}}){{/if}} |\n\n"
                      }
                   },
                   "S_status_extra": {
@@ -1927,7 +1927,7 @@
                      "comment": "Status of this release in the submission system.",
                      "display": {
                         "template_engine": "handlebars",
-                        "markdown_pattern": "| | |\n|---|---|---|\n| Build Status | {{$fkeys.CFDE.release_status_fkey.rowName}} |\n| CFDE Approval Status | {{#with $fkeys.CFDE.release_cfde_approval_status_fkey}}{{rowName}}{{/with}} |\n| Diagnostics | {{diagnostics}}|\n| Data | {{#if _ermrest_url}}[ERMrest Catalog]({{_ermrest_url}}){{/if}} |\n"
+                        "markdown_pattern": "|  |  |\n|---|---|\n| Build Status | {{$fkeys.CFDE.release_status_fkey.rowName}} |\n| CFDE Approval Status | {{#with $fkeys.CFDE.release_cfde_approval_status_fkey}}{{rowName}}{{/with}} |\n| Diagnostics | {{diagnostics}} |\n| Data | {{#if _ermrest_url}}[ERMrest Catalog]({{_ermrest_url}}){{/if}} |\n\n"
                      }
                   },
                   "S_status": {
