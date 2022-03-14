@@ -13,20 +13,27 @@ access scenarios:
 
 from deriva.core import urlquote, DEFAULT_HEADERS
 
+
 def _get_required(d, k):
     v = d[k]
     if v is None:
         raise ValueError('record field %r must have a value' % (k,))
+    return v
+
 
 def _get_required_number(d, k):
     v = _get_required(d, k)
     if not isinstance(v, (int, float)):
         raise ValueError('record field %r must be a number' % (k,))
+    return v
+
 
 def _get_optional_number(d, k):
     v = d.get(k)
     if v is not None and not isinstance(v, (int, float)):
         raise ValueError('record field %r must be a number or None' % (k,))
+    return v
+
 
 def _is_distinct(v1, v2):
     if v1 is None and v2 is not None:
@@ -38,8 +45,10 @@ def _is_distinct(v1, v2):
     else:
         return False
 
+
 def _is_stale(existing, goal, keys):
-    return any([ is_distinct(existing.get(k), goal.get(k)) for k in keys ])
+    return any([_is_distinct(existing.get(k), goal.get(k)) for k in keys])
+
 
 def register_datapackage_metrics(registry_catalog, records):
     """Idempotently register datapackage_metric terms
@@ -67,8 +76,8 @@ def register_datapackage_metrics(registry_catalog, records):
     for record in records:
         curi = _get_required(record, 'id')
         name = _get_required(record, 'name')
-        rank = record.get('rank', 1000.0) # HACK, use same default as in registry schema
-        hide = record.get('hide', False)  # HACK, use same default as in registry schema
+        rank = record.get('rank', 1000.0)  # HACK, use same default as in registry schema
+        hide = record.get('hide', False)   # HACK, use same default as in registry schema
         description = record.get('description')
         if curi in by_id:
             raise ValueError('records cannot share "id" field %r' % (curi,))
@@ -76,19 +85,22 @@ def register_datapackage_metrics(registry_catalog, records):
             id=curi,
             name=name,
             rank=rank,
-            description=description,
+            hide=hide,
+            description=description
         )
 
     registry_catalog.post(
         '/entity/CFDE:datapackage_metric?onconflict=skip',
-        json=by_id.values()
-    ).json() # discard response data
+        json=list(by_id.values())
+    ).json()  # discard response data
     return None
+
 
 def _check_submission_id(registry_catalog, submission_id):
     rows = registry_catalog.get('/entity/CFDE:datapackage/id=%s' % (urlquote(submission_id)))
     if not rows:
         raise ValueError('submission_id %r is not known by the registry' % (submission_id,))
+
 
 def register_datapackage_measurements(registry_catalog, submission_id, records):
     """Idempotently register datapackage_measurement data.
@@ -137,8 +149,8 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
     # insert missing rows first
     registry_catalog.post(
         '/entity/CFDE:datapackage_measurement?onconflict=skip',
-        json=by_metric.values()
-    ).json() # discard response data
+        json=list(by_metric.values())
+    ).json()  # discard response data
 
     # find and update existing but stale rows
     need_update = [
@@ -146,7 +158,7 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
         for row in registry_catalog.get(
                 '/entity/CFDE:datapackage_measurement/datapackage=%s' % (urlquote(submission_id))
         ).json()
-        if row['metric'] in by_metric and is_stale(
+        if row['metric'] in by_metric and _is_stale(
                 row,
                 by_metric.get(row['metric'], {}),
                 ['value', 'numerator', 'denominator', 'comment']
@@ -156,7 +168,8 @@ def register_datapackage_measurements(registry_catalog, submission_id, records):
     registry_catalog.put(
         '/attributegroup/CFDE:datapackage_measurement/datapackage,metric;value,numerator,denominator,comment',
         json=need_update,
-    ).json() # discard response data
+    ).json()  # discard response data
+
 
 def get_datapackage_measurements(registry_catalog, submission_id, headers=DEFAULT_HEADERS):
     """Return a sorted list of all measurement data for a given datapackage.
