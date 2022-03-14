@@ -559,7 +559,7 @@ class StatsQuery2 (object):
                 SlimDimension('file_format', 'file_formats'),
                 Dimension('gene', 'genes'),
                 Dimension('mime_type', 'mime_types'),
-                Dimension('ncbi_taxonomy', 'ncbi_taxons'),
+                SlimDimension('ncbi_taxonomy', 'ncbi_taxons'),
                 AssocTypeDimension('phenotype', 'phenotypes'),
                 Dimension('race', 'races'),
                 Dimension('sex', 'sexes'),
