@@ -81,7 +81,7 @@ SELECT
     '[]'
   ) AS subject_species,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM file_describes_subject fds JOIN subject_role_taxonomy a ON (fds.subject = a.subject) WHERE fds.file = f.nid
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM file_describes_subject fds JOIN subject_role_taxonomy a ON (fds.subject = a.subject) JOIN ncbi_taxonomy_slim_union sl ON (a.taxon = sl.original_term) WHERE fds.file = f.nid
     ),
     '[]'
   ) AS ncbi_taxons,
@@ -434,7 +434,7 @@ SELECT
     '[]'
   ) AS subject_species,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM biosample_from_subject bfs JOIN subject_role_taxonomy a ON (bfs.subject = a.subject) WHERE bfs.biosample = b.nid
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM biosample_from_subject bfs JOIN subject_role_taxonomy a ON (bfs.subject = a.subject) JOIN ncbi_taxonomy_slim_union sl ON (a.taxon = sl.original_term) WHERE bfs.biosample = b.nid
     ),
     '[]'
   ) AS ncbi_taxons,
@@ -787,7 +787,7 @@ SELECT
     '[]'
   ) AS subject_species,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.taxon)) FROM subject_role_taxonomy a WHERE a.subject = s.nid
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM subject_role_taxonomy a JOIN ncbi_taxonomy_slim_union sl ON (a.taxon = sl.original_term) WHERE a.subject = s.nid
     ),
     '[]'
   ) AS ncbi_taxons,
