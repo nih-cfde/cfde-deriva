@@ -510,6 +510,21 @@
                   }
                },
                {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["is_slim", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "description",
                   "description": "A human-readable description of this taxon",
                   "type": "string"
@@ -3740,6 +3755,108 @@
                   "constraint_name": "file_format_slim_union_slim_fkey",
                   "reference": {
                      "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) taxonomy terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "ncbi_taxonomy_slim_original_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "ncbi_taxonomy_slim_slim_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) taxonomy terms and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["slim_term", "original_term"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "constraint_name": "ncbi_taxonomy_slim_union_original_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "constraint_name": "ncbi_taxonomy_slim_union_slim_fkey",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
                      "fields": "nid"
                   }
                }

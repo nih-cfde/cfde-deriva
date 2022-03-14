@@ -1298,14 +1298,16 @@ ORDER BY j.value, s.nid;
 }
 
         slim_vocab_tnames = {
-            'anatomy',
-            'assay_type',
-            'data_type',
-            'disease',
-            'file_format',
+            'anatomy': [],
+            'assay_type': [],
+            'data_type': [],
+            'disease': [],
+            'file_format': [],
+            'ncbi_taxonomy': ['clade'],
         }
         if tname in slim_vocab_tnames:
             # use built-in template to populate slim vocab table
+            extra_cols = slim_vocab_tnames[tname]
             return """
 INSERT INTO %(cvname)s (
   nid,
@@ -1313,7 +1315,7 @@ INSERT INTO %(cvname)s (
   "name",
   is_slim,
   description,
-  synonyms
+  synonyms%(extra)s
 )
 -- get submissions term nid + id but canonical labels
 SELECT
@@ -1322,7 +1324,7 @@ SELECT
   c."name",
   COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
   c.description,
-  c.synonyms
+  c.synonyms%(c_extra)s
 FROM submission.%(cvname)s s
 JOIN %(cvname)s_canonical c ON (s.id = c.id)
 
@@ -1335,7 +1337,7 @@ SELECT
   s."name",
   COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
   s.description,
-  s.synonyms
+  s.synonyms%(s_extra)s
 FROM submission.%(cvname)s s
 LEFT JOIN %(cvname)s_canonical c ON (s.id = c.id)
 WHERE c.id IS NULL;
@@ -1346,14 +1348,14 @@ INSERT INTO %(cvname)s (
   "name",
   is_slim,
   description,
-  synonyms
+  synonyms%(extra)s
 )
 SELECT DISTINCT
   c.id,
   c."name",
   true,
   c.description,
-  c.synonyms
+  c.synonyms%(c_extra)s
 FROM %(cvname)s s
 JOIN %(cvname)s_slim_raw sm ON (s.id = sm.original_term_id)
 JOIN %(cvname)s_canonical c ON (sm.slim_term_id = c.id)
@@ -1361,6 +1363,9 @@ LEFT JOIN submission.%(cvname)s e ON (c.id = e.id)
 WHERE e.id IS NULL;
 """ % {
     "cvname": tname,
+    "extra": ''.join([ ',\n %s' % sql_identifier(cname) for cname in extra_cols ]),
+    "c_extra": ''.join([ ',\n c.%s' % sql_identifier(cname) for cname in extra_cols ]),
+    "s_extra": ''.join([ ',\n s.%s' % sql_identifier(cname) for cname in extra_cols ]),
 }
         if tname.endswith('_slim') and tname[0:-5] in slim_vocab_tnames:
             # use built-in template to populate slim map

@@ -247,6 +247,53 @@
             "primaryKey": "id"
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_canonical",
+         "description": "Canonical taxonomy terms known by CFDE, imported from TSV.",
+         "path": "ncbi_taxonomy.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An NCBI Taxonomy Database ID identifying a particular taxon",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "clade",
+                  "description": "The phylogenetic level (e.g. species, genus) assigned to this taxon (use 'no rank' if not defined)",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this taxon",
+                  "type": "string",
+                  "constraint": {
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this taxon",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of human-readable synonyms for this term",
+                  "type": "array"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -468,6 +515,50 @@
             ]
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_slim_raw",
+         "path": "ncbi_taxonomy_slim.tsv",
+         "description": "The taxonomy slim mapping defined by CFDE, imported from TSV.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term_id",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term_id",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term_id", "slim_term_id" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term_id",
+                  "reference": {
+                     "resource": "ncbi_taxonomy_canonical",
+                     "fields": "id"
+                  }
+               },
+               {
+                  "fields": "slim_term_id",
+                  "reference": {
+                     "resource": "ncbi_taxonomy_canonical",
+                     "fields": "id"
+                  }
+               }
+            ]
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -628,6 +719,15 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  }
+               },
+               {
+                  "name": "is_slim",
+                  "description": "Boolean true when this term is designated as a slim-term by the CFDE-CC.",
+                  "type": "boolean",
+                  "default": false,
+                  "constraint": {
+                     "required": true
                   }
                },
                {
@@ -1848,6 +1948,50 @@
          },
          "derivation_sql_path": null
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_slim",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) taxonomy terms.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -2062,6 +2206,50 @@
                   "fields": "slim_term",
                   "reference": {
                      "resource": "file_format",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncbi_taxonomy_slim_union",
+         "description": "A binary association of original (more detailed) to slim (more abstracted) taxons and to themselves (reflexive on original).",
+         "schema": {
+            "fields": [
+               {
+                  "name": "original_term",
+                  "description": "The identifier for the original (more precise) term linked to C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "slim_term",
+                  "description": "The identifier for the original or slim (more general) term abstracting the C2M2 data.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "original_term", "slim_term" ],
+            "foreignKeys": [
+               {
+                  "fields": "original_term",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "slim_term",
+                  "reference": {
+                     "resource": "ncbi_taxonomy",
                      "fields": "nid"
                   }
                }
