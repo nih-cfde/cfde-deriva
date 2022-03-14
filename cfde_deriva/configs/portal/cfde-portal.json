@@ -4640,6 +4640,17 @@
                         "nid"
                      ]
                   },
+                  "S_ncbi_taxons_slim": {
+                     "markdown_name": "Taxonomy (slim)",
+                     "comment": "The taxonomic classification of a subject, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"filter": "is_slim", "operand_pattern": "true"},
+                        "nid"
+                     ]
+                  },
                   "S_subject_granularities": {
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of a directly or indirectly constituent subject.",
@@ -4865,6 +4876,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_ncbi_taxons_slim"},
                   {"sourcekey": "S_ncbi_taxons"},
                   {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
@@ -5732,6 +5744,17 @@
                         "nid"
                      ]
                   },
+                  "S_taxonomy_slim": {
+                     "markdown_name": "Subject Taxonomy (slim)",
+                     "comment": "The taxonomy concept(s) characterizing subjects described directly or indirectly by the file, offering only \"slim\" terms corresponding to original metadata.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"filter": "is_slim", "operand_pattern": "true"},
+                        "nid"
+                     ]
+                  },
                   "S_sex": {
                      "comment": "A sex linked to the described subject.",
                      "source": [
@@ -5867,6 +5890,7 @@
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_taxonomy_slim"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease_slim"},
                   {"sourcekey": "S_disease"},
@@ -6502,6 +6526,17 @@
                         "nid"
                      ]
                   },
+                  "S_taxonomy_slim": {
+                     "markdown_name": "Subject Taxonomy (slim)",
+                     "comment": "The taxonomy concept(s) characterizing the subject of the biosampling, offering only \"slim\" terms corresponding to the original metadata.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"filter": "is_slim", "operand_pattern": "true"},
+                        "nid"
+                     ]
+                  },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
                      "source": [
@@ -6696,6 +6731,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_taxonomy_slim"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease_search_slim"},
                   {"sourcekey": "S_disease_search"},
@@ -7312,6 +7348,17 @@
                         "nid"
                      ]
                   },
+                  "S_taxonomy_slim": {
+                     "markdown_name": "Taxonomy",
+                     "comment": "The taxonomy concept(s) characterizing the subject.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"filter": "is_slim", "operand_pattern": "true"},
+                        "nid"
+                     ]
+                  },
                   "S_taxonomy_array": {
                      "markdown_name": "Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject.",
@@ -7529,7 +7576,8 @@
                   {"sourcekey": "S_age_at_sampling"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_taxonomy", "open": true},
+                  {"sourcekey": "S_taxonomy_slim", "open": true},
+                  {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_granularity", "open": true},
                   {"sourcekey": "S_sex"},
                   {"sourcekey": "S_race_search"},
