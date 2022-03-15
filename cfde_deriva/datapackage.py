@@ -1322,20 +1322,35 @@ SELECT
   s.nid,
   s.id,
   c."name",
-  COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
+  COALESCE(
+    (SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), 
+    (SELECT false FROM %(cvname)s_slim_raw sm WHERE sm.original_term_id = s.id LIMIT 1), 
+    true
+  ),
   c.description,
   c.synonyms%(c_extra)s
 FROM submission.%(cvname)s s
 JOIN %(cvname)s_canonical c ON (s.id = c.id)
+;
 
-UNION
-
+INSERT INTO %(cvname)s (
+  nid,
+  id,
+  "name",
+  is_slim,
+  description,
+  synonyms%(extra)s
+)
 -- get submissions definitions for non-canonical terms
 SELECT
   s.nid,
   s.id,
   s."name",
-  COALESCE((SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), false),
+  COALESCE(
+    (SELECT true FROM %(cvname)s_slim_raw sm WHERE sm.slim_term_id = s.id LIMIT 1), 
+    (SELECT false FROM %(cvname)s_slim_raw sm WHERE sm.original_term_id = s.id LIMIT 1), 
+    true
+  ),
   s.description,
   s.synonyms%(s_extra)s
 FROM submission.%(cvname)s s
