@@ -614,6 +614,7 @@ class ReviewConfigurator (CatalogConfigurator):
                 acls,
                 {
                     "CFDE": { "select": dcc_read_acl },
+                    "c2m2": { "select": dcc_read_acl },
                 }
             )
         return acls
