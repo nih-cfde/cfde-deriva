@@ -598,6 +598,9 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
