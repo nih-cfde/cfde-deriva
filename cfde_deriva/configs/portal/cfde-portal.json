@@ -156,6 +156,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -166,12 +171,22 @@
                      "required": true,
                      "unique": true,
                      "pattern": "^OBI:[0-9]+$"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "is_slim",
@@ -185,13 +200,21 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this OBI term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -201,6 +224,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -225,6 +251,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -329,6 +359,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -338,6 +373,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -347,12 +387,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this OBI term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -362,6 +412,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -386,7 +439,11 @@
             "primaryKey": "id"
          },
          "deriva": {
-            "table_config": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
+             "table_config": {
                "stable_key_columns": ["id"]
             },
             "source_definitions": {
@@ -481,6 +538,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -491,6 +553,11 @@
                      "required": true,
                      "unique": true,
                      "pattern": "^NCBI:txid[0-9]+$"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -499,6 +566,11 @@
                   "type": "string",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -507,6 +579,11 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -527,7 +604,12 @@
                {
                   "name": "description",
                   "description": "A human-readable description of this taxon",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -537,6 +619,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -561,6 +646,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -666,6 +755,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -676,6 +770,11 @@
                      "required": true,
                      "unique": true,
                      "pattern": "^UBERON:[0-9]+$"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -684,6 +783,11 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -698,13 +802,21 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this Uberon term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -714,6 +826,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -738,6 +853,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -846,6 +965,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -856,6 +980,11 @@
                      "required": true,
                      "unique": true,
                      "pattern": "^format:[0-9]+$"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -864,6 +993,11 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -878,13 +1012,21 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this EDAM format term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -894,6 +1036,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -918,6 +1063,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -1022,6 +1171,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1032,6 +1186,11 @@
                      "required": true,
                      "unique": true,
                      "pattern": "^data:[0-9]+$"
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1040,6 +1199,11 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1054,13 +1218,21 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this EDAM data term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1070,6 +1242,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1094,6 +1269,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -1198,6 +1377,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1207,6 +1391,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1216,6 +1405,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1230,13 +1424,21 @@
                      "indexing_preferences": {
                         "btree": ["is_slim", "nid"],
                         "trgm": false
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this Disease Ontology term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1246,6 +1448,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1270,6 +1475,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -1387,6 +1596,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1396,6 +1610,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1405,12 +1624,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this Human Phenotype Ontology term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1420,6 +1649,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1444,6 +1676,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -1563,6 +1799,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1572,6 +1813,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1581,12 +1827,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this PubChem term",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1596,6 +1852,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1620,6 +1879,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -1735,6 +1998,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1744,6 +2012,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1753,12 +2026,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this substance",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1768,6 +2051,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1777,6 +2063,11 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1810,6 +2101,10 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -1915,6 +2210,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1924,6 +2224,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1933,12 +2238,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this gene",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -1948,6 +2263,9 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
@@ -1957,6 +2275,11 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -1990,6 +2313,10 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites": {
@@ -2121,6 +2448,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2130,6 +2462,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2139,12 +2476,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this protein",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "synonyms",
@@ -2154,13 +2501,21 @@
                      "indexing_preferences": {
                         "btree": false,
                         "trgm": true
+                     },
+                     "acls": {
+                        "update": []
                      }
                   }
                },
                {
                   "name": "organism",
                   "description": "OPTIONAL: The numeric ID of the taxon identifying this protein's source organism",
-                  "type": "integer"
+                  "type": "integer",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -2193,6 +2548,10 @@
             ]
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"],
                "user_favorites_disabled": {
@@ -2398,6 +2757,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2407,6 +2771,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2415,12 +2784,22 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this subject_role",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -2443,6 +2822,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -2539,6 +2922,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2548,6 +2936,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2556,12 +2949,22 @@
                   "type": "string",
                   "constraint": {
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this subject_granularity",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -2584,6 +2987,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -2679,6 +3086,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2688,6 +3100,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2697,12 +3114,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this sex",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -2725,6 +3152,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -2822,6 +3253,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2831,6 +3267,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2840,12 +3281,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this race",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -2868,6 +3319,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
@@ -2965,6 +3420,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2974,6 +3434,11 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
@@ -2983,12 +3448,22 @@
                   "constraints": {
                      "required": true,
                      "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
                   }
                },
                {
                   "name": "description",
                   "description": "A human-readable description of this ethnicity",
-                  "type": "string"
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
                },
                {
                   "name": "resource_markdown",
@@ -3011,6 +3486,10 @@
             "primaryKey": "nid"
          },
          "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
             "table_config": {
                "stable_key_columns": ["id"]
             },
