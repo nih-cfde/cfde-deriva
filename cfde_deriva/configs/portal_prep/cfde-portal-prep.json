@@ -251,7 +251,7 @@
          "profile": "tabular-data-resource",
          "name": "ncbi_taxonomy_canonical",
          "description": "Canonical taxonomy terms known by CFDE, imported from TSV.",
-         "path": "ncbi_taxonomy.tsv",
+         "path": "ncbi_taxonomy.tsv.gz",
          "schema": {
             "fields": [
                {
@@ -518,7 +518,7 @@
       {
          "profile": "tabular-data-resource",
          "name": "ncbi_taxonomy_slim_raw",
-         "path": "ncbi_taxonomy_slim.tsv",
+         "path": "ncbi_taxonomy_slim.tsv.gz",
          "description": "The taxonomy slim mapping defined by CFDE, imported from TSV.",
          "schema": {
             "fields": [

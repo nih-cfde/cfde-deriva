@@ -8,6 +8,7 @@ import sys
 import json
 import hashlib
 import base64
+import gzip
 import logging
 import requests
 import pkgutil
@@ -101,21 +102,36 @@ class PackageDataName (object):
     def __str__(self):
         return self.filename
 
-    def get_data(self, key=None):
+    def get_data(self, key=None, decompress=True):
         """Get named content as raw buffer
 
         :param key: Alternate name to lookup in package instead of self
+        :param decompress: Return decompressed data if compression detected (default True)
+
+        Compressed resources are detected based on a suffix match on
+        the key:
+
+        - '.gz': gzip codec
+
+        any unrecognized suffix is returned without interpretation.
+
         """
         if key is None:
             key = self.filename
-        return pkgutil.get_data(self.package.__name__, key)
+        buf = pkgutil.get_data(self.package.__name__, key)
+        if decompress:
+            if key.endswith('.gz'):
+                buf = gzip.decompress(buf)
+            else:
+                pass
+        return buf
 
     def get_data_str(self, key=None):
         """Get named content as unicode decoded str
 
         :param key: Alternate name to lookup in package instead of self
         """
-        return self.get_data(key).decode()
+        return self.get_data(key, decompress=True).decode()
 
     def get_data_stringio(self, key=None):
         """Get named content as unicode decoded StringIO buffer object
@@ -129,10 +145,10 @@ portal_prep_schema_json = PackageDataName(portal_prep, 'cfde-portal-prep.json')
 registry_schema_json = PackageDataName(registry, 'cfde-registry-model.json')
 
 class PortalPackageDataName (PackageDataName):
-    def get_data(self, key=None):
+    def get_data(self, key=None, decompress=True):
         if key is None:
             key = self.filename
-        buf = super(PortalPackageDataName, self).get_data(key)
+        buf = super(PortalPackageDataName, self).get_data(key, decompress=decompress)
         if key != self.filename:
             return buf
         # augment the portal model we return w/ c2m2 submission tables
