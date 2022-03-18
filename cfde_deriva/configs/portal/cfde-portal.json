@@ -7845,9 +7845,8 @@
                      "markdown_name": "Taxonomy",
                      "comment": "The taxonomy concept(s) characterizing the subject.",
                      "source": [
-                        {"sourcekey": "S_core_fact"},
-                        {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
-                        {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
+                        {"inbound": ["CFDE", "subject_role_taxonomy_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_role_taxonomy_taxonomy_fkey"]},
                         "nid"
                      ],
                      "aggregate": "array_d"
@@ -8037,7 +8036,7 @@
                   {"sourcekey": "S_sex"},
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_ethnicity"},
-                  {"sourcekey": "S_taxonomy"},
+                  {"sourcekey": "S_taxonomy_array"},
                   {
                      "sourcekey": "S_disease",
                      "display": {
