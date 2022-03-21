@@ -5133,6 +5133,15 @@
                         "nid"
                      ]
                   },
+                  "S_taxonomy_assoc": {
+                     "markdown_name": "Taxonomy",
+                     "comment": "The taxons associated with the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_taxonomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_taxonomy_taxon_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_subject_granularities": {
                      "markdown_name": "Subject Granularity",
                      "comment": "The specificity of a directly or indirectly constituent subject.",
@@ -5159,6 +5168,15 @@
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_anatomy_assoc": {
+                     "markdown_name": "Anatomy",
+                     "comment": "Anatomy terms associated with the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_anatomy_anatomy_fkey"]},
                         "nid"
                      ]
                   },
@@ -5251,6 +5269,15 @@
                         "nid"
                      ]
                   },
+                  "S_substance_assoc": {
+                     "markdown_name": "Substance",
+                     "comment": "A substance associated with the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_substance_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_substance_substance_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_compound": {
                      "markdown_name": "Compound",
                      "comment": "A compound linked to a biosample or subject.",
@@ -5261,6 +5288,15 @@
                         "nid"
                      ]
                   },
+                  "S_compound_assoc": {
+                     "markdown_name": "Compound",
+                     "comment": "A compound associated with the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_compound_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_compound_compound_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_gene": {
                      "markdown_name": "Gene",
                      "comment": "A gene linked to a biosample.",
@@ -5268,6 +5304,15 @@
                         {"sourcekey": "S_gene_fact"},
                         {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
                         {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_gene_assoc": {
+                     "markdown_name": "Gene",
+                     "comment": "A gene associated with the collection.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_gene_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_gene_gene_fkey"]},
                         "nid"
                      ]
                   },
@@ -5337,9 +5382,14 @@
                   "name",
                   "description",
                   {"sourcekey": "S_creation_time"},
+                  {"sourcekey": "S_anatomy_assoc"},
+                  {"sourcekey": "S_compound_assoc"},
                   {"sourcekey": "S_disease_assoc"},
+                  {"sourcekey": "S_gene_assoc"},
                   {"sourcekey": "S_phenotype_assoc"},
                   {"sourcekey": "S_protein_assoc"},
+                  {"sourcekey": "S_substance_assoc"},
+                  {"sourcekey": "S_taxonomy_assoc"},
                   "has_time_series_data",
                   {
                      "source": [
