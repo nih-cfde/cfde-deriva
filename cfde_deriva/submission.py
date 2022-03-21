@@ -1333,7 +1333,9 @@ WHERE id IS NOT NULL
                 if 'CFDE' in review_model.schemas:
                     logger.info('Purging CFDE schema content on existing catalog %s...' % ermrest_url)
                     tables = list(review_model.schemas['CFDE'].tables.values())
-                    tables.extend(review_model.schemas['c2m2'].tables.values())
+                    if 'c2m2' in review_model.schemas:
+                        # allow rebuild of older submissions that lack the raw schema
+                        tables.extend(review_model.schemas['c2m2'].tables.values())
                     for table in reversed(tables_topo_sorted(tables)):
                         submission.review_catalog.delete('/schema/%s/table/%s' % (
                             urlquote(table.schema.name),
