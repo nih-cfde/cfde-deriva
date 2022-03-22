@@ -50,11 +50,12 @@ def _is_stale(existing, goal, keys):
     return any([_is_distinct(existing.get(k), goal.get(k)) for k in keys])
 
 
-def register_datapackage_metrics(registry_catalog, records):
+def register_datapackage_metrics(registry_catalog, records, update_existing=False):
     """Idempotently register datapackage_metric terms
 
     :param registry_catalog: An ErmrestCatalog instance for the registry.
     :param records: A list of dict-like term records.
+    :param update_existing: Whether to also update existing metric definitions (default False).
 
     A term record has the following mandatory fields:
     - id: CURI-like global id for a metric
@@ -65,11 +66,19 @@ def register_datapackage_metrics(registry_catalog, records):
     - description: a longer human-readable explanation of a metric
     - hide: boolean "true" to suppress metric displays in portal
 
-    This will insert new metrics not already known by the registry but
-    will leave existing metrics unmodified (using existing registry
-    definitions as authoritative). The administrator should curate the
-    live records in the registry if changes to existing metric names,
-    descriptions, or ranks are desired.
+    By default, this function will insert new metrics not already
+    known by the registry but will leave existing metrics unmodified
+    (using existing registry definitions as authoritative). Setting
+    update_existing=True will switch this and treat the input records
+    as authoritative. However, the "hide" field will NOT be updated
+    by this mechanism.
+
+    The administrator should curate the live records in the registry
+    if changes to existing metric names, descriptions, or ranks are
+    desired without using the update_existing=True flag here.
+
+    The administrator must curate the live records if changes to the
+    "hide" field are desired.
 
     """
     by_id = {}
@@ -93,6 +102,34 @@ def register_datapackage_metrics(registry_catalog, records):
         '/entity/CFDE:datapackage_metric?onconflict=skip',
         json=list(by_id.values())
     ).json()  # discard response data
+
+    if update_existing:
+        # do an idempotent update while minimizing mutation requests to the registry
+        rows = registry_catalog.get('/entity/CFDE:datapackage_metric?limit=none').json()
+        existing_by_id = { row['id']: row for row in rows }
+
+        update_cols = ['name', 'rank', 'description']
+
+        def need_update(existing, goal):
+            for cname in update_cols:
+                if existing[cname] != goal[cname]:
+                    return True
+            return False
+
+        updates = [
+            v
+            for k, v in existing_by_id
+            if need_update(v, by_id[k])
+        ]
+
+        registry_catalog.put(
+            # correlate by existing 'id' and write the other update cols
+            '/attributegroup/CFDE:datapackage_metric/id;%s' % (
+                ','.join([ urlquote(c) for c in update_cols ])
+            ),
+            json=updates,
+        ).json() # discard response data
+
     return None
 
 
