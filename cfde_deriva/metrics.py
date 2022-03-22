@@ -127,8 +127,8 @@ def register_datapackage_metrics(registry_catalog, records, update_existing=Fals
 
         updates = [
             v
-            for k, v in existing_by_id
-            if need_update(v, by_id[k])
+            for k,v in by_id.items()
+            if need_update(existing_by_id[k], v)
         ]
 
         registry_catalog.put(
