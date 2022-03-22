@@ -50,12 +50,13 @@ def _is_stale(existing, goal, keys):
     return any([_is_distinct(existing.get(k), goal.get(k)) for k in keys])
 
 
-def register_datapackage_metrics(registry_catalog, records, update_existing=False):
+def register_datapackage_metrics(registry_catalog, records, update_existing=False, update_cols=['name', 'description']):
     """Idempotently register datapackage_metric terms
 
     :param registry_catalog: An ErmrestCatalog instance for the registry.
     :param records: A list of dict-like term records.
     :param update_existing: Whether to also update existing metric definitions (default False).
+    :param update_cols: Which columns to update when update_existing=True (default updates only name and description).
 
     A term record has the following mandatory fields:
     - id: CURI-like global id for a metric
@@ -104,11 +105,19 @@ def register_datapackage_metrics(registry_catalog, records, update_existing=Fals
     ).json()  # discard response data
 
     if update_existing:
+        if not isinstance(update_cols, list):
+            raise TypeError('update_cols must be a list')
+
+        for cname in update_cols:
+            if not isinstance(cname, str):
+                raise TypeError('each element of update_cols must be a string')
+            allowed_update_cols = {'name', 'description', 'rank', 'hide'}
+            if cname not in allowed_update_cols:
+                raise ValueError('each element of update_cols must be one of %r' % allowed_update_cols)
+
         # do an idempotent update while minimizing mutation requests to the registry
         rows = registry_catalog.get('/entity/CFDE:datapackage_metric?limit=none').json()
         existing_by_id = { row['id']: row for row in rows }
-
-        update_cols = ['name', 'rank', 'description']
 
         def need_update(existing, goal):
             for cname in update_cols:
