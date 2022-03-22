@@ -71,15 +71,15 @@ def register_datapackage_metrics(registry_catalog, records, update_existing=Fals
     known by the registry but will leave existing metrics unmodified
     (using existing registry definitions as authoritative). Setting
     update_existing=True will switch this and treat the input records
-    as authoritative. However, the "hide" field will NOT be updated
-    by this mechanism.
+    as authoritative. However, only the columns named in the
+    update_cols parameter will be revised.
 
-    The administrator should curate the live records in the registry
-    if changes to existing metric names, descriptions, or ranks are
-    desired without using the update_existing=True flag here.
-
-    The administrator must curate the live records if changes to the
-    "hide" field are desired.
+    The administrator should coordinate activities to either curate
+    live records in the registry or in an authoritative store being
+    used to supply the records input to this function. The update_cols
+    parameter allows the authoritative content to be split between the
+    caller-provided records and the registry's live records on a field
+    by field basis.
 
     """
     by_id = {}
