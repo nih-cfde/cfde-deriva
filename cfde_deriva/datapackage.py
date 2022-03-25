@@ -431,6 +431,21 @@ class CfdeDataPackage (object):
                         logger.info("Created key %s" % (key.constraint_name,))
         self.get_model()
 
+        # purge keys that no longer exist
+        for nschema in self.doc_model_root.schemas.values():
+            schema = self.cat_model_root.schemas[nschema.name]
+            for ntable in nschema.tables.values():
+                table = schema.tables[ntable.name]
+                for key in table.keys:
+                    cnames = { c.name for c in key.unique_columns }
+                    if cnames == {'RID'}:
+                        continue
+                    nkey = ntable.key_by_columns(cnames, raise_nomatch=False)
+                    if nkey is None:
+                        key.drop()
+                        logger.info("Deleted key %s" % (key.constraint_name,))
+        self.get_model()
+
         # create and/or upgrade fkeys, stripping acl-bindings which may be incoherent
         for nschema in self.doc_model_root.schemas.values():
             schema = self.cat_model_root.schemas[nschema.name]

@@ -2297,8 +2297,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
                   "type": "string",
                   "constraint": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2479,8 +2478,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2572,7 +2570,6 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
                   }
                },
                {
@@ -2723,7 +2720,6 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
                   }
                },
                {
@@ -2823,7 +2819,6 @@
                   "description": "A short, human-readable, machine-read-friendly label for this taxon",
                   "type": "string",
                   "constraint": {
-                     "unique": true
                   }
                },
                {
@@ -2930,8 +2925,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3023,7 +3017,6 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
                   }
                },
                {
@@ -3115,8 +3108,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this PubChem CID",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3208,8 +3200,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this PubChem SID",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3323,8 +3314,7 @@
                   "description": "The Ensembl 'Name' for this gene (e.g. 'BRCA1')",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3438,8 +3428,7 @@
                   "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
