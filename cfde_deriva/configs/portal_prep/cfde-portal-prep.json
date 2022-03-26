@@ -4212,7 +4212,7 @@
             "foreignKeys": [
                {
                   "fields": "collection",
-                  "constraint_Name": "collection_anatomy_collection_fkey",
+                  "constraint_name": "collection_anatomy_collection_fkey",
                   "reference": {
                      "resource": "collection",
                      "fields": "nid"
@@ -4220,7 +4220,7 @@
                },
                {
                   "fields": "anatomy",
-                  "constraint_Name": "collection_anatomy_anatomy_fkey",
+                  "constraint_name": "collection_anatomy_anatomy_fkey",
                   "reference": {
                      "resource": "anatomy",
                      "fields": "nid"
