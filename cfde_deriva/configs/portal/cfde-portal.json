@@ -52,7 +52,10 @@
                {
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
-                  "type": "string"
+                  "type": "string",
+		  "constraints": {
+		     "required": true
+		  }
                },
                {
                   "name": "description",
@@ -182,6 +185,9 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
+		  "constraints": {
+		     "required": true
+		  },
                   "deriva": {
                      "acls": {
                         "update": []
@@ -385,8 +391,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -578,7 +583,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this taxon",
                   "type": "string",
                   "constraint": {
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -785,7 +790,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Uberon term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -995,7 +1000,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -1201,7 +1206,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
                   "type": "string",
                   "constraint": {
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -1406,8 +1411,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -1625,8 +1629,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -1828,8 +1831,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this 'compound' term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -2027,8 +2029,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this substance",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -2239,8 +2240,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this gene",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -2477,8 +2477,7 @@
                   "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   },
                   "deriva": {
                      "acls": {
@@ -2786,6 +2785,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_role",
                   "type": "string",
                   "constraint": {
+		     "required": true,
                      "unique": true
                   },
                   "deriva": {
@@ -2951,6 +2951,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
                   "type": "string",
                   "constraint": {
+		     "required": true,
                      "unique": true
                   },
                   "deriva": {

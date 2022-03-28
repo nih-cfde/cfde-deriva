@@ -14,7 +14,7 @@ from deriva.core.ermrest_model import Model, Table, Column, Key, ForeignKey, bui
 import requests
 
 from . import tableschema
-from .tableschema import PackageDataName, submission_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json
+from .tableschema import PackageDataName, submission_schema_json, constituent_schema_json, portal_prep_schema_json, portal_schema_json, registry_schema_json
 from .exception import IncompatibleDatapackageModel, InvalidDatapackage
 
 """
@@ -920,7 +920,7 @@ class CfdeDataPackage (object):
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename in (submission_schema_json, portal_schema_json):
+        if not self.package_filename in (submission_schema_json, consituent_schema_json, portal_schema_json):
             raise ValueError('check_sqlite_tables() is only valid for built-in datapackages')
         if source is None:
             source = self
@@ -1063,7 +1063,7 @@ LIMIT 1;
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename in {portal_schema_json, registry_schema_json}:
+        if not self.package_filename in {portal_schema_json, constituent_schema_json, registry_schema_json}:
             raise ValueError('load_sqlite_tables() is only valid for built-in portal datapackages')
         if tables is None:
             tables = self.doc_cfde_schema.tables.values()

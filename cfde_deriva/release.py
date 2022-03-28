@@ -14,7 +14,7 @@ from deriva.core import DerivaServer, get_credential, init_logging, urlquote, ur
 from . import exception
 from .cfde_login import get_archive_headers_map
 from .tableschema import ReleaseConfigurator, authn_id
-from .datapackage import CfdeDataPackage, submission_schema_json, portal_prep_schema_json, portal_schema_json, make_session_config
+from .datapackage import CfdeDataPackage, constituent_schema_json, portal_prep_schema_json, portal_schema_json, make_session_config
 from .registry import Registry, nochange, terms
 from .submission import Submission
 
@@ -516,7 +516,7 @@ class Release (object):
 
             # this includes portal schema and built-in vocabs
             logger.info('Provisioning sqlite...')
-            Submission.provision_sqlite(submission_schema_json, self.ingest_sqlite_filename)
+            Submission.provision_sqlite(constituent_schema_json, self.ingest_sqlite_filename)
             Submission.provision_sqlite(portal_prep_schema_json, self.portal_prep_sqlite_filename)
 
             logger.info('Loading %s release constituents...' % len(self.dcc_datapackages))

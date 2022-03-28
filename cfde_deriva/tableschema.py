@@ -141,6 +141,37 @@ class PackageDataName (object):
         return io.StringIO(self.get_data_str(key))
 
 submission_schema_json = PackageDataName(submission, 'c2m2-datapackage.json')
+
+class ConstituentPackageDataName (PackageDataName):
+    def get_data(self, key=None, decompress=True):
+        if key is None:
+            key = self.filename
+        buf = super(ConstituentPackageDataName, self).get_data(key, decompress=decompress)
+        if key != self.filename:
+            return buf
+        # prune CV name uniqueness from C2M2 submission schema
+        doc = json.loads(buf.decode())
+        resources = doc['resources']
+        tables = [
+            resource
+            for resource in resources
+        ]
+
+        for resource in resources:
+            if 'resourceSchema' in resource:
+                continue
+            cdocs = {
+                cdoc['name']: cdoc
+                for cdoc in resource.get('schema', {}).get('fields', [])
+            }
+            if not {'id','name','description','synonyms'}.issubset(set(cdocs.keys())):
+                continue
+            cdocs['name'].get('constraints', {}).pop('unique')
+
+        # return as UTF8 bytes to meet get_data() method signature...
+        return json.dumps(doc).encode('utf8')
+
+constituent_schema_json = ConstituentPackageDataName(submission, 'c2m2-datapackage.json')
 portal_prep_schema_json = PackageDataName(portal_prep, 'cfde-portal-prep.json')
 registry_schema_json = PackageDataName(registry, 'cfde-registry-model.json')
 
@@ -1200,7 +1231,7 @@ def main():
     The output JSON is suitable for POST to an /ermrest/catalog/N/schema
     resource on a fresh, empty catalog.
 
-    Arguments:  { 'registry' | 'review' | 'release' | 'portal_prep' | 'submission' }
+    Arguments:  { 'registry' | 'review' | 'release' | 'portal_prep' | 'submission' | 'constituent' }
 
     Examples:
 
@@ -1226,6 +1257,7 @@ def main():
         'registry': registry_schema_json,
         'portal_prep': portal_prep_schema_json,
         'submission': submission_schema_json,
+        'constituent': constituent_schema_json,
     }[sys.argv[1]].get_data_str()
 
     configurator = {
