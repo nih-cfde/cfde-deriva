@@ -920,7 +920,7 @@ class CfdeDataPackage (object):
         """
         if progress is None:
             progress = dict()
-        if not self.package_filename in (submission_schema_json, consituent_schema_json, portal_schema_json):
+        if not self.package_filename in (submission_schema_json, constituent_schema_json, portal_schema_json):
             raise ValueError('check_sqlite_tables() is only valid for built-in datapackages')
         if source is None:
             source = self
