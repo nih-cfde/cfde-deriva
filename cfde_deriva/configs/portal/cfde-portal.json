@@ -7873,7 +7873,7 @@
                   },
                   "S_taxonomy": {
                      "markdown_name": "Taxonomy",
-                     "comment": "The taxonomy concept(s) characterizing the subject.",
+                     "comment": "The taxonomy concept(s) characterizing the subject, including original and corresponding slim terms.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
@@ -7882,8 +7882,8 @@
                      ]
                   },
                   "S_taxonomy_slim": {
-                     "markdown_name": "Taxonomy",
-                     "comment": "The taxonomy concept(s) characterizing the subject.",
+                     "markdown_name": "Taxonomy (slim)",
+                     "comment": "The taxonomy concept(s) characterizing the subject, reduced to only corresponding slim terms.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},

@@ -1346,6 +1346,15 @@ WHERE id IS NOT NULL
         #
         submission.ingest()
 
+    @classmethod
+    def reconfigure(cls, server, registry, row):
+        if row["review_ermrest_url"] is None:
+            logger.info("Submission %s does not have a catalog to reconfigure." % row["id"])
+        else:
+            catalog = server.connect_ermrest(Submission.extract_catalog_id(server, row['review_ermrest_url']))
+            Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
+            logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
+
 def main(subcommand, *args):
     """Ugly test-harness for data submission library.
 
@@ -1400,14 +1409,6 @@ def main(subcommand, *args):
 
     archive_headers_map = get_archive_headers_map(servername)
 
-    def reconfigure_submission(row):
-        if row["review_ermrest_url"] is None:
-            logger.info("Submission %s does not have a catalog to reconfigure." % row["id"])
-        else:
-            catalog = server.connect_ermrest(Submission.extract_catalog_id(server, row['review_ermrest_url']))
-            Submission.configure_review_catalog(registry, catalog, row['id'], provision=False)
-            logger.info("Submission %s (%s) reconfigured." % (row["id"], row["review_ermrest_url"]))
-
     def rebuild_submission(row, purge_partial=True):
         if submitting_user.webauthn_id == row['submitting_user']:
             row['submitting_user'] = submitting_user
@@ -1439,7 +1440,7 @@ def main(subcommand, *args):
 
         row = registry.get_datapackage(submission_id)
         if subcommand == 'reconfigure':
-            reconfigure_submission(row)
+            Submission.reconfigure(server, registry, row)
         elif subcommand == 'rebuild':
             rebuild_submission(row)
         elif subcommand == 'purge':
@@ -1451,7 +1452,7 @@ def main(subcommand, *args):
     elif subcommand == 'reconfigure-all':
         for row in registry.list_datapackages():
             try:
-                reconfigure_submission(row)
+                Submission.reconfigure(server, registry, row)
             except Exception as e:
                 logger.info("Submission %s reconfiguration failed: %s" % (row['id'], e))
     elif subcommand == 'test_external_error':
