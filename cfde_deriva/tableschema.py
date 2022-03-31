@@ -166,7 +166,7 @@ class ConstituentPackageDataName (PackageDataName):
             }
             if not {'id','name','description','synonyms'}.issubset(set(cdocs.keys())):
                 continue
-            cdocs['name'].get('constraints', {}).pop('unique')
+            cdocs['name'].get('constraints', {}).pop('unique', None)
 
         # return as UTF8 bytes to meet get_data() method signature...
         return json.dumps(doc).encode('utf8')
