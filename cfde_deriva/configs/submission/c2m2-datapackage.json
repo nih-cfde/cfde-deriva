@@ -3164,8 +3164,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this PubChem SID",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
