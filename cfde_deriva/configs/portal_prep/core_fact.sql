@@ -5,7 +5,7 @@ SELECT
   f.id_namespace,
   f.bundle_collection IS NOT NULL AS is_bundle,
   f.persistent_id IS NOT NULL AS has_persistent_id,
-  f.ras_permissions IS NOT NULL AS has_ras_permissions,
+  f.dbgap_study_id IS NOT NULL AS has_dbgap_study_id,
 
   COALESCE(f.project, -1) AS project,
   -1 AS sex,
@@ -119,7 +119,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -157,7 +157,7 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -208,7 +208,7 @@ SELECT
   ff.id_namespace,
   ff.is_bundle,
   ff.has_persistent_id,
-  ff.has_ras_permissions,
+  ff.has_dbgap_study_id,
 
   ff.project,
   ff.sex,
@@ -259,7 +259,7 @@ FROM (
     ff.id_namespace,
     ff.is_bundle,
     ff.has_persistent_id,
-    ff.has_ras_permissions,
+    ff.has_dbgap_study_id,
 
     ff.project,
     ff.sex,
@@ -316,7 +316,7 @@ WHERE u.nid = ff.nid
   AND ff.id_namespace = cf.id_namespace
   AND ff.is_bundle = cf.is_bundle
   AND ff.has_persistent_id = cf.has_persistent_id
-  AND ff.has_ras_permissions = cf.has_ras_permissions
+  AND ff.has_dbgap_study_id = cf.has_dbgap_study_id
 
   AND ff.project = cf.project
   AND ff.sex = cf.sex
@@ -358,7 +358,7 @@ SELECT
   b.id_namespace,
   False AS is_bundle,
   b.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_ras_permissions,
+  False AS has_dbgap_study_id,
 
   COALESCE(b.project, -1) AS project,
   -1 AS sex,
@@ -484,7 +484,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -522,7 +522,7 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -573,7 +573,7 @@ SELECT
   bf.id_namespace,
   bf.is_bundle,
   bf.has_persistent_id,
-  bf.has_ras_permissions,
+  bf.has_dbgap_study_id,
 
   bf.project,
   bf.sex,
@@ -624,7 +624,7 @@ FROM (
     bf.id_namespace,
     bf.is_bundle,
     bf.has_persistent_id,
-    bf.has_ras_permissions,
+    bf.has_dbgap_study_id,
 
     bf.project,
     bf.sex,
@@ -681,7 +681,7 @@ WHERE u.nid = bf.nid
   AND bf.id_namespace = cf.id_namespace
   AND bf.is_bundle = cf.is_bundle
   AND bf.has_persistent_id = cf.has_persistent_id
-  AND bf.has_ras_permissions = cf.has_ras_permissions
+  AND bf.has_dbgap_study_id = cf.has_dbgap_study_id
 
   AND bf.project = cf.project
   AND bf.sex = cf.sex
@@ -723,7 +723,7 @@ SELECT
   s.id_namespace,
   False AS is_bundle,
   s.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_ras_permissions,
+  False AS has_dbgap_study_id,
 
   COALESCE(s.project, -1) AS project,
   COALESCE(s.sex, -1) AS sex,
@@ -837,7 +837,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -875,7 +875,7 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -926,7 +926,7 @@ SELECT
   sf.id_namespace,
   sf.is_bundle,
   sf.has_persistent_id,
-  sf.has_ras_permissions,
+  sf.has_dbgap_study_id,
 
   sf.project,
   sf.sex,
@@ -977,7 +977,7 @@ FROM (
     sf.id_namespace,
     sf.is_bundle,
     sf.has_persistent_id,
-    sf.has_ras_permissions,
+    sf.has_dbgap_study_id,
 
     sf.project,
     sf.sex,
@@ -1034,7 +1034,7 @@ WHERE u.nid = sf.nid
   AND sf.id_namespace = cf.id_namespace
   AND sf.is_bundle = cf.is_bundle
   AND sf.has_persistent_id = cf.has_persistent_id
-  AND sf.has_ras_permissions = cf.has_ras_permissions
+  AND sf.has_dbgap_study_id = cf.has_dbgap_study_id
 
   AND sf.project = cf.project
   AND sf.sex = cf.sex
@@ -1076,7 +1076,7 @@ SELECT
   col.id_namespace,
   False AS is_bundle,
   col.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_ras_permissions,
+  False AS has_dbgap_study_id,
 
   -1 AS project,
   -1 AS sex,
@@ -1316,7 +1316,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -1354,7 +1354,7 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_ras_permissions,
+    has_dbgap_study_id,
 
     project,
     sex,
@@ -1405,7 +1405,7 @@ SELECT
   colf.id_namespace,
   colf.is_bundle,
   colf.has_persistent_id,
-  colf.has_ras_permissions,
+  colf.has_dbgap_study_id,
 
   colf.project,
   colf.sex,
@@ -1456,7 +1456,7 @@ FROM (
     colf.id_namespace,
     colf.is_bundle,
     colf.has_persistent_id,
-    colf.has_ras_permissions,
+    colf.has_dbgap_study_id,
 
     colf.project,
     colf.sex,
@@ -1513,7 +1513,7 @@ WHERE u.nid = colf.nid
   AND colf.id_namespace = cf.id_namespace
   AND colf.is_bundle = cf.is_bundle
   AND colf.has_persistent_id = cf.has_persistent_id
-  AND colf.has_ras_permissions = cf.has_ras_permissions
+  AND colf.has_dbgap_study_id = cf.has_dbgap_study_id
 
   AND colf.project = cf.project
   AND colf.sex = cf.sex

@@ -5570,8 +5570,8 @@
                   "type": "string"
                },
                {
-                  "name": "ras_permissions",
-                  "description": "A string identifying access control information for this file compatible with RAS user-level access control metadata",
+                  "name": "dbgap_study_id",
+                  "description": "The name of a dbGaP study ID governing access control for this file, compatible for comparison to RAS user-level access control metadata",
                   "type": "string"
                },
                {
@@ -6000,15 +6000,15 @@
                      ],
                      "entity": false
                   },
-                  "S_ras_permissions": {
-                     "source": [ "ras_permissions" ]
+                  "S_dbgap_study_id": {
+                     "source": [ "dbgap_study_id" ]
                   },
-                  "S_has_ras_permissions": {
-                     "markdown_name": "Has RAS Permissions",
-                     "comment": "The file specifies RAS permission requirements.",
+                  "S_has_dbgap_study_id": {
+                     "markdown_name": "Has dbGaP Permissions",
+                     "comment": "The file specifies dbGaP permission requirements.",
                      "source": [
                         {"outbound": ["CFDE", "file_core_fact_fkey"]},
-                        "has_ras_permissions"
+                        "has_dbgap_study_id"
                      ],
                      "entity": false
                   },
@@ -6409,7 +6409,7 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_ras_permissions"},
+                  {"sourcekey": "S_dbgap_study_id"},
                   "sha256",
                   "md5"
                ],
@@ -6445,7 +6445,7 @@
                   },
                   {"source": "size_in_bytes"},
                   {"sourcekey": "S_has_persistent_id"},
-                  {"sourcekey": "S_has_ras_permissions"},
+                  {"sourcekey": "S_has_dbgap_study_id"},
                   {"sourcekey": "S_is_bundle"},
                   {"source": "uncompressed_size_in_bytes"},
                   {"sourcekey": "S_compression_format"}
@@ -10434,8 +10434,8 @@
                   }
                },
                {
-                  "name": "has_ras_permissions",
-                  "description": "Boolean true when described entities specify RAS permission requirements.",
+                  "name": "has_dbgap_study_id",
+                  "description": "Boolean true when described entities specify dbGaP permission requirements.",
                   "type": "boolean",
                   "constraints": {
                      "required": true

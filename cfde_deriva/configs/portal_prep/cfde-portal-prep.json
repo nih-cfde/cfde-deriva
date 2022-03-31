@@ -2551,8 +2551,8 @@
                   "type": "string"
                },
                {
-                  "name": "ras_permissions",
-                  "description": "A string identifying access control information for this file compatible with RAS user-level access control metadata",
+                  "name": "dbgap_study_id",
+                  "description": "The name of a dbGaP study ID governing access control for this file, compatible for comparison to RAS user-level access control metadata",
                   "type": "string"
                },
                {
@@ -4972,7 +4972,7 @@
                   }
                },
                {
-                  "name": "has_ras_permissions",
+                  "name": "has_dbgap_study_id",
                   "description": "Boolean true when described entities specify RAS permission requirements.",
                   "type": "boolean",
                   "constraints": {
@@ -5281,7 +5281,7 @@
                "id_namespace",
                "is_bundle",
                "has_persistent_id",
-               "has_ras_permissions",
+               "has_dbgap_study_id",
 
                "project",
                "sex",
