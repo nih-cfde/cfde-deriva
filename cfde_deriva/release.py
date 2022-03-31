@@ -671,6 +671,8 @@ def main(subcommand, *args):
        - Build content based on release definition
     - 'rebuild-submissions' release_id
        - Rebuild submission review catalogs for each constituent of release
+    - 'reconfigure-submissions' release_id
+       - Reconfigure submission review catalogs for each constituent of release
     - 'reconfigure' release_id
        - Revise policy/presentation config on existing catalog
     - 'publish' release_id
@@ -762,7 +764,7 @@ def main(subcommand, *args):
         res = registry.get_latest_approved_datapackages(need_dcc_appr, need_cfde_appr)
         print('Found %d elements for draft release' % len(res))
         print(json.dumps(list(res.values()), indent=4))
-    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'analyze', 'prune-favorites', 'refresh-resources'}:
+    elif subcommand in  {'provision', 'build', 'reconfigure', 'publish', 'purge', 'rebuild-submissions', 'reconfigure-submissions', 'analyze', 'prune-favorites', 'refresh-resources'}:
         if len(args) < 1:
             raise TypeError('%r requires one positional argument: release_id' % (subcommand,))
 
@@ -785,13 +787,16 @@ def main(subcommand, *args):
             print("Publishing alias %(id)r now bound to target %(alias_target)r" % aliasdoc)
         elif subcommand == 'purge':
             release.purge()
-        elif subcommand == 'rebuild-submissions':
+        elif subcommand in {'rebuild-submissions', 'reconfigure-submissions'}:
             rel_row, dcc_datapackages = registry.get_release(rel_id)
             for dp_row in dcc_datapackages.values():
-                kwargs = { k: v for k, v in dp_row.items() if k in {'id', 'submitting_dcc', 'submitting_user', 'datapackage_url'} }
-                kwargs['submitting_user'] = registry.get_user(dp_row['submitting_user'])
-                Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
-                print('rebuild', kwargs)
+                if subcommand == 'rebuild-submissions':
+                    kwargs = { k: v for k, v in dp_row.items() if k in {'id', 'submitting_dcc', 'submitting_user', 'datapackage_url'} }
+                    kwargs['submitting_user'] = registry.get_user(dp_row['submitting_user'])
+                    Submission.rebuild(server, registry, **kwargs, archive_headers_map=archive_headers_map, skip_dcc_check=True)
+                    print('rebuild', kwargs)
+                elif subcommand == 'reconfigure-submissions':
+                    Submission.reconfigure(server, registry, dp_row)
             print('Rebuilt %d constituent submissions of release %s' % (len(dcc_datapackages), rel_row['id']))
         elif subcommand == 'prune-favorites':
             release.prune_favorites()
