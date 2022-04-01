@@ -716,6 +716,15 @@
                         {"inbound": ["CFDE", "file_core_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_taxonomy_taxon_fkey"]},
+                        {"outbound": ["CFDE", "collection_taxonomy_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -743,6 +752,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_subject"}
                ]
             }
@@ -927,6 +937,15 @@
                         "nid"
                      ],
                      "entity": true
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_anatomy_anatomy_fkey"]},
+                        {"outbound": ["CFDE", "collection_anatomy_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -953,6 +972,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_biosample"}
                ]
             }
@@ -1553,6 +1573,15 @@
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_disease_disease_fkey"]},
+                        {"outbound": ["CFDE", "collection_disease_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -1581,6 +1610,7 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_phenotype"},
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -1753,6 +1783,15 @@
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_phenotype_phenotype_fkey"]},
+                        {"outbound": ["CFDE", "collection_phenotype_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -1783,6 +1822,7 @@
                "*": [
                   {"sourcekey": "S_disease"},
                   {"sourcekey": "S_gene"},
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -1954,6 +1994,15 @@
                         {"inbound": ["CFDE", "collection_pubchem_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_compound_compound_fkey"]},
+                        {"outbound": ["CFDE", "collection_compound_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -1981,6 +2030,7 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_substance"},
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -2165,6 +2215,15 @@
                         {"inbound": ["CFDE", "collection_pubchem_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_substance_substance_fkey"]},
+                        {"outbound": ["CFDE", "collection_substance_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -2192,6 +2251,7 @@
             },
             "visible_foreign_keys": {
                "*": [
+                  {"sourcekey": "S_collection_assoc"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -2399,6 +2459,15 @@
                         {"inbound": ["CFDE", "collection_gene_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_gene_gene_fkey"]},
+                        {"outbound": ["CFDE", "collection_gene_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -2429,6 +2498,7 @@
                "*": [
                   {"sourcekey": "S_phenotype"},
                   {"sourcekey": "S_protein"},
+                  {"sourcekey": "S_collection"},
                   {"sourcekey": "S_file"},
                   {"sourcekey": "S_biosample"},
                   {"sourcekey": "S_subject"}
@@ -2597,6 +2667,15 @@
                         {"inbound": ["CFDE", "collection_protein_fact_fkey"]},
                         "nid"
                      ]
+                  },
+                  "S_collection_assoc": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections directly linked to this term.",
+                     "source": [
+                        {"inbound": ["CFDE", "collection_protein_protein_fkey"]},
+                        {"outbound": ["CFDE", "collection_protein_collection_fkey"]},
+                        "nid"
+                     ]
                   }
                }
             },
@@ -2623,7 +2702,7 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_gene"},
-                  {"sourcekey": "S_collection"}
+                  {"sourcekey": "S_collection_assoc"}
                ]
             }
          }
