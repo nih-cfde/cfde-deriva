@@ -122,12 +122,12 @@
                },
                {
                   "name": "bundle_collection_id_namespace",
-                  "description": "If this file is a bundle encoding more than one sub-file, this field gives the id_namespace of a collection listing the bundle's sub-file contents. Null otherwise.",
+                  "description": "If this file is a bundle encoding more than one sub-file, this field gives the id_namespace of a collection listing the bundle's sub-file contents; null otherwise",
                   "type": "string"
                },
                {
                   "name": "bundle_collection_local_id",
-                  "description": "If this file is a bundle encoding more than one sub-file, this field gives the local_id of a collection listing the bundle's sub-file contents. Null otherwise.",
+                  "description": "If this file is a bundle encoding more than one sub-file, this field gives the local_id of a collection listing the bundle's sub-file contents; null otherwise",
                   "type": "string"
                },
                {
@@ -317,7 +317,7 @@
             "skipInitialSpace": true,
             "header": true
          },
-         "description": "A biological entity from which a C2M2 biosample can be generated",
+         "description": "A biological entity from which a C2M2 biosample can in principle be generated",
          "schema": {
             "fields": [
                {
@@ -373,12 +373,12 @@
                },
                {
                   "name": "sex",
-                  "description": "The sex of this subject",
+                  "description": "A CFDE CV category characterizing the physiological sex of this subject",
                   "type": "string"
                },
                {
                   "name": "ethnicity",
-                  "description": "The ethnicity of this subject",
+                  "description": "A CFDE CV category characterizing the self-reported ethnicity of this subject",
                   "type": "string"
                },
                {
@@ -502,7 +502,7 @@
                },
                {
                   "name": "project_id_namespace",
-                  "description": "ID of the identifier namespace for the project record representing the top-level C2M2 metadataset produced by this DCC.",
+                  "description": "ID of the identifier namespace for the project record representing the C2M2 submission produced by this DCC",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -510,7 +510,7 @@
                },
                {
                   "name": "project_local_id",
-                  "description": "Foreign key identifying the project record representing the top-level C2M2 metadataset produced by this DCC.",
+                  "description": "Foreign key identifying the project record representing the C2M2 submission produced by this DCC",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -863,7 +863,7 @@
             "fields": [
                {
                   "name": "superset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the superset collection",
+                  "description": "ID of the identifier namespace corresponding to the C2M2 submission containing the superset collection",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -879,7 +879,7 @@
                },
                {
                   "name": "subset_collection_id_namespace",
-                  "description": "ID of the identifier namespace corresponding to the top-level C2M2 metadataset containing the subset collection",
+                  "description": "ID of the identifier namespace corresponding to the C2M2 submission containing the subset collection",
                   "type": "string",
                   "constraints": {
                      "required": true
@@ -2732,8 +2732,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2779,8 +2778,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2835,8 +2833,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this taxon",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2882,8 +2879,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this UBERON term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2929,8 +2925,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM format term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -2976,8 +2971,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this EDAM data term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3023,8 +3017,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Disease Ontology term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3070,8 +3063,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this Human Phenotype Ontology term",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3117,8 +3109,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this compound",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3227,8 +3218,7 @@
                   "description": "The Ensembl 'Name' for this gene (e.g. 'BRCA1')",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3243,7 +3233,7 @@
                },
                {
                   "name": "organism",
-                  "description": "An NCBI Taxonomy Database ID identifying this gene's source organism (e.g. 'NCBItxid9606')",
+                  "description": "An NCBI Taxonomy Database ID identifying this gene's source organism (e.g. 'NCBI:txid9606')",
                   "type": "string",
                   "constraints": {
                      "required": true,
@@ -3292,8 +3282,7 @@
                   "description": "The UniProt recommended name of this protein (e.g. 'Uncharacterized protein YnaG')",
                   "type": "string",
                   "constraints": {
-                     "required": true,
-                     "unique": true
+                     "required": true
                   }
                },
                {
@@ -3308,7 +3297,7 @@
                },
                {
                   "name": "organism",
-                  "description": "OPTIONAL: An NCBI Taxonomy Database ID identifying this protein's source organism (e.g. 'NCBItxid9606')",
+                  "description": "OPTIONAL: An NCBI Taxonomy Database ID identifying this protein's source organism (e.g. 'NCBI:txid9606')",
                   "type": "string",
                   "constraints": {
                      "pattern": "^NCBI:txid[0-9]+$"
