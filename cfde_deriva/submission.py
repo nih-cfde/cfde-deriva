@@ -412,7 +412,7 @@ class Submission (object):
                 self.review_catalog = self.create_review_catalog(self.server, self.registry, self.datapackage_id)
 
             next_error_state = terms.cfde_registry_dp_status.content_error
-            self.load_sqlite(self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
+            self.load_sqlite(self.content_path, self.ingest_sqlite_filename, onconflict='abort', table_error_callback=dpt_error2)
             self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
@@ -809,7 +809,7 @@ class Submission (object):
             dp.sqlite_import_data_files(conn, onconflict='skip')
 
     @classmethod
-    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None):
+    def load_sqlite(cls, content_path, sqlite_filename, table_error_callback=None, progress=None, onconflict='skip'):
         """Idempotently insert submission content."""
         if progress is None:
             progress = dict()
@@ -818,7 +818,7 @@ class Submission (object):
         # this with block produces a transaction in sqlite3
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Idempotently loading data for %s into %s' % (content_path, sqlite_filename))
-            submitted_dp.sqlite_import_data_files(conn, onconflict='skip', table_error_callback=table_error_callback, progress=progress)
+            submitted_dp.sqlite_import_data_files(conn, onconflict=onconflict, table_error_callback=table_error_callback, progress=progress)
 
     @classmethod
     def sqlite_datapackage_check(cls, schema_json, content_path, sqlite_filename, table_error_callback=None, tablenames=None, progress=None):
