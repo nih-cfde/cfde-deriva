@@ -1320,6 +1320,11 @@ WHERE id IS NOT NULL
             skip_dcc_check=True,
         )
         if purge_partial:
+            for path in [submission.ingest_sqlite_filename, submission.portal_prep_sqlite_filename]:
+                if os.path.exists(path):
+                    logger.info('Purging %s' % path)
+                    os.remove(path)
+
             ermrest_url = registry.get_datapackage(id).get('review_ermrest_url')
             if ermrest_url is not None:
                 submission.review_catalog = server.connect_ermrest(cls.extract_catalog_id(server, ermrest_url))
