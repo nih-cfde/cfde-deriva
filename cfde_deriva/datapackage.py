@@ -878,6 +878,45 @@ class CfdeDataPackage (object):
                                         resource["path"],
                                         error_cname,
                                     ))
+                            elif msg.find('UNIQUE constraint failed') >= 0:
+                                # find offending row to give better error details
+                                error_cnames = msg.split(':')[-1] # "... failed: tname.col, ... "
+                                error_cnames = [
+                                    fragment.split('.')[-1] # only need cname from "tname.cname"
+                                    for fragment in error_cnames.split(',')
+                                ]
+                                error_positions = [ header.index(cname) for cname in error_cnames ]
+                                try:
+                                    cur = conn.cursor()
+                                    keys = set()
+                                    # check batch against itself and against prior batches in table
+                                    for row in batch:
+                                        key = tuple([ row[pos] for pos in error_positions ])
+                                        if key in keys:
+                                            raise InvalidDatapackage('Resource file "%s" violates uniqueness constraint for key %r' % (
+                                                resource["path"],
+                                                dict(zip(error_cnames, key)),
+                                            ))
+                                        keys.add(key)
+                                        cur.execute("SELECT %(cols)s FROM %(table)s WHERE %(where)s" % {
+                                            'table': sql_identifier(table.name),
+                                            'cols': ','.join([ sql_identifier(cname) for cname in error_cnames ]),
+                                            'where': ' AND '.join([
+                                                '(%s = %s)' % (sql_identifier(k), sql_literal(v))
+                                                for k, v in dict(zip(error_cnames, key)).items()
+                                            ]),
+                                        })
+                                        for key in cur:
+                                            # zero or one existing keys returned here
+                                            raise InvalidDatapackage('Resource file "%s" violates uniqueness constraint for key %r' % (
+                                                resource["path"],
+                                                dict(zip(error_cnames, key)),
+                                            ))
+                                except ValueError:
+                                    raise InvalidDatapackage('Resource file "%s" violates uniqueness constraint for key %r' % (
+                                        resource["path"],
+                                        error_cnames,
+                                    ))
                             # re-raise if we don't have a better idea
                             raise
                         logger.debug("Batch of rows for %s loaded" % table.name)
