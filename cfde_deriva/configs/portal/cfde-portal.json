@@ -449,7 +449,16 @@
             },
             "immutable": true,
              "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_analysis_type",
+                     "favorited_key_columns": ["analysis_type"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
@@ -1717,7 +1726,16 @@
             },
             "immutable": true,
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "user_favorites": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_phenotype",
+                     "favorited_key_columns": ["phenotype"],
+                     "user_id_column": "user_id"
+                  }
+               }
             },
             "source_definitions": {
                "columns": true,
