@@ -5715,9 +5715,11 @@
                   ["CFDE", "favorite_ncbi_taxonomy_user_id_fkey"],
                   ["CFDE", "favorite_anatomy_user_id_fkey"],
                   ["CFDE", "favorite_disease_user_id_fkey"],
+                  ["CFDE", "favorite_phenotype_user_id_fkey"],
                   ["CFDE", "favorite_gene_user_id_fkey"],
                   ["CFDE", "favorite_compound_user_id_fkey"],
                   ["CFDE", "favorite_assay_type_user_id_fkey"],
+                  ["CFDE", "favorite_analysis_type_user_id_fkey"],
                   ["CFDE", "favorite_data_type_user_id_fkey"],
                   ["CFDE", "favorite_file_format_user_id_fkey"]
                ]
