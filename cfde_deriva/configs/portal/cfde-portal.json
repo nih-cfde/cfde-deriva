@@ -6031,7 +6031,7 @@
                         ]
                      },
                      {
-                        "displayname": "NCPI file manifest (work in progress)",
+                        "displayname": "NCPI file manifest",
                         "type": "FILE",
                         "outputs": [
                            {
@@ -13739,7 +13739,7 @@
                         ]
                      },
                      {
-                        "displayname": "NCPI file manifest (work in progress)",
+                        "displayname": "NCPI file manifest",
                         "type": "FILE",
                         "outputs": [
                            {
