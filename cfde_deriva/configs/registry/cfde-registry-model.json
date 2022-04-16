@@ -5745,7 +5745,7 @@
                      "markdown_name": "Permissions",
                      "display": {
                        "template_engine": "handlebars",
-                       "markdown_pattern": "{{#if (eq $session.client.id _id)}}{{#if $session.extensions.has_ras_permissions}}{{#each $session.extensions.ras_dbgap_permissions}}{{#each this}}{{{this.phs_id}}}{{/each}}{{/each}}{{/if}}{{/if}}"
+                       "markdown_pattern": "{{#if (eq $session.client.id _id)}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#each $session.client.extensions.ras_dbgap_permissions}}{{#each this}}{{{this.phs_id}}}{{/each}}{{/each}}{{/if}}{{/if}}{{/if}}"
                      }
                   }, {
                      "markdown_name": "Groups",
