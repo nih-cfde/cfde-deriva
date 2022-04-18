@@ -397,6 +397,9 @@ class CatalogConfigurator (object):
             "SystemColumnsDisplayCompact": [],
             "SystemColumnsDisplayDetailed": [],
             "disableDefaultExport": True,
+            "facetPanelDisplay": {
+                "open": ["compact/select/association"]
+            },
             "savedQueryConfig": {
                 "storageTable": {
                     "catalog": "registry",
@@ -413,7 +416,7 @@ class CatalogConfigurator (object):
                 "menuOptions": [
                     {
                         "nameMarkdownPattern": "My Profile",
-                        "urlPattern": "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}",
+                        "urlPattern": "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.client.id}}{{/encode}}",
                         "type": "url"
                     },
                     {
@@ -422,7 +425,7 @@ class CatalogConfigurator (object):
                         '*::facets::{{#encodeFacet}}'
                         '{"and": [{'
                         '"sourcekey":"S_RCB",'
-                        '"choices":["{{{$session.id}}}"],'
+                        '"choices":["{{{$session.client.id}}}"],'
                         '"source_domain":{"schema":"public","table":"ERMrest_Client","column":"ID"}'
                         '}]}'
                         '{{/encodeFacet}}',
