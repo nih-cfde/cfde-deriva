@@ -6037,7 +6037,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)=(CFDE:core_fact:nid)/$M/Md:=c2m2:file/$M/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$M/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$M/file_name:=M:filename,drs_uri:=M:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=M:nid"
+                                 "path": "cf:=(core_fact)=(CFDE:core_fact:nid)/$M/Md:=c2m2:file/$M/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$M/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$M/name:=M:filename,drs_uri:=M:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=M:nid"
                               },
                               "destination": {
                                  "name": "ncpi_manifest.json",
@@ -13745,7 +13745,7 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "personal_collection_file/m:=CFDE:file/cf:=(core_fact)=(CFDE:core_fact:nid)/$m/Md:=c2m2:file/$m/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$m/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$m/file_name:=m:filename,drs_uri:=m:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=m:nid"
+                                 "path": "personal_collection_file/m:=CFDE:file/cf:=(core_fact)=(CFDE:core_fact:nid)/$m/Md:=c2m2:file/$m/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$m/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$m/name:=m:filename,drs_uri:=m:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=m:nid"
                               },
                               "destination": {
                                  "name": "ncpi_manifest.json",
