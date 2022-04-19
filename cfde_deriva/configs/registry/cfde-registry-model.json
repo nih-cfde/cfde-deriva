@@ -1646,6 +1646,7 @@
                   {"sourcekey": "S_datapackage"},
                   {"sourcekey": "S_metric"},
                   "value",
+                  "numerator",
                   "denominator"
                ],
                "compact": [
