@@ -5746,13 +5746,7 @@
                      "markdown_name": "dbGaP Permissions (from NIH RAS)",
                      "display": {
                        "template_engine": "handlebars",
-                       "markdown_pattern": "{{#if (eq $session.client.id _id)}}{{#if $session.client.extensions}}"
-                            "{{#if $session.client.extensions.has_ras_permissions}}{{#each $session.client.extensions.ras_dbgap_permissions}}`{{{this.phs_id}}}`{{#unless @last}}, {{/unless}}{{/each}}"
-                            "{{else}}"
-                                "{{#if (eq $session.client.extensions.has_ras_permissions false)}}_none_{tooltip=\"A RAS-aware login provider was used for this session, but no dbGaP permissions were found for the user.\"}"
-                                "{{else}}_not supported by login method_{tooltip=\"This session used a login provider that is not RAS-aware, so dbGaP permission status is not known for the user.\"}{{/if}}"
-                            "{{/if}}"
-                         "{{/if}}{{/if}}"
+                       "markdown_pattern": "{{#if (eq $session.client.id _id)}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#each $session.client.extensions.ras_dbgap_permissions}}`{{{this.phs_id}}}`{{#unless @last}}, {{/unless}}{{/each}}{{else}}{{#if (eq $session.client.extensions.has_ras_permissions false)}}_none_{tooltip=\"A RAS-aware login provider was used for this session, but no dbGaP permissions were found for the user.\"}{{else}}_not supported by login method_{tooltip=\"This session used a login provider that is not RAS-aware, so dbGaP permission status is not known for the user.\"}{{/if}}{{/if}}{{/if}}{{/if}}"
                      }
                   }, {
                      "markdown_name": "Groups",
