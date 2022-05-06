@@ -889,7 +889,8 @@ def make_type(type, format):
     if type == "boolean":
         return builtin_types.boolean
     if type == "array":
-        # assume array is a list of strings for now...
+        if format == 'integer':
+            return builtin_types["int8[]"]
         return builtin_types["text[]"]
     if type == "object":
         # revisit if we need raw JSON support as an option...

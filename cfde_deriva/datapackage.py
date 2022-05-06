@@ -1710,6 +1710,7 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'float8': 'real',
             'boolean': 'boolean',
             'text[]': 'json',
+            'int8[]': 'json',
             'jsonb': 'json',
         }[typeobj.typename]
 
