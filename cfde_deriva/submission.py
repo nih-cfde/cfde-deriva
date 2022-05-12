@@ -955,12 +955,12 @@ ORDER BY count(*) DESC;
         def cfde_keywords_set(*strings):
             """Downcase and split strings into tokens, remove common junk tokens, merge into set."""
             def str_split(s):
-                for s2 in re.split('\s|[/.,;()[\]{}\'"_~%&|]', s.lower()):
-                    s2 = s2.strip('-:/.,;()[]{}\'"~%&|')
+                for s2 in re.split('\s|[+/.,;()[\]{}\'"_~%&|]', s.lower()):
+                    s2 = s2.strip('-:+/.,;()[]{}\'"~%&|')
                     if s2 not in {
-                            '', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on',
-                            'or', 'and', 'is', 'by', 'not', 'from', 'are', 's',
-                    }:
+                            '', 'an', 'the', 'of', 'as', 'at', 'to', 'on',
+                            'or', 'and', 'is', 'by', 'not', 'from', 'are',
+                    } and len(s2) > 1:
                         yield s2
 
             kw = set()
