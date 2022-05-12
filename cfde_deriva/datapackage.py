@@ -99,8 +99,8 @@ class CfdeDataPackage (object):
     # (i.e. stuff that perhaps wasn't translated to deriva equivalents)
     schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 
-    batch_size = 2000 # how may rows we'll send to ermrest
-    batch_bytes_limit = 1024**2 # 1MB
+    batch_size = 1000 # how may rows we'll send to ermrest
+    batch_bytes_limit = 512*1024 # 0.5MB
 
     def __init__(self, package_filename, configurator=None):
         """Construct CfdeDataPackage from given package definition filename.
