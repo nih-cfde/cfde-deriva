@@ -2357,7 +2357,7 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
+                  "type": "string",
                   "derivation_sql_path": "collection_kw.sql"
                }
             ],
@@ -2568,6 +2568,12 @@
                      "unique": true
                   },
                   "derivation_sql_path": "file_id.sql"
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "derivation_sql_path": "file_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -2781,6 +2787,12 @@
                      "unique": true
                   },
                   "derivation_sql_path": "biosample_id.sql"
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "derivation_sql_path": "biosample_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -2969,6 +2981,12 @@
                      "unique": true
                   },
                   "derivation_sql_path": "subject_id.sql"
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "derivation_sql_path": "subject_kw.sql"
                }
             ],
             "missingValues": [ "" ],
@@ -5275,6 +5293,11 @@
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
                   "default": 0
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "array"
                }
             ],
             "primaryKey": [
@@ -5334,35 +5357,6 @@
             ]
          },
          "derivation_sql_path": "core_fact.sql"
-      },
-      {
-         "profile": "tabular-data-resource",
-         "name": "core_keyword",
-         "title": "Core Keywords",
-         "description": "Core keyword metadata, representing keyword-matching corpi for classes of core C2M2 entities characterized by the same combination of metadata concepts.",
-         "schema": {
-            "fields": [
-               {
-                  "name": "nid",
-                  "title": "Numeric ID",
-                  "description": "Numeric, surrogate key representing this fact record in the portal.",
-                  "type": "integer",
-                  "constraints": {
-                     "required": true,
-                     "unique": true
-                  }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "constraints": {
-                     "required": true
-                  }
-               }
-            ]
-         },
-         "derivation_sql_path": "core_keyword.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -5659,12 +5653,6 @@
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
                   "default": 0
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "derivation_sql_path": "combined_fact_kw.sql"
                }
             ],
             "primaryKey": [

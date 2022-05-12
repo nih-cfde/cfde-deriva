@@ -4588,7 +4588,7 @@
                {
                   "name": "kw",
                   "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
+                  "type": "string",
                   "deriva": {
                      "indexing_preferences": {
                         "btree": false,
@@ -5068,10 +5068,6 @@
                      "source": [ "kw" ],
                      "markdown_name": "collection",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
-                  },
-                  {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
-                     "markdown_name": "project, or C2M2 CV terms"
                   }
                ]},
                "sources": {
@@ -5685,6 +5681,17 @@
                   "constraints": {
                      "unique": true
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -6095,7 +6102,7 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [ "kw" ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
                   }
@@ -6706,6 +6713,17 @@
                   "constraints": {
                      "unique": true
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -7037,7 +7055,7 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [ "kw" ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -7546,6 +7564,17 @@
                   "constraints": {
                      "unique": true
                   }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
                }
             ],
             "missingValues": [ "" ],
@@ -7789,7 +7818,7 @@
                "fkeys": true,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [ "kw" ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -10963,14 +10992,6 @@
             "primaryKey": "nid",
             "foreignKeys": [
                {
-                  "fields": "nid",
-                  "constraint_name": "core_fact_keyword_fkey",
-                  "reference": {
-                     "resource": "core_keyword",
-                     "fields": "nid"
-                  }
-               },
-               {
                   "fields": "id_namespace",
                   "constraint_name": "core_fact_id_namespace_fkey",
                   "reference": {
@@ -11820,17 +11841,6 @@
                   "type": "integer",
                   "format": "int8",
                   "default": 0
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "primaryKey": "nid",

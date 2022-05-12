@@ -934,6 +934,22 @@ ORDER BY count(*) DESC;
         submission_dp = CfdeDataPackage(submission_schema_json)
         prep_dp = CfdeDataPackage(portal_prep_schema_json)
 
+        def array_join(j, sep):
+            if j is None:
+                return None
+            try:
+                a = json.loads(j)
+            except Exception as e:
+                logger.error('array_join(%r) JSON decode failed: %s' % (j, e))
+                raise
+            if not isinstance(a, list):
+                logger.error('array_join unexpected array input %r' % (j,))
+                raise ValueError(j)
+            if not isinstance(sep, str):
+                logger.error('array_join unexpected separator input %r' % (sep,))
+                raise ValueError(sep)
+            return sep.join(a)
+
         def json_sorted(j):
             if j is None:
                 return None
@@ -1013,6 +1029,7 @@ ORDER BY count(*) DESC;
             logger.debug('Building derived data in %s' % (sqlite_filename,))
             for dbname, dbfilename in attach.items():
                 conn.execute("ATTACH DATABASE %s AS %s;" % (sql_literal(dbfilename), sql_identifier(dbname)))
+            conn.create_function('array_join', 2, array_join)
             conn.create_function('json_sorted', 1, json_sorted)
             conn.create_function('cfde_keywords', -1, cfde_keywords)
             conn.create_function('cfde_keywords_merge', -1, cfde_keywords_merge)
