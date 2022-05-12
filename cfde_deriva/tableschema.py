@@ -882,14 +882,20 @@ def make_type(type, format):
         return builtin_types.date
     if type == "integer":
         if format == "serial":
+            return builtin_types.serial4
+        elif format == 'serial8':
             return builtin_types.serial8
-        return builtin_types.int8
+        elif format == 'int8':
+            return builtin_types.int8
+        return builtin_types.int4
     if type == "number":
         return builtin_types.float8
     if type == "boolean":
         return builtin_types.boolean
     if type == "array":
-        if format == 'integer':
+        if format in ('integer', 'int4'):
+            return builtin_types["int4[]"]
+        elif format == 'int8':
             return builtin_types["int8[]"]
         return builtin_types["text[]"]
     if type == "object":
@@ -1091,7 +1097,7 @@ def make_table(sname, tdef_resource, configurator, trusted=False, history_captur
         system_fkeys = []
 
     if provide_nid:
-        system_columns.append(Column.define("nid", builtin_types.serial8, nullok=False, comment="A numeric surrogate key for this record."))
+        system_columns.append(Column.define("nid", builtin_types.serial4, nullok=False, comment="A numeric surrogate key for this record."))
         system_keys.append(make_key(sname, tname, ['nid']))
 
     # use a dict to remove duplicate keys e.g. for "nid", "RID", or frictionless primaryKey + unique constraints

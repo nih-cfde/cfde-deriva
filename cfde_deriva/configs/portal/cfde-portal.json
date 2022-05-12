@@ -5642,12 +5642,14 @@
                {
                   "name": "size_in_bytes",
                   "description": "The size of this file in bytes",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "uncompressed_size_in_bytes",
                   "description": "The total decompressed size in bytes of the contents of this file",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "sha256",
@@ -10954,6 +10956,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11340,6 +11343,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11483,6 +11487,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11631,6 +11636,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11812,6 +11818,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                },
                {
@@ -13203,7 +13210,8 @@
                {
                   "name": "num_bytes",
                   "description": "The total size in bytes of files related to this combination of metadata terms",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "num_biosamples",

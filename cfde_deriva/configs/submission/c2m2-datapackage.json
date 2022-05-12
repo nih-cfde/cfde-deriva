@@ -63,12 +63,14 @@
                {
                   "name": "size_in_bytes",
                   "description": "The size of this file in bytes",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "uncompressed_size_in_bytes",
                   "description": "The total decompressed size in bytes of the contents of this file: null if this file is not compressed",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "sha256",
