@@ -4584,17 +4584,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "string",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -5065,7 +5054,11 @@
                "fkeys": true,
                "search-box": {"or": [
                   {
-                     "source": [ "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "collection_keywords_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "collection",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -5681,17 +5674,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "string",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -6102,7 +6084,11 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "file_keywords_file_fkey"]},
+                        {"outbound": ["CFDE", "file_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
                   }
@@ -6713,17 +6699,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "string",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -7055,7 +7030,11 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_keywords_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -7564,17 +7543,6 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "string",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
@@ -7818,7 +7786,11 @@
                "fkeys": true,
                "search-box": {"or": [
                   {
-                     "source": [ "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "subject_keywords_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -13030,6 +13002,294 @@
                   "constraint_name": "core_fact_mime_type_mime_type_fkey",
                   "reference": {
                      "resource": "mime_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "keywords",
+         "description": "Textual keywords corpus for portal UI search-box.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this keywords list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_keywords",
+         "description": "Association of search keyword lists to C2M2 file records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "file",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "file"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "file", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "file",
+                  "constraint_name": "file_keywords_file_fkey",
+                  "reference": {
+                     "resource": "file",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "file_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "biosample_keywords",
+         "description": "Association of search keyword lists to C2M2 biosample records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "biosample",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a biosample in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "biosample"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "biosample", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "biosample",
+                  "constraint_name": "biosample_keywords_biosample_fkey",
+                  "reference": {
+                     "resource": "biosample",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "biosample_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_keywords",
+         "description": "Association of search keyword lists to C2M2 subject records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "subject",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a subject in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "subject"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "subject", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "subject",
+                  "constraint_name": "subject_keywords_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "subject_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_keywords",
+         "description": "Association of search keyword lists to C2M2 collection records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "collection",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "collection", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_keywords_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "collection_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
                      "fields": "nid"
                   }
                }

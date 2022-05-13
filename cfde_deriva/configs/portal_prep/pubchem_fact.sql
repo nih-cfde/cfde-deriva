@@ -200,9 +200,7 @@ WHERE u.nid = colf.nid
   AND colf.compounds = pcf.compounds
 ;
 
-UPDATE pubchem_fact AS v
-SET kw = s.kw
-FROM (
+CREATE TEMPORARY TABLE pubchemfact_kw AS
   SELECT
     pcf.nid,
     cfde_keywords_merge(
@@ -215,6 +213,47 @@ FROM (
        FROM json_each(pcf.compounds) cmpdj JOIN compound cmpd ON (cmpdj.value = cmpd.nid))
     ) AS kw
   FROM pubchem_fact pcf
-) s
-WHERE v.nid = s.nid
+;
+
+INSERT INTO keywords (kw)
+SELECT kw FROM (
+SELECT DISTINCT array_join(kw, ' ') AS kw FROM pubchemfact_kw
+EXCEPT
+SELECT kw FROM keywords
+) AS s
+WHERE kw IS NOT NULL
+  AND kw != ''
+;
+
+CREATE TEMPORARY TABLE pubchemfact_kw_map AS
+SELECT
+  c.nid AS pubchem_fact,
+  k.nid AS kw
+FROM pubchemfact_kw c
+JOIN keywords k ON (c.kw = k.kw)
+;
+
+INSERT INTO file_keywords (file, kw)
+SELECT s.nid, k.kw
+FROM file s JOIN pubchemfact_kw_map k ON (s.pubchem_fact = k.pubchem_fact)
+EXCEPT
+SELECT file, kw FROM file_keywords
+;
+INSERT INTO biosample_keywords (biosample, kw)
+SELECT s.nid, k.kw
+FROM biosample s JOIN pubchemfact_kw_map k ON (s.pubchem_fact = k.pubchem_fact)
+EXCEPT
+SELECT biosample, kw FROM biosample_keywords
+;
+INSERT INTO subject_keywords (subject, kw)
+SELECT s.nid, k.kw
+FROM subject s JOIN pubchemfact_kw_map k ON (s.pubchem_fact = k.pubchem_fact)
+EXCEPT
+SELECT subject, kw FROM subject_keywords
+;
+INSERT INTO collection_keywords (collection, kw)
+SELECT s.nid, k.kw
+FROM collection s JOIN pubchemfact_kw_map k ON (s.pubchem_fact = k.pubchem_fact)
+EXCEPT
+SELECT collection, kw FROM collection_keywords
 ;

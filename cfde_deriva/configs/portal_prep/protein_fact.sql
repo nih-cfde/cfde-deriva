@@ -48,9 +48,7 @@ WHERE u.nid = colf.nid
   AND colf.proteins = prf.proteins
 ;
 
-UPDATE protein_fact AS v
-SET kw = s.kw
-FROM (
+CREATE TEMPORARY TABLE proteinfact_kw AS
   SELECT
     prf.nid,
     cfde_keywords_merge(
@@ -59,6 +57,48 @@ FROM (
        FROM json_each(prf.proteins) prj JOIN protein pr ON (prj.value = pr.nid))
     ) AS kw
   FROM protein_fact prf
-) s
-WHERE v.nid = s.nid
 ;
+
+INSERT INTO keywords (kw)
+SELECT kw FROM (
+SELECT DISTINCT array_join(kw, ' ') AS kw FROM proteinfact_kw
+EXCEPT
+SELECT kw FROM keywords
+) AS s
+WHERE kw IS NOT NULL
+  AND kw != ''
+;
+
+CREATE TEMPORARY TABLE proteinfact_kw_map AS
+SELECT
+  c.nid AS protein_fact,
+  k.nid AS kw
+FROM proteinfact_kw c
+JOIN keywords k ON (array_join(c.kw, ' ') = k.kw)
+;
+
+INSERT INTO file_keywords (file, kw)
+SELECT s.nid, k.kw
+FROM file s JOIN proteinfact_kw_map k ON (s.protein_fact = k.protein_fact)
+EXCEPT
+SELECT file, kw FROM file_keywords
+;
+INSERT INTO biosample_keywords (biosample, kw)
+SELECT s.nid, k.kw
+FROM biosample s JOIN proteinfact_kw_map k ON (s.protein_fact = k.protein_fact)
+EXCEPT
+SELECT biosample, kw FROM biosample_keywords
+;
+INSERT INTO subject_keywords (subject, kw)
+SELECT s.nid, k.kw
+FROM subject s JOIN proteinfact_kw_map k ON (s.protein_fact = k.protein_fact)
+EXCEPT
+SELECT subject, kw FROM subject_keywords
+;
+INSERT INTO collection_keywords (collection, kw)
+SELECT s.nid, k.kw
+FROM collection s JOIN proteinfact_kw_map k ON (s.protein_fact = k.protein_fact)
+EXCEPT
+SELECT collection, kw FROM collection_keywords
+;
+
