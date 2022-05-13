@@ -441,7 +441,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "acls": {
@@ -3715,7 +3715,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "table_config": {
@@ -4598,7 +4598,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -5053,7 +5053,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -5075,16 +5075,16 @@
                      "source": [{"outbound": ["CFDE", "collection_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_protein_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_protein_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_protein_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
@@ -5695,7 +5695,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -6090,7 +6090,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -6112,13 +6112,13 @@
                      "source": [{"outbound": ["CFDE", "file_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
@@ -6727,7 +6727,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -7043,7 +7043,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -7065,13 +7065,13 @@
                      "source": [{"outbound": ["CFDE", "biosample_combined_fact_fkey"]}, "nid"]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_gene_fact_fkey"]}, "nid"]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_pubchem_fact_fkey"]}, "nid"]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
@@ -7578,7 +7578,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -7806,7 +7806,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -7828,13 +7828,13 @@
                      "source": [{"outbound": ["CFDE", "subject_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
