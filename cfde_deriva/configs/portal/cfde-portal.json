@@ -327,7 +327,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -514,7 +514,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -743,7 +743,7 @@
                   "name",
                   "clade",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -963,7 +963,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -1170,7 +1170,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -1376,7 +1376,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -1599,7 +1599,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -1823,7 +1823,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "filter": {"and": [
                   {"source": "id"},
@@ -2029,7 +2029,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -2251,7 +2251,7 @@
                   "name",
                   {"sourcekey": "S_compound"},
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -2495,7 +2495,7 @@
                   "name",
                   {"sourcekey": "S_organism"},
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -2703,7 +2703,7 @@
                   "name",
                   {"sourcekey": "S_organism"},
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -2983,7 +2983,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -3149,7 +3149,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -3314,7 +3314,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -3481,7 +3481,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
@@ -3648,7 +3648,7 @@
                   "id",
                   "name",
                   "description",
-                  "resource_markdown"
+                  {"source": "resource_markdown", "hide_column_header": true}
                ],
                "compact": [
                   "id",
