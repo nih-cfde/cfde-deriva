@@ -934,6 +934,22 @@ ORDER BY count(*) DESC;
         submission_dp = CfdeDataPackage(submission_schema_json)
         prep_dp = CfdeDataPackage(portal_prep_schema_json)
 
+        def array_join(j, sep):
+            if j is None:
+                return None
+            try:
+                a = json.loads(j)
+            except Exception as e:
+                logger.error('array_join(%r) JSON decode failed: %s' % (j, e))
+                raise
+            if not isinstance(a, list):
+                logger.error('array_join unexpected array input %r' % (j,))
+                raise ValueError(j)
+            if not isinstance(sep, str):
+                logger.error('array_join unexpected separator input %r' % (sep,))
+                raise ValueError(sep)
+            return sep.join(a)
+
         def json_sorted(j):
             if j is None:
                 return None
@@ -955,12 +971,12 @@ ORDER BY count(*) DESC;
         def cfde_keywords_set(*strings):
             """Downcase and split strings into tokens, remove common junk tokens, merge into set."""
             def str_split(s):
-                for s2 in re.split('\s|[/.,;()[\]{}\'"_~%&|]', s.lower()):
-                    s2 = s2.strip('-:/.,;()[]{}\'"~%&|')
+                for s2 in re.split('\s|[+/.,;()[\]{}\'"_~%&|]', s.lower()):
+                    s2 = s2.strip('-:+/.,;()[]{}\'"~%&|')
                     if s2 not in {
-                            '', 'a', 'an', 'the', 'of', 'as', 'at', 'to', 'on',
-                            'or', 'and', 'is', 'by', 'not', 'from', 'are', 's',
-                    }:
+                            '', 'an', 'the', 'of', 'as', 'at', 'to', 'on',
+                            'or', 'and', 'is', 'by', 'not', 'from', 'are',
+                    } and len(s2) > 1:
                         yield s2
 
             kw = set()
@@ -981,7 +997,13 @@ ORDER BY count(*) DESC;
             for a in arrays:
                 if a is None:
                     continue
-                kw.update(json.loads(a))
+                v = json.loads(a)
+                if isinstance(v, str):
+                    kw.add(v)
+                elif isinstance(v, list):
+                    kw.update(v)
+                else:
+                    raise TypeError(a)
             kw.difference_update({None,})
             return kw
 
@@ -1009,10 +1031,12 @@ ORDER BY count(*) DESC;
                 return json.dumps(sorted(self.kw), separators=(',',':'))
 
         # this with block produces a transaction in sqlite3
+        sqlite3.enable_callback_tracebacks(True)
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
             for dbname, dbfilename in attach.items():
                 conn.execute("ATTACH DATABASE %s AS %s;" % (sql_literal(dbfilename), sql_identifier(dbname)))
+            conn.create_function('array_join', 2, array_join)
             conn.create_function('json_sorted', 1, json_sorted)
             conn.create_function('cfde_keywords', -1, cfde_keywords)
             conn.create_function('cfde_keywords_merge', -1, cfde_keywords_merge)

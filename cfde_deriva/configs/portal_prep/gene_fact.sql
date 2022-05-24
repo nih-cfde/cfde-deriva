@@ -123,19 +123,57 @@ WHERE u.nid = colf.nid
   AND colf.genes = gf.genes
 ;
 
-UPDATE gene_fact AS v
-SET kw = s.kw
-FROM (
+CREATE TEMPORARY TABLE genefact_kw AS
   SELECT
     gf.nid,
     cfde_keywords_merge(
-      (SELECT cfde_keywords_merge(
-         cfde_keywords_agg(gn.id, gn.name, gn.description),
-         cfde_keywords_merge_agg(gn.synonyms)
-       )
+      -- perform split/strip/merge of gene.synonyms too...
+      (SELECT cfde_keywords_agg(gn.id, gn.name, gn.description, gn.synonyms)
        FROM json_each(gf.genes) gnj JOIN gene gn ON (gnj.value = gn.nid))
     ) AS kw
   FROM gene_fact gf
-) s
-WHERE v.nid = s.nid
 ;
+
+INSERT INTO keywords (kw)
+SELECT kw FROM (
+SELECT DISTINCT array_join(kw, ' ') AS kw FROM genefact_kw
+EXCEPT
+SELECT kw FROM keywords
+) AS s
+WHERE kw IS NOT NULL
+  AND kw != ''
+;
+
+CREATE TEMPORARY TABLE genefact_kw_map AS
+SELECT
+  c.nid AS gene_fact,
+  k.nid AS kw
+FROM genefact_kw c
+JOIN keywords k ON (c.kw = k.kw)
+;
+
+INSERT INTO file_keywords (file, kw)
+SELECT s.nid, k.kw
+FROM file s JOIN genefact_kw_map k ON (s.gene_fact = k.gene_fact)
+EXCEPT
+SELECT file, kw FROM file_keywords
+;
+INSERT INTO biosample_keywords (biosample, kw)
+SELECT s.nid, k.kw
+FROM biosample s JOIN genefact_kw_map k ON (s.gene_fact = k.gene_fact)
+EXCEPT
+SELECT biosample, kw FROM biosample_keywords
+;
+INSERT INTO subject_keywords (subject, kw)
+SELECT s.nid, k.kw
+FROM subject s JOIN genefact_kw_map k ON (s.gene_fact = k.gene_fact)
+EXCEPT
+SELECT subject, kw FROM subject_keywords
+;
+INSERT INTO collection_keywords (collection, kw)
+SELECT s.nid, k.kw
+FROM collection s JOIN genefact_kw_map k ON (s.gene_fact = k.gene_fact)
+EXCEPT
+SELECT collection, kw FROM collection_keywords
+;
+

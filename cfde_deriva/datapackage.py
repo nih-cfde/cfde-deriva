@@ -100,7 +100,7 @@ class CfdeDataPackage (object):
     schema_tag = 'tag:isrd.isi.edu,2019:table-schema-leftovers'
 
     batch_size = 2000 # how may rows we'll send to ermrest
-    batch_bytes_limit = 1024**2 # 1MB
+    batch_bytes_limit = 256*1024 # 0.25MB
 
     def __init__(self, package_filename, configurator=None):
         """Construct CfdeDataPackage from given package definition filename.
@@ -226,6 +226,13 @@ class CfdeDataPackage (object):
 
             # TBD: should this be a method in deriva-py ermrest_model.Type class?
             def type_equal(t1, t2):
+                # be tolerant where we abuse "format" to specify subtypes for postgres
+                if t1.typename in {'int4', 'int8'}:
+                    if t2.typename in {'int4', 'int8'}:
+                        return True
+                if t1.typename in {'serial4', 'serial8'}:
+                    if t2.typename in {'serial4', 'serial8'}:
+                        return True
                 if t1.typename != t2.typename:
                     return False
                 if t1.is_domain != t2.is_domain or t1.is_array != t2.is_array:
@@ -760,7 +767,7 @@ class CfdeDataPackage (object):
                             row = [ None if v in missing else v for v in row ]
                             res = dict(zip(header, row))
                             for cname in header:
-                                if table.columns[cname].type.typename in ('text[]', 'json', 'jsonb'):
+                                if table.columns[cname].type.typename in ('text[]', 'json', 'jsonb', 'int4[]', 'int8[]'):
                                     res[cname] = json.loads(res[cname]) if res[cname] is not None else None
                             return res
                         payload = [ row_to_json(row) for row in batch ]
@@ -1143,7 +1150,7 @@ LIMIT 1;
             )
             valfuncs = [
                 # f(x) does json decoding or is identify func, depending on column def
-                (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb') else lambda x: x
+                (lambda x: json.loads(x) if x is not None else x) if col.type.typename in ('text[]', 'json', 'jsonb', 'int4[]', 'int8[]') else lambda x: x
                 for col in cols
             ]
             position = progress.get(table.name, None)
@@ -1706,10 +1713,13 @@ CREATE TABLE IF NOT EXISTS %(tname)s (
             'markdown': 'text',
             'timestamptz': 'datetime',
             'date': 'date',
-            'int8': 'int8',
+            'int4': 'integer',
+            'int8': 'integer',
             'float8': 'real',
             'boolean': 'boolean',
             'text[]': 'json',
+            'int4[]': 'json',
+            'int8[]': 'json',
             'jsonb': 'json',
         }[typeobj.typename]
 

@@ -441,7 +441,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "acls": {
@@ -3715,7 +3715,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": "id"
+            "primaryKey": "nid"
          },
          "deriva": {
             "table_config": {
@@ -4584,21 +4584,10 @@
                   "constraints": {
                      "unique": true
                   }
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -5053,7 +5042,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -5065,13 +5054,13 @@
                "fkeys": true,
                "search-box": {"or": [
                   {
-                     "source": [ "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "collection_keywords_collection_fkey"]},
+                        {"outbound": ["CFDE", "collection_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "collection",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
-                  },
-                  {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
-                     "markdown_name": "project, or C2M2 CV terms"
                   }
                ]},
                "sources": {
@@ -5079,16 +5068,16 @@
                      "source": [{"outbound": ["CFDE", "collection_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_protein_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_protein_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "collection_protein_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifying the collection ID.",
@@ -5642,12 +5631,14 @@
                {
                   "name": "size_in_bytes",
                   "description": "The size of this file in bytes",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "uncompressed_size_in_bytes",
                   "description": "The total decompressed size in bytes of the contents of this file",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "sha256",
@@ -5686,7 +5677,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -6081,7 +6072,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -6093,7 +6084,11 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "file_keywords_file_fkey"]},
+                        {"outbound": ["CFDE", "file_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "file-format, data-type, assay-type, anatomy, disease, taxonomy, subject granularity, project, or collection keywords"
                   }
@@ -6103,13 +6098,13 @@
                      "source": [{"outbound": ["CFDE", "file_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "file_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the file ID.",
@@ -6707,7 +6702,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -7023,7 +7018,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -7035,7 +7030,11 @@
                "fkeys": false,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "biosample_keywords_biosample_fkey"]},
+                        {"outbound": ["CFDE", "biosample_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -7045,13 +7044,13 @@
                      "source": [{"outbound": ["CFDE", "biosample_combined_fact_fkey"]}, "nid"]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_core_fact_fkey"]}, "nid"]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_gene_fact_fkey"]}, "nid"]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid"]
+                     "source": [{"outbound": ["CFDE", "biosample_pubchem_fact_fkey"]}, "nid"]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the biosample ID.",
@@ -7547,7 +7546,7 @@
                }
             ],
             "missingValues": [ "" ],
-            "primaryKey": [ "nid", "combined_fact" ],
+            "primaryKey": [ "nid" ],
             "foreignKeys": [
                {
                   "fields": "combined_fact",
@@ -7775,7 +7774,7 @@
             },
             "table_display": {
                "*": {
-                  "row_order": [ "combined_fact", "nid" ]
+                  "row_order": [ "nid" ]
                },
                "row_name": {
                   "wait-for": ["persistent_id", "id"],
@@ -7787,7 +7786,11 @@
                "fkeys": true,
                "search-box": {"or": [
                   {
-                     "source": [ {"sourcekey": "S_combined_fact"}, "kw" ],
+                     "source": [
+                        {"inbound": ["CFDE", "subject_keywords_subject_fkey"]},
+                        {"outbound": ["CFDE", "subject_keywords_kw_fkey"]},
+                        "kw"
+                     ],
                      "markdown_name": "project, collection, or C2M2 CV terms",
                      "comment": "anatomy, disease, file-format, assay-type, data-type, granularity, role, taxonomy, project, collection keywords"
                   }
@@ -7797,13 +7800,13 @@
                      "source": [{"outbound": ["CFDE", "subject_combined_fact_fkey"]}, "nid" ]
                   },
                   "S_core_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_core_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_core_fact_fkey"]}, "nid" ]
                   },
                   "S_gene_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_gene_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_gene_fact_fkey"]}, "nid" ]
                   },
                   "S_pubchem_fact": {
-                     "source": [{"sourcekey": "S_combined_fact"}, {"outbound": ["CFDE", "combined_fact_pubchem_fact_fkey"]}, "nid" ]
+                     "source": [{"outbound": ["CFDE", "subject_pubchem_fact_fkey"]}, "nid" ]
                   },
                   "S_id_namespace": {
                      "comment": "The namespace qualifier for the subject ID.",
@@ -10581,7 +10584,8 @@
                {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10589,7 +10593,8 @@
                {
                   "name": "dccs",
                   "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10598,7 +10603,7 @@
                {
                   "name": "phenotypes",
                   "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
-                  "type": "array",
+                  "type": "object",
                   "constraints": {
                      "required": true
                   }
@@ -10615,7 +10620,8 @@
                {
                   "name": "sexes",
                   "description": "The numeric ID of the sex terms qualifiying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10623,7 +10629,8 @@
                {
                   "name": "races",
                   "description": "The numeric ID of the race terms qualifiying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10631,7 +10638,8 @@
                {
                   "name": "ethnicities",
                   "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10639,7 +10647,8 @@
                {
                   "name": "subject_roles",
                   "description": "The numeric ID of subject_role terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10647,7 +10656,8 @@
                {
                   "name": "subject_granularities",
                   "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10655,7 +10665,8 @@
                {
                   "name": "subject_species",
                   "description": "The numeric ID of subject-species terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10663,7 +10674,8 @@
                {
                   "name": "ncbi_taxons",
                   "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10672,7 +10684,8 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10681,7 +10694,8 @@
                {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10690,6 +10704,7 @@
                   "name": "analysis_types",
                   "description": "The numeric ID of analysis_type terms qualifying the described entities.",
                   "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10697,7 +10712,8 @@
                {
                   "name": "file_formats",
                   "description": "The numeric ID of file_format terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10705,7 +10721,8 @@
                {
                   "name": "compression_formats",
                   "description": "The numeric ID of compression_format terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10713,7 +10730,8 @@
                {
                   "name": "data_types",
                   "description": "The numeric ID of data_type terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10721,7 +10739,8 @@
                {
                   "name": "mime_types",
                   "description": "The numeric ID of mime_type terms qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -10938,19 +10957,12 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
             "primaryKey": "nid",
             "foreignKeys": [
-               {
-                  "fields": "nid",
-                  "constraint_name": "core_fact_keyword_fkey",
-                  "reference": {
-                     "resource": "core_keyword",
-                     "fields": "nid"
-                  }
-               },
                {
                   "fields": "id_namespace",
                   "constraint_name": "core_fact_id_namespace_fkey",
@@ -11289,7 +11301,8 @@
                {
                   "name": "genes",
                   "description": "The numeric ID of gene qualifying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -11323,6 +11336,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11422,7 +11436,8 @@
                {
                   "name": "substances",
                   "description": "The numeric ID of the substance terms qualifiying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -11430,7 +11445,8 @@
                {
                   "name": "compounds",
                   "description": "The numeric ID of the compound terms qualifiying the described entities.",
-                  "type": "object",
+                  "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   }
@@ -11464,6 +11480,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11612,6 +11629,7 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
                }
             ],
@@ -11793,18 +11811,8 @@
                   "name": "total_size_in_bytes",
                   "description": "The sum of size_in_bytes for files with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
+                  "format": "int8",
                   "default": 0
-               },
-               {
-                  "name": "kw",
-                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
-                  "type": "array",
-                  "deriva": {
-                     "indexing_preferences": {
-                        "btree": false,
-                        "trgm": true
-                     }
-                  }
                }
             ],
             "primaryKey": "nid",
@@ -13003,6 +13011,294 @@
 
       {
          "profile": "tabular-data-resource",
+         "name": "keywords",
+         "description": "Textual keywords corpus for portal UI search-box.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this keywords list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "description": "A pre-computed set of keywords/strings used by the CFDE search UI.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "file_keywords",
+         "description": "Association of search keyword lists to C2M2 file records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "file",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "file"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "file", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "file",
+                  "constraint_name": "file_keywords_file_fkey",
+                  "reference": {
+                     "resource": "file",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "file_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "biosample_keywords",
+         "description": "Association of search keyword lists to C2M2 biosample records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "biosample",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a biosample in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "biosample"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "biosample", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "biosample",
+                  "constraint_name": "biosample_keywords_biosample_fkey",
+                  "reference": {
+                     "resource": "biosample",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "biosample_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "subject_keywords",
+         "description": "Association of search keyword lists to C2M2 subject records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "subject",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a subject in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "subject"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "subject", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "subject",
+                  "constraint_name": "subject_keywords_subject_fkey",
+                  "reference": {
+                     "resource": "subject",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "subject_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "collection_keywords",
+         "description": "Association of search keyword lists to C2M2 collection records",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this associated pair in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "collection",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a collection in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "kw",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing a keyword list in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["kw", "collection"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": [ "collection", "kw" ],
+            "foreignKeys": [
+               {
+                  "fields": "collection",
+                  "constraint_name": "collection_keywords_collection_fkey",
+                  "reference": {
+                     "resource": "collection",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "kw",
+                  "constraint_name": "collection_keywords_kw_fkey",
+                  "reference": {
+                     "resource": "keywords",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "profile": "tabular-data-resource",
          "name": "level1_stats",
          "title": "Legacy Core Statistics",
          "description": "Basic statistical roll-up of core entities by metadata combination.",
@@ -13184,7 +13480,8 @@
                {
                   "name": "num_bytes",
                   "description": "The total size in bytes of files related to this combination of metadata terms",
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int8"
                },
                {
                   "name": "num_biosamples",
