@@ -997,7 +997,13 @@ ORDER BY count(*) DESC;
             for a in arrays:
                 if a is None:
                     continue
-                kw.update(json.loads(a))
+                v = json.loads(a)
+                if isinstance(v, str):
+                    kw.add(v)
+                elif isinstance(v, list):
+                    kw.update(v)
+                else:
+                    raise TypeError(a)
             kw.difference_update({None,})
             return kw
 
@@ -1025,6 +1031,7 @@ ORDER BY count(*) DESC;
                 return json.dumps(sorted(self.kw), separators=(',',':'))
 
         # this with block produces a transaction in sqlite3
+        sqlite3.enable_callback_tracebacks(True)
         with sqlite3.connect(sqlite_filename) as conn:
             logger.debug('Building derived data in %s' % (sqlite_filename,))
             for dbname, dbfilename in attach.items():

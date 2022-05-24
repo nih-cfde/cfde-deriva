@@ -1637,13 +1637,13 @@ INSERT INTO keywords (kw)
 SELECT kw FROM (
 SELECT DISTINCT array_join(kw, ' ') AS kw FROM corefact_kw
 UNION
-SELECT DISTINCT array_join(cfde_keywords(local_id, persistent_id, filename, dbgap_study_id), ' ') FROM file
+SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id, filename, dbgap_study_id)), ' ') FROM file
 UNION
-SELECT DISTINCT array_join(cfde_keywords(local_id, persistent_id), ' ') FROM biosample
+SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id)), ' ') FROM biosample
 UNION
-SELECT DISTINCT array_join(cfde_keywords(local_id, persistent_id), ' ') FROM subject
+SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id)), ' ') FROM subject
 UNION
-SELECT DISTINCT array_join(cfde_keywords(local_id, persistent_id, abbreviation, name, description), ' ') FROM collection
+SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id, abbreviation, name, description)), ' ') FROM collection
 ) AS s
 WHERE kw IS NOT NULL
   AND kw != ''
@@ -1662,28 +1662,28 @@ SELECT s.nid, k.kw
 FROM file s JOIN corefact_kw_map k ON (s.core_fact = k.core_fact)
 UNION
 SELECT s.nid, k.nid
-FROM file s JOIN keywords k ON ( array_join(cfde_keywords(s.local_id, s.persistent_id, s.filename, s.dbgap_study_id), ' ') = k.kw)
+FROM file s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id, s.filename, s.dbgap_study_id)), ' ') = k.kw)
 ;
 INSERT INTO biosample_keywords (biosample, kw)
 SELECT s.nid, k.kw
 FROM biosample s JOIN corefact_kw_map k ON (s.core_fact = k.core_fact)
 UNION
 SELECT s.nid, k.nid
-FROM biosample s JOIN keywords k ON ( array_join(cfde_keywords(s.local_id, s.persistent_id), ' ') = k.kw)
+FROM biosample s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id)), ' ') = k.kw)
 ;
 INSERT INTO subject_keywords (subject, kw)
 SELECT s.nid, k.kw
 FROM subject s JOIN corefact_kw_map k ON (s.core_fact = k.core_fact)
 UNION
 SELECT s.nid, k.nid
-FROM subject s JOIN keywords k ON ( array_join(cfde_keywords(s.local_id, s.persistent_id), ' ') = k.kw)
+FROM subject s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id)), ' ') = k.kw)
 ;
 INSERT INTO collection_keywords (collection, kw)
 SELECT s.nid, k.kw
 FROM collection s JOIN corefact_kw_map k ON (s.core_fact = k.core_fact)
 UNION
 SELECT s.nid, k.nid
-FROM collection s JOIN keywords k ON ( array_join(cfde_keywords(s.local_id, s.persistent_id, s.abbreviation, s.name, s.description), ' ') = k.kw)
+FROM collection s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id, s.abbreviation, s.name), cfde_keywords(s.description)), ' ') = k.kw)
 ;
 
 UPDATE core_fact AS v
