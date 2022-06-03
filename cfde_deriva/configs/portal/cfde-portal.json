@@ -6080,7 +6080,7 @@
                }
             },
             "source_definitions": {
-               "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5"],
+               "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5", "dbgap_study_id"],
                "fkeys": false,
                "search-box": {"or": [
                   {
