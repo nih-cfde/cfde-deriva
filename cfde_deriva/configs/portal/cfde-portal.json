@@ -6490,6 +6490,14 @@
                      }
                   },
                   {
+                      "markdown_name": "Dbgap Study Id",
+                      "comment": "The name of a dbGaP study ID governing access control for this file.",
+                      "sourcekey": "S_dbgap_study_id",
+                      "display": {
+                         "markdown_pattern": "{{{dbgap_study_id}}}"
+                      }
+                  },
+                  {
                      "markdown_name": "File Format",
                      "comment": "The content format of the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "file_format_row" ],
