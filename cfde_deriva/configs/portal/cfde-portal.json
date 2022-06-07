@@ -6133,7 +6133,9 @@
                      "entity": false
                   },
                   "S_dbgap_study_id": {
-                     "source": [ "dbgap_study_id" ]
+                     "markdown_name": "dbGaP Study ID",
+                     "source": [ "dbgap_study_id" ],
+                     "entity": false
                   },
                   "S_has_dbgap_study_id": {
                      "markdown_name": "Has dbGaP Permissions",
@@ -6490,7 +6492,7 @@
                      }
                   },
                   {
-                      "markdown_name": "Dbgap Study Id",
+                      "markdown_name": "dbGaP Study Id",
                       "comment": "The name of a dbGaP study ID governing access control for this file.",
                       "sourcekey": "S_dbgap_study_id",
                       "display": {
@@ -6575,6 +6577,7 @@
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_age_at_enrollment"},
+                  {"sourcekey": "S_dbgap_study_id"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularity"},
@@ -6585,7 +6588,6 @@
                   },
                   {"source": "size_in_bytes"},
                   {"sourcekey": "S_has_persistent_id"},
-                  {"sourcekey": "S_has_dbgap_study_id"},
                   {"sourcekey": "S_is_bundle"},
                   {"source": "uncompressed_size_in_bytes"},
                   {"sourcekey": "S_compression_format"}
