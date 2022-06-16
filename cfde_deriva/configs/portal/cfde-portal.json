@@ -6080,7 +6080,7 @@
                }
             },
             "source_definitions": {
-               "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5"],
+               "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5", "dbgap_study_id"],
                "fkeys": false,
                "search-box": {"or": [
                   {
@@ -6133,7 +6133,9 @@
                      "entity": false
                   },
                   "S_dbgap_study_id": {
-                     "source": [ "dbgap_study_id" ]
+                     "markdown_name": "dbGaP Study ID",
+                     "source": [ "dbgap_study_id" ],
+                     "entity": false
                   },
                   "S_has_dbgap_study_id": {
                      "markdown_name": "Has dbGaP Permissions",
@@ -6490,6 +6492,15 @@
                      }
                   },
                   {
+                      "markdown_name": "dbGaP Study Id",
+                      "comment": "The name of a dbGaP study ID governing access control for this file.",
+                      "sourcekey": "S_dbgap_study_id",
+                      "display": {
+                          "template_engine": "handlebars",
+                          "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}{title=\"User has access to this file.\" .cfde_green_disc} {{else}}{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
+                      }
+                  },
+                  {
                      "markdown_name": "File Format",
                      "comment": "The content format of the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "file_format_row" ],
@@ -6541,7 +6552,13 @@
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
-                  {"sourcekey": "S_dbgap_study_id"},
+                  {
+                      "sourcekey": "S_dbgap_study_id",
+                      "display": {
+                         "template_engine": "handlebars",
+                         "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}{title=\"User has access to this file.\" .cfde_green_disc} {{else}}{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
+                      }
+                  },
                   "sha256",
                   "md5"
                ],
@@ -6567,6 +6584,7 @@
                   {"sourcekey": "S_race"},
                   {"sourcekey": "S_ethnicity"},
                   {"sourcekey": "S_age_at_enrollment"},
+                  {"sourcekey": "S_dbgap_study_id"},
                   {"sourcekey": "S_dcc"},
                   {"sourcekey": "S_super_projects"},
                   {"sourcekey": "S_subject_granularity"},
@@ -6577,7 +6595,6 @@
                   },
                   {"source": "size_in_bytes"},
                   {"sourcekey": "S_has_persistent_id"},
-                  {"sourcekey": "S_has_dbgap_study_id"},
                   {"sourcekey": "S_is_bundle"},
                   {"source": "uncompressed_size_in_bytes"},
                   {"sourcekey": "S_compression_format"}
