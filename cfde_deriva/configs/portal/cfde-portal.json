@@ -6497,7 +6497,7 @@
                       "sourcekey": "S_dbgap_study_id",
                       "display": {
                           "template_engine": "handlebars",
-                          "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}{title=\"User has access to this file.\" .cfde_green_disc} {{else}}{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
+                          "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
                       }
                   },
                   {
@@ -6556,7 +6556,7 @@
                       "sourcekey": "S_dbgap_study_id",
                       "display": {
                          "template_engine": "handlebars",
-                         "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}{title=\"User has access to this file.\" .cfde_green_disc} {{else}}{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
+                         "markdown_pattern": "{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.extensions.ras_dbgap_phs_ids dbgap_study_id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{dbgap_study_id}}}"
                       }
                   },
                   "sha256",
