@@ -849,9 +849,11 @@ class CfdeDataPackage (object):
                     reader = csv.reader(f, delimiter="\t")
                     header = next(reader)
                     missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
+                    if not header:
+                        raise InvalidDatapackage("blank/missing header for %r" % (resource["path"],))
                     for cname in header:
                         if cname not in table.column_definitions.elements:
-                            raise ValueError("header column %s not found in table %s" % (cname, table.name))
+                            raise InvalidDatapackage("header column %s not found in table %s" % (cname, table.name))
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
                     def insert_batch():
