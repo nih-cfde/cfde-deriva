@@ -708,6 +708,9 @@ class Submission (object):
     @classmethod
     def bdbag_validate(cls, content_path):
         """Perform BDBag validation of unpacked bag contents."""
+        if os.getenv('CFDE_SKIP_BDBAG', 'false').lower() == 'true':
+            logger.info('SKIPPING validation of bag "%s" due to CFDE_SKIP_BDBAG environment variable!' % content_path)
+            return
         try:
             logger.debug('Validating unpacked bag at "%s"' % (content_path,))
             bdbag_api.validate_bag(content_path)
