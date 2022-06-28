@@ -510,14 +510,20 @@ class CatalogConfigurator (object):
                         "name": "User Help",
                         "children": [
                             {
+                                "name": "Contact the Helpdesk",
+                                "markdownName": ":span:Contact the Helpdesk:/span:{.external-link-icon}",
+                                "url": "mailto:support@cfde.atlassian.net",
+                                "newTab": True
+                            },
+                            {
                                 "name": "Portal User Guide",
                                 "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}",
                                 "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/",
                                 "newTab": True
                             },
                             {
-                                "name": "Cohort Building Tutorial",
-                                "markdownName": ":span:Cohort Building Tutorial:/span:{.external-link-icon}",
+                                "name": "Tutorials",
+                                "markdownName": ":span:Tutorials:/span:{.external-link-icon}",
                                 "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/",
                                 "newTab": True
                             },
@@ -525,12 +531,6 @@ class CatalogConfigurator (object):
                                 "name": "Submit a Feature Request or Bug Report",
                                 "markdownName": ":span:Submit a Feature Request or Bug Report:/span:{.external-link-icon}",
                                 "url": "https://github.com/nih-cfde/published-documentation/discussions",
-                                "newTab": True
-                            },
-                            {
-                                "name": "Email the Helpdesk",
-                                "markdownName": ":span:Email the Helpdesk:/span:{.external-link-icon}",
-                                "url": "mailto:support@cfde.atlassian.net",
                                 "newTab": True
                             },
                             {
