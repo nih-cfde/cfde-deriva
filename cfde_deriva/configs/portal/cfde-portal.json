@@ -10691,7 +10691,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "dccs",
@@ -10700,7 +10707,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -10727,7 +10741,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "races",
@@ -10736,7 +10757,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "ethnicities",
@@ -10745,7 +10773,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "subject_roles",
@@ -10754,7 +10789,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "subject_granularities",
@@ -10763,7 +10805,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "subject_species",
@@ -10772,7 +10821,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "ncbi_taxons",
@@ -10781,7 +10837,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -10791,7 +10854,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -10801,7 +10871,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "analysis_types",
@@ -10810,7 +10887,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "file_formats",
@@ -10819,7 +10903,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "compression_formats",
@@ -10828,7 +10919,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "data_types",
@@ -10837,7 +10935,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "mime_types",
@@ -10846,7 +10951,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "dbgap_study_ids",
@@ -10855,7 +10967,14 @@
 		  "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -11445,7 +11564,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -11580,7 +11706,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
                {
                   "name": "compounds",
@@ -11589,7 +11722,14 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
@@ -11737,7 +11877,14 @@
                   "type": "array",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {
