@@ -11891,8 +11891,7 @@
                   "name": "num_subjects",
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "protein_fact_num_entities.sql"
+                  "default": 0
                },
                {
                   "name": "num_biosamples",
