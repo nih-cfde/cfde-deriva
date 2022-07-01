@@ -5078,7 +5078,7 @@
 
                {
                   "name": "phenotypes",
-                  "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
+                  "description": "The paired numeric IDs of the (phenotype, association type) terms qualifiying the described entities.",
                   "type": "array",
                   "constraints": {
                      "required": true
@@ -5087,6 +5087,22 @@
                {
                   "name": "diseases",
                   "description": "The paired numeric IDs of the (disease, association type) terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
                   "type": "array",
                   "constraints": {
                      "required": true

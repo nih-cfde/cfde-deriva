@@ -10719,7 +10719,7 @@
 
                {
                   "name": "phenotypes",
-                  "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
+                  "description": "The paired numeric IDs of the (phenotype, association_type) terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
                      "required": true
@@ -10727,11 +10727,43 @@
                },
                {
                    "name": "diseases",
-                  "description": "The numeric ID of the disease terms qualifiying the described entities.",
+                  "description": "The paired numeric IDs of the (disease, association_type) terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
                      "required": true
                   }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": false,
+			"trgm": false,
+			"gin_array": true
+		     }
+		  }
                },
 
                {

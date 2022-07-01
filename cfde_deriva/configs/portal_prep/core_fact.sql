@@ -194,6 +194,9 @@ INSERT INTO core_fact (
     data_types,
     mime_types,
     
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     dbgap_study_id_row,
     project_row,
@@ -246,6 +249,11 @@ SELECT
   ff.compression_formats,
   ff.data_types,
   ff.mime_types,
+
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(ff.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(ff.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', dbg.nid, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
@@ -567,7 +575,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -619,6 +630,11 @@ SELECT
   bf.compression_formats,
   bf.data_types,
   bf.mime_types,
+
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(bf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(bf.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
@@ -926,7 +942,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -978,6 +997,11 @@ SELECT
   sf.compression_formats,
   sf.data_types,
   sf.mime_types,
+
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(sf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(sf.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
@@ -1418,7 +1442,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -1471,6 +1498,11 @@ SELECT
   colf.data_types,
   colf.mime_types,
         
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(colf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(colf.diseases) j) AS diseases_flat,
+
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
