@@ -717,12 +717,16 @@ class CfdeDataPackage (object):
             def open_package():
                 if isinstance(self.package_filename, PackageDataName):
                     path = resource["path"]
-                    if self.package_filename is registry_schema_json and path.startswith("/submission/"):
-                        # allow absolute path to reference submission package
-                        path = path[len("/submission/"):]
-                        return submission_schema_json.get_data_stringio(path)
-                    else:
-                        return self.package_filename.get_data_stringio(resource["path"])
+                    if self.package_filename is registry_schema_json:
+                        # allow absolute path to reference packages
+                        if path.startswith("/submission/"):
+                            path = path[len("/submission/"):]
+                            return submission_schema_json.get_data_stringio(path)
+                        elif path.startswith("/portal_prep/"):
+                            path = path[len("/portal_prep/"):]
+                            return portal_prep_schema_json.get_data_stringio(path)
+                        # fall through common else:
+                    return self.package_filename.get_data_stringio(path)
                 else:
                     fname = "%s/%s" % (os.path.dirname(self.package_filename), resource["path"])
                     return open(fname, 'r')
