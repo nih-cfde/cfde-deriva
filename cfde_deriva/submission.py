@@ -1234,6 +1234,7 @@ WHERE v.id = t.id;
                             'anatomy',
                             'assay_type',
                             'data_type',
+                            'dbgap_study_id',
                             'disease',
                             'file_format',
                             'mime_type',
@@ -1268,6 +1269,8 @@ WHERE v.id = t.id;
                      'datapackage_assay_type', 'assay_type'),
                     ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN data_type v ON (cf.data_type = v.nid)',
                      'datapackage_data_type', 'data_type'),
+                    ('SELECT v.id FROM file e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN dbgap_study_id v ON (cf.dbgap_study_id = v.nid)',
+                     'datapackage_dbgap_study_id', 'dbgap_study_id'),
                     ("""  SELECT v.id FROM subject_disease a    JOIN disease v ON (a.disease = v.nid)
                     UNION SELECT v.id FROM biosample_disease a  JOIN disease v ON (a.disease = v.nid)
                     UNION SELECT v.id FROM collection_disease a JOIN disease v ON (a.disease = v.nid)""",
