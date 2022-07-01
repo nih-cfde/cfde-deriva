@@ -294,6 +294,47 @@
             "primaryKey": "id"
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "dbgap_study_id_canonical",
+         "description": "Canonical dbGaP study ID terms known by the CFDE-CC.",
+	 "path": "dbgap_study_id.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this study ID in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "The unique dbGaP study ID",
+                  "type": "string",
+                  "constraints": {
+                      "required": true,
+		      "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -1383,6 +1424,49 @@
             "primaryKey": "nid"
          },
          "derivation_sql_path": "mime_type.sql"
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "dbgap_study_id",
+         "title": "dbGaP Study ID",
+         "description": "Dimension table of each distinct dbGaP study ID referenced by C2M2 files.",
+	 "path": "dbgap_study_id.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this study ID in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "The unique dbGaP study ID",
+                  "type": "string",
+                  "constraints": {
+                      "required": true,
+		      "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string"
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": "dbgap_study_id.sql"
       },
       {
          "profile": "tabular-data-resource",
@@ -2547,7 +2631,9 @@
                {
                   "name": "dbgap_study_id",
                   "description": "The name of a dbGaP study ID governing access control for this file, compatible for comparison to RAS user-level access control metadata",
-                  "type": "string"
+                  "type": "integer",
+                  "derivation_sql_select": "file_dbgap_study_id_fkey.nid",
+                  "derivation_sql_join": "LEFT JOIN dbgap_study_id file_dbgap_study_id_fkey ON (src.dbgap_study_id = file_dbgap_study_id_fkey.id)"
                },
                {
                   "name": "bundle_collection",
@@ -2667,6 +2753,14 @@
                   "constraint_name": "file_mime_type_fkey",
                   "reference": {
                      "resource": "mime_type",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "dbgap_study_id",
+                  "constraint_name": "file_dbgap_study_id_fkey",
+                  "reference": {
+                     "resource": "dbgap_study_id",
                      "fields": "nid"
                   }
                },
@@ -4966,14 +5060,6 @@
                   }
                },
                {
-                  "name": "has_dbgap_study_id",
-                  "description": "Boolean true when described entities specify RAS permission requirements.",
-                  "type": "boolean",
-                  "constraints": {
-                     "required": true
-                  }
-               },
-               {
                   "name": "projects",
                   "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
                   "type": "array",
@@ -5121,7 +5207,20 @@
                      "required": true
                   }
                },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
 
+               {
+                  "name": "dbgap_study_id",
+                  "description": "The numeric ID of the dbgap_study_id specified in file records of this fact class.",
+                  "type": "integer"
+               },
                {
                   "name": "project",
                   "description": "The numeric ID of the project attributed as source for the described entities.",
@@ -5181,6 +5280,11 @@
                {
                   "name": "id_namespace_row",
                   "description": "Denormalized copy of the id_namespace in which described entities were issued a local_id.",
+                  "type": "object"
+               },
+               {
+                  "name": "dbgap_study_id_row",
+                  "description": "Denormalized copy of the dbgap_study_id of the described file entities.",
                   "type": "object"
                },
                {
@@ -5280,8 +5384,8 @@
                "id_namespace",
                "is_bundle",
                "has_persistent_id",
-               "has_dbgap_study_id",
 
+               "dbgap_study_id",
                "project",
                "sex",
                "ethnicity",
@@ -5294,6 +5398,7 @@
                "data_type",
                "mime_type",
 
+               "dbgap_study_ids",
                "projects",
                "dccs",
                "phenotypes",
@@ -6710,6 +6815,52 @@
                   "constraint_name": "core_fact_mime_type_mime_type_fkey",
                   "reference": {
                      "resource": "mime_type",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_dbgap_study_id",
+         "description": "An exploded representation of the core_fact.dbgap_study_ids array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dbgap_study_id",
+                  "description": "The numeric ID of a term found in the core_fact.dbgap_study_ids array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "dbgap_study_id"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_dbgap_study_id_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "dbgap_study_id",
+                  "constraint_name": "core_fact_dbgap_study_id_dbgap_study_id_fkey",
+                  "reference": {
+                     "resource": "dbgap_study_id",
                      "fields": "nid"
                   }
                }
