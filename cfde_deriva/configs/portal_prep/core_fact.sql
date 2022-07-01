@@ -5,8 +5,8 @@ SELECT
   f.id_namespace,
   f.bundle_collection IS NOT NULL AS is_bundle,
   f.persistent_id IS NOT NULL AS has_persistent_id,
-  f.dbgap_study_id IS NOT NULL AS has_dbgap_study_id,
 
+  COALESCE(f.dbgap_study_id, -1) AS dbgap_study_id,
   COALESCE(f.project, -1) AS project,
   -1 AS sex,
   -1 AS ethnicity,
@@ -19,6 +19,7 @@ SELECT
   COALESCE(f.data_type, -1) AS data_type,
   COALESCE(f.mime_type, -1) AS mime_type,
 
+  CASE WHEN f.dbgap_study_id IS NOT NULL THEN json_array(f.dbgap_study_id) ELSE '[]' END AS dbgap_study_ids,
   json_array(f.project) AS projects,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
@@ -119,8 +120,8 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -133,6 +134,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -157,8 +159,8 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -171,6 +173,7 @@ INSERT INTO core_fact (
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -192,6 +195,7 @@ INSERT INTO core_fact (
     mime_types,
     
     id_namespace_row,
+    dbgap_study_id_row,
     project_row,
     sex_row,
     ethnicity_row,
@@ -208,8 +212,8 @@ SELECT
   ff.id_namespace,
   ff.is_bundle,
   ff.has_persistent_id,
-  ff.has_dbgap_study_id,
 
+  ff.dbgap_study_id,
   ff.project,
   ff.sex,
   ff.ethnicity,
@@ -221,7 +225,8 @@ SELECT
   ff.compression_format,
   ff.data_type,
   ff.mime_type,
-    
+
+  ff.dbgap_study_ids,
   ff.projects,
   ff.dccs,
   ff.phenotypes,
@@ -243,6 +248,7 @@ SELECT
   ff.mime_types,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
+  json_object('nid', dbg.nid, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
@@ -259,8 +265,8 @@ FROM (
     ff.id_namespace,
     ff.is_bundle,
     ff.has_persistent_id,
-    ff.has_dbgap_study_id,
 
+    ff.dbgap_study_id,
     ff.project,
     ff.sex,
     ff.ethnicity,
@@ -273,6 +279,7 @@ FROM (
     ff.data_type,
     ff.mime_type,
 
+    ff.dbgap_study_ids,
     ff.projects,
     ff.dccs,
     ff.phenotypes,
@@ -306,6 +313,7 @@ LEFT JOIN file_format fmt ON (ff.file_format = fmt.nid)
 LEFT JOIN file_format cfmt ON (ff.compression_format = cfmt.nid)
 LEFT JOIN data_type dt ON (ff.data_type = dt.nid)
 LEFT JOIN mime_type mt ON (ff.mime_type = mt.nid)
+LEFT JOIN dbgap_study_id dbg ON (ff.dbgap_study_id = dbg.nid)
 WHERE True
 ON CONFLICT DO NOTHING
 ;
@@ -316,8 +324,8 @@ WHERE u.nid = ff.nid
   AND ff.id_namespace = cf.id_namespace
   AND ff.is_bundle = cf.is_bundle
   AND ff.has_persistent_id = cf.has_persistent_id
-  AND ff.has_dbgap_study_id = cf.has_dbgap_study_id
 
+  AND ff.dbgap_study_id = cf.dbgap_study_id
   AND ff.project = cf.project
   AND ff.sex = cf.sex
   AND ff.ethnicity = cf.ethnicity
@@ -330,6 +338,7 @@ WHERE u.nid = ff.nid
   AND ff.data_type = cf.data_type
   AND ff.mime_type = cf.mime_type
 
+  AND ff.dbgap_study_ids = cf.dbgap_study_ids
   AND ff.projects = cf.projects
   AND ff.dccs = cf.dccs
   AND ff.phenotypes = cf.phenotypes
@@ -358,8 +367,8 @@ SELECT
   b.id_namespace,
   False AS is_bundle,
   b.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_dbgap_study_id,
 
+  -1 AS dbgap_study_id,
   COALESCE(b.project, -1) AS project,
   -1 AS sex,
   -1 AS ethnicity,
@@ -372,6 +381,7 @@ SELECT
   -1 AS data_type,
   -1 AS mime_type,
 
+  '[]' AS dbgap_study_ids,
   json_array(b.project) AS projects,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
@@ -484,8 +494,8 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -498,6 +508,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -522,8 +533,8 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -536,6 +547,7 @@ INSERT INTO core_fact (
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -573,8 +585,8 @@ SELECT
   bf.id_namespace,
   bf.is_bundle,
   bf.has_persistent_id,
-  bf.has_dbgap_study_id,
 
+  bf.dbgap_study_id,
   bf.project,
   bf.sex,
   bf.ethnicity,
@@ -586,7 +598,8 @@ SELECT
   bf.compression_format,
   bf.data_type,
   bf.mime_type,
-    
+
+  bf.dbgap_study_ids,
   bf.projects,
   bf.dccs,
   bf.phenotypes,
@@ -624,8 +637,8 @@ FROM (
     bf.id_namespace,
     bf.is_bundle,
     bf.has_persistent_id,
-    bf.has_dbgap_study_id,
 
+    bf.dbgap_study_id,
     bf.project,
     bf.sex,
     bf.ethnicity,
@@ -637,7 +650,8 @@ FROM (
     bf.compression_format,
     bf.data_type,
     bf.mime_type,
-    
+
+    bf.dbgap_study_ids,
     bf.projects,
     bf.dccs,
     bf.phenotypes,
@@ -681,8 +695,8 @@ WHERE u.nid = bf.nid
   AND bf.id_namespace = cf.id_namespace
   AND bf.is_bundle = cf.is_bundle
   AND bf.has_persistent_id = cf.has_persistent_id
-  AND bf.has_dbgap_study_id = cf.has_dbgap_study_id
 
+  AND bf.dbgap_study_id = cf.dbgap_study_id
   AND bf.project = cf.project
   AND bf.sex = cf.sex
   AND bf.ethnicity = cf.ethnicity
@@ -695,6 +709,7 @@ WHERE u.nid = bf.nid
   AND bf.data_type = cf.data_type
   AND bf.mime_type = cf.mime_type
 
+  AND bf.dbgap_study_ids = cf.dbgap_study_ids
   AND bf.projects = cf.projects
   AND bf.dccs = cf.dccs
   AND bf.phenotypes = cf.phenotypes
@@ -723,8 +738,8 @@ SELECT
   s.id_namespace,
   False AS is_bundle,
   s.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_dbgap_study_id,
 
+  -1 AS dbgap_study_id,
   COALESCE(s.project, -1) AS project,
   COALESCE(s.sex, -1) AS sex,
   COALESCE(s.ethnicity, -1) AS ethnicity,
@@ -737,6 +752,7 @@ SELECT
   -1 AS data_type,
   -1 AS mime_type,
 
+  '[]' AS dbgap_study_ids,
   json_array(s.project) AS projects,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT dcc.nid))
@@ -837,8 +853,8 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -851,6 +867,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -875,8 +892,8 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -888,7 +905,8 @@ INSERT INTO core_fact (
     compression_format,
     data_type,
     mime_type,
-    
+
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -926,8 +944,8 @@ SELECT
   sf.id_namespace,
   sf.is_bundle,
   sf.has_persistent_id,
-  sf.has_dbgap_study_id,
 
+  sf.dbgap_study_id,
   sf.project,
   sf.sex,
   sf.ethnicity,
@@ -939,7 +957,8 @@ SELECT
   sf.compression_format,
   sf.data_type,
   sf.mime_type,
-    
+
+  sf.dbgap_study_ids,
   sf.projects,
   sf.dccs,
   sf.phenotypes,
@@ -977,8 +996,8 @@ FROM (
     sf.id_namespace,
     sf.is_bundle,
     sf.has_persistent_id,
-    sf.has_dbgap_study_id,
 
+    sf.dbgap_study_id,
     sf.project,
     sf.sex,
     sf.ethnicity,
@@ -991,6 +1010,7 @@ FROM (
     sf.data_type,
     sf.mime_type,
 
+    sf.dbgap_study_ids,
     sf.projects,
     sf.dccs,
     sf.phenotypes,
@@ -1034,8 +1054,8 @@ WHERE u.nid = sf.nid
   AND sf.id_namespace = cf.id_namespace
   AND sf.is_bundle = cf.is_bundle
   AND sf.has_persistent_id = cf.has_persistent_id
-  AND sf.has_dbgap_study_id = cf.has_dbgap_study_id
 
+  AND sf.dbgap_study_id = cf.dbgap_study_id
   AND sf.project = cf.project
   AND sf.sex = cf.sex
   AND sf.ethnicity = cf.ethnicity
@@ -1048,6 +1068,7 @@ WHERE u.nid = sf.nid
   AND sf.data_type = cf.data_type
   AND sf.mime_type = cf.mime_type
 
+  AND sf.dbgap_study_ids = cf.dbgap_study_ids
   AND sf.projects = cf.projects
   AND sf.dccs = cf.dccs
   AND sf.phenotypes = cf.phenotypes
@@ -1076,8 +1097,8 @@ SELECT
   col.id_namespace,
   False AS is_bundle,
   col.persistent_id IS NOT NULL AS has_persistent_id,
-  False AS has_dbgap_study_id,
 
+  -1 AS dbgap_study_id,
   -1 AS project,
   -1 AS sex,
   -1 AS ethnicity,
@@ -1090,6 +1111,14 @@ SELECT
   -1 AS data_type,
   -1 AS mime_type,
 
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.dbgap_study_ids) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS dbgap_study_ids,
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT cdbp.project)) FROM collection_defined_by_project cdbp WHERE cdbp.collection = col.nid
     ),
@@ -1316,8 +1345,8 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -1330,6 +1359,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     data_type,
     mime_type,
 
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -1354,8 +1384,8 @@ INSERT INTO core_fact (
     id_namespace,
     is_bundle,
     has_persistent_id,
-    has_dbgap_study_id,
 
+    dbgap_study_id,
     project,
     sex,
     ethnicity,
@@ -1367,7 +1397,8 @@ INSERT INTO core_fact (
     compression_format,
     data_type,
     mime_type,
-    
+
+    dbgap_study_ids,
     projects,
     dccs,
     phenotypes,
@@ -1405,8 +1436,8 @@ SELECT
   colf.id_namespace,
   colf.is_bundle,
   colf.has_persistent_id,
-  colf.has_dbgap_study_id,
 
+  colf.dbgap_study_id,
   colf.project,
   colf.sex,
   colf.ethnicity,
@@ -1418,7 +1449,8 @@ SELECT
   colf.compression_format,
   colf.data_type,
   colf.mime_type,
-    
+
+  colf.dbgap_study_ids,
   colf.projects,
   colf.dccs,
   colf.phenotypes,
@@ -1456,8 +1488,8 @@ FROM (
     colf.id_namespace,
     colf.is_bundle,
     colf.has_persistent_id,
-    colf.has_dbgap_study_id,
 
+    colf.dbgap_study_id,
     colf.project,
     colf.sex,
     colf.ethnicity,
@@ -1470,6 +1502,7 @@ FROM (
     colf.data_type,
     colf.mime_type,
 
+    colf.dbgap_study_ids,
     colf.projects,
     colf.dccs,
     colf.phenotypes,
@@ -1513,8 +1546,8 @@ WHERE u.nid = colf.nid
   AND colf.id_namespace = cf.id_namespace
   AND colf.is_bundle = cf.is_bundle
   AND colf.has_persistent_id = cf.has_persistent_id
-  AND colf.has_dbgap_study_id = cf.has_dbgap_study_id
 
+  AND colf.dbgap_study_id = cf.dbgap_study_id
   AND colf.project = cf.project
   AND colf.sex = cf.sex
   AND colf.ethnicity = cf.ethnicity
@@ -1527,6 +1560,7 @@ WHERE u.nid = colf.nid
   AND colf.data_type = cf.data_type
   AND colf.mime_type = cf.mime_type
 
+  AND colf.dbgap_study_ids = cf.dbgap_study_ids
   AND colf.projects = cf.projects
   AND colf.dccs = cf.dccs
   AND colf.phenotypes = cf.phenotypes
@@ -1553,6 +1587,9 @@ CREATE TEMPORARY TABLE corefact_kw AS
     cf.nid,
     cfde_keywords_merge(
       cfde_keywords(n.name, n.abbreviation),
+
+      (SELECT cfde_keywords_agg(dbg.name, dbg.description)
+       FROM json_each(cf.dbgap_study_ids) j JOIN dbgap_study_id dbg ON (j.value = dbg.nid)),
 
       (SELECT cfde_keywords_agg(p.name, p.abbreviation, p.description)
        FROM json_each(cf.projects) pj JOIN project p ON (pj.value = p.nid)),
@@ -1637,7 +1674,7 @@ INSERT INTO keywords (kw)
 SELECT kw FROM (
 SELECT DISTINCT array_join(kw, ' ') AS kw FROM corefact_kw
 UNION
-SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id, filename, dbgap_study_id)), ' ') FROM file
+SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id, filename)), ' ') FROM file
 UNION
 SELECT DISTINCT array_join(cfde_keywords_merge(json_array(local_id, persistent_id)), ' ') FROM biosample
 UNION
@@ -1662,7 +1699,7 @@ SELECT s.nid, k.kw
 FROM file s JOIN corefact_kw_map k ON (s.core_fact = k.core_fact)
 UNION
 SELECT s.nid, k.nid
-FROM file s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id, s.filename, s.dbgap_study_id)), ' ') = k.kw)
+FROM file s JOIN keywords k ON ( array_join(cfde_keywords_merge(json_array(s.local_id, s.persistent_id, s.filename)), ' ') = k.kw)
 ;
 INSERT INTO biosample_keywords (biosample, kw)
 SELECT s.nid, k.kw
@@ -1690,6 +1727,7 @@ UPDATE core_fact AS v
 SET
 -- HACK: undo usage of -1 in place of NULLs before we send to catalog
 -- has nothing to do with kw but this should be done in the same rewrite order
+  dbgap_study_id = CASE WHEN v.dbgap_study_id = -1 THEN NULL ELSE v.dbgap_study_id END,
   project = CASE WHEN v.project = -1 THEN NULL ELSE v.project END,
   sex = CASE WHEN v.sex = -1 THEN NULL ELSE v.sex END,
   ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
