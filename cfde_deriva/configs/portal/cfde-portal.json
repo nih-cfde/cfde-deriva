@@ -10666,7 +10666,13 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": ["id_namespace", "nid"],
+			"trgm": false
+		     }
+		  }
                },
                {
                   "name": "is_bundle",
@@ -10674,7 +10680,13 @@
                   "type": "boolean",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": ["is_bundle", "nid"],
+			"trgm": false
+		     }
+		  }
                },
                {
                   "name": "has_persistent_id",
@@ -10682,7 +10694,13 @@
                   "type": "boolean",
                   "constraints": {
                      "required": true
-                  }
+                  },
+		  "deriva": {
+		     "indexing_preferences": {
+			"btree": ["has_persistent_id", "nid"],
+			"trgm": false
+		     }
+		  }
                },
                {
                   "name": "projects",
