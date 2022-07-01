@@ -1325,6 +1325,7 @@ LIMIT 1;
                 'compression_format': 'compression_formats',
                 'data_type': 'data_types',
                 'mime_type': 'mime_types',
+                'dbgap_study_id': 'dbgap_study_ids',
             },
             'gene_fact_': {
                 'gene': 'genes',
