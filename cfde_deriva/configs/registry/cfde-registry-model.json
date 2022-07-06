@@ -1206,6 +1206,16 @@
                      ],
                      "entity": true
                   },
+		  "S_dbgap_study_id": {
+		     "markdown_name": "dbGaP Study ID",
+		     "comment": "dbGaP study IDs used in submission",
+		     "source": [
+			{"inbound": ["CFDE", "datapackage_dbgap_study_id_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_dbgap_study_id_dbgap_study_id_fkey"]},
+                        "id"
+		     ],
+		     "entity": true
+		   },
                   "S_disease": {
                      "markdown_name": "Disease",
                      "comment": "Disease terms used in submission",
@@ -4035,6 +4045,66 @@
             }
          }
       },
+      {
+         "profile": "tabular-data-resource",
+         "name": "dbgap_study_id",
+         "title": "dbGaP Study ID",
+         "description": "Dimension table of each distinct dbGaP study ID known by CFDE.",
+	 "path": "/portal_prep/dbgap_study_id.tsv",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "The unique dbGaP study ID",
+                  "type": "string",
+                  "constraints": {
+                      "required": true,
+		      "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this term",
+                  "type": "string",
+                  "constraints": {
+                      "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this term",
+                  "type": "string"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
 
       {
          "profile": "tabular-data-resource",
@@ -5465,6 +5535,78 @@
                   "types": ["select"],
                   "projection": [
                      {"outbound": ["CFDE", "datapackage_subject_role_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_dbgap_study_id",
+         "title": "Datapackage dbGaP Study ID",
+         "description": "An association of a dbGaP study ID used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "dbgap_study_id",
+                  "description": "The referenced subject role term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "dbgap_study_id"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_dbgap_study_id_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "dbgap_study_id",
+                  "constraint_name": "datapackage_dbgap_study_id_dbgap_study_id_fkey",
+                  "reference": {
+                     "resource": "dbgap_study_id",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_dbgap_study_id_datapackage_fkey"]},
                      {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
                      {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
                      {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
