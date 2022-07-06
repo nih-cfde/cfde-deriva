@@ -199,12 +199,6 @@ class PortalPackageDataName (PackageDataName):
                 # skip tables not in default CFDE schema...
                 continue
 
-            if resource['name'] in {
-                    'primary_dcc_contact',
-            }:
-                # skip tables we explicitly don't want
-                continue
-
             # customize resource for use in c2m2 schema of portal
             resource['resourceSchema'] = 'c2m2'
             resource['description'] = 'C2M2 formatted %(name)s data' % resource
