@@ -416,14 +416,6 @@ class Submission (object):
             self.sqlite_datapackage_check(submission_schema_json, self.content_path, self.ingest_sqlite_filename, table_error_callback=dpt_error2)
             self.registry.update_datapackage(self.datapackage_id, status=terms.cfde_registry_dp_status.check_valid)
 
-            # TODO: remove this deprecated compatibility transform from code?
-            next_error_state = terms.cfde_registry_dp_status.ops_error
-            try:
-                self.transitional_etl_dcc_table(self.content_path, self.ingest_sqlite_filename, self.submitting_dcc_id)
-            except exception.InvalidDatapackage:
-                next_error_state = terms.cfde_registry_dp_status.content_error
-                raise
-
             self.prepare_sqlite_derived_data(self.portal_prep_sqlite_filename, attach={"submission": self.ingest_sqlite_filename})
             self.record_vocab_usage(self.registry, self.portal_prep_sqlite_filename, self.datapackage_id)
             self.download_resource_markdown_to_sqlite(self.registry, self.portal_prep_sqlite_filename)
@@ -833,40 +825,6 @@ class Submission (object):
             canonical_dp.check_sqlite_tables(conn, submitted_dp, table_error_callback, tablenames, progress)
 
     @classmethod
-    def transitional_etl_dcc_table(cls, content_path, sqlite_filename, submitting_dcc):
-        """Apply transitional ETL if needed to prepare dcc table"""
-        packagefile = cls.datapackage_name_from_path(content_path)
-        submitted_dp = CfdeDataPackage(packagefile)
-        # this with block produces a transaction in sqlite3
-        with sqlite3.connect(sqlite_filename) as conn:
-            cur = conn.cursor()
-            if 'primary_dcc_contact' in submitted_dp.doc_cfde_schema.tables:
-                if 'dcc' in submitted_dp.doc_cfde_schema.tables:
-                    raise exception.InvalidDatapackage('Submission mixes C2M2 dcc and legacy primary_dcc_contact tables')
-                if os.getenv('CFDE_REQUIRE_DCC_TABLE', 'true').lower() == 'true':
-                    raise exception.InvalidDatapackage('Submission must include "dcc" table rather than legacy "primary_dcc_contact"')
-                logger.info('Translating legacy primary_dcc_contact into dcc table...')
-                cur.execute("""
-INSERT INTO dcc (id, dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id)
-SELECT
-  %(dcc_id)s,
-  dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
-FROM (
-  SELECT
-    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
-  FROM primary_dcc_contact
-  EXCEPT
-  SELECT
-    dcc_name, dcc_abbreviation, dcc_description, contact_email, contact_name, dcc_url, project_id_namespace, project_local_id
-   FROM dcc
-) s;
-""" % {
-    'dcc_id': sql_literal(submitting_dcc)
-})
-                logger.info('Deleting legacy primary_dcc_contact records...')
-                cur.execute("""DELETE FROM primary_dcc_contact;""")
-
-    @classmethod
     def validate_submission_dcc_table(cls, sqlite_filename, submitting_dcc):
         """Validate that the dcc table in sqlite has exactly one row matching the submitting_dcc"""
         with sqlite3.connect(sqlite_filename) as conn:
@@ -894,6 +852,28 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                 raise exception.InvalidDatapackage('DCC project identifier (%s, %s) does not designate a root in the project hierarchy' % (
                     id_namespace,
                     local_id
+                ))
+            # TODO: revisit if DCCs permitted to submit records not attributed to themselves!
+            cur.execute("""
+SELECT DISTINCT
+  i.id,
+  p.local_id
+FROM project p
+JOIN id_namespace i ON (p.id_namespace = i.nid)
+JOIN project_in_project_transitive pipt ON (p.nid = pipt.member_project)
+JOIN project_root pr ON (pipt.leader_project = pr.nid)
+LEFT OUTER JOIN dcc d ON (pr.nid = d.project)
+WHERE d.nid IS NULL;
+""")
+            rows = list(cur)
+            if rows:
+                id_namespace2, local_id2 = rows[0]
+                raise exception.InvalidDatapackage('Project identifier (%r, %r) and %d others not connected as a sub-project of the root DCC project (%r, %r)' % (
+                    id_namespace2,
+                    local_id2,
+                    len(rows) - 1,
+                    id_namespace,
+                    local_id,
                 ))
 
     @classmethod
