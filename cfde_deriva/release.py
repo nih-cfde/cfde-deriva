@@ -551,8 +551,6 @@ class Release (object):
                     self.ingest_sqlite_filename,
                     progress=progress.setdefault('sqlite_load', {}).setdefault(dprow['id'], {}),
                 )
-                # this works because we incrementally translate each DCC's primary_dcc_contact rows
-                submission.transitional_etl_dcc_table(submission.content_path, self.ingest_sqlite_filename, submission.submitting_dcc_id)
                 self.dump_progress(progress)
 
             # do this once w/ all content now loaded in sqlite
