@@ -256,7 +256,7 @@ SELECT
    FROM json_each(ff.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
-  json_object('nid', dbg.nid, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
+  json_object('nid', dbg.nid, 'id', dbg.id, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
