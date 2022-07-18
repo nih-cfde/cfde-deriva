@@ -440,6 +440,7 @@ class Release (object):
                     row['id']: row['resource_markdown']
                     for row in batch
                 })
+            nreg = len(authoritative)
 
             # get all release terms since we need to know which IDs exist
             for batch in get_batches('/ermrest/catalog/%s' % (urlquote(cat_id),)):
@@ -447,13 +448,14 @@ class Release (object):
                     row['id']: row['resource_markdown']
                     for row in batch
                 })
+            nexist = len(existing)
 
             need_update = [
                 {'id': k, 'resource_markdown': authoritative.get(k)}
                 for k, v in existing.items()
                 if v != authoritative.get(k)
             ]
-            nrows = len(need_update)
+            nupdate = len(need_update)
 
             while need_update:
                 self.server.put(
@@ -465,7 +467,7 @@ class Release (object):
                 ).json() # discard response content
                 need_update = need_update[500:]
 
-            logger.info("Refreshed %d resource_markdown values for %r..." % (nrows, vocab_tname,))
+            logger.info("Refreshed %d/%d resource_markdown values for %r (%d in registry)" % (nupdate, nexist, vocab_tname, nreg,))
 
     def build(self):
         """Idempotently run release-build processing lifecycle.
