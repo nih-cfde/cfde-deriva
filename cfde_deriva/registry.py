@@ -755,6 +755,7 @@ class Registry (object):
         - id: required and CURI must be found in registry's CV table already
         - resource_markdown: markdown-formatted resource info string
         """
+        batch_size = 500
         cfde_schema = reg_model.schemas['CFDE']
         try:
             vocab_table = cfde_schema.tables[vocab_tname]
@@ -764,9 +765,10 @@ class Registry (object):
         def existing_batches():
             after = ''
             while True:
-                rows = self._catalog.get('/attribute/CFDE:%s/id,resource_markdown@sort(id)%s?limit=1000' % (
+                rows = self._catalog.get('/attribute/CFDE:%s/id,resource_markdown@sort(id)%s?limit=%d' % (
                     urlquote(vocab_tname),
-                    after
+                    after,
+                    batch_size
                 )).json()
                 if rows:
                     after = '@after(%s)' % urlquote(rows[-1]['id'])
@@ -795,14 +797,17 @@ class Registry (object):
         need_update = [ record for record in records if needs_update(**record) ]
         logger.info('Found %d input records with new and different resource information' % (len(need_update),))
 
-        if need_update:
+        if not need_update:
+            logger.info('Skipping %r with no resource information needing update' % (vocab_tname,))
+        while need_update:
+            batch = need_update[0:batch_size]
             self._catalog.put(
                 '/attributegroup/CFDE:%s/id;resource_markdown' % (urlquote(vocab_tname),),
-                json=need_update,
+                json=batch,
             ).json() # discard response data
-            logger.info('Updated resource information for %r' % (vocab_tname,))
-        else:
-            logger.info('Skipping %r with no resource information needing update' % (vocab_tname,))
+            logger.info('Updated %d resources for %r' % (len(batch), vocab_tname,))
+            need_update = need_update[batch_size:]
+        logger.info('Updated resource information for %r' % (vocab_tname,))
 
     def upload_resource_files(self, filepaths):
         """Take input filepaths and upload as resource info for vocab terms.
