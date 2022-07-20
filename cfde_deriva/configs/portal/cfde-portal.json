@@ -53,9 +53,9 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
                   "type": "string",
-		  "constraints": {
-		     "required": true
-		  }
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "description",
@@ -185,9 +185,9 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
-		  "constraints": {
-		     "required": true
-		  },
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "acls": {
                         "update": []
@@ -2863,7 +2863,7 @@
                   "type": "string",
                   "constraints": {
                       "required": true,
-		      "unique": true
+                      "unique": true
                   }
                },
                {
@@ -2986,7 +2986,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_role",
                   "type": "string",
                   "constraint": {
-		     "required": true,
+                     "required": true,
                      "unique": true
                   },
                   "deriva": {
@@ -3152,7 +3152,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
                   "type": "string",
                   "constraint": {
-		     "required": true,
+                     "required": true,
                      "unique": true
                   },
                   "deriva": {
@@ -6234,10 +6234,10 @@
                   "S_dbgap_study_id": {
                      "markdown_name": "dbGaP Study ID",
                       "source": [
-			  {"sourcekey": "S_core_fact"},
-			  {"outbound": ["CFDE", "core_fact_dbgap_study_id_fkey"]},
-			  "nid"
-		      ],
+                          {"sourcekey": "S_core_fact"},
+                          {"outbound": ["CFDE", "core_fact_dbgap_study_id_fkey"]},
+                          "nid"
+                      ],
                      "entity": true
                   },
                   "S_bundle_collection": {
@@ -6579,7 +6579,7 @@
                   {"sourcekey": "S_dcc_array"},
                   {
                       "markdown_name": "Project",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                      "comment": "The project attributed as the source of the file.",
                      "source": [ {"sourcekey": "S_core_fact"}, "project_row" ],
                      "display": {
@@ -6588,7 +6588,7 @@
                   },
                   {
                       "markdown_name": "dbGaP Study Id",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                       "comment": "The name of a dbGaP study ID governing access control for this file.",
                       "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
@@ -6598,7 +6598,7 @@
                   },
                   {
                      "markdown_name": "File Format",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                      "comment": "The content format of the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "file_format_row" ],
                      "display": {
@@ -6607,7 +6607,7 @@
                   },
                   {
                      "markdown_name": "Data Type",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                      "comment": "The type of data represented by the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "data_type_row" ],
                      "display": {
@@ -6616,7 +6616,7 @@
                   },
                   {
                      "markdown_name": "Assay Type",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                      "comment": "Assay type used to generate the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "assay_type_row" ],
                      "display": {
@@ -6625,7 +6625,7 @@
                   },
                   {
                      "markdown_name": "Analysis Type",
-		      "aggregate": "array_d",
+                      "aggregate": "array_d",
                      "comment": "Assay type used to generate the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "analysis_type_row" ],
                      "display": {
@@ -6653,7 +6653,7 @@
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
                   {
-		      "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
+                      "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
                          "template_engine": "handlebars",
                          "markdown_pattern": "{{#with $_self}}{{#if id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
@@ -10673,12 +10673,12 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": ["id_namespace", "nid"],
-			"trgm": false
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["id_namespace", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "is_bundle",
@@ -10687,12 +10687,12 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": ["is_bundle", "nid"],
-			"trgm": false
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["is_bundle", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "has_persistent_id",
@@ -10701,12 +10701,12 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": ["has_persistent_id", "nid"],
-			"trgm": false
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["has_persistent_id", "nid"],
+                        "trgm": false
+                     }
+                  }
                },
                {
                   "name": "projects",
@@ -10716,13 +10716,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "dccs",
@@ -10732,13 +10732,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -10765,13 +10765,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "diseases_flat",
@@ -10781,13 +10781,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -10798,13 +10798,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "races",
@@ -10814,13 +10814,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "ethnicities",
@@ -10830,13 +10830,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "subject_roles",
@@ -10846,13 +10846,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "subject_granularities",
@@ -10862,13 +10862,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "subject_species",
@@ -10878,13 +10878,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "ncbi_taxons",
@@ -10894,13 +10894,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -10911,13 +10911,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -10928,13 +10928,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "analysis_types",
@@ -10944,13 +10944,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "file_formats",
@@ -10960,13 +10960,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "compression_formats",
@@ -10976,13 +10976,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "data_types",
@@ -10992,13 +10992,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "mime_types",
@@ -11008,36 +11008,36 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "dbgap_study_ids",
                   "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
                   "type": "array",
-		  "format": "integer",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
                   "name": "dbgap_study_id",
                   "description": "The numeric ID of the dbgap_study_id specified in file records of this fact class.",
                   "type": "integer",
-		  "deriva": {
+                  "deriva": {
                      "indexing_preferences": {
                         "btree": ["dbgap_study_id", "nid"],
                         "trgm": false
@@ -11621,13 +11621,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -11763,13 +11763,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "compounds",
@@ -11779,13 +11779,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
@@ -11934,13 +11934,13 @@
                   "constraints": {
                      "required": true
                   },
-		  "deriva": {
-		     "indexing_preferences": {
-			"btree": false,
-			"trgm": false,
-			"gin_array": true
-		     }
-		  }
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
 
                {
