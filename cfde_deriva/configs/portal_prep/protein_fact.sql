@@ -5,15 +5,18 @@ ON CONFLICT DO NOTHING
 ;
 
 UPDATE file AS u
-SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]')
+SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]'),
+    proteins = '[]'
 ;
 
 UPDATE biosample AS u
-SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]')
+SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]'),
+    proteins = '[]'
 ;
 
 UPDATE subject AS u
-SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]')
+SET protein_fact = (SELECT nid FROM protein_fact WHERE proteins = '[]'),
+    proteins = '[]'
 ;
 
 CREATE TEMPORARY TABLE collection_prfacts AS
@@ -42,7 +45,8 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE collection AS u
-SET protein_fact = prf.nid
+SET protein_fact = prf.nid,
+    proteins = prf.proteins
 FROM collection_prfacts colf, protein_fact prf
 WHERE u.nid = colf.nid
   AND colf.proteins = prf.proteins

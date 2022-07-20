@@ -326,7 +326,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE file AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM file_facts ff, core_fact cf
 WHERE u.nid = ff.nid
   AND ff.id_namespace = cf.id_namespace
@@ -705,7 +726,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE biosample AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM biosample_facts bf, core_fact cf
 WHERE u.nid = bf.nid
   AND bf.id_namespace = cf.id_namespace
@@ -1072,7 +1114,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE subject AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM subject_facts sf, core_fact cf
 WHERE u.nid = sf.nid
   AND sf.id_namespace = cf.id_namespace
@@ -1572,7 +1635,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE collection AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM collection_facts colf, core_fact cf
 WHERE u.nid = colf.nid
   AND colf.id_namespace = cf.id_namespace

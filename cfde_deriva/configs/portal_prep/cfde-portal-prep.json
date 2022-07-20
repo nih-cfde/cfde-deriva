@@ -2393,6 +2393,131 @@
                   "format": "any"
                },
                {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
                   "name": "local_id",
                   "description": "An ID representing this collection, unique within this id_namespace",
                   "type": "string",
@@ -2580,6 +2705,131 @@
                   "type": "integer",
                   "derivation_sql_select": "file_mime_type_fkey.nid",
                   "derivation_sql_join": "LEFT JOIN mime_type file_mime_type_fkey ON (src.mime_type = file_mime_type_fkey.id)"
+               },
+               {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array"
                },
                {
                   "name": "local_id",
@@ -2848,6 +3098,131 @@
                   "format": "any"
                },
                {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
                   "name": "local_id",
                   "description": "An ID representing this biosample, unique within this id_namespace",
                   "type": "string",
@@ -3034,6 +3409,131 @@
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
                   "type": "datetime",
                   "format": "any"
+               },
+               {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean"
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array"
                },
                {
                   "name": "local_id",

@@ -39,7 +39,9 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE file AS u
-SET pubchem_fact = pcf.nid
+SET pubchem_fact = pcf.nid,
+    substances = pcf.substances,
+    compounds = pcf.compounds
 FROM file_pfacts ff, pubchem_fact pcf
 WHERE u.nid = ff.nid
   AND ff.substances = pcf.substances
@@ -87,7 +89,9 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE biosample AS u
-SET pubchem_fact = pcf.nid
+SET pubchem_fact = pcf.nid,
+    substances = pcf.substances,
+    compounds = pcf.compounds
 FROM biosample_pfacts bf, pubchem_fact pcf
 WHERE u.nid = bf.nid
   AND bf.substances = pcf.substances
@@ -135,7 +139,9 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE subject AS u
-SET pubchem_fact = pcf.nid
+SET pubchem_fact = pcf.nid,
+    substances = pcf.substances,
+    compounds = pcf.compounds
 FROM subject_pfacts sf, pubchem_fact pcf
 WHERE u.nid = sf.nid
   AND sf.substances = pcf.substances
@@ -193,7 +199,9 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE collection AS u
-SET pubchem_fact = pcf.nid
+SET pubchem_fact = pcf.nid,
+    substances = pcf.substances,
+    compounds = pcf.compounds
 FROM collection_pfacts colf, pubchem_fact pcf
 WHERE u.nid = colf.nid
   AND colf.substances = pcf.substances
