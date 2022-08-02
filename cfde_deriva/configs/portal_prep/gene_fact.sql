@@ -21,7 +21,8 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE file AS u
-SET gene_fact = gf.nid
+SET gene_fact = gf.nid,
+    genes = gf.genes
 FROM file_gfacts ff, gene_fact gf
 WHERE u.nid = ff.nid
   AND ff.genes = gf.genes
@@ -50,7 +51,8 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE biosample AS u
-SET gene_fact = gf.nid
+SET gene_fact = gf.nid,
+    genes = gf.genes
 FROM biosample_gfacts bf, gene_fact gf
 WHERE u.nid = bf.nid
   AND bf.genes = gf.genes
@@ -79,7 +81,8 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE subject AS u
-SET gene_fact = gf.nid
+SET gene_fact = gf.nid,
+    genes = gf.genes
 FROM subject_gfacts sf, gene_fact gf
 WHERE u.nid = sf.nid
   AND sf.genes = gf.genes
@@ -117,7 +120,8 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE collection AS u
-SET gene_fact = gf.nid
+SET gene_fact = gf.nid,
+    genes = gf.genes
 FROM collection_gfacts colf, gene_fact gf
 WHERE u.nid = colf.nid
   AND colf.genes = gf.genes

@@ -53,9 +53,9 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this identifier namespace",
                   "type": "string",
-		  "constraints": {
-		     "required": true
-		  }
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "description",
@@ -185,9 +185,9 @@
                   "name": "name",
                   "description": "A short, human-readable, machine-read-friendly label for this OBI term",
                   "type": "string",
-		  "constraints": {
-		     "required": true
-		  },
+                  "constraints": {
+                     "required": true
+                  },
                   "deriva": {
                      "acls": {
                         "update": []
@@ -2863,7 +2863,7 @@
                   "type": "string",
                   "constraints": {
                       "required": true,
-		      "unique": true
+                      "unique": true
                   }
                },
                {
@@ -2986,7 +2986,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_role",
                   "type": "string",
                   "constraint": {
-		     "required": true,
+                     "required": true,
                      "unique": true
                   },
                   "deriva": {
@@ -3152,7 +3152,7 @@
                   "description": "A short, human-readable, machine-read-friendly label for this subject_granularity",
                   "type": "string",
                   "constraint": {
-		     "required": true,
+                     "required": true,
                      "unique": true
                   },
                   "deriva": {
@@ -4642,6 +4642,402 @@
                   "format": "any"
                },
                {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
                   "name": "local_id",
                   "description": "An ID representing this collection, unique within this id_namespace",
                   "type": "string",
@@ -5710,20 +6106,399 @@
                   }
                },
                {
-                  "name": "local_id",
-                  "description": "An ID representing this file, unique in combination with this file's id_namespace.",
-                  "type": "string",
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
                   }
                },
                {
-                  "name": "persistent_id",
-                  "title": "Persistent ID",
-                  "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC (using, e.g., our minid server) and attached to this file",
-                  "type": "string",
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
                   "constraints": {
-                     "unique": true
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -5745,21 +6520,13 @@
                   "format": "int8"
                },
                {
-                  "name": "sha256",
-                  "description": "The output of the SHA-256 cryptographic hash function after being run on this file: one or both of sha256 and md5 is required; sha256 is preferred",
+                  "name": "persistent_id",
+                  "title": "Persistent ID",
+                  "description": "A persistent, resolvable (not nec. retrievable) URI generated by a DCC (using, e.g., our minid server) and attached to this file",
                   "type": "string",
-                  "format": "binary"
-               },
-               {
-                  "name": "md5",
-                  "description": "The output of the MD5 message-digest algorithm after being run as a cryptographic hash function on this file: one or both of sha256 and md5 is required; sha256 is preferred",
-                  "type": "string",
-                  "format": "binary"
-               },
-               {
-                  "name": "filename",
-                  "description": "A filename with no prepended PATH information.",
-                  "type": "string"
+                  "constraints": {
+                     "unique": true
+                  }
                },
                {
                   "name": "bundle_collection",
@@ -6127,35 +6894,11 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "cf:=(core_fact)=(CFDE:core_fact:nid)/$M/Md:=c2m2:file/$M/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$M/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$M/name:=M:filename,drs_uri:=M:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=M:nid"
+                                 "path": "(nid)=(CFDE:ncpi_file:nid)/name,drs_uri,study_registration,study_id,participant_id,specimen_id,experimental_strategy,file_format"
                               },
                               "destination": {
-                                 "name": "ncpi_manifest.json",
-                                 "type": "json-stream"
-                              }
-                           }
-                        ],
-                        "transforms": [
-                           {
-                              "name": "ncpi_manifest_transformed",
-                              "processor": "column",
-                              "processor_params": {
-                                 "input_path": "ncpi_manifest.json",
-                                 "output_path": "ncpi_manifest_transformed.json",
-                                 "column_transforms": {
-                                    "experimental_strategy": {"fn": "replace", "value": {"key":"experimental_strategy", "value":"name"}},
-                                    "file_format": {"fn": "replace", "value": {"key":"file_format", "value":"name"}},
-                                    "file_nid": {"fn": "delete"}
-                                 }
-                              }
-                           },
-                           {
-                              "name": "ncpi_manifest",
-                              "processor": "json2csv",
-                              "processor_params": {
-                                 "input_path": "ncpi_manifest_transformed.json",
-                                 "output_path": "ncpi_manifest.csv",
-                                 "include_header": true
+                                 "name": "ncpi_manifest",
+                                 "type": "csv"
                               }
                            }
                         ]
@@ -6179,7 +6922,7 @@
                }
             },
             "source_definitions": {
-               "columns": ["persistent_id", "local_id", "filename", "size_in_bytes", "uncompressed_size_in_bytes", "sha256", "md5"],
+               "columns": ["persistent_id", "size_in_bytes", "uncompressed_size_in_bytes"],
                "fkeys": false,
                "search-box": {"or": [
                   {
@@ -6193,6 +6936,9 @@
                   }
                ]},
                "sources": {
+                  "S_c2m2_file": {
+                     "source": [{"outbound": ["CFDE", "file_nid_c2m2_fkey"]}, "nid"]
+                  },
                   "S_combined_fact": {
                      "source": [{"outbound": ["CFDE", "file_combined_fact_fkey"]}, "nid" ]
                   },
@@ -6217,7 +6963,6 @@
                      "markdown_name": "Is Bundle",
                      "comment": "The file is a bundle (archive) specifying its content manifest as a collection.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
                         "is_bundle"
                      ],
                      "entity": false
@@ -6226,7 +6971,6 @@
                      "markdown_name": "Has Persistent ID",
                      "comment": "The file is assigned a persistent ID.",
                      "source": [
-                        {"outbound": ["CFDE", "file_core_fact_fkey"]},
                         "has_persistent_id"
                      ],
                      "entity": false
@@ -6234,10 +6978,10 @@
                   "S_dbgap_study_id": {
                      "markdown_name": "dbGaP Study ID",
                       "source": [
-			  {"sourcekey": "S_core_fact"},
-			  {"outbound": ["CFDE", "core_fact_dbgap_study_id_fkey"]},
-			  "nid"
-		      ],
+                          {"sourcekey": "S_core_fact"},
+                          {"outbound": ["CFDE", "core_fact_dbgap_study_id_fkey"]},
+                          "nid"
+                      ],
                      "entity": true
                   },
                   "S_bundle_collection": {
@@ -6562,6 +7306,42 @@
                         {"inbound": ["CFDE", "biosample_from_subject_biosample_fkey"]},
                         "age_at_sampling"
                      ]
+                  },
+                  "S_filename": {
+                     "markdown_name": "Filename",
+                     "aggregate": "array_d",
+                     "comment": "Base filename of this file as known by the DCC.",
+                     "source":  [{"sourcekey": "S_c2m2_file"}, "filename"],
+                     "display": {
+                        "markdown_pattern": "{{{$_self.0}}}"
+                     }
+                  },
+                  "S_local_id": {
+                     "markdown_name": "Local ID",
+                     "aggregate": "array_d",
+                     "comment": "An ID representing this file, unique in combination with this file's id_namespace",
+                     "source":  [{"sourcekey": "S_c2m2_file"}, "local_id"],
+                     "display": {
+                        "markdown_pattern": "{{{$_self.0}}}"
+                     }
+                  },
+                  "S_md5": {
+                     "markdown_name": "MD5",
+                     "aggregate": "array_d",
+                     "comment": "The output of the MD5 hash algorithm applied to this file's contents.",
+                     "source":  [{"sourcekey": "S_c2m2_file"}, "md5"],
+                     "display": {
+                        "markdown_pattern": "{{{$_self.0}}}"
+                     }
+                  },
+                  "S_sha256": {
+                     "markdown_name": "SHA256",
+                     "aggregate": "array_d",
+                     "comment": "The output of the SHA-256 hash algorithm applied to this file's contents.",
+                     "source":  [{"sourcekey": "S_c2m2_file"}, "sha256"],
+                     "display": {
+                        "markdown_pattern": "{{{$_self.0}}}"
+                     }
                   }
                }
             },
@@ -6579,63 +7359,69 @@
                   {"sourcekey": "S_dcc_array"},
                   {
                      "markdown_name": "Project",
+                     "aggregate": "array_d",
                      "comment": "The project attributed as the source of the file.",
                      "source": [ {"sourcekey": "S_core_fact"}, "project_row" ],
                      "display": {
-                        "markdown_pattern": "{{{$_self.name}}}"
+                        "markdown_pattern": "{{{$_self.0.name}}}"
                      }
                   },
                   {
                       "markdown_name": "dbGaP Study Id",
+                      "aggregate": "array_d",
                       "comment": "The name of a dbGaP study ID governing access control for this file.",
-                      "sourcekey": "S_dbgap_study_id",
+                      "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
                           "template_engine": "handlebars",
-                          "markdown_pattern": "{{#with S_dbgap_study_id.values}}{{#if _id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids _id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{_id}}}{{/with}}"
+                          "markdown_pattern": "{{#with $_self.[0]}}{{#if id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
                       }
                   },
                   {
                      "markdown_name": "File Format",
+                     "aggregate": "array_d",
                      "comment": "The content format of the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "file_format_row" ],
                      "display": {
-                        "markdown_pattern": "{{{$_self.name}}}"
+                        "markdown_pattern": "{{{$_self.0.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Data Type",
+                      "aggregate": "array_d",
                      "comment": "The type of data represented by the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "data_type_row" ],
                      "display": {
-                        "markdown_pattern": "{{{$_self.name}}}"
+                        "markdown_pattern": "{{{$_self.0.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Assay Type",
+                      "aggregate": "array_d",
                      "comment": "Assay type used to generate the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "assay_type_row" ],
                      "display": {
-                        "markdown_pattern": "{{{$_self.name}}}"
+                        "markdown_pattern": "{{{$_self.0.name}}}"
                      }
                   },
                   {
                      "markdown_name": "Analysis Type",
+                      "aggregate": "array_d",
                      "comment": "Assay type used to generate the file.",
                      "source": [  {"sourcekey": "S_core_fact"}, "analysis_type_row" ],
                      "display": {
-                        "markdown_pattern": "{{{$_self.name}}}"
+                        "markdown_pattern": "{{{$_self.0.name}}}"
                      }
                   },
                   "size_in_bytes",
-                  "filename",
+                  {"sourcekey": "S_filename"},
                   "persistent_id",
                   {"sourcekey": "S_creation_time"}
                ],
                "detailed": [
                   {"sourcekey": "S_id_namespace"},
-                  "local_id",
+                  {"sourcekey": "S_local_id"},
                   "persistent_id",
-                  "filename",
+                  {"sourcekey": "S_filename"},
                   {"sourcekey": "S_project"},
                   "size_in_bytes",
                   "uncompressed_size_in_bytes",
@@ -6647,14 +7433,14 @@
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_creation_time"},
                   {
-                      "sourcekey": "S_dbgap_study_id",
+                      "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
                          "template_engine": "handlebars",
-                         "markdown_pattern": "{{#with S_dbgap_study_id.values}}{{#if _id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids _id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
+                         "markdown_pattern": "{{#with $_self}}{{#if id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
                       }
                   },
-                  "sha256",
-                  "md5"
+                  {"sourcekey": "S_sha256"},
+                  {"sourcekey": "S_md5"}
                ],
                "filter": {"and": [
                   {"sourcekey": "S_data_type_slim", "open": true},
@@ -6788,6 +7574,402 @@
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this biosample's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
                   "type": "datetime",
                   "format": "any"
+               },
+               {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "local_id",
@@ -7632,6 +8814,402 @@
                   "description": "An ISO 8601 -- RFC 3339 (subset)-compliant timestamp documenting this subject record's creation time: YYYY-MM-DDTHH:MM:SS±NN:NN",
                   "type": "datetime",
                   "format": "any"
+               },
+               {
+                  "name": "is_bundle",
+                  "description": "Boolean true when described file entities specify a bundle_collection manifest.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "has_persistent_id",
+                  "description": "Boolean true when described entities specify a persistent_id.",
+                  "type": "boolean",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": true,
+                        "trgm": false
+                     }
+                  }
+               },
+               {
+                  "name": "projects",
+                  "description": "The numeric IDs of source or defining project(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dccs",
+                  "description": "The numeric IDs of source or defining DCC(s) attributed for the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sexes",
+                  "description": "The numeric ID of the sex terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "races",
+                  "description": "The numeric ID of the race terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ethnicities",
+                  "description": "The numeric ID of the ethnicity terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_roles",
+                  "description": "The numeric ID of subject_role terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_granularities",
+                  "description": "The numeric ID of subject_granularity terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "subject_species",
+                  "description": "The numeric ID of subject-species terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "ncbi_taxons",
+                  "description": "The numeric ID of ncbi_taxonomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "anatomies",
+                  "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "assay_types",
+                  "description": "The numeric ID of assay_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "analysis_types",
+                  "description": "The numeric ID of analysis_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "file_formats",
+                  "description": "The numeric ID of file_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compression_formats",
+                  "description": "The numeric ID of compression_format terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "data_types",
+                  "description": "The numeric ID of data_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "mime_types",
+                  "description": "The numeric ID of mime_type terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "dbgap_study_ids",
+                  "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "genes",
+                  "description": "The numeric ID of the gene terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "substances",
+                  "description": "The numeric ID of the substance terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "compounds",
+                  "description": "The numeric ID of the compound terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "proteins",
+                  "description": "The numeric ID of the protein terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
                },
                {
                   "name": "local_id",
@@ -10666,6 +12244,12 @@
                   "type": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["id_namespace", "nid"],
+                        "trgm": false
+                     }
                   }
                },
                {
@@ -10674,6 +12258,12 @@
                   "type": "boolean",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["is_bundle", "nid"],
+                        "trgm": false
+                     }
                   }
                },
                {
@@ -10682,6 +12272,12 @@
                   "type": "boolean",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["has_persistent_id", "nid"],
+                        "trgm": false
+                     }
                   }
                },
                {
@@ -10691,6 +12287,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10700,12 +12303,19 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
                {
                   "name": "phenotypes",
-                  "description": "The numeric ID of the phenotype terms qualifiying the described entities.",
+                  "description": "The paired numeric IDs of the (phenotype, association_type) terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
                      "required": true
@@ -10713,10 +12323,42 @@
                },
                {
                    "name": "diseases",
-                  "description": "The numeric ID of the disease terms qualifiying the described entities.",
+                  "description": "The paired numeric IDs of the (disease, association_type) terms qualifiying the described entities.",
                   "type": "object",
                   "constraints": {
                      "required": true
+                  }
+               },
+               {
+                  "name": "phenotypes_flat",
+                  "description": "The numeric IDs of the phenotype terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "diseases_flat",
+                  "description": "The numeric IDs of the disease terms qualifiying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -10727,6 +12369,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10736,6 +12385,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10745,6 +12401,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10754,6 +12417,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10763,6 +12433,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10772,6 +12449,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10781,6 +12465,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -10791,6 +12482,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -10801,6 +12499,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10810,6 +12515,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10819,6 +12531,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10828,6 +12547,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10837,6 +12563,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -10846,15 +12579,29 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
                   "name": "dbgap_study_ids",
                   "description": "The numeric ID of the dbgap_study_id terms qualifying the described entities.",
                   "type": "array",
-		  "format": "integer",
+                  "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -10862,7 +12609,7 @@
                   "name": "dbgap_study_id",
                   "description": "The numeric ID of the dbgap_study_id specified in file records of this fact class.",
                   "type": "integer",
-		  "deriva": {
+                  "deriva": {
                      "indexing_preferences": {
                         "btree": ["dbgap_study_id", "nid"],
                         "trgm": false
@@ -11445,6 +13192,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -11580,6 +13334,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
                {
@@ -11589,6 +13350,13 @@
                   "format": "integer",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -11737,6 +13505,13 @@
                   "type": "array",
                   "constraints": {
                      "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
                   }
                },
 
@@ -11744,8 +13519,7 @@
                   "name": "num_subjects",
                   "description": "The number of subjects with this distinct combination of C2M2 characteristics.",
                   "type": "integer",
-                  "default": 0,
-                  "derivation_sql_path": "protein_fact_num_entities.sql"
+                  "default": 0
                },
                {
                   "name": "num_biosamples",
@@ -13482,6 +15256,86 @@
                   "reference": {
                      "resource": "keywords",
                      "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "ncpi_file",
+         "title": "NCPI file manifest",
+         "description": "Derived NCPI-compatible file manifest record for each C2M2 file",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this file in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "File basename, supplied by the DCC as C2M2 file.filename",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "drs_uri",
+                  "description": "Resolvable file ID, supplied by the DCC as C2M2 file.persistent_id",
+                  "type": "string"
+               },
+               {
+                  "name": "study_registration",
+                  "description": "Namespace qualifying the study_id of the file, supplied by the DCC as C2M2 file.project_id_namespace",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "study_id",
+                  "description": "The study ID of the file, supplied by the DCC as C2M2 file.project_local_id",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "participant_id",
+                  "description": "A local identifier for a subject of the file (if known), supplied by the DCC as C2M2 subject.local_id",
+                  "type": "string"
+               },
+               {
+                  "name": "specimen_id",
+                  "description": "A local identifier for a biospecimen of the file (if known), supplied by the DCC as C2M2 biosample.local_id",
+                  "type": "string"
+               },
+               {
+                  "name": "experimental_strategy",
+                  "description": "The type of experiment producing the file (if known), supplied by the DCC as C2M2 file.assay_type and assay_type.name",
+                  "type": "string"
+               },
+               {
+                  "name": "file_format",
+                  "description": "The format of the file (if known), supplied by the DCC as C2M2 file.file_format and file_format.name",
+                  "type": "string"
+               }
+            ],
+            "primaryKey": "nid",
+            "foreignKeys": [
+               {
+                  "fields": [ "nid" ],
+                  "constraint_name": "ncpi_file_nid_fkey",
+                  "reference": {
+                     "resource": "file",
+                     "fields": [ "nid" ]
                   }
                }
             ]

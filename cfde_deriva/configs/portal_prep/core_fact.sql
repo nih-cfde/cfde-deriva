@@ -194,6 +194,9 @@ INSERT INTO core_fact (
     data_types,
     mime_types,
     
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     dbgap_study_id_row,
     project_row,
@@ -247,8 +250,13 @@ SELECT
   ff.data_types,
   ff.mime_types,
 
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(ff.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(ff.diseases) j) AS diseases_flat,
+
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
-  json_object('nid', dbg.nid, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
+  json_object('nid', dbg.nid, 'id', dbg.id, 'name', dbg.name, 'description', dbg.description) AS dbgap_study_id_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
@@ -318,7 +326,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE file AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM file_facts ff, core_fact cf
 WHERE u.nid = ff.nid
   AND ff.id_namespace = cf.id_namespace
@@ -567,7 +596,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -619,6 +651,11 @@ SELECT
   bf.compression_formats,
   bf.data_types,
   bf.mime_types,
+
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(bf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(bf.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
@@ -689,7 +726,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE biosample AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM biosample_facts bf, core_fact cf
 WHERE u.nid = bf.nid
   AND bf.id_namespace = cf.id_namespace
@@ -926,7 +984,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -978,6 +1039,11 @@ SELECT
   sf.compression_formats,
   sf.data_types,
   sf.mime_types,
+
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(sf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(sf.diseases) j) AS diseases_flat,
 
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
@@ -1048,7 +1114,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE subject AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM subject_facts sf, core_fact cf
 WHERE u.nid = sf.nid
   AND sf.id_namespace = cf.id_namespace
@@ -1418,7 +1505,10 @@ INSERT INTO core_fact (
     compression_formats,
     data_types,
     mime_types,
-    
+
+    phenotypes_flat,
+    diseases_flat,
+
     id_namespace_row,
     project_row,
     sex_row,
@@ -1471,6 +1561,11 @@ SELECT
   colf.data_types,
   colf.mime_types,
         
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(colf.phenotypes) j) AS phenotypes_flat,
+  (SELECT json_sorted(json_group_array(DISTINCT json_extract(j.value, '$[0]')))
+   FROM json_each(colf.diseases) j) AS diseases_flat,
+
   json_object('nid', n.nid, 'name', n.name, 'description', n.description) AS id_namespace_row,
   json_object('nid', p.nid, 'name', p.name, 'description', p.description) AS project_row,
   json_object('nid', sx.nid,'name', sx.name, 'description', sx.description) AS sex_row,
@@ -1540,7 +1635,28 @@ WHERE True
 ON CONFLICT DO NOTHING
 ;
 UPDATE collection AS u
-SET core_fact = cf.nid
+SET core_fact = cf.nid,
+    is_bundle = cf.is_bundle,
+    has_persistent_id = cf.has_persistent_id,
+    projects = cf.projects,
+    dccs = cf.dccs,
+    phenotypes_flat = cf.phenotypes_flat,
+    diseases_flat = cf.diseases_flat,
+    sexes = cf.sexes,
+    races = cf.races,
+    ethnicities = cf.ethnicities,
+    subject_roles = cf.subject_roles,
+    subject_granularities = cf.subject_granularities,
+    subject_species = cf.subject_species,
+    ncbi_taxons = cf.ncbi_taxons,
+    anatomies = cf.anatomies,
+    assay_types = cf.assay_types,
+    analysis_types = cf.analysis_types,
+    file_formats = cf.file_formats,
+    compression_formats = cf.compression_formats,
+    data_types = cf.data_types,
+    mime_types = cf.mime_types,
+    dbgap_study_ids = cf.dbgap_study_ids
 FROM collection_facts colf, core_fact cf
 WHERE u.nid = colf.nid
   AND colf.id_namespace = cf.id_namespace
