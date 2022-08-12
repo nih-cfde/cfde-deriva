@@ -517,6 +517,12 @@ class CatalogConfigurator (object):
                                 "newTab": True
                             },
                             {
+                                "name": "Video Overviews",
+                                "markdownName": ":span:Video Overviews:/span:{.external-link-icon}",
+                                "url": "https://nih-cfde.github.io/2022-CoC-Videos/",
+                                "newTab": True
+                            },
+                            {
                                 "name": "Tutorials",
                                 "markdownName": ":span:Tutorials:/span:{.external-link-icon}",
                                 "url": "https://training.nih-cfde.org/en/latest/Common-Fund-Tools/CFDE-Portal/",
