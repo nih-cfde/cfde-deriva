@@ -1359,7 +1359,11 @@ WHERE id IS NOT NULL
                 logger.info('Reprovisioning CFDE schema content on existing catalog %s...' % ermrest_url)
                 Submission.configure_review_catalog(registry, submission.review_catalog, id, provision=True)
         #
-        submission.ingest()
+        try:
+            submission.ingest()
+        except exception.InvalidDatapackage as e:
+            logger.warn('Rebuild of submission %s encountered error: %s' % (id, e))
+            pass
 
     @classmethod
     def reconfigure(cls, server, registry, row):
