@@ -400,6 +400,7 @@ class Release (object):
                 "disease",
                 "compound",
                 "substance",
+                "protein",
                 "gene",
                 "assay_type",
                 "analysis_type",
