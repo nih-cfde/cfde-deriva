@@ -7373,7 +7373,7 @@
                       "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
                           "template_engine": "handlebars",
-                          "markdown_pattern": "{{#with $_self.[0]}}{{#if id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
+                          "markdown_pattern": "{{#if $_self.[0].id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids $_self.[0].id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{$_self.[0].id}}}"
                       }
                   },
                   {
@@ -7436,7 +7436,7 @@
                       "source": [  {"sourcekey": "S_core_fact"}, "dbgap_study_id_row" ],
                       "display": {
                          "template_engine": "handlebars",
-                         "markdown_pattern": "{{#with $_self}}{{#if id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{/if}}{{{id}}}{{/with}}"
+                         "markdown_pattern": "{{#if $_self.id}}{{#if $session.client}}{{#if $session.client.extensions}}{{#if $session.client.extensions.has_ras_permissions}}{{#if (lookup $session.client.extensions.ras_dbgap_phs_ids $_self.id) }}:span::/span:{title=\"User has access to this file.\" .cfde_green_disc} {{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User does not have access to this file.\" .cfde_yellow_disc} {{/if}}{{else}}:span::/span:{title=\"User access to this file undetermined, check log in credentials.\" .cfde_grey_disc} {{/if}}{{/if}}{{/if}}{{{$_self.id}}}"
                       }
                   },
                   {"sourcekey": "S_sha256"},
