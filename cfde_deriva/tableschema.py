@@ -226,7 +226,9 @@ class PortalPackageDataName (PackageDataName):
                 fdoc
                 for fdoc in rschema['fields']
                 # HACK: skip synonyms to reduce DB and export bloat...
-                if fdoc['name'] != 'synonyms'
+                # HACK: skip biosample.assay_type deprecated field...
+                if (fdoc['name'] != 'synonyms'
+                    and (resource['name'] != 'biosample' or fdoc['name'] != 'assay_type'))
             ]
             rschema['primaryKey'] = [ "nid" ]
             rschema['foreignKeys'] = [ ]

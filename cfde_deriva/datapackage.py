@@ -1319,6 +1319,7 @@ LIMIT 1;
                 'subject_granularity': 'subject_granularities',
                 'subject_species': 'subject_species',
                 'ncbi_taxonomy': ('ncbi_taxon', 'ncbi_taxons'),
+                'sample_prep_method': 'sample_prep_methods',
                 'assay_type': 'assay_types',
                 'analysis_type': 'analysis_types',
                 'file_format': 'file_formats',

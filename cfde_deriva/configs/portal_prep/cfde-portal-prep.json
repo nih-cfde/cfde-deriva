@@ -666,6 +666,72 @@
          },
          "derivation_sql_path": null
       },
+
+      {
+         "profile": "tabular-data-resource",
+         "name": "sample_prep_method",
+         "title": "sample_prep_method",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe types of preparation methods that produce C2M2 biosamples",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this sample_prep_method in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
+                  "type": "array"
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown"
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "derivation_sql_path": null
+      },
+
+      
       {
          "profile": "tabular-data-resource",
          "name": "analysis_type",
@@ -2463,6 +2529,11 @@
                   "type": "array"
                },
                {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "array"
@@ -2777,6 +2848,11 @@
                   "type": "array"
                },
                {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "array"
@@ -3082,8 +3158,8 @@
                   }
                },
                {
-                  "name": "assay_type",
-                  "description": "Numeric ID for assay_type term ID describing the type of experiment that generated this biosample",
+                  "name": "sample_prep_method",
+                  "description": "Numeric ID for an OBI CV term ID (from the 'planned process' branch of the vocabulary, excluding the 'assay' subtree) describing the preparation method that produced this biosample",
                   "type": "integer"
                },
                {
@@ -3165,6 +3241,11 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
                   "type": "array"
                },
                {
@@ -3306,10 +3387,10 @@
                   }
                },
                {
-                  "fields": "assay_type",
-                  "constraint_name": "biosample_assay_type_fkey",
+                  "fields": "sample_prep_method",
+                  "constraint_name": "biosample_sample_prep_method_fkey",
                   "reference": {
-                     "resource": "assay_type",
+                     "resource": "sample_prep_method",
                      "fields": "nid"
                   }
                },
@@ -3478,6 +3559,11 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array"
+               },
+               {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
                   "type": "array"
                },
                {
@@ -5674,6 +5760,14 @@
                      "required": true
                   }
                },
+               {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array",
+                  "constraints": {
+                     "required": true
+                  }
+               },
 
                {
                   "name": "assay_types",
@@ -5763,6 +5857,11 @@
                   "type": "integer"
                },
                {
+                  "name": "sample_prep_method",
+                  "description": "Numeric ID of the sample_prep_method term qualifying the described biosamples.",
+                  "type": "integer"
+               },
+               {
                   "name": "assay_type",
                   "description": "The numeric ID of the assay_type term qualifying the described files.",
                   "type": "integer"
@@ -5826,6 +5925,11 @@
                {
                   "name": "anatomy_row",
                   "description": "Denormalized copy of the anatomy term qualifying the described biosamples.",
+                  "type": "object"
+               },
+               {
+                  "name": "sample_prep_method_row",
+                  "description": "Denormalized copy of the sample_prep_method term qualifying the described biosamples.",
                   "type": "object"
                },
                {
@@ -5907,6 +6011,7 @@
                "ethnicity",
                "subject_granularity",
                "anatomy",
+               "sample_prep_method",
                "assay_type",
                "analysis_type",
                "file_format",
@@ -5927,6 +6032,7 @@
                "subject_species",
                "ncbi_taxons",
                "anatomies",
+               "sample_prep_methods",
                "assay_types",
                "analysis_types",
                "file_formats",
@@ -7055,6 +7161,52 @@
                   "constraint_name": "core_fact_anatomy_anatomy_fkey",
                   "reference": {
                      "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         },
+         "derivation_sql_path": null
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_sample_prep_method",
+         "description": "An exploded representation of the core_fact.sample_prep_methods array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "sample_prep_method",
+                  "description": "The numeric ID of a term found in the core_fact.sample_prep_methods array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "sample_prep_method"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_sample_prep_method_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "sample_prep_method",
+                  "constraint_name": "core_fact_sample_prep_method_sample_prep_method_fkey",
+                  "reference": {
+                     "resource": "sample_prep_method",
                      "fields": "nid"
                   }
                }

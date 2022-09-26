@@ -12,6 +12,7 @@ SELECT
   -1 AS ethnicity,
   -1 AS subject_granularity,
   -1 AS anatomy,
+  -1 AS sample_prep_method,
   COALESCE(f.assay_type, -1) AS assay_type,
   COALESCE(f.analysis_type, -1) AS analysis_type,
   COALESCE(f.file_format, -1) AS file_format,
@@ -92,12 +93,12 @@ SELECT
     '[]'
   ) AS anatomies,
   COALESCE((
-      SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
-      FROM (
-        SELECT sl.slim_term FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) JOIN assay_type_slim_union sl ON (b.assay_type = sl.original_term) WHERE fdb.file = f.nid
-        UNION
-        SELECT sl.slim_term FROM assay_type_slim_union sl WHERE sl.original_term = f.assay_type
-      ) a
+      SELECT json_sorted(json_group_array(DISTINCT b.sample_prep_method)) FROM file_describes_biosample fdb JOIN biosample b ON (fdb.biosample = b.nid) WHERE fdb.file = f.nid AND b.sample_prep_method IS NOT NULL
+    ),
+    '[]'
+  ) AS sample_prep_methods,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT sl.slim_term)) FROM assay_type_slim_union sl WHERE sl.original_term = f.assay_type
     ),
     '[]'
   ) AS assay_types,
@@ -127,6 +128,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -147,6 +149,7 @@ CREATE INDEX IF NOT EXISTS file_facts_combo_idx ON file_facts(
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -166,6 +169,7 @@ INSERT INTO core_fact (
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -186,6 +190,7 @@ INSERT INTO core_fact (
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -204,6 +209,7 @@ INSERT INTO core_fact (
     ethnicity_row,
     subject_granularity_row,
     anatomy_row,
+    sample_prep_method_row,
     assay_type_row,
     analysis_type_row,
     file_format_row,
@@ -222,6 +228,7 @@ SELECT
   ff.ethnicity,
   ff.subject_granularity,
   ff.anatomy,
+  ff.sample_prep_method,
   ff.assay_type,
   ff.analysis_type,
   ff.file_format,
@@ -242,6 +249,7 @@ SELECT
   ff.subject_species,
   ff.ncbi_taxons,
   ff.anatomies,
+  ff.sample_prep_methods,
   ff.assay_types,
 
   ff.analysis_types,
@@ -262,6 +270,7 @@ SELECT
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
+  json_object('nid', spm.nid, 'name', spm.name, 'description', spm.description) AS sample_prep_method_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
   json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
@@ -280,6 +289,7 @@ FROM (
     ff.ethnicity,
     ff.subject_granularity,
     ff.anatomy,
+    ff.sample_prep_method,
     ff.assay_type,
     ff.analysis_type,
     ff.file_format,
@@ -300,6 +310,7 @@ FROM (
     ff.subject_species,
     ff.ncbi_taxons,
     ff.anatomies,
+    ff.sample_prep_methods,
     ff.assay_types,
 
     ff.analysis_types,
@@ -315,6 +326,7 @@ LEFT JOIN subject_granularity sg ON (ff.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (ff.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (ff.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (ff.anatomy = a.nid)
+LEFT JOIN sample_prep_method spm ON (ff.sample_prep_method = spm.nid)
 LEFT JOIN assay_type ast ON (ff.assay_type = ast.nid)
 LEFT JOIN analysis_type ant ON (ff.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (ff.file_format = fmt.nid)
@@ -341,6 +353,7 @@ SET core_fact = cf.nid,
     subject_species = cf.subject_species,
     ncbi_taxons = cf.ncbi_taxons,
     anatomies = cf.anatomies,
+    sample_prep_methods = cf.sample_prep_methods,
     assay_types = cf.assay_types,
     analysis_types = cf.analysis_types,
     file_formats = cf.file_formats,
@@ -360,6 +373,7 @@ WHERE u.nid = ff.nid
   AND ff.ethnicity = cf.ethnicity
   AND ff.subject_granularity = cf.subject_granularity
   AND ff.anatomy = cf.anatomy
+  AND ff.sample_prep_method = cf.sample_prep_method
   AND ff.assay_type = cf.assay_type
   AND ff.analysis_type = cf.analysis_type
   AND ff.file_format = cf.file_format
@@ -380,6 +394,7 @@ WHERE u.nid = ff.nid
   AND ff.subject_species = cf.subject_species
   AND ff.ncbi_taxons = cf.ncbi_taxons
   AND ff.anatomies = cf.anatomies
+  AND ff.sample_prep_methods = cf.sample_prep_methods
   AND ff.assay_types = cf.assay_types
 
   AND ff.analysis_types = cf.analysis_types
@@ -403,7 +418,8 @@ SELECT
   -1 AS ethnicity,
   -1 AS subject_granularity,
   COALESCE(b.anatomy, -1) AS anatomy,
-  COALESCE(b.assay_type, -1) AS assay_type,
+  COALESCE(b.sample_prep_method, -1) AS sample_prep_method,
+  -1 AS assay_type,
   -1 AS analysis_type,
   -1 AS file_format,
   -1 AS compression_format,
@@ -482,12 +498,11 @@ SELECT
     ),
     '[]'
   ) AS anatomies,
+  CASE WHEN b.sample_prep_method IS NOT NULL THEN json_array(b.sample_prep_method) ELSE '[]' END AS sample_prep_methods,  
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
       FROM (
         SELECT sl.slim_term FROM file_describes_biosample fdb JOIN file f ON (fdb.file = f.nid) JOIN assay_type_slim_union sl ON (f.assay_type = sl.original_term) WHERE fdb.biosample = b.nid
-        UNION
-        SELECT sl.slim_term FROM assay_type_slim_union sl WHERE sl.original_term = b.assay_type
       ) a
     ),
     '[]'
@@ -530,6 +545,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -550,6 +566,7 @@ CREATE INDEX IF NOT EXISTS biosample_facts_combo_idx ON biosample_facts(
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -569,6 +586,7 @@ INSERT INTO core_fact (
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -589,6 +607,7 @@ INSERT INTO core_fact (
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -606,6 +625,7 @@ INSERT INTO core_fact (
     ethnicity_row,
     subject_granularity_row,
     anatomy_row,
+    sample_prep_method_row,
     assay_type_row,
     analysis_type_row,
     file_format_row,
@@ -624,6 +644,7 @@ SELECT
   bf.ethnicity,
   bf.subject_granularity,
   bf.anatomy,
+  bf.sample_prep_method,
   bf.assay_type,
   bf.analysis_type,
   bf.file_format,
@@ -644,6 +665,7 @@ SELECT
   bf.subject_species,
   bf.ncbi_taxons,
   bf.anatomies,
+  bf.sample_prep_methods,
   bf.assay_types,
 
   bf.analysis_types,
@@ -663,6 +685,7 @@ SELECT
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
+  json_object('nid', spm.nid, 'name', spm.name, 'description', spm.description) AS sample_prep_method_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
   json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
@@ -681,6 +704,7 @@ FROM (
     bf.ethnicity,
     bf.subject_granularity,
     bf.anatomy,
+    bf.sample_prep_method,
     bf.assay_type,
     bf.analysis_type,
     bf.file_format,
@@ -701,6 +725,7 @@ FROM (
     bf.subject_species,
     bf.ncbi_taxons,
     bf.anatomies,
+    bf.sample_prep_methods,
     bf.assay_types,
 
     bf.analysis_types,
@@ -716,6 +741,7 @@ LEFT JOIN subject_granularity sg ON (bf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (bf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (bf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (bf.anatomy = a.nid)
+LEFT JOIN sample_prep_method spm ON (bf.sample_prep_method = spm.nid)
 LEFT JOIN assay_type ast ON (bf.assay_type = ast.nid)
 LEFT JOIN analysis_type ant ON (bf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (bf.file_format = fmt.nid)
@@ -741,6 +767,7 @@ SET core_fact = cf.nid,
     subject_species = cf.subject_species,
     ncbi_taxons = cf.ncbi_taxons,
     anatomies = cf.anatomies,
+    sample_prep_methods = cf.sample_prep_methods,
     assay_types = cf.assay_types,
     analysis_types = cf.analysis_types,
     file_formats = cf.file_formats,
@@ -760,6 +787,7 @@ WHERE u.nid = bf.nid
   AND bf.ethnicity = cf.ethnicity
   AND bf.subject_granularity = cf.subject_granularity
   AND bf.anatomy = cf.anatomy
+  AND bf.sample_prep_method = cf.sample_prep_method
   AND bf.assay_type = cf.assay_type
   AND bf.analysis_type = cf.analysis_type
   AND bf.file_format = cf.file_format
@@ -780,6 +808,7 @@ WHERE u.nid = bf.nid
   AND bf.subject_species = cf.subject_species
   AND bf.ncbi_taxons = cf.ncbi_taxons
   AND bf.anatomies = cf.anatomies
+  AND bf.sample_prep_methods = cf.sample_prep_methods
   AND bf.assay_types = cf.assay_types
 
   AND bf.analysis_types = cf.analysis_types
@@ -804,6 +833,7 @@ SELECT
   COALESCE(s.granularity, -1) AS subject_granularity,
   -1 AS anatomy,
   -1 AS assay_type,
+  -1 AS sample_prep_method,
   -1 AS analysis_type,
   -1 AS file_format,
   -1 AS compression_format,
@@ -871,11 +901,14 @@ SELECT
     '[]'
   ) AS anatomies,
   COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT b.sample_prep_method)) FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) WHERE bfs.subject = s.nid AND b.sample_prep_method IS NOT NULL
+    ),
+    '[]'
+  ) AS sample_prep_methods,
+  COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT a.slim_term))
       FROM (
         SELECT sl.slim_term FROM file_describes_subject fds JOIN file f ON (fds.file = f.nid) JOIN assay_type_slim_union sl ON (sl.original_term = f.assay_type) WHERE fds.subject = s.nid
-        UNION
-        SELECT sl.slim_term FROM biosample_from_subject bfs JOIN biosample b ON (bfs.biosample = b.nid) JOIN assay_type_slim_union sl ON (sl.original_term = b.assay_type) WHERE bfs.subject = s.nid
       ) a
     ),
     '[]'
@@ -918,6 +951,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -938,6 +972,7 @@ CREATE INDEX IF NOT EXISTS subject_facts_combo_idx ON subject_facts(
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -957,6 +992,7 @@ INSERT INTO core_fact (
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -977,6 +1013,7 @@ INSERT INTO core_fact (
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -994,6 +1031,7 @@ INSERT INTO core_fact (
     ethnicity_row,
     subject_granularity_row,
     anatomy_row,
+    sample_prep_method_row,
     assay_type_row,
     analysis_type_row,
     file_format_row,
@@ -1012,6 +1050,7 @@ SELECT
   sf.ethnicity,
   sf.subject_granularity,
   sf.anatomy,
+  sf.sample_prep_method,
   sf.assay_type,
   sf.analysis_type,
   sf.file_format,
@@ -1032,6 +1071,7 @@ SELECT
   sf.subject_species,
   sf.ncbi_taxons,
   sf.anatomies,
+  sf.sample_prep_methods,
   sf.assay_types,
 
   sf.analysis_types,
@@ -1051,6 +1091,7 @@ SELECT
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
+  json_object('nid', spm.nid, 'name', spm.name, 'description', spm.description) AS sample_prep_method_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
   json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
@@ -1069,6 +1110,7 @@ FROM (
     sf.ethnicity,
     sf.subject_granularity,
     sf.anatomy,
+    sf.sample_prep_method,
     sf.assay_type,
     sf.analysis_type,
     sf.file_format,
@@ -1089,6 +1131,7 @@ FROM (
     sf.subject_species,
     sf.ncbi_taxons,
     sf.anatomies,
+    sf.sample_prep_methods,
     sf.assay_types,
 
     sf.analysis_types,
@@ -1104,6 +1147,7 @@ LEFT JOIN subject_granularity sg ON (sf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (sf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (sf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (sf.anatomy = a.nid)
+LEFT JOIN sample_prep_method spm ON (sf.sample_prep_method = spm.nid)
 LEFT JOIN assay_type ast ON (sf.assay_type = ast.nid)
 LEFT JOIN analysis_type ant ON (sf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (sf.file_format = fmt.nid)
@@ -1129,6 +1173,7 @@ SET core_fact = cf.nid,
     subject_species = cf.subject_species,
     ncbi_taxons = cf.ncbi_taxons,
     anatomies = cf.anatomies,
+    sample_prep_methods = cf.sample_prep_methods,
     assay_types = cf.assay_types,
     analysis_types = cf.analysis_types,
     file_formats = cf.file_formats,
@@ -1148,6 +1193,7 @@ WHERE u.nid = sf.nid
   AND sf.ethnicity = cf.ethnicity
   AND sf.subject_granularity = cf.subject_granularity
   AND sf.anatomy = cf.anatomy
+  AND sf.sample_prep_method = cf.sample_prep_method
   AND sf.assay_type = cf.assay_type
   AND sf.analysis_type = cf.analysis_type
   AND sf.file_format = cf.file_format
@@ -1168,6 +1214,7 @@ WHERE u.nid = sf.nid
   AND sf.subject_species = cf.subject_species
   AND sf.ncbi_taxons = cf.ncbi_taxons
   AND sf.anatomies = cf.anatomies
+  AND sf.sample_prep_methods = cf.sample_prep_methods
   AND sf.assay_types = cf.assay_types
 
   AND sf.analysis_types = cf.analysis_types
@@ -1191,6 +1238,7 @@ SELECT
   -1 AS ethnicity,
   -1 AS subject_granularity,
   -1 AS anatomy,
+  -1 AS sample_prep_method,
   -1 AS assay_type,
   -1 AS analysis_type,
   -1 AS file_format,
@@ -1358,6 +1406,18 @@ SELECT
   COALESCE((
       SELECT json_sorted(json_group_array(DISTINCT s.value))
       FROM (
+        SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.sample_prep_methods) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.sample_prep_methods) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
+        UNION
+        SELECT j.value FROM subject_in_collection sic, subject s, core_fact cf, json_each(cf.sample_prep_methods) j WHERE sic.collection = col.nid AND sic.subject = s.nid AND s.core_fact = cf.nid
+      ) s
+    ),
+    '[]'
+  ) AS sample_prep_methods,
+  COALESCE((
+      SELECT json_sorted(json_group_array(DISTINCT s.value))
+      FROM (
         SELECT j.value FROM file_in_collection fic, file f, core_fact cf, json_each(cf.assay_types) j WHERE fic.collection = col.nid AND fic.file = f.nid AND f.core_fact = cf.nid
         UNION
         SELECT j.value FROM biosample_in_collection bic, biosample b, core_fact cf, json_each(cf.assay_types) j WHERE bic.collection = col.nid AND bic.biosample = b.nid AND b.core_fact = cf.nid
@@ -1439,6 +1499,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -1459,6 +1520,7 @@ CREATE INDEX IF NOT EXISTS collection_facts_combo_idx ON collection_facts(
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -1478,6 +1540,7 @@ INSERT INTO core_fact (
     ethnicity,
     subject_granularity,
     anatomy,
+    sample_prep_method,
     assay_type,
     analysis_type,
     file_format,
@@ -1498,6 +1561,7 @@ INSERT INTO core_fact (
     subject_species,
     ncbi_taxons,
     anatomies,
+    sample_prep_methods,
     assay_types,
 
     analysis_types,
@@ -1515,6 +1579,7 @@ INSERT INTO core_fact (
     ethnicity_row,
     subject_granularity_row,
     anatomy_row,
+    sample_prep_method_row,
     assay_type_row,
     analysis_type_row,
     file_format_row,
@@ -1533,6 +1598,7 @@ SELECT
   colf.ethnicity,
   colf.subject_granularity,
   colf.anatomy,
+  colf.sample_prep_method,
   colf.assay_type,
   colf.analysis_type,
   colf.file_format,
@@ -1553,6 +1619,7 @@ SELECT
   colf.subject_species,
   colf.ncbi_taxons,
   colf.anatomies,
+  colf.sample_prep_methods,
   colf.assay_types,
 
   colf.analysis_types,
@@ -1572,6 +1639,7 @@ SELECT
   json_object('nid', eth.nid,'name', eth.name, 'description', eth.description) AS ethnicity_row,
   json_object('nid', sg.nid,'name', sg.name, 'description', sg.description) AS subject_granularity_row,
   json_object('nid', a.nid, 'name', a.name, 'description', a.description) AS anatomy_row,
+  json_object('nid', spm.nid, 'name', spm.name, 'description', spm.description) AS sample_prep_method_row,
   json_object('nid', ast.nid, 'name', ast.name, 'description', ast.description) AS assay_type_row,
   json_object('nid', ant.nid, 'name', ant.name, 'description', ant.description) AS analysis_type_row,
   json_object('nid', fmt.nid, 'name', fmt.name, 'description', fmt.description) AS file_format_row,
@@ -1590,6 +1658,7 @@ FROM (
     colf.ethnicity,
     colf.subject_granularity,
     colf.anatomy,
+    colf.sample_prep_method,
     colf.assay_type,
     colf.analysis_type,
     colf.file_format,
@@ -1610,6 +1679,7 @@ FROM (
     colf.subject_species,
     colf.ncbi_taxons,
     colf.anatomies,
+    colf.sample_prep_methods,
     colf.assay_types,
 
     colf.analysis_types,
@@ -1625,6 +1695,7 @@ LEFT JOIN subject_granularity sg ON (colf.subject_granularity = sg.nid)
 LEFT JOIN sex sx ON (colf.sex = sx.nid)
 LEFT JOIN ethnicity eth ON (colf.ethnicity = eth.nid)
 LEFT JOIN anatomy a ON (colf.anatomy = a.nid)
+LEFT JOIN sample_prep_method spm ON (colf.sample_prep_method = spm.nid)
 LEFT JOIN assay_type ast ON (colf.assay_type = ast.nid)
 LEFT JOIN analysis_type ant ON (colf.analysis_type = ant.nid)
 LEFT JOIN file_format fmt ON (colf.file_format = fmt.nid)
@@ -1650,6 +1721,7 @@ SET core_fact = cf.nid,
     subject_species = cf.subject_species,
     ncbi_taxons = cf.ncbi_taxons,
     anatomies = cf.anatomies,
+    sample_prep_methods = cf.sample_prep_methods,
     assay_types = cf.assay_types,
     analysis_types = cf.analysis_types,
     file_formats = cf.file_formats,
@@ -1669,6 +1741,7 @@ WHERE u.nid = colf.nid
   AND colf.ethnicity = cf.ethnicity
   AND colf.subject_granularity = cf.subject_granularity
   AND colf.anatomy = cf.anatomy
+  AND colf.sample_prep_method = cf.sample_prep_method
   AND colf.assay_type = cf.assay_type
   AND colf.analysis_type = cf.analysis_type
   AND colf.file_format = cf.file_format
@@ -1689,6 +1762,7 @@ WHERE u.nid = colf.nid
   AND colf.subject_species = cf.subject_species
   AND colf.ncbi_taxons = cf.ncbi_taxons
   AND colf.anatomies = cf.anatomies
+  AND colf.sample_prep_methods = cf.sample_prep_methods
   AND colf.assay_types = cf.assay_types
 
   AND colf.analysis_types = cf.analysis_types
@@ -1751,6 +1825,11 @@ CREATE TEMPORARY TABLE corefact_kw AS
        )
        FROM json_each(cf.anatomies) aj JOIN anatomy a ON (aj.value = a.nid)
        JOIN anatomy_slim a_slim ON (aj.value = a_slim.original_term) JOIN anatomy a2 ON (a_slim.slim_term = a2.nid)),
+
+      (SELECT cfde_keywords_merge(
+         cfde_keywords_agg(spm.id, spm.name, spm.description, spm.synonyms)
+       )
+       FROM json_each(cf.sample_prep_methods) spmj JOIN sample_prep_method spm ON (spmj.value = spm.nid)),
 
       (SELECT cfde_keywords_merge(
          cfde_keywords_agg("at".id, "at".name, "at".description, "at".synonyms),
@@ -1849,6 +1928,7 @@ SET
   ethnicity = CASE WHEN v.ethnicity = -1 THEN NULL ELSE v.ethnicity END,
   subject_granularity = CASE WHEN v.subject_granularity = -1 THEN NULL ELSE v.subject_granularity END,
   anatomy = CASE WHEN v.anatomy = -1 THEN NULL ELSE v.anatomy END,
+  sample_prep_method = CASE WHEN v.sample_prep_Method = -1 THEN NULL ELSE v.sample_prep_method END,
   assay_type = CASE WHEN v.assay_type = -1 THEN NULL ELSE v.assay_type END,
   analysis_type = CASE WHEN v.analysis_type = -1 THEN NULL ELSE v.analysis_type END,
   file_format = CASE WHEN v.file_format = -1 THEN NULL ELSE v.file_format END,
