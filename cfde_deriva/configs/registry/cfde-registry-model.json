@@ -1166,6 +1166,16 @@
                      ],
                      "entity": true
                   },
+                  "S_sample_prep_method": {
+                     "markdown_name": "Sample Prep Method",
+                     "comment": "Sample prep method terms used in submission",
+                     "source": [
+                        {"inbound": ["CFDE", "datapackage_sample_prep_method_datapackage_fkey"]},
+                        {"outbound": ["CFDE", "datapackage_sample_prep_method_sample_prep_method_fkey"]},
+                        "id"
+                     ],
+                     "entity": true
+                  },
                   "S_analysis_type": {
                      "markdown_name": "Analysis Type",
                      "comment": "Analysis type terms used in submission",
@@ -1365,6 +1375,7 @@
                   {"sourcekey": "S_datapackage_measurements"},
                   {"sourcekey": "S_analysis_type"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_sample_prep_method"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_compound"},
                   {"sourcekey": "S_data_type"},
@@ -1444,6 +1455,7 @@
                   {"sourcekey": "S_release_statuses"},
                   {"source": "submission_time"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_sample_prep_method"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_data_type"},
                   {"sourcekey": "S_file_format"},
@@ -2319,6 +2331,105 @@
                {
                   "name": "synonyms",
                   "description": "A list of human-readable synonyms for this term",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "title": "Resources",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "id"
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "*" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description",
+                  "resource_markdown"
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ]
+            },
+            "visible_foreign_keys": {
+               "*": [
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "sample_prep_method",
+         "title": "sample_prep_method",
+         "dialect": {
+            "delimiter": "\t",
+            "doubleQuote": false,
+            "lineTerminator": "\n",
+            "skipInitialSpace": true,
+            "header": true
+         },
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe types of preparation methods that produce C2M2 biosamples",
+         "schema": {
+            "fields": [
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string"
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
                   "type": "array",
                   "deriva": {
                      "indexing_preferences": {
@@ -4167,6 +4278,78 @@
                   "types": ["select"],
                   "projection": [
                      {"outbound": ["CFDE", "datapackage_anatomy_datapackage_fkey"]},
+                     {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
+                     {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
+                     {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
+                     "webauthn_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "datapackage_sample_prep_method",
+         "title": "Datapackage Sample Prep Method",
+         "description": "An association of an sample_prep_method term used by a datapackage submission.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "datapackage",
+                  "description": "The datapackage ID which uses the term.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "sample_prep_method",
+                  "description": "The referenced sample_prep_method term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["datapackage", "sample_prep_method"],
+            "foreignKeys": [
+               {
+                  "fields": "datapackage",
+                  "constraint_name": "datapackage_sample_prep_method_datapackage_fkey",
+                  "reference": {
+                     "resource": "datapackage",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               },
+               {
+                  "fields": "sample_prep_method",
+                  "constraint_name": "datapackage_sample_prep_method_sample_prep_method_fkey",
+                  "reference": {
+                     "resource": "sample_prep_method",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline", "cfde_portal_reviewer" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline" ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "acl_bindings": {
+               "dcc_group_any": {
+                  "types": ["select"],
+                  "projection": [
+                     {"outbound": ["CFDE", "datapackage_sample_prep_method_datapackage_fkey"]},
                      {"outbound": ["CFDE", "datapackage_submitting_dcc_fkey"]},
                      {"inbound": ["CFDE", "dcc_group_role_dcc_fkey"]},
                      {"outbound": ["CFDE", "dcc_group_role_group_fkey"]},
@@ -6347,6 +6530,97 @@
                   "reference": {
                      "title": "Favorite Anatomy",
                      "resource": "anatomy",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE"
+               }
+            ]
+         },
+         "deriva": {
+            "acls": {
+               "select": [ "cfde_portal_admin" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_members", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_portal_writer", "cfde_portal_reader" ],
+               "update": [ "cfde_portal_admin" ],
+               "delete": [ "cfde_portal_admin" ]
+            },
+            "acl_bindings": {
+               "profile_owner": {
+                  "types": ["select", "update", "delete"],
+                  "projection": [
+                     "user_id"
+                  ],
+                  "projection_type": "acl",
+                  "scope_acl": ["*"]
+               }
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "favorite_sample_prep_method",
+         "title": "Favorite Sample Prep Method",
+         "description": "An association of a favorited sample_prep_method term in a specific user profile.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "user_id",
+                  "description": "The authentication system ID for the user.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "select": ["*"],
+                        "update": []
+                     },
+                     "acl_bindings": {
+                        "profile_owner": false
+                     }
+                  }
+               },
+               {
+                  "name": "sample_prep_method",
+                  "description": "The favorited sample_prep_method term ID.",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": ["user_id", "sample_prep_method"],
+            "foreignKeys": [
+               {
+                  "fields": "user_id",
+                  "constraint_name": "favorite_sample_prep_method_user_id_fkey",
+                  "reference": {
+                     "resource": "user_profile",
+                     "fields": "id"
+                  },
+                  "on_update": "CASCADE",
+                  "on_delete": "CASCADE",
+                  "deriva": {
+                     "acls": {
+                        "insert": [ "cfde_portal_admin" ]
+                     },
+                     "acl_bindings": {
+                        "self": {
+                           "types": ["insert"],
+                           "projection": [ "id" ],
+                           "projection_type": "acl",
+                           "scope_acl": ["*"]
+                        }
+                     }
+                  }
+               },
+               {
+                  "fields": "sample_prep_method",
+                  "constraint_name": "favorite_sample_prep_method_sample_prep_method_fkey",
+                  "reference": {
+                     "title": "Favorite Sample Prep Method",
+                     "resource": "sample_prep_method",
                      "fields": "id"
                   },
                   "on_update": "CASCADE",
