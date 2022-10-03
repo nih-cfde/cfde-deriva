@@ -777,7 +777,7 @@ class Submission (object):
                 },
             )
 
-        report = frictionless.validate_package(package, trusted=False, original=True, parallel=False)
+        report = frictionless.package.validate.validate(package, original=True, parallel=False)
         if post_process:
             post_process(content_path, packagefile, report)
         if report.stats['errors'] > 0:
@@ -1365,7 +1365,7 @@ WHERE id IS NOT NULL
         try:
             submission.ingest()
         except exception.InvalidDatapackage as e:
-            logger.warn('Rebuild of submission %s encountered error: %s' % (id, e))
+            logger.warning('Rebuild of submission %s encountered error: %s' % (id, e))
             pass
 
     @classmethod
