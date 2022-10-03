@@ -304,7 +304,7 @@
                   },
                   "S_collection": {
                      "markdown_name": "Collection",
-                     "comment": "Cllections referencing this assay type.",
+                     "comment": "Collections referencing this assay type.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "collection_core_fact_fkey"]},
@@ -346,6 +346,192 @@
             "visible_foreign_keys": {
                "*": [
                   {"sourcekey": "S_file"}
+               ]
+            }
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "sample_prep_method",
+         "title": "Sample Prep Method",
+         "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used to describe types of preparation methods that produce C2M2 biosamples",
+         "schema": {
+            "fields": [
+               {
+                  "name": "nid",
+                  "title": "Numeric ID",
+                  "description": "Numeric, surrogate key representing this sample_prep_method in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "id",
+                  "description": "An OBI CV term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true,
+                     "unique": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "name",
+                  "description": "A short, human-readable, machine-read-friendly label for this OBI term",
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "description",
+                  "description": "A human-readable description of this OBI term",
+                  "type": "string",
+                  "deriva": {
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "synonyms",
+                  "description": "A list of synonyms for this term as identified by the OBI metadata",
+                  "type": "array",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": []
+                     }
+                  }
+               },
+               {
+                  "name": "resource_markdown",
+                  "description": "External resource information pre-formatted as markdown",
+                  "type": "string",
+                  "format": "markdown",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
+                     "acls": {
+                        "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+                     }
+                  }
+               }
+            ],
+            "missingValues": [ "" ],
+            "primaryKey": "nid"
+         },
+         "deriva": {
+            "acls": {
+               "update": [ "cfde_portal_admin", "cfde_portal_curator" ]
+            },
+            "immutable": true,
+            "table_config": {
+               "stable_key_columns": ["id"],
+               "user_favorites_disabled": {
+                  "storage_table": {
+                     "catalog": "registry",
+                     "schema": "CFDE",
+                     "table": "favorite_sample_prep_method",
+                     "favorited_key_columns": ["sample_prep_method"],
+                     "user_id_column": "user_id"
+                  }
+               }
+            },
+            "source_definitions": {
+               "columns": true,
+               "fkeys": true,
+               "sources": {
+                  "S_core_fact": {
+                     "source": [
+                        {"inbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_biosample": {
+                     "markdown_name": "Biosample",
+                     "comment": "Biosamples referencing this sample prep method.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "biosample_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_subject": {
+                     "markdown_name": "Subject",
+                     "comment": "Subjects referencing this sample prep method.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "subject_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_collection": {
+                     "markdown_name": "Collection",
+                     "comment": "Collections referencing this sample prep method.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "collection_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  },
+                  "S_file": {
+                     "markdown_name": "File",
+                     "comment": "Files referencing this sample prep method.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "file_core_fact_fkey"]},
+                        "nid"
+                     ]
+                  }
+               }
+            },
+            "visible_columns": {
+               "*": [
+                  "id",
+                  "name",
+                  "description",
+                  {"source": "resource_markdown", "hide_column_header": true}
+               ],
+               "compact": [
+                  "id",
+                  "name",
+                  "description"
+               ],
+               "filter": {"and": [
+                  {"source": "id"},
+                  {"source": "name"},
+                  {"sourcekey": "S_collection"},
+                  {"sourcekey": "S_file"},
+                  {"sourcekey": "S_biosample"},
+                  {"sourcekey": "S_subject"}
+               ]}
+            },
+            "visible_foreign_keys": {
+               "*": [
+                  {"sourcekey": "S_biosample"}
                ]
             }
          }
@@ -4862,6 +5048,22 @@
                   }
                },
                {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "array",
@@ -5282,6 +5484,16 @@
                            {
                               "source": {
                                  "api": "entity",
+                                 "path": "(core_fact)/CFDE:core_fact_sample_prep_method/(sample_prep_method)=(c2m2:sample_prep_method:nid)"
+                              },
+                              "destination": {
+                                 "name": "sample_prep_method",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
                                  "path": "(core_fact)/CFDE:core_fact_assay_type/(assay_type)=(c2m2:assay_type:nid)"
                               },
                               "destination": {
@@ -5679,6 +5891,15 @@
                         "nid"
                      ]
                   },
+                  "S_sample_prep_method": {
+                     "comment": "Sample prep method of a consistuent biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_assay_type": {
                      "comment": "Assay type of a constituent file, offering original terms and corresponding \"slim\" terms.",
                      "source": [
@@ -5993,6 +6214,7 @@
                   {"sourcekey": "S_file_format"},
                   {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_sample_prep_method"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_ncbi_taxons_slim"},
@@ -6312,6 +6534,22 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
                   "type": "array",
                   "format": "integer",
                   "constraints": {
@@ -6651,6 +6889,16 @@
                               },
                               "destination": {
                                  "name": "data_type",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
+                                 "path": "(core_fact)/CFDE:core_fact_sample_prep_method/(sample_prep_method)=(c2m2:sample_prep_method:nid)"
+                              },
+                              "destination": {
+                                 "name": "sample_prep_method",
                                  "type": "csv"
                               }
                            },
@@ -7114,8 +7362,17 @@
                         "nid"
                      ]
                   },
+                  "S_sample_prep_method": {
+                     "comment": "Sample prep method of related biosamples.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_assay_type": {
-                     "comment": "Assay type of the file or related biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "comment": "Assay type of a file, offering original terms and corresponding \"slim\" terms.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -7125,7 +7382,7 @@
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
-                     "comment": "Assay type of the file or related biosamples, offering only \"slim\" terms corresponding to original metadata.",
+                     "comment": "Assay type of a file, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -7450,6 +7707,7 @@
                   {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_analysis_type"},
+                  {"sourcekey": "S_sample_prep_method"},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
                   {"sourcekey": "S_taxonomy_slim"},
@@ -7796,6 +8054,22 @@
                   }
                },
                {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "array",
@@ -8080,6 +8354,16 @@
                            {
                               "source": {
                                  "api": "entity",
+                                 "path": "(core_fact)/CFDE:core_fact_sample_prep_method/(sample_prep_method)=(c2m2:sample_prep_method:nid)"
+                              },
+                              "destination": {
+                                 "name": "sample_prep_method",
+                                 "type": "csv"
+                              }
+                           },
+                           {
+                              "source": {
+                                 "api": "entity",
                                  "path": "(core_fact)/CFDE:core_fact_assay_type/(assay_type)=(c2m2:assay_type:nid)"
                               },
                               "destination": {
@@ -8353,8 +8637,17 @@
                         "nid"
                      ]
                   },
+                  "S_sample_prep_method": {
+                     "comment": "Sample prep method of a biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_assay_type": {
-                     "comment": "Assay type of a biosample or related files, offering original terms and corresponding \"slim\" terms.",
+                     "comment": "Assay type of related files, offering original terms and corresponding \"slim\" terms.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -8364,7 +8657,7 @@
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
-                     "comment": "Assay type of a biosample or related files, offering only \"slim\" terms corresponding to original metadata.",
+                     "comment": "Assay type of related files, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -8373,12 +8666,12 @@
                         "nid"
                      ]
                   },
-                  "S_assay_type_local": {
-                     "markdown_name": "Assay Type",
-                     "comment": "The assay-type which prepared the biosample.",
+                  "S_sample_prep_method_local": {
+                     "markdown_name": "Sample Prep Method",
+                     "comment": "The sample prep method for the biosample.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
-                        {"outbound": ["CFDE", "core_fact_assay_type_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_fkey"]},
                         "nid"
                      ]
                   },
@@ -8653,9 +8946,9 @@
                      }
                   },
                   {
-                     "markdown_name": "Assay Type",
-                     "comment": "The assay type of the biosample.",
-                     "source": ["S_core_fact", "assay_type_row"],
+                     "markdown_name": "Sample Prep Method",
+                     "comment": "The sample prep method of the biosample.",
+                     "source": ["S_core_fact", "sample_prep_method_row"],
                      "display": {
                         "markdown_pattern": "{{{$_self.name}}}"
                      }
@@ -8670,7 +8963,7 @@
                   "local_id",
                   "persistent_id",
                   {"sourcekey": "S_project"},
-                  {"sourcekey": "S_assay_type_local"},
+                  {"sourcekey": "S_sample_prep_method_local"},
                   {"sourcekey": "S_anatomy"},
                   {
                      "sourcekey": "S_disease",
@@ -8689,10 +8982,11 @@
                   {"sourcekey": "S_creation_time"}
                ],
                "filter": {"and": [
-                  {"sourcekey": "S_assay_type_slim", "open": true},
-                  {"sourcekey": "S_assay_type"},
+                  {"sourcekey": "S_sample_prep_method", "open": true},
                   {"sourcekey": "S_anatomy_slim", "open": true},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_assay_type_slim", "open": true},
+                  {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_taxonomy_slim"},
                   {"sourcekey": "S_taxonomy"},
                   {"sourcekey": "S_disease_search_slim"},
@@ -9022,6 +9316,22 @@
                {
                   "name": "anatomies",
                   "description": "The numeric ID of anatomy terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
                   "type": "array",
                   "format": "integer",
                   "constraints": {
@@ -9751,8 +10061,17 @@
                         "nid"
                      ]
                   },
+                  "S_sample_prep_method": {
+                     "comment": "Sample prep method of a biosample.",
+                     "source": [
+                        {"sourcekey": "S_core_fact"},
+                        {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
+                        {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
+                        "nid"
+                     ]
+                  },
                   "S_assay_type": {
-                     "comment": "Assay type of a file or related biosamples, offering original terms and corresponding \"slim\" terms.",
+                     "comment": "Assay type of a file, offering original terms and corresponding \"slim\" terms.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -9762,7 +10081,7 @@
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
-                     "comment": "Assay type of a file or related biosamples, offering only \"slim\" terms corresponding to original metadata.",
+                     "comment": "Assay type of a file, offering only \"slim\" terms corresponding to original metadata.",
                      "source": [
                         {"sourcekey": "S_core_fact"},
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
@@ -9951,6 +10270,7 @@
                   {"sourcekey": "S_role"},
                   {"sourcekey": "S_anatomy_slim"},
                   {"sourcekey": "S_anatomy"},
+                  {"sourcekey": "S_sample_prep_method"},
                   {"sourcekey": "S_assay_type_slim"},
                   {"sourcekey": "S_assay_type"},
                   {"sourcekey": "S_data_type_slim"},
@@ -12493,6 +12813,22 @@
                },
 
                {
+                  "name": "sample_prep_methods",
+                  "description": "The numeric ID of sample_prep_method terms qualifying the described entities.",
+                  "type": "array",
+                  "format": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": false,
+                        "gin_array": true
+                     }
+                  }
+               },
+               {
                   "name": "assay_types",
                   "description": "The numeric ID of assay_type terms qualifying the described entities.",
                   "type": "array",
@@ -12672,6 +13008,17 @@
                   }
                },
                {
+                  "name": "sample_prep_method",
+                  "description": "The numeric ID of the sample_prep_method term qualifying the described files.",
+                  "type": "integer",
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["sample_prep_method", "nid"],
+                        "trgm": false
+                     }
+                  }
+               },
+               {
                   "name": "assay_type",
                   "description": "The numeric ID of the assay_type term qualifying the described files.",
                   "type": "integer",
@@ -12771,6 +13118,11 @@
                {
                   "name": "anatomy_row",
                   "description": "Denormalized copy of the anatomy term qualifying the described biosamples.",
+                  "type": "object"
+               },
+               {
+                  "name": "sample_prep_method_row",
+                  "description": "Denormalized copy of the sample_prep_method term qualifying the described files.",
                   "type": "object"
                },
                {
@@ -12895,6 +13247,14 @@
                   }
                },
                {
+                  "fields": "sample_prep_method",
+                  "constraint_name": "core_fact_sample_prep_method_fkey",
+                  "reference": {
+                     "resource": "sample_prep_method",
+                     "fields": "nid"
+                  }
+               },
+               {
                   "fields": "assay_type",
                   "constraint_name": "core_fact_assay_type_fkey",
                   "reference": {
@@ -12979,6 +13339,10 @@
                      "comment": "An ethnicity CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_ethnicity_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_ethnicity_ethnicity_fkey"]}, "nid"]
                   },
+                  "S_sample_prep_methods": {
+                     "comment": "A sample prep method CV term associated with a set of C2M2 entities.",
+                     "source": [{"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]}, "nid"]
+                  },
                   "S_assay_types": {
                      "comment": "An assay-type CV term associated with a set of C2M2 entities.",
                      "source": [{"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]}, {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]}, "nid"]
@@ -13032,6 +13396,7 @@
                   {"sourcekey": "S_projects"},
                   {"sourcekey": "S_diseases"},
                   {"sourcekey": "S_assay_types"},
+                  {"sourcekey": "S_sample_prep_methods"},
                   {"sourcekey": "S_data_types"},
                   {"sourcekey": "S_file_formats"},
                   {"sourcekey": "S_compression_formats"},
@@ -13066,6 +13431,15 @@
                      "display": {
                         "template_engine": "handlebars",
                         "markdown_pattern": "{{#if (gt _assay_types.length \"1\")}}{{_assay_types.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_assay_type_fkey}}{{{$fkeys.CFDE.core_fact_assay_type_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
+                     }
+                  },
+                  {
+                     "markdown_name": "Sample Prep Method",
+                     "source": "sample_prep_methods",
+                     "comment": "Sample prep method to which a set of C2M2 entities is attributed.",
+                     "display": {
+                        "template_engine": "handlebars",
+                        "markdown_pattern": "{{#if (gt _sample_prep_methods.length \"1\")}}{{_sample_prep_methods.length}} values{{else}}{{#if $fkeys.CFDE.core_fact_sample_prep_method_fkey}}{{{$fkeys.CFDE.core_fact_sample_prep_method_fkey.rowName}}}{{else}}{{/if}}{{/if}}"
                      }
                   },
                   {
@@ -13127,6 +13501,7 @@
                   {"sourcekey": "S_dccs"},
                   {"sourcekey": "S_projects"},
                   {"sourcekey": "S_assay_types"},
+                  {"sourcekey": "S_sample_prep_methods"},
                   {"sourcekey": "S_data_types"},
                   {"sourcekey": "S_file_formats"},
                   {"sourcekey": "S_compression_formats"},
@@ -14609,6 +14984,57 @@
                   "constraint_name": "core_fact_anatomy_anatomy_fkey",
                   "reference": {
                      "resource": "anatomy",
+                     "fields": "nid"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "profile": "tabular-data-resource",
+         "name": "core_fact_sample_prep_method",
+         "description": "An exploded representation of the core_fact.sample_prep_methods array column as a binary association.",
+         "schema": {
+            "fields": [
+               {
+                  "name": "core_fact",
+                  "title": "Numeric ID",
+                  "description": "The numeric ID of a core_fact record in the portal.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  }
+               },
+               {
+                  "name": "sample_prep_method",
+                  "description": "The numeric ID of a term found in the core_fact.sample_prep_methods array column.",
+                  "type": "integer",
+                  "constraints": {
+                     "required": true
+                  },
+                  "deriva": {
+                     "indexing_preferences": {
+                        "btree": ["sample_prep_method", "core_fact"],
+                        "trgm": false
+                     }
+                  }
+               }
+            ],
+            "primaryKey": ["core_fact", "sample_prep_method"],
+            "foreignKeys": [
+               {
+                  "fields": "core_fact",
+                  "constraint_name": "core_fact_sample_prep_method_core_fact_fkey",
+                  "reference": {
+                     "resource": "core_fact",
+                     "fields": "nid"
+                  }
+               },
+               {
+                  "fields": "sample_prep_method",
+                  "constraint_name": "core_fact_sample_prep_method_sample_prep_method_fkey",
+                  "reference": {
+                     "resource": "sample_prep_method",
                      "fields": "nid"
                   }
                }

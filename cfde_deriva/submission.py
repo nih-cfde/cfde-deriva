@@ -777,7 +777,7 @@ class Submission (object):
                 },
             )
 
-        report = frictionless.validate_package(package, trusted=False, original=True, parallel=False)
+        report = frictionless.package.validate.validate(package, original=True, parallel=False)
         if post_process:
             post_process(content_path, packagefile, report)
         if report.stats['errors'] > 0:
@@ -1212,6 +1212,7 @@ WHERE v.id = t.id;
                     registry_dp.doc_cfde_schema.tables[tname]
                     for tname in [
                             'anatomy',
+                            'sample_prep_method',
                             'assay_type',
                             'data_type',
                             'dbgap_study_id',
@@ -1244,6 +1245,8 @@ WHERE v.id = t.id;
                     ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN anatomy v ON (cf.anatomy = v.nid)
                     UNION SELECT v.id FROM collection_anatomy a JOIN anatomy v ON (a.anatomy = v.nid)""",
                      'datapackage_anatomy', 'anatomy'),
+                    ('SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN sample_prep_method v ON (cf.sample_prep_method = v.nid)',
+                     'datapackage_sample_prep_method', 'sample_prep_method'),
                     ("""  SELECT v.id FROM biosample e JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)
                     UNION SELECT v.id FROM file e      JOIN core_fact cf ON (e.core_fact = cf.nid) JOIN assay_type v ON (cf.assay_type = v.nid)""",
                      'datapackage_assay_type', 'assay_type'),
@@ -1362,7 +1365,7 @@ WHERE id IS NOT NULL
         try:
             submission.ingest()
         except exception.InvalidDatapackage as e:
-            logger.warn('Rebuild of submission %s encountered error: %s' % (id, e))
+            logger.warning('Rebuild of submission %s encountered error: %s' % (id, e))
             pass
 
     @classmethod
