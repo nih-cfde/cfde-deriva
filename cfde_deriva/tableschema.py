@@ -464,6 +464,7 @@ class CatalogConfigurator (object):
                                     { "name": "Phenotype", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:phenotype" },
                                     { "name": "Protein", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:protein" },
                                     { "name": "Race", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:race" },
+                                    { "name": "Sample Prep Method", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:sample_prep_method" },
                                     { "name": "Sex", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:sex" },
                                     { "name": "Subject Granularity", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_granularity" },
                                     { "name": "Subject Role", "url": "/chaise/recordset/#{{$catalog.id}}/CFDE:subject_role" },
