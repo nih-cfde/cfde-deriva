@@ -562,6 +562,7 @@ class StatsQuery2 (object):
                 Dimension('mime_type', 'mime_types'),
                 SlimDimension('ncbi_taxonomy', 'ncbi_taxons'),
                 AssocTypeDimension('phenotype', 'phenotypes'),
+                Dimension('protein', 'proteins', fact_tname='protein_fact'),
                 Dimension('race', 'races'),
                 Dimension('sample_prep_method', 'sample_prep_methods'),
                 Dimension('sex', 'sexes'),
