@@ -13878,6 +13878,7 @@
                   "name": "proteins",
                   "description": "The numeric ID of the protein terms qualifiying the described entities.",
                   "type": "array",
+                  "format": "integer",
                   "constraints": {
                      "required": true
                   },
