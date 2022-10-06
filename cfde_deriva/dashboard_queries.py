@@ -475,6 +475,7 @@ class Dimension (object):
         self.name = dim_name
         self.array_cname = array_cname
         self.vocab_tname = kwargs.get('vocab_tname', dim_name)
+        self.fact_tname = kwargs.get('fact_tname', 'core_fact')
 
     def get_vocab_map(self, helper, headers=DEFAULT_HEADERS):
         return TermMap(helper, self.vocab_tname, headers=headers)
@@ -557,14 +558,15 @@ class StatsQuery2 (object):
                 SlimAssocTypeDimension('disease', 'diseases'),
                 Dimension('ethnicity', 'ethnicities'),
                 SlimDimension('file_format', 'file_formats'),
-                Dimension('gene', 'genes'),
+                Dimension('gene', 'genes', fact_tname='gene_fact'),
                 Dimension('mime_type', 'mime_types'),
                 SlimDimension('ncbi_taxonomy', 'ncbi_taxons'),
                 AssocTypeDimension('phenotype', 'phenotypes'),
                 Dimension('race', 'races'),
+                Dimension('sample_prep_method', 'sample_prep_methods'),
                 Dimension('sex', 'sexes'),
                 Dimension('species', 'subject_species', vocab_tname='ncbi_taxonomy'),
-                Dimension('substance', 'substances'),
+                Dimension('substance', 'substances', fact_tname='pubchem_fact'),
                 Dimension('subject_granularity', 'subject_granularities'),
                 Dimension('subject_role', 'subject_roles'),
         ]
@@ -578,7 +580,7 @@ class StatsQuery2 (object):
         self.helper = helper
         self.included_entities = set()
         self.included_dimensions = set()
-        self.path = self.helper.builder.CFDE.core_fact.path
+        self.path = self.helper.builder.CFDE.combined_fact.path
 
     def entity(self, entity_name):
         """Select entity which will be source of statistics
@@ -617,6 +619,9 @@ class StatsQuery2 (object):
 
         self.included_dimensions.add(dim)
 
+        if dim.fact_tname not in self.path.table_instances:
+            self.path = self.path.combined_fact.link(self.helper.builder.CFDE.tables[dim.fact_tname])
+
         return self
 
     def _sort_and_merge(self, rows, sort_key, sums_dict):
@@ -644,28 +649,28 @@ class StatsQuery2 (object):
     def fetch(self, headers=DEFAULT_HEADERS):
         """Fetch results for configured query"""
         if self.path is None:
-            raise TypeError('Cannot call .fetch() method to calling .entity() method.')
+            raise TypeError('Cannot call .fetch() method prior to calling .entity() method.')
 
         entities = list(self.included_entities)
         dimensions = list(self.included_dimensions)
 
-        filters = self.path.core_fact.column_definitions[entities[0].attr_cnames[0]] > 0
+        filters = self.path.combined_fact.column_definitions[entities[0].attr_cnames[0]] > 0
         for ent in entities[1:]:
-            filters = filters | (self.path.core_fact.column_definitions[ent.attr_cnames[0]] > 0)
+            filters = filters | (self.path.combined_fact.column_definitions[ent.attr_cnames[0]] > 0)
 
         if dimensions:
             attributes = []
             for ent in self.included_entities:
-                attributes.extend([ self.path.core_fact.column_definitions[cname] for cname in ent.attr_cnames ])
+                attributes.extend([ Sum(self.path.combined_fact.column_definitions[cname]).alias(cname) for cname in ent.attr_cnames ])
 
             api = self.path.filter(filters).groupby(*[
-                self.path.core_fact.column_definitions[dim.array_cname]
+                self.path.table_instances[dim.fact_tname].column_definitions[dim.array_cname]
                 for dim in dimensions
             ]).attributes(*attributes)
         else:
             aggregates = []
             for ent in self.included_entities:
-                aggregates.extend([ Sum(self.path.core_fact.column_definitions[cname]).alias(cname) for cname in ent.attr_cnames ])
+                aggregates.extend([ Sum(self.path.combined_fact.column_definitions[cname]).alias(cname) for cname in ent.attr_cnames ])
 
             api = self.path.filter(filters).aggregates(*aggregates)
 
@@ -727,8 +732,8 @@ class DashboardQueryHelper (object):
         self.catalog = ErmrestCatalog(scheme, hostname, catalogid, caching=caching, session_config=session_config, credentials=credential)
         self.builder = self.catalog.getPathBuilder()
         self.cfde_schema = self.catalog.getCatalogModel().schemas['CFDE']
-        if 'core_fact' not in self.cfde_schema.tables:
-            raise ValueError('Target %s catalog %r lacks the required CFDE.core_fact table' % (hostname, catalogid))
+        if 'combined_fact' not in self.cfde_schema.tables:
+            raise ValueError('Target %s catalog %r lacks the required CFDE.combined_fact table' % (hostname, catalogid))
 
     def run_demo1(self):
         """Run each example query and dump all results as JSON."""
@@ -816,12 +821,12 @@ class DashboardQueryHelper (object):
 
             'subject_stats_datatype_substance': list(StatsQuery2(self).entity('subject').dimension('data_type').dimension('substance').fetch()),
 
-            'file_all': list(StatsQuery2(self).entity('file')
+            'file_gene': list(StatsQuery2(self).entity('file').dimension('gene').fetch()),
+            'file_substance': list(StatsQuery2(self).entity('file').dimension('substance').fetch()),
+            'file_core': list(StatsQuery2(self).entity('file')
                              .dimension('anatomy')
                              .dimension('assay_type')
                              .dimension('analysis_type').dimension('compression_format').dimension('data_type').dimension('file_format').dimension('mime_type')
-                             .dimension('gene')
-                             .dimension('substance')
                              .dimension('subject_granularity').dimension('subject_role').dimension('species').dimension('ncbi_taxonomy')
                              .dimension('sex').dimension('race').dimension('ethnicity')
                              .dimension('disease').dimension('phenotype')
