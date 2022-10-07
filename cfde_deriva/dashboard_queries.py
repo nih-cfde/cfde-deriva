@@ -725,6 +725,47 @@ class StatsQuery2 (object):
 
         return [ rewrite_row(row) for row in rows ]
 
+    def fetch_flattened(self, allow_nulls=True, headers=DEFAULT_HEADERS):
+        """Perform self.fetch() but flatten dimensions to one term per group.
+
+        :param allow_nulls: If true, return groups that lack a term for a dimension.
+        :param headers: Override HTTP headers sent in ERMrest query.
+
+        This flattening of results may introduce "double-counting" by
+        representing the same group of entities in more than one
+        result record, once for each term associated with the same
+        group for the same dimension. This effect multiplies if
+        multiple dimensions are multi-termed.
+        """
+        def expand_row(row, dimensions):
+            # recursively generate output row(s) for each dimension
+            if not dimensions:
+                # recursion base case
+                yield row
+            else:
+                # extract first dimension
+                try:
+                    dim0 = dimensions[0]
+                    dim0_terms = row.pop(dim0.array_cname)
+                except KeyError as e:
+                    print(e, dim0, row)
+                # recur for subsequent dimensions
+                for row in expand_row(row, dimensions[1:]):
+                    # expand row for each term in first dimension
+                    if not dim0_terms and allow_nulls:
+                        # produce a row for null dimension
+                        row[dim0.name] = None
+                        yield row
+                    for term in dim0_terms:
+                        row = dict(row) # make copy we can mutate for this term
+                        row[dim0.name] = term
+                        yield row
+
+        for row in self.fetch(headers):
+            # each expand call may yield zero or more rows
+            for row in expand_row(row, list(self.included_dimensions)):
+                yield row
+
 class DashboardQueryHelper (object):
 
     def __init__(self, hostname, catalogid, scheme='https', caching=True, credential=None):
@@ -832,9 +873,53 @@ class DashboardQueryHelper (object):
                              .dimension('sex').dimension('race').dimension('ethnicity')
                              .dimension('disease').dimension('phenotype')
                              .fetch()
-                             )
+                              ),
+            'file_protein': list(StatsQuery2(self).entity('file').dimension('protein').fetch()),
         }
         print(json.dumps(results, indent=2))
+
+    def run_demo3(self):
+        """Run each example query and dump all results as JSON."""
+        # use list() to convert each ResultSet
+        # for easier JSON serialization...
+        results = {
+            'dccs': list(self.list_dccs()),
+
+            'file': list(StatsQuery2(self).entity('file').fetch_flattened()),
+
+            'file_stats_anatomy_assaytype': list(StatsQuery2(self).entity('file').dimension('anatomy').dimension('assay_type').fetch_flattened()),
+            'file_stats_disease_gene': list(StatsQuery2(self).entity('file').dimension('disease').dimension('gene').fetch_flattened()),
+            'file_stats_datatype_dcc': list(StatsQuery2(self).entity('file').dimension('data_type').dimension('dcc').fetch_flattened()),
+            'file_stats_datatype_species': list(StatsQuery2(self).entity('file').dimension('data_type').dimension('species').fetch_flattened()),
+
+            'biosample_stats_datatype_disease': list(StatsQuery2(self).entity('biosample').dimension('data_type').dimension('disease').fetch_flattened()),
+
+            'subject_stats_datatype_substance': list(StatsQuery2(self).entity('subject').dimension('data_type').dimension('substance').fetch_flattened()),
+
+            'file_gene': list(StatsQuery2(self).entity('file').dimension('gene').fetch_flattened()),
+            'file_substance': list(StatsQuery2(self).entity('file').dimension('substance').fetch_flattened()),
+            'file_core': list(StatsQuery2(self).entity('file')
+                             .dimension('anatomy')
+                             .dimension('assay_type')
+                             .dimension('analysis_type').dimension('compression_format').dimension('data_type').dimension('file_format').dimension('mime_type')
+                             .dimension('subject_granularity').dimension('subject_role').dimension('species').dimension('ncbi_taxonomy')
+                             .dimension('sex').dimension('race').dimension('ethnicity')
+                             .dimension('disease').dimension('phenotype')
+                             .fetch_flattened()
+                              ),
+            'file_protein': list(StatsQuery2(self).entity('file').dimension('protein').fetch_flattened()),
+        }
+        print(json.dumps(results, indent=2))
+
+    def list_dccs(self, headers=DEFAULT_HEADERS):
+        dcc = self.builder.CFDE.dcc
+        path = dcc.path
+        return path.attributes(
+            path.dcc.id,
+            path.dcc.dcc_name,
+            path.dcc.dcc_abbreviation,
+            path.dcc.dcc_description,
+        ).fetch(headers=headers)
 
     def list_projects(self, use_root_projects=False, parent_project_nid=None, headers=DEFAULT_HEADERS):
         """Return list of projects AKA funded activities
@@ -905,8 +990,9 @@ def main():
     credential = get_credential(hostname)
     catalogid = os.getenv('DERIVA_CATALOGID', '1')
     db = DashboardQueryHelper(hostname, catalogid, credential=credential)
-    db.run_demo1()
+    #db.run_demo1()
     db.run_demo2()
+    db.run_demo3()
     return 0
 
 if __name__ == '__main__':
