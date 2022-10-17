@@ -4193,8 +4193,8 @@
          "deriva": {
             "acls": {
                "select": [ "*" ],
-               "insert": [ "cfde_portal_admin", "cfde_portal_curator" ],
-               "update": [ "cfde_portal_admin", "cfde_portal_curator" ],
+               "insert": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline"  ],
+               "update": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_submission_pipeline"  ],
                "delete": [ "cfde_portal_admin", "cfde_portal_curator" ]
             },
             "source_definitions": {
