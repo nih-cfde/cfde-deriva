@@ -3,4 +3,5 @@ cfde_subject_sex:0	Indeterminate	Indeterminate
 cfde_subject_sex:1	Female	Female
 cfde_subject_sex:2	Male	Male
 cfde_subject_sex:3	Intersex	Intersex
-cfde_subject_sex:4	Transsexual	Transsexual
+cfde_subject_sex:4	Transsexual (MTF)	Transsexual (male-to-female)
+cfde_subject_sex:5	Transsexual (FTM)	Transsexual (female-to-male)
