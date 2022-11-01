@@ -1,4 +1,12 @@
 id	name	description	synonyms
+ILX:0793637	Nucleic acid contact matrix	A matrix representing contact frequencies of pairs of binned genomic regions	[]
+ILX:0793638	Contact list	A list containing pairs of genomic loci, with each pair representing a contact.	[]
+ILX:0793639	Microscopy data	Measurements obtained from microscopy experiments	[]
+ILX:0793640	Single particle tracking coordinates	A table representing the X and Y coordinates as well as timepoints for each individual particle detected in a single particle tracking experiment	[]
+ILX:0793648	Abundance data	A type of data measuring the abundance of an entity represented as a normalized value.	[]
+ILX:0793649	Gene family sequence abundance	A type of abundance data measuring the number of sequences mapping to a representative sequence of a gene family from a reference database, reported as a normalized value such as reads per kilobase (RPKs).	[]
+ILX:0793650	Pathway abundance	A type of abundance data measuring the number of sequences mapping a to a representation of a metabolic pathway found in a sequence dataset, reported as a normalized value.	[]
+ILX:0793651	Pathway coverage	A type of pathway data measuring the confidence or level of completeness at which a pathway is detected within a sequence dataset.	[]
 data:0005	Resource type	A type of computational resource used in bioinformatics.	[]
 data:0006	Data	Information, represented in an information artefact (data record) that is 'understandable' by dedicated computational tools that can use the data as input or produce it as output.	["Data record","Data set","Datum"]
 data:0007	Tool	A bioinformatics package or tool, e.g. a standalone application or web service.	[]
