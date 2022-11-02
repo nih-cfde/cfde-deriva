@@ -1,4 +1,10 @@
 id	name	description	synonyms
+ILX:0793630	hic	The hic format is a compressed binary format for storing multiple resolutions of genomic contact information.	[]
+ILX:0793631	cooler	The cooler format is an hdf5-based format for storing genomic contact information, represented as one or more sparse matrices with identical axes.	[]
+ILX:0793633	mcool	The mcool format is the multiple resolution version of the cooler format for storing genomic contact matrices.	[]
+ILX:0793634	scool	The scool format is a version of the cooler format that stores all of the contact matrices of a single cell dataset in which each contact matrix represents a cell.	[]
+ILX:0793635	pairs	The pairs format is a text format for storing pairs of genomic loci, originally developed for Hi-C data.	[]
+ILX:0793636	spt	The spt format is for storing single particle tracking data, based on the tsv format. It contains a header and multiple data rows, where each row represents one particle at one time point, and contains X and Y coordinates as well as time.	[]
 format:1196	SMILES	Chemical structure specified in Simplified Molecular Input Line Entry System (SMILES) line notation.	[]
 format:1197	InChI	Chemical structure specified in IUPAC International Chemical Identifier (InChI) line notation.	[]
 format:1198	mf	Chemical structure specified by Molecular Formula (MF), including a count of each element in a compound.	[]
