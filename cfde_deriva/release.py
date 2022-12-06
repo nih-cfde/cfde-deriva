@@ -97,36 +97,57 @@ class Release (object):
         if purge_mode not in {'auto', 'ALL'}:
             raise ValueError('Invalid purge_mode %r' % (purge_mode,))
 
-        in_past = True
-        for rel_row in registry.list_releases(sortby="RCT"):
-            purge_this = False
+        current = cls.find_published_release(server, registry, publish_id='1')
+        if current is None:
+            raise NotImplementedError("Auto-purge logic not defined when current release catalog is not determined.")
 
-            if rel_row["status"] == terms.cfde_registry_rel_status.public_release:
-                logger.debug("Found public-release %(id)s, dividing release history into past/present/future" % rel_row)
-                in_past = False
+        release_rows = list(registry.list_releases(sortby="RCT"))
+        idx_by_id = {
+            release_rows[i]["id"]: i
+            for i in range(len(release_rows))
+        }
 
+        # find protection boundaries
+        # - current published release
+        # - most recent obsolete release
+        # - every non-error catalog newer than current published release
+        publ_idx = idx_by_id[current.release_id]
+        protect = {publ_idx}
+        for i in range(publ_idx - 1, -1, -1):
+            if release_rows[i]["status"] == terms.cfde_registry_rel_status.obsoleted:
+                protect.add(i)
+                break
+
+        for i in range(len(release_rows)):
+            rel_row = release_rows[i]
             if purge_mode == 'ALL':
-                logger.info("Purging release %(id)s in purge ALL mode" % rel_row)
-                purge_this = True
+                rel_row['action'] = 'ALL'
+            elif i in protect:
+                rel_row['action'] = 'protect'
             elif rel_row["status"] in {
                     terms.cfde_registry_rel_status.ops_error,
-                    terms.cfde_registry_rel_status.obsoleted,
                     terms.cfde_registry_rel_status.rejected,
                     terms.cfde_registry_rel_status.content_error,
             }:
-                logger.info("Purging release %(id)s with unconditional purge status %(status)s" % rel_row)
-                purge_this = True
-            elif in_past and rel_row["status"] in {
+                rel_row['action'] = 'junk'
+            elif rel_row["status"] in {
                     terms.cfde_registry_rel_status.planning,
                     terms.cfde_registry_rel_status.pending,
                     terms.cfde_registry_rel_status.content_ready,
+                    terms.cfde_registry_rel_status.obsoleted,
             }:
-                logger.info("Purging past release %(id)s with conditional purge status %(status)s" % rel_row)
-                purge_this = True
+                rel_row['action'] = 'protect' if i >= publ_idx else 'stale'
             else:
-                logger.info("Skipping release %(id)s with unmatched status %(status)s for purge." % rel_row)
+                rel_row['action'] = 'protect'
 
-            if purge_this:
+        logger.info('Purging in mode=%r:' % (purge_mode,))
+        for i in range(len(release_rows)):
+            rel_row = release_rows[i]
+            rel_row['idx'] = i
+            if rel_row['ermrest_url'] is not None:
+                logger.info('%(idx)6.d  %(RCT)s  %(id)s  %(action)-6s  %(status)-12s  %(ermrest_url)s' % rel_row)
+            if rel_row['action'] in {'stale', 'junk', 'ALL'} \
+               and rel_row['ermrest_url'] is not None:
                 release = cls.by_id(server, registry, rel_row['id'])
                 release.purge()
 
@@ -217,7 +238,6 @@ class Release (object):
                 logger.debug('Changing release %r status %s -> %s' % (self.release_id, status, new_state))
                 self.registry.update_release(self.release_id, status=new_state)
 
-            logger.debug('Deleting ermrest catalog %r' % (catalog_id,))
             try:
                 self.server.delete('/ermrest/catalog/%s' % urlquote(catalog_id))
                 mesg = 'Purged catalog %r for release %r.' % (catalog_id, self.release_id)
@@ -232,6 +252,32 @@ class Release (object):
         except exception.StateError:
             logger.info('Release %r already purged.' % self.release_id)
             return False
+
+    @classmethod
+    def find_published_release(cls, server, registry, publish_id='1', suppress_ids=set()):
+        """Find release currently bound to the publish_id catalog alias."""
+        try:
+            # find previous release currently bound to publish_id
+            res = server.get('/ermrest/alias/%s' % urlquote(publish_id))
+            aliasdoc = res.json()
+            if aliasdoc.get('alias_target') is not None:
+                # HACK: search release by pattern-match on ermrest_url
+                pattern = '/%s$' % urlquote(aliasdoc['alias_target'])
+                rows = registry._catalog.get('/entity/CFDE:release/ermrest_url::regexp::%s' % (urlquote(pattern),)).json()
+                if len(rows) > 1:
+                    raise NotImplementedError('Found more than one release matching ermrest_url ::regexp:: %r:\n%r' % (pattern, rows))
+                if rows:
+                    prev_release = Release.by_id(server, registry, rows[0]['id'])
+                    if prev_release.release_id in suppress_ids:
+                        prev_release = None
+                    return prev_release
+
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == requests.codes.not_found:
+                # publish_id alias is not registered yet?
+                return None
+            else:
+                raise
 
     def publish(self, publish_id='1'):
         """Adjust ermrest catalog alias to publish this release"""
@@ -248,28 +294,12 @@ class Release (object):
         if not res.json().get('features', {}).get('catalog_alias', False):
             raise exception.StateError('The server does not support catalog aliasing features!')
 
-        prev_release = None
-        try:
-            # find previous release currently bound to publish_id
-            res = self.server.get('/ermrest/alias/%s' % urlquote(publish_id))
-            aliasdoc = res.json()
-            if aliasdoc.get('alias_target') is not None:
-                # HACK: search release by pattern-match on ermrest_url
-                pattern = '/%s$' % urlquote(aliasdoc['alias_target'])
-                rows = self.registry._catalog.get('/entity/CFDE:release/ermrest_url::regexp::%s' % (urlquote(pattern),)).json()
-                if len(rows) > 1:
-                    raise NotImplementedError('Found more than one release matching ermrest_url ::regexp:: %r:\n%r' % (pattern, rows))
-                logger.info(rows)
-                if rows:
-                    prev_release = Release.by_id(self.server, self.registry, rows[0]['id'])
-                    if prev_release.release_id == self.release_id:
-                        prev_release = None
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == requests.codes.not_found:
-                # maybe we are creating a new publish_id?
-                pass
-            else:
-                raise
+        prev_release = Release.find_published_release(
+            self.server,
+            self.registry,
+            publish_id=publish_id,
+            suppress_ids={self.release_id}
+        )
 
         res = self.server.put(
             '/ermrest/alias/%s' % urlquote(publish_id),
