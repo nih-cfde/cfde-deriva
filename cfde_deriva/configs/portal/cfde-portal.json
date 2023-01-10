@@ -9,6 +9,7 @@
       },
       "display": {
          "hide_row_count": {
+            "compact": false,
             "*": true
          }
       }
