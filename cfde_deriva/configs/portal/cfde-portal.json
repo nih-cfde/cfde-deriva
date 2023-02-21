@@ -9,6 +9,7 @@
       },
       "display": {
          "hide_row_count": {
+            "compact": false,
             "*": true
          }
       }
@@ -5750,7 +5751,8 @@
                "show_saved_query": true
             },
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "aggressive_facet_lookup": true
             },
             "table_display": {
                "*": {
@@ -5807,7 +5809,8 @@
                         {"inbound": ["CFDE", "core_fact_project_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_project_project_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "projects" ]
                   },
                   "S_project_array": {
                      "markdown_name": "Project",
@@ -5818,6 +5821,7 @@
                         {"outbound": ["CFDE", "core_fact_project_project_fkey"]},
                         "nid"
                      ],
+                     "fast_filter_source": [ "projects" ],
                      "aggregate": "array_d"
                   },
                   "S_dcc": {
@@ -5828,7 +5832,8 @@
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "dccs" ]
                   },
                   "S_dcc_array": {
                      "markdown_name": "Common Fund Program",
@@ -5839,6 +5844,7 @@
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
                      ],
+                     "fast_filter_source": [ "dccs" ],
                      "aggregate": "array_d"
                   },
                   "S_super_projects": {
@@ -5858,7 +5864,8 @@
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_file_format_slim": {
                      "markdown_name": "File Format (slim)",
@@ -5869,7 +5876,8 @@
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_data_type": {
                      "comment": "Data type of a constituent file, offering original terms and corresponding \"slim\" terms.",
@@ -5878,7 +5886,8 @@
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_data_type_slim": {
                      "markdown_name": "Data Type (slim)",
@@ -5889,7 +5898,8 @@
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_sample_prep_method": {
                      "comment": "Sample prep method of a consistuent biosample.",
@@ -5898,7 +5908,8 @@
                         {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sample_prep_methods" ]
                   },
                   "S_assay_type": {
                      "comment": "Assay type of a constituent file, offering original terms and corresponding \"slim\" terms.",
@@ -5907,7 +5918,8 @@
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
@@ -5918,7 +5930,8 @@
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_ncbi_taxons": {
                      "markdown_name": "Taxonomy",
@@ -5928,7 +5941,8 @@
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_ncbi_taxons_slim": {
                      "markdown_name": "Taxonomy (slim)",
@@ -5939,7 +5953,8 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_taxonomy_assoc": {
                      "markdown_name": "Taxonomy",
@@ -5958,7 +5973,8 @@
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "subject_granularities" ]
                   },
                   "S_subject_roles": {
                      "markdown_name": "Subject Role",
@@ -5968,7 +5984,8 @@
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "subject_roles" ]
                   },
                   "S_anatomy": {
                      "comment": "Anatomy for biosamples, offering original terms and corresponding \"slim\" terms.",
@@ -5977,7 +5994,8 @@
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_anatomy_assoc": {
                      "markdown_name": "Anatomy",
@@ -5997,7 +6015,8 @@
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_disease": {
                      "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
@@ -6006,7 +6025,8 @@
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_disease_slim": {
                      "markdown_name": "Disease (slim)",
@@ -6017,7 +6037,8 @@
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_phenotype": {
                      "markdown_name": "Phenotype",
@@ -6027,7 +6048,8 @@
                         {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "phenotypes_flat" ]
                   },
                   "S_disease_assoc": {
                      "markdown_name": "Disease",
@@ -6075,7 +6097,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "substances" ]
                   },
                   "S_substance_assoc": {
                      "markdown_name": "Substance",
@@ -6094,7 +6117,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "compounds" ]
                   },
                   "S_compound_assoc": {
                      "markdown_name": "Compound",
@@ -6113,7 +6137,8 @@
                         {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
                         {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "genes" ]
                   },
                   "S_gene_assoc": {
                      "markdown_name": "Gene",
@@ -7158,7 +7183,8 @@
                "show_saved_query": true
             },
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "aggressive_facet_lookup": true
             },
             "table_display": {
                "*": {
@@ -7230,7 +7256,8 @@
                           {"outbound": ["CFDE", "core_fact_dbgap_study_id_fkey"]},
                           "nid"
                       ],
-                     "entity": true
+                     "entity": true,
+                     "fast_filter_source": [ "dbgap_study_ids" ]
                   },
                   "S_bundle_collection": {
                      "markdown_name": "Bundle Collection",
@@ -7268,7 +7295,8 @@
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
                      ],
-                     "entity": true
+                     "entity": true,
+                     "fast_filter_source": [ "dccs" ]
                   },
                   "S_dcc_array": {
                      "markdown_name": "Common Fund Program",
@@ -7288,7 +7316,8 @@
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_file_format_slim": {
                      "markdown_name": "File Format (slim)",
@@ -7299,7 +7328,8 @@
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_compression_format": {
                      "markdown_name": "Compression Format",
@@ -7308,7 +7338,8 @@
                         {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_compression_format_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "compression_formats" ]
                   },
                   "S_data_type": {
                      "comment": "Data type of a the file, offering original terms and corresponding \"slim\" terms.",
@@ -7317,7 +7348,8 @@
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_data_type_slim": {
                      "markdown_name": "Data Type (slim)",
@@ -7328,7 +7360,8 @@
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the file was created.",
@@ -7349,7 +7382,8 @@
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_anatomy_slim": {
                      "markdown_name": "Anatomy (slim)",
@@ -7360,7 +7394,8 @@
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_sample_prep_method": {
                      "comment": "Sample prep method of related biosamples.",
@@ -7369,7 +7404,8 @@
                         {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sample_prep_methods" ]
                   },
                   "S_assay_type": {
                      "comment": "Assay type of a file, offering original terms and corresponding \"slim\" terms.",
@@ -7378,7 +7414,8 @@
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
@@ -7389,7 +7426,8 @@
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_analysis_type": {
                      "comment": "Analysis type used to generate the file.",
@@ -7397,7 +7435,8 @@
                         {"sourcekey": "S_core_fact"},
                         {"outbound": ["CFDE", "core_fact_analysis_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "analysis_types" ]
                   },
                   "S_subject_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line, of subjects described directly or indirectly by the file.",
@@ -7406,7 +7445,8 @@
                         {"inbound": ["CFDE", "core_fact_subject_granularity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_granularity_subject_granularity_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "subject_granularities" ]
                   },
                   "S_subject_role": {
                      "comment": "The taxonomy role(s) of subjects described directly or indirectly by the file.",
@@ -7415,7 +7455,8 @@
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "subject_roles" ]
                   },
                   "S_described_subjects": {
                      "comment": "Subjects described or characterized by the file.",
@@ -7432,7 +7473,8 @@
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_disease_slim": {
                      "markdown_name": "Disease (slim)",
@@ -7443,7 +7485,8 @@
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_phenotype": {
                      "markdown_name": "Phenotype",
@@ -7453,7 +7496,8 @@
                         {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "phenotypes_flat" ]
                   },
                   "S_substance": {
                      "markdown_name": "Substance",
@@ -7463,7 +7507,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "substances" ]
                   },
                   "S_compound": {
                      "markdown_name": "Compound",
@@ -7473,7 +7518,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "compounds" ]
                   },
                   "S_gene": {
                      "markdown_name": "Gene",
@@ -7483,7 +7529,8 @@
                         {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
                         {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "genes" ]
                   },
                   "S_part_of_collections": {
                      "markdown_name": "Part of Collection",
@@ -7504,7 +7551,8 @@
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_taxonomy_slim": {
                      "markdown_name": "Subject Taxonomy (slim)",
@@ -7515,7 +7563,8 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_sex": {
                      "comment": "A sex linked to the described subject.",
@@ -7524,7 +7573,8 @@
                         {"inbound": ["CFDE", "core_fact_sex_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sex_sex_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sexes" ]
                   },
                   "S_race": {
                      "markdown_name": "Race",
@@ -7534,7 +7584,8 @@
                         {"inbound": ["CFDE", "core_fact_race_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_race_race_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "races" ]
                   },
                   "S_ethnicity": {
                      "comment": "An ethnicity linked to the described subject.",
@@ -7543,7 +7594,8 @@
                         {"inbound": ["CFDE", "core_fact_ethnicity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ethnicity_ethnicity_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ethnicities" ]
                   },
                   "S_age_at_enrollment": {
                      "markdown_name": "Age at Enrollment",
@@ -8591,7 +8643,8 @@
                "show_saved_query": true
             },
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "aggressive_facet_lookup": true
             },
             "table_display": {
                "*": {
@@ -8644,7 +8697,8 @@
                         {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sample_prep_methods" ]
                   },
                   "S_assay_type": {
                      "comment": "Assay type of related files, offering original terms and corresponding \"slim\" terms.",
@@ -8653,7 +8707,8 @@
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
@@ -8664,7 +8719,8 @@
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_sample_prep_method_local": {
                      "markdown_name": "Sample Prep Method",
@@ -8682,7 +8738,8 @@
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_anatomy_slim": {
                      "markdown_name": "Anatomy (slim)",
@@ -8693,7 +8750,8 @@
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_disease_search": {
                      "comment": "Disease for collection, biosample, or subject, offering original terms and corresponding \"slim\" terms.",
@@ -8702,7 +8760,8 @@
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_disease_search_slim": {
                      "markdown_name": "Disease (slim)",
@@ -8713,7 +8772,8 @@
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_phenotype_search": {
                      "markdown_name": "Phenotype",
@@ -8723,7 +8783,8 @@
                         {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "phenotypes_flat" ]
                   },
                   "S_disease": {
                      "markdown_name": "Biosample Disease",
@@ -8750,7 +8811,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "substances" ]
                   },
                   "S_substance": {
                      "markdown_name": "Substance",
@@ -8769,7 +8831,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "compounds" ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Subject Taxonomy",
@@ -8779,7 +8842,8 @@
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_taxonomy_slim": {
                      "markdown_name": "Subject Taxonomy (slim)",
@@ -8790,7 +8854,8 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_project": {
                      "comment": "The project attributed as the source of the biosample.",
@@ -8808,7 +8873,8 @@
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "dccs" ]
                   },
                   "S_dcc_array": {
                      "markdown_name": "Common Fund Program",
@@ -8819,6 +8885,7 @@
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
                      ],
+                     "fast_filter_source": [ "dccs" ],
                      "aggregate": "array_d"
                   },
                   "S_super_projects": {
@@ -8850,7 +8917,8 @@
                         {"inbound": ["CFDE", "core_fact_sex_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sex_sex_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sexes" ]
                   },
                   "S_race": {
                      "markdown_name": "Race",
@@ -8860,7 +8928,8 @@
                         {"inbound": ["CFDE", "core_fact_race_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_race_race_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "races" ]
                   },
                   "S_ethnicity": {
                      "comment": "An ethnicity linked to the originating subject.",
@@ -8869,7 +8938,8 @@
                         {"inbound": ["CFDE", "core_fact_ethnicity_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ethnicity_ethnicity_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ethnicities" ]
                   },
                   "S_age_at_enrollment": {
                      "markdown_name": "Age at Enrollment",
@@ -9769,7 +9839,8 @@
                "show_saved_query": true
             },
             "table_config": {
-               "stable_key_columns": ["id"]
+               "stable_key_columns": ["id"],
+               "aggressive_facet_lookup": true
             },
             "table_display": {
                "*": {
@@ -9841,7 +9912,8 @@
                         {"inbound": ["CFDE", "core_fact_dcc_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "dccs" ]
                   },
                   "S_dcc_array": {
                      "markdown_name": "Common Fund Program",
@@ -9852,6 +9924,7 @@
                         {"outbound": ["CFDE", "core_fact_dcc_dcc_fkey"]},
                         "nid"
                      ],
+                     "fast_filter_source": [ "dccs" ],
                      "aggregate": "array_d"
                   },
                   "S_disease_search": {
@@ -9861,7 +9934,8 @@
                         {"inbound": ["CFDE", "core_fact_disease_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_disease_search_slim": {
                      "markdown_name": "Disease (slim)",
@@ -9872,7 +9946,8 @@
                         {"outbound": ["CFDE", "core_fact_disease_disease_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "diseases_flat" ]
                   },
                   "S_disease": {
                      "markdown_name": "Subject Disease",
@@ -9898,7 +9973,8 @@
                         {"inbound": ["CFDE", "core_fact_phenotype_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_phenotype_phenotype_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "phenotypes_flat" ]
                   },
                   "S_substance_search": {
                      "markdown_name": "Substance",
@@ -9908,7 +9984,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_substance_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_substance_substance_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "substances" ]
                   },
                   "S_substance": {
                      "markdown_name": "Substance",
@@ -9927,7 +10004,8 @@
                         {"inbound": ["CFDE", "pubchem_fact_compound_pubchem_fact_fkey"]},
                         {"outbound": ["CFDE", "pubchem_fact_compound_compound_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "compounds" ]
                   },
                   "S_compound": {
                      "markdown_name": "Compound",
@@ -9947,7 +10025,8 @@
                         {"inbound": ["CFDE", "gene_fact_gene_gene_fact_fkey"]},
                         {"outbound": ["CFDE", "gene_fact_gene_gene_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "genes" ]
                   },
                   "S_granularity": {
                      "comment": "The specificity of the subject description, e.g. organism versus cell-line.",
@@ -9973,7 +10052,8 @@
                         {"inbound": ["CFDE", "core_fact_race_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_race_race_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "races" ]
                   },
                   "S_race": {
                      "comment": "A race term characterizing this subject.",
@@ -10008,7 +10088,8 @@
                         {"inbound": ["CFDE", "core_fact_subject_role_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_subject_role_subject_role_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "subject_roles" ]
                   },
                   "S_taxonomy": {
                      "markdown_name": "Taxonomy",
@@ -10018,7 +10099,8 @@
                         {"inbound": ["CFDE", "core_fact_ncbi_taxonomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_taxonomy_slim": {
                      "markdown_name": "Taxonomy (slim)",
@@ -10029,7 +10111,8 @@
                         {"outbound": ["CFDE", "core_fact_ncbi_taxonomy_ncbi_taxon_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "ncbi_taxons" ]
                   },
                   "S_taxonomy_array": {
                      "markdown_name": "Taxonomy",
@@ -10048,7 +10131,8 @@
                         {"inbound": ["CFDE", "core_fact_anatomy_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_anatomy_slim": {
                      "markdown_name": "Anatomy (slim)",
@@ -10059,7 +10143,8 @@
                         {"outbound": ["CFDE", "core_fact_anatomy_anatomy_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "anatomies" ]
                   },
                   "S_sample_prep_method": {
                      "comment": "Sample prep method of a biosample.",
@@ -10068,7 +10153,8 @@
                         {"inbound": ["CFDE", "core_fact_sample_prep_method_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_sample_prep_method_sample_prep_method_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "sample_prep_methods" ]
                   },
                   "S_assay_type": {
                      "comment": "Assay type of a file, offering original terms and corresponding \"slim\" terms.",
@@ -10077,7 +10163,8 @@
                         {"inbound": ["CFDE", "core_fact_assay_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_assay_type_slim": {
                      "markdown_name": "Assay Type (slim)",
@@ -10088,7 +10175,8 @@
                         {"outbound": ["CFDE", "core_fact_assay_type_assay_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "assay_types" ]
                   },
                   "S_data_type": {
                      "comment": "Data type of a related file, offering original terms and corresponding \"slim\" terms.",
@@ -10097,7 +10185,8 @@
                         {"inbound": ["CFDE", "core_fact_data_type_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_data_type_slim": {
                      "markdown_name": "Data Type (slim)",
@@ -10108,7 +10197,8 @@
                         {"outbound": ["CFDE", "core_fact_data_type_data_type_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "data_types" ]
                   },
                   "S_file_format": {
                      "comment": "File format of a related file, offering original terms and corresponding \"slim\" terms.",
@@ -10117,7 +10207,8 @@
                         {"inbound": ["CFDE", "core_fact_file_format_core_fact_fkey"]},
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_file_format_slim": {
                      "markdown_name": "File Format (slim)",
@@ -10128,7 +10219,8 @@
                         {"outbound": ["CFDE", "core_fact_file_format_file_format_fkey"]},
                         {"filter": "is_slim", "operand_pattern": "true"},
                         "nid"
-                     ]
+                     ],
+                     "fast_filter_source": [ "file_formats" ]
                   },
                   "S_creation_time": {
                      "comment": "The time when the subject record created.",
