@@ -671,15 +671,66 @@ class Submission (object):
                 download_filename,
                 tmp_name,
             ))
+            abs_tmp_name = os.path.realpath(tmp_name)
 
             # unpack ourselves so we can control output names vs. extract_bag()
+            def is_allowed_path(target):
+                """Check that the archive member target path is safe
+
+                This is important with tarfiles and the zipfile module
+                documentation still warns about safety even though it
+                tries to do some path canonicalization.
+
+                We only process submitted archives from authenticated
+                and trustworthy peers, but should check anyway, since
+                they could unknowingly be preparing archives on a
+                compromised system.
+
+                NOTE: our path safety assumption is based on unpacking
+                into our new tmp_name directory, which starts empty,
+                and assuming we will not create any hard or symbolic
+                links inside this temporary sandbox.
+                """
+                abs_target = os.path.realpath(os.path.join(abs_tmp_name, target))
+                prefix = os.path.commonprefix([abs_tmp_name, abs_target])
+                return prefix == abs_tmp_name
+
             if zipfile.is_zipfile(download_filename):
                 with open(download_filename, 'rb') as bag_file:
                     with zipfile.ZipFile(bag_file) as decoder:
-                        decoder.extractall(tmp_name)
+                        for member in decoder.infolist():
+                            # this check may be redundant if zipfile is stripping '..' and leading '/'
+                            #
+                            # TODO: revisit if zipfile module starts supporting more than file+dir types
+                            # (currently ZipInfo only has is_dir() but no is_file()
+                            if not is_allowed_path(member.filename):
+                                raise exception.InvalidDatapackage(
+                                    "Zipfile member %r not allowed" % (member.filename)
+                                )
+                        #
+                        decoder.extractall(abs_tmp_name)
             elif tarfile.is_tarfile(download_filename):
                 with tarfile.open(download_filename) as decoder:
-                    decoder.extractall(tmp_name)
+                    def has_allowed_type(member):
+                        return member.isfile() or member.isdir()
+
+                    for member in decoder.getmembers():
+                        # to maintain our safety assumptions, we should never extract links
+                        # and other special file types are not appropriate for datapackages either...
+                        if not (has_allowed_type(member)
+                                and is_allowed_path(member.name)):
+                            member_type = {
+                                tarfile.LNKTYPE: 'link',
+                                tarfile.SYMTYPE: 'symlink',
+                                tarfile.FIFOTYPE: 'fifo special',
+                                tarfile.CHRTYPE: 'char special',
+                                tarfile.BLKTYPE: 'block special',
+                            }.get(member.type, member.type)
+                            raise exception.InvalidDatapackage(
+                                "Tarfile member %r (type %r) not allowed" % (member.name, member_type)
+                            )
+                    #
+                    decoder.extractall(abs_tmp_name)
             else:
                 raise exception.InvalidDatapackage('Unknown or unsupported bag archive format')
 
