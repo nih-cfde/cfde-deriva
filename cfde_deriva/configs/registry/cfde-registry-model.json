@@ -5872,7 +5872,7 @@
          },
          "deriva": {
             "acls": {
-               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_portal_reviewer" ],
+               "select": [ "cfde_portal_admin", "cfde_portal_curator", "cfde_portal_reviewer", "cfde_submission_pipeline" ],
                "insert": [ "cfde_portal_admin", "cfde_submission_pipeline" ],
                "update": [],
                "delete": []
