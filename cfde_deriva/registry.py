@@ -5,6 +5,7 @@ import datetime
 import json
 import logging
 import urllib3
+import requests.exceptions
 
 from deriva.core import DerivaServer, ErmrestCatalog, get_credential, DEFAULT_SESSION_CONFIG, init_logging, urlquote
 from deriva.core.ermrest_model import nochange
@@ -365,16 +366,22 @@ class Registry (object):
 
         # poke the submitting user into the registry's user-tracking table in case they don't exist
         # this acts as controlled domain table for submitting_user fkeys
-        self._catalog.post('/entity/public:ERMrest_Client?onconflict=skip', json=[{
-            'ID': submitting_user.webauthn_id,
-            'Display_Name': submitting_user.display_name,
-            'Full_Name': submitting_user.full_name,
-            'Email': submitting_user.email,
-            'Client_Object': {
-                'id': submitting_user.webauthn_id,
-                'display_name': submitting_user.display_name,
-            }
-        }])
+        try:
+            self._catalog.post('/entity/public:ERMrest_Client?onconflict=skip', json=[{
+                'ID': submitting_user.webauthn_id,
+                'Display_Name': submitting_user.display_name,
+                'Full_Name': submitting_user.full_name,
+                'Email': submitting_user.email,
+                'Client_Object': {
+                    'id': submitting_user.webauthn_id,
+                    'display_name': submitting_user.display_name,
+                }
+            }])
+        except requests.exceptions.HTTPError as e:
+            # due to an ermrest bug, the onconflict=skip doesn't always work here
+            # check for existing user record (this will raise again if still not found)
+            ignore = self.get_user(submitting_user.webauthn_id)
+            logger.info('ignoring HTTPError while inserting submitting user to ERMrest_Client since a record is found... ')
 
         newrow = {
             "id": id,
