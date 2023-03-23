@@ -906,15 +906,18 @@ LEFT OUTER JOIN project_root pr ON (d.project = pr.project);
                 ))
             # TODO: revisit if DCCs permitted to submit records not attributed to themselves!
             cur.execute("""
-SELECT DISTINCT
+SELECT
   i.id,
   p.local_id
-FROM project p
-JOIN id_namespace i ON (p.id_namespace = i.nid)
-JOIN project_in_project_transitive pipt ON (p.nid = pipt.member_project)
-JOIN project_root pr ON (pipt.leader_project = pr.nid)
-LEFT OUTER JOIN dcc d ON (pr.nid = d.project)
-WHERE d.nid IS NULL;
+FROM (
+  SELECT p.nid FROM project p
+  EXCEPT
+  SELECT pipt.member_project
+  FROM project_in_project_transitive pipt
+  JOIN dcc d ON (d.project = pipt.leader_project)
+) s
+JOIN project p ON (s.nid = p.nid)
+JOIN id_namespace i ON (p.id_namespace = i.nid);
 """)
             rows = list(cur)
             if rows:
