@@ -332,7 +332,7 @@ class CfdeDataPackage (object):
                         # apply built-in upgrade data to new column
                         if upgrade_data_path and isinstance(self.package_filename, PackageDataName):
                             with self.package_filename.get_data_stringio(upgrade_data_path) as upgrade_tsv:
-                                reader = csv.reader(upgrade_tsv, delimiter='\t')
+                                reader = csv.reader(upgrade_tsv, delimiter='\t', skipinitialspace=True)
                                 header = next(reader)
                                 # we expect TSV to have key column(s) and then this new target column
                                 if header[-1] != ncolumn.name:
@@ -733,7 +733,7 @@ class CfdeDataPackage (object):
             try:
                 with open_package() as f:
                     # translate TSV to python dicts
-                    reader = csv.reader(f, delimiter="\t")
+                    reader = csv.reader(f, delimiter="\t", skipinitialspace=True)
                     header = next(reader)
                     missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
                     for cname in header:
@@ -850,7 +850,7 @@ class CfdeDataPackage (object):
             try:
                 with open_package() as f:
                     # translate TSV to python dicts
-                    reader = csv.reader(f, delimiter="\t")
+                    reader = csv.reader(f, delimiter="\t", skipinitialspace=True)
                     header = next(reader)
                     missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
                     if not header:
