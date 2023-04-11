@@ -89,6 +89,7 @@
                   "description": "A filename with no prepended PATH information",
                   "type": "string",
                   "constraints": {
+                     "required": true,
                      "pattern": "^[^\/\\:]+$"
                   }
                },

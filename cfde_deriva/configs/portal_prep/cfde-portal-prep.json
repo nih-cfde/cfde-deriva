@@ -2952,7 +2952,10 @@
                {
                   "name": "filename",
                   "description": "A filename with no prepended PATH information.",
-                  "type": "string"
+                  "type": "string",
+                  "constraints": {
+                     "required": true
+                  }
                },
                {
                   "name": "dbgap_study_id",
