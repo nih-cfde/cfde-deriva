@@ -6185,6 +6185,10 @@
                   "description": "The CFDE/DERIVA machine-readable JSON description of the faceted search criteria",
                   "type": "object",
                   "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
                      "acls": {
                         "select": ["*"],
                         "update": []
@@ -6201,6 +6205,10 @@
                   "description": "The URL-encoded, machine-readable JSON version of faceted search criteria",
                   "type": "string",
                   "deriva": {
+                     "indexing_preferences": {
+                        "btree": false,
+                        "trgm": true
+                     },
                      "acls": {
                         "select": ["*"],
                         "update": []
