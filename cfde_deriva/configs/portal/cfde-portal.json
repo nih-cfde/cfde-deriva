@@ -16606,35 +16606,11 @@
                            {
                               "source": {
                                  "api": "attribute",
-                                 "path": "personal_collection_file/m:=CFDE:file/cf:=(core_fact)=(CFDE:core_fact:nid)/$m/Md:=c2m2:file/$m/left(nid)=(CFDE:file_describes_subject:file)/Sd:=left(subject)=(c2m2:subject:nid)/$m/left(nid)=(CFDE:file_describes_biosample:file)/Bd:=left(biosample)=(c2m2:biosample:nid)/$m/name:=m:filename,drs_uri:=m:persistent_id,study_registration:=Md:project_id_namespace,study_id:=Md:project_local_id,participant_id:=Sd:local_id,specimen_id:=Bd:local_id,experimental_strategy:=cf:assay_type_row,file_format:=cf:file_format_row,file_nid:=m:nid"
+                                 "path": "personal_collection_file/CFDE:file/(nid)=(CFDE:ncpi_file:nid)/name,drs_uri,study_registration,study_id,participant_id,specimen_id,experimental_strategy,file_format"
                               },
                               "destination": {
-                                 "name": "ncpi_manifest.json",
-                                 "type": "json-stream"
-                              }
-                           }
-                        ],
-                        "transforms": [
-                           {
-                              "name": "ncpi_manifest_transformed",
-                              "processor": "column",
-                              "processor_params": {
-                                 "input_path": "ncpi_manifest.json",
-                                 "output_path": "ncpi_manifest_transformed.json",
-                                 "column_transforms": {
-                                    "experimental_strategy": {"fn": "replace", "value": {"key":"experimental_strategy", "value":"name"}},
-                                    "file_format": {"fn": "replace", "value": {"key":"file_format", "value":"name"}},
-                                    "file_nid": {"fn": "delete"}
-                                 }
-                              }
-                           },
-                           {
-                              "name": "ncpi_manifest",
-                              "processor": "json2csv",
-                              "processor_params": {
-                                 "input_path": "ncpi_manifest_transformed.json",
-                                 "output_path": "ncpi_manifest.csv",
-                                 "include_header": true
+                                 "name": "ncpi_manifest",
+                                 "type": "csv"
                               }
                            }
                         ]
