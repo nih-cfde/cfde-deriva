@@ -852,6 +852,7 @@ class CfdeDataPackage (object):
                     # translate TSV to python dicts
                     reader = csv.reader(f, delimiter="\t", skipinitialspace=True)
                     header = next(reader)
+                    num_cols = len(header)
                     missing = set(table.annotations.get(self.schema_tag, {}).get("missingValues", []))
                     if not header:
                         raise InvalidDatapackage("blank/missing header for %r" % (resource["path"],))
@@ -861,6 +862,19 @@ class CfdeDataPackage (object):
                     # Largest known CFDE ingest has file with >5m rows
                     batch = []
                     def insert_batch():
+                        for row in batch:
+                            if len(row) != num_cols:
+                                msg = 'Expecting %d columns %r, found row with %d values %r.' % (
+                                    num_cols,
+                                    header,
+                                    len(row),
+                                    row,
+                                )
+                                raise InvalidDatapackage('Resource file "%s" inconsistent field counts: %s' % (
+                                    resource["path"],
+                                    msg,
+                                ))
+
                         sql = "INSERT INTO %(table)s (%(cols)s) VALUES %(values)s %(upsert)s" % {
                             'table': sql_identifier(table.name),
                             'cols': ', '.join([ sql_identifier(c) for c in header ]),
@@ -870,8 +884,15 @@ class CfdeDataPackage (object):
                             ]),
                             'upsert': 'ON CONFLICT DO NOTHING' if onconflict == 'skip' else '',
                         }
+
                         try:
                             conn.execute(sql)
+                        except sqlite3.OperationalError as e:
+                            logger.info('got error during batch insertion: %s' % e)
+                            logger.info('>>>>>>>>> BEGIN batch SQL')
+                            logger.info(sql)
+                            logger.info('<<<<<<<<< END batch SQL')
+                            raise
                         except sqlite3.IntegrityError as e:
                             msg = str(e)
                             if msg.find('NOT NULL constraint failed') >= 0:
