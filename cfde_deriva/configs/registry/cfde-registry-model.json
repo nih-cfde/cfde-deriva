@@ -2304,6 +2304,7 @@
          "name": "anatomy",
          "title": "Anatomy",
          "description": "List of Uber-anatomy ontology (Uberon) CV terms used by CFDE members",
+	 "path": "/portal_prep/anatomy.tsv",
          "schema": {
             "fields": [
                {
@@ -2495,6 +2496,7 @@
          "name": "assay_type",
          "title": "Assay Type",
          "description": "List of Ontology for Biomedical Investigations (OBI) CV terms used by CFDE members",
+	 "path": "/portal_prep/assay_type.tsv",
          "schema": {
             "fields": [
                {
@@ -2676,6 +2678,7 @@
          "name": "data_type",
          "title": "Data Type",
          "description": "List of EDAM CV 'data:' terms used to describe data in files in this dataset",
+	 "path": "/portal_prep/data_type.tsv",
          "schema": {
             "fields": [
                {
@@ -2826,6 +2829,7 @@
          "name": "file_format",
          "title": "File Format",
          "description": "List of EDAM CV 'format:' terms used to describe formats of files in this dataset",
+	 "path": "/portal_prep/file_format.tsv",
          "schema": {
             "fields": [
                {
@@ -3123,6 +3127,7 @@
          "name": "disease",
          "title": "Disease",
          "description": "List of Disease Ontology terms used to characterize C2M2 subjects or biosamples.",
+	 "path": "/portal_prep/disease.tsv",
          "schema": {
             "fields": [
                {
@@ -3534,6 +3539,7 @@
          "name": "protein",
          "title": "protein",
          "description": "List of UniProtKB proteins directly referenced in this C2M2 submission",
+         "path": "/portal_prep/protein.tsv.gz",
          "schema": {
             "fields": [
                {
