@@ -479,6 +479,10 @@ augment vocabulary terms known by the registry.
 
 `python -m cfde_deriva.registry upload-resources vocabname.json...`
 
+Optional environment variables:
+
+- `SKIP_NONMATCHING_RESOURCES=true`: tolerate unkown term IDs
+
 One or more JSON files are supplied and must be named by a vocabulary
 table name known by the registry plus the suffix `.json`. For example:
 
@@ -500,9 +504,14 @@ records:
 ```
 
 Each record identifies one existing term by its CURI `id` and supplies
-the extra `resource_markdown` payload.  Markdown often contains
-newlines and these will be escaped in the JSON payload as `\n`, a
-backslash character followed by the character `n`.
+the extra `resource_markdown` payload. By default, any term `id`
+present in the JSON file and not in the registry will cause an error,
+rejecting the whole file. With `SKIP_NONMATCHING_RESOURCES=true`,
+these non-matching resources will be ignored to upload the other
+matching terms in the same file.
+
+Markdown often contains newlines and these will be escaped in the JSON
+payload as `\n`, a backslash character followed by the character `n`.
 
 As soon as uploads are completed, the results can be reviewed by
 browsing the C2M2 vocabulary tables in the submission system itself.

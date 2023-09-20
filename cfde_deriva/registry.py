@@ -796,9 +796,16 @@ class Registry (object):
             else:
                 return v1 != v2
 
+        skip_nonmatch = os.getenv('SKIP_NONMATCHING_RESOURCES', 'false').lower() == 'true'
+
         def needs_update(id=None, resource_markdown=None):
             if id not in existing:
-                raise ValueError('Cannot set resource info for unknown %r term %r' % (vocab_tname, id))
+                mesg = 'Cannot set resource info for unknown %r term %r' % (vocab_tname, id)
+                if skip_nonmatch:
+                    logger.info(mesg)
+                    return False
+                else:
+                    raise ValueError(mesg)
             return is_distinct(existing[id]['resource_markdown'], resource_markdown)
 
         need_update = [ record for record in records if needs_update(**record) ]
@@ -868,6 +875,12 @@ def main(subcommand, *extra_args):
 
     Set environment variables:
     - DERIVA_SERVERNAME to choose service host.
+    - SKIP_NONMATCHING_RESOURCES=true to tolerate mismatches
+
+    Normally, upload-resources rejects a resource markdown file that
+    references term IDs not present in the registry. Set
+    SKIP_NONMATCHING_RESOURCES=true to allow the matching subset of
+    resources to be uploaded while ignoring non-matching inputs.
 
     """
     init_logging(logging.INFO)
