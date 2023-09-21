@@ -516,7 +516,7 @@ class CatalogConfigurator (object):
                             {
                                 "name": "Portal User Guide",
                                 "markdownName": ":span:Portal User Guide:/span:{.external-link-icon}",
-                                "url": "https://cfde-published-documentation.readthedocs-hosted.com/en/latest/about/portalguide/",
+                                "url": "https://docs.nih-cfde.org/en/latest/portalguide/",
                                 "newTab": True
                             },
                             {
